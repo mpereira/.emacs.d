@@ -1,0 +1,6 @@
+[submodule "evil-surround"]
+	path = packages/evil-surround
+	url = git://github.com/timcharper/evil-surround.git
+[submodule "distel"]
+	path = packages/distel
+	url = git://github.com/massemanet/distel.git
