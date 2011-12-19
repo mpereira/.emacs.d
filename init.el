@@ -8,6 +8,7 @@
 ; Evil.
 (add-to-list 'load-path "~/.emacs.d/packages/undo-tree")
 (add-to-list 'load-path "~/.emacs.d/packages/evil")
+(setq evil-shift-width 2)
 (require 'evil)
 (evil-mode 1)
 
