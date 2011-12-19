@@ -6,6 +6,7 @@
       (package-initialize))
 
 ; Evil.
+(add-to-list 'load-path "~/.emacs.d/packages/undo-tree")
 (add-to-list 'load-path "~/.emacs.d/packages/evil")
 (require 'evil)
 (evil-mode 1)

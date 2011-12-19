@@ -4,3 +4,6 @@
 [submodule "distel"]
 	path = packages/distel
 	url = git://github.com/massemanet/distel.git
+[submodule "packages/undo-tree"]
+	path = packages/undo-tree
+	url = http://www.dr-qubit.org/git/undo-tree.git
