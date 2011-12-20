@@ -31,12 +31,17 @@
 ;; Highlight matching parentheses when the point is on them.
 (show-paren-mode 1)
 
+;; Don't use tabs for indentation.
+(setq c-basic-indent 2)
+(setq tab-width 2)
+(setq indent-tabs-mode nil)
+
 ;; Give a boost to emacs's poor completion engine.
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (ido-mode 1)
 
-(setq whitespace-style '(face trailing lines-tail tabs))
+(setq whitespace-style '(face trailing lines-tail tabs tabs-mark))
 (global-whitespace-mode 1)
 
 (require 'mpereira-evil)
