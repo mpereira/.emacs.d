@@ -9,6 +9,7 @@
 (add-to-list 'load-path "~/.emacs.d/packages/undo-tree")
 (add-to-list 'load-path "~/.emacs.d/packages/evil")
 (setq evil-shift-width 2)
+(define-key evil-visual-state-map ",c" 'comment-or-uncomment-region)
 (require 'evil)
 (evil-mode 1)
 
