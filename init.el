@@ -7,8 +7,6 @@
 
 (add-to-list 'load-path "~/.emacs.d/")
 (require 'mpereira-defuns)
-(require 'mpereira-evil)
-(require 'mpereira-erlang)
 
 ;; Paredit.
 (add-to-list 'load-path "~/.emacs.d/packages/paredit")
@@ -37,3 +35,9 @@
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (ido-mode 1)
+
+(setq whitespace-style '(face trailing lines-tail tabs))
+(global-whitespace-mode 1)
+
+(require 'mpereira-evil)
+(require 'mpereira-erlang)
