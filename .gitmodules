@@ -7,3 +7,6 @@
 [submodule "packages/undo-tree"]
 	path = packages/undo-tree
 	url = http://www.dr-qubit.org/git/undo-tree.git
+[submodule "packages/evil-numbers"]
+	path = packages/evil-numbers
+	url = git://github.com/cofi/evil-numbers.git
