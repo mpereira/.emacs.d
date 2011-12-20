@@ -10,3 +10,6 @@
 [submodule "packages/evil-numbers"]
 	path = packages/evil-numbers
 	url = git://github.com/cofi/evil-numbers.git
+[submodule "packages/paredit"]
+	path = packages/paredit
+	url = git://github.com/emacsmirror/paredit.git
