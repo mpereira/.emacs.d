@@ -10,7 +10,12 @@
 (require 'mpereira-evil)
 (require 'mpereira-erlang)
 
-;; Quiet startup.
+;; Paredit.
+(add-to-list 'load-path "~/.emacs.d/packages/paredit")
+(require 'paredit)
+(paredit-mode t)
+
+;; Quiel startup.
 (setq inhibit-startup-echo-area-message t)
 (setq inhibit-startup-message t)
 
