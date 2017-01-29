@@ -1,2 +1,7 @@
-auto-save-list
-*~
+/.cache
+/ac-comphist.dat
+/auto-save-list
+/backups
+/elpa
+/eshell
+/semanticdb
