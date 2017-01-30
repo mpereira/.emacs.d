@@ -192,10 +192,10 @@
 
 (use-package magit
   :ensure t
-  :after evil-leader
   :config
-  (evil-leader/set-key
-    "gs" 'magit-status))
+  (with-eval-after-load 'evil-leader
+    (evil-leader/set-key
+      "gs" 'magit-status)))
 
 ;; Evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
