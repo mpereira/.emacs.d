@@ -209,10 +209,6 @@
   (add-hook
    'evil-mode-hook
    (lambda ()
-     (setq evil-motion-state-modes (append evil-emacs-state-modes
-                                           evil-motion-state-modes))
-     (setq evil-emacs-state-modes nil)
-
      (setq evil-shift-width 2)
 
      (define-key evil-normal-state-map (kbd ";") 'evil-ex)
