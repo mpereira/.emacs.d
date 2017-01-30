@@ -80,6 +80,8 @@
 (global-whitespace-mode t)
 (setq-default show-trailing-whitespace t)
 
+(setq comment-column 80)
+
 ;; https://github.com/technomancy/better-defaults
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
@@ -92,12 +94,34 @@
       load-prefer-newer t
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory
-                                               "backups"))))
+                                               "backups")))
+      exec-path (append exec-path '("/usr/local/bin")))
 
 ;; general ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package general
-  :ensure t)
+  :ensure t
+  :config
+  (setq my-leader ",")
+
+  (general-define-key
+   :states '(normal visual)
+   :keymaps 'emacs-lisp-mode-map
+   "C-S-k" 'describe-thing-at-point
+   "K" 'describe-thing-at-point-in-popup)
+
+  (general-define-key
+   :prefix my-leader
+   :states '(normal visual)
+   "," 'mode-line-other-buffer
+   "dk" 'describe-key
+   "df" 'describe-function
+   "dv" 'describe-variable
+   "b" 'switch-to-buffer
+   "w" 'save-buffer
+   "q" 'evil-quit
+   "hs" 'split-window-vertically
+   "vs" 'split-window-horizontally))
 
 ;; pos-tip ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -116,7 +140,8 @@
 (use-package lispy
   :ensure t
   :config
-  (add-hook 'emacs-lisp-mode-hook 'lispy-mode))
+  (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
+  (add-hook 'clojure-mode-hook 'lispy-mode))
 
 ;; Lispyville ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -125,7 +150,6 @@
   :after evil lispy
   :config
   (add-hook 'lispy-mode-hook 'lispyville-mode)
-
   (evil-define-key 'normal global-map
     (kbd "y") 'lispyville-yank
     (kbd "d") 'lispyville-delete
@@ -166,8 +190,10 @@
   (evil-define-key 'insert global-map
     (kbd "ESC") 'lispyville-normal-state)
 
-  (evil-leader/set-key
-    "R" 'lispy-raise-sexp))
+  (general-define-key
+   :prefix my-leader
+   :states '(normal visual)
+   "R" 'lispy-raise-sexp))
 
 ;; Auto-Complete ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -188,24 +214,57 @@
 (use-package which-key
   :ensure t)
 
+;; projectile ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-global-mode)
+  (setq projectile-enable-caching t)
+  (general-define-key
+   :prefix my-leader
+   :states '(normal)
+   "pf" 'projectile-find-file
+   "ps" 'projectile-switch-project))
+
+;; clojure-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package clojure-mode
+  :ensure t
+  :config
+  (general-define-key
+   :states '(insert)
+   "[" 'lispy-brackets
+   "]" 'lispy-close-square
+   "{" 'lispy-braces
+   "}" 'lispy-close-curly))
+
+;; cider ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package cider
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps 'clojure-mode-map
+   :states '(normal visual)
+   "K" 'cider-doc))
+
 ;; Magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package magit
   :ensure t
   :config
-  (with-eval-after-load 'evil-leader
-    (evil-leader/set-key
-      "gs" 'magit-status)))
+  (general-define-key
+   :prefix my-leader
+   :states '(normal)
+   "gs" 'magit-status))
 
 ;; Evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package evil
   :ensure t
   :init
-  (setq evil-extra-operator-eval-key (kbd "ge"))
   :config
-  (add-hook 'prog-mode-hook 'evil-extra-operator-mode)
-
   (add-hook
    'evil-mode-hook
    (lambda ()
@@ -214,13 +273,17 @@
      (define-key evil-normal-state-map (kbd ";") 'evil-ex)
      (define-key evil-normal-state-map (kbd ":") 'evil-repeat-find-char)
 
+     (evil-define-key 'insert global-map
+       (kbd "") 'evil-window-left
+       (kbd "C-j") 'evil-window-down
+       (kbd "C-k") 'evil-window-up
+       (kbd "C-l") 'evil-window-right)
+
      (evil-define-key 'normal global-map
        (kbd "C-h") 'evil-window-left
        (kbd "C-j") 'evil-window-down
        (kbd "C-k") 'evil-window-up
-       (kbd "C-l") 'evil-window-right
-       (kbd "C-S-k") 'describe-thing-at-point
-       (kbd "K") 'describe-thing-at-point-in-popup)))
+       (kbd "C-l") 'evil-window-right)))
 
   (add-hook
    'occur-mode-hook
@@ -239,6 +302,13 @@
     :after magit
     :ensure t)
 
+  (use-package evil-extra-operator
+    :ensure t
+    :init
+    (setq evil-extra-operator-eval-key (kbd "ge"))
+    :config
+    (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
+
   (use-package evil-escape
     :ensure t)
 
@@ -251,20 +321,4 @@
   (use-package evil-surround
     :ensure t
     :config
-    (global-evil-surround-mode t))
-
-  (use-package evil-leader
-    :ensure t
-    :config
-    (global-evil-leader-mode)
-    (evil-leader/set-leader ",")
-    (evil-leader/set-key
-      "," 'mode-line-other-buffer
-      "dk" 'describe-key
-      "df" 'describe-function
-      "dv" 'describe-variable
-      "b" 'switch-to-buffer
-      "w" 'save-buffer
-      "q" 'evil-quit
-      "hs" 'split-window-vertically
-      "vs" 'split-window-horizontally)))
+    (global-evil-surround-mode t)))

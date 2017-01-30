@@ -4,4 +4,5 @@
 /backups
 /elpa
 /eshell
+/projectile*
 /semanticdb
