@@ -58,13 +58,29 @@
                     (buffer-string))))
     (pos-tip-show content nil nil nil 999)))
 
+(require 'thingatpt)
+(defun eval-sexp-at-or-surrounding-pt ()
+  "Evaluate the sexp following the point, or surrounding the point"
+  (interactive)
+  (save-excursion
+    (forward-char 1)
+    (if (search-backward "(" nil t)
+        (message "%s" (eval (read-from-whole-string (thing-at-point 'sexp)))))))
+
 ;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
+(blink-cursor-mode -1)
+(line-number-mode t)
+(column-number-mode t)
+(global-hl-line-mode t)
 (setq inhibit-startup-echo-area-message t)
-(setq inhibit-startup-message t)
+(setq inhibit-startup-screen t)
+(setq ring-bell-function 'ignore)
+
+(fset 'yes-or-no-p 'y-or-n-p)
 
 (require 'linum)
 (add-hook 'prog-mode-hook 'linum-mode)
@@ -75,14 +91,27 @@
 (require 'saveplace)
 (setq-default save-place t)
 
+(require 'savehist)
+(setq savehist-additional-variables '(search-ring regexp-search-ring)
+      savehist-autosave-interval 60
+      savehist-file (expand-file-name "savehist" user-emacs-directory))
+(savehist-mode t)
+
 (require 'whitespace)
 (setq whitespace-style '(face lines-tail trailing))
-(global-whitespace-mode t)
+(dolist (hook '(prog-mode-hook text-mode-hook))
+  (add-hook hook #'whitespace-mode))
 (setq-default show-trailing-whitespace t)
 
 (setq comment-column 80)
 
-;; https://github.com/technomancy/better-defaults
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+(setq tab-always-indent 'complete)
+
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
 (setq select-enable-clipboard t
@@ -93,9 +122,25 @@
       require-final-newline t
       load-prefer-newer t
       save-place-file (concat user-emacs-directory "places")
-      backup-directory-alist `(("." . ,(concat user-emacs-directory
-                                               "backups")))
-      exec-path (append exec-path '("/usr/local/bin")))
+      backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
+
+;; exec-path-from-shell
+
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (setq exec-path-from-shell-variables
+        (append exec-path-from-shell-variables
+                '("SONIAN_USER"
+                  "SONIAN_RELEASES_REPO_URL"
+                  "SONIAN_RELEASES_REPO_USERNAME"
+                  "SONIAN_RELEASES_REPO_PASSWORD"
+                  "SONIAN_RELEASES_REPO_SIGN"
+                  "SONIAN_SNAPSHOTS_REPO_URL"
+                  "SONIAN_SNAPSHOTS_REPO_USERNAME"
+                  "SONIAN_SNAPSHOTS_REPO_PASSWORD"
+                  "SONIAN_SNAPSHOTS_REPO_SIGN")))
+  (exec-path-from-shell-initialize))
 
 ;; general ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -104,15 +149,44 @@
   :config
   (setq my-leader ",")
 
+  (setq general-default-keymaps 'evil-normal-state-map
+        general-default-states 'normal)
+
   (general-define-key
-   :states '(normal visual)
    :keymaps 'emacs-lisp-mode-map
+   :states '(normal visual)
    "C-S-k" 'describe-thing-at-point
    "K" 'describe-thing-at-point-in-popup)
 
   (general-define-key
-   :prefix my-leader
+   :keymaps 'emacs-lisp-mode-map
    :states '(normal visual)
+   :prefix my-leader
+   "eE" 'eval-buffer)
+
+  (general-define-key
+   :keymaps 'emacs-lisp-mode-map
+   :states '(normal)
+   :prefix my-leader
+   "ee" 'eval-sexp-at-or-surrounding-pt)
+
+  (general-define-key
+   :keymaps 'emacs-lisp-mode-map
+   :states '(visual)
+   :prefix my-leader
+   "ee" 'eval-region)
+
+  (general-define-key
+   :keymaps 'global-map
+   :states '(normal visual)
+   "<s-return>" 'toggle-frame-fullscreen
+   "s-+" 'text-scale-increase
+   "s--" 'text-scale-decrease)
+
+  (general-define-key
+   :keymaps 'global-map
+   :states '(normal visual)
+   :prefix my-leader
    "," 'mode-line-other-buffer
    "dk" 'describe-key
    "df" 'describe-function
@@ -123,15 +197,26 @@
    "hs" 'split-window-vertically
    "vs" 'split-window-horizontally))
 
+;; expand-region ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package expand-region
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps 'global-map
+   :states '(normal visual)
+   "+" 'er/expand-region))
+
 ;; pos-tip ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package pos-tip
   :ensure t)
 
-;; aggresssive-indent ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; aggressive-indent ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package aggressive-indent
   :ensure t
+  :diminish aggressive-indent-mode
   :config
   (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
@@ -139,18 +224,27 @@
 
 (use-package lispy
   :ensure t
+  :diminish lispy-mode
   :config
   (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
-  (add-hook 'clojure-mode-hook 'lispy-mode))
+  (add-hook 'clojure-mode-hook 'lispy-mode)
+  (general-define-key
+   :keymaps 'lispy-mode-map
+   :states '(insert)
+   "[" 'lispy-brackets
+   "]" 'lispy-close-square
+   "{" 'lispy-braces
+   "}" 'lispy-close-curly))
 
 ;; Lispyville ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package lispyville
   :ensure t
   :after evil lispy
+  :diminish (lispyville-mode "LY")
   :config
   (add-hook 'lispy-mode-hook 'lispyville-mode)
-  (evil-define-key 'normal global-map
+  (evil-define-key 'normal lispyville-mode-map
     (kbd "y") 'lispyville-yank
     (kbd "d") 'lispyville-delete
     (kbd "c") 'lispyville-change
@@ -174,7 +268,7 @@
     (kbd "<f") 'lispyville-move-up
     (kbd ">f") 'lispyville-move-down)
 
-  (evil-define-key 'visual global-map
+  (evil-define-key 'visual lispyville-mode-map
     (kbd "y") 'lispyville-yank
     (kbd "d") 'lispyville-delete
     (kbd "c") 'lispyville-change
@@ -187,18 +281,20 @@
     (kbd "(") 'lispyville-backward-up-list
     (kbd ")") 'lispyville-up-list)
 
-  (evil-define-key 'insert global-map
+  (evil-define-key 'insert lispyville-mode-map
     (kbd "ESC") 'lispyville-normal-state)
 
   (general-define-key
-   :prefix my-leader
    :states '(normal visual)
+   :keymaps 'lispyville-mode-map
+   :prefix my-leader
    "R" 'lispy-raise-sexp))
 
 ;; Auto-Complete ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package auto-complete
   :ensure t
+  :diminish auto-complete-mode
   :config
   (ac-config-default)
   (ac-set-trigger-key "TAB")
@@ -212,7 +308,10 @@
 ;; Which-key ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package which-key
-  :ensure t)
+  :ensure t
+  :diminish which-key-mode
+  :config
+  (which-key-mode))
 
 ;; projectile ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -222,22 +321,33 @@
   (projectile-global-mode)
   (setq projectile-enable-caching t)
   (general-define-key
-   :prefix my-leader
+   :keymaps 'global-map
    :states '(normal)
+   :prefix my-leader
    "pf" 'projectile-find-file
    "ps" 'projectile-switch-project))
+
+;; neotree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package neotree
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps 'global-map
+   :states '(normal visual)
+   :prefix my-leader
+   "tt" 'neotree-projectile-action)
+
+  (general-define-key
+   :keymaps 'neotree-mode-map
+   :states '(normal visual)
+   "RET" 'neotree-enter
+   "q" 'neotree-hide)
 
 ;; clojure-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package clojure-mode
-  :ensure t
-  :config
-  (general-define-key
-   :states '(insert)
-   "[" 'lispy-brackets
-   "]" 'lispy-close-square
-   "{" 'lispy-braces
-   "}" 'lispy-close-curly))
+  :ensure t)
 
 ;; cider ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -245,9 +355,27 @@
   :ensure t
   :config
   (general-define-key
-   :keymaps 'clojure-mode-map
+   :keymaps 'cider-mode-map
    :states '(normal visual)
-   "K" 'cider-doc))
+   "K" 'cider-doc)
+
+  (general-define-key
+   :keymaps 'cider-mode-map
+   :states '(normal visual)
+   :prefix my-leader
+   "eE" 'cider-eval-buffer)
+
+  (general-define-key
+   :keymaps 'cider-mode-map
+   :states '(normal)
+   :prefix my-leader
+   "ee" 'cider-eval-sexp-at-point)
+
+  (general-define-key
+   :keymaps 'cider-mode-map
+   :states '(visual)
+   :prefix my-leader
+   "ee" 'cider-eval-region))
 
 ;; Magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -256,8 +384,10 @@
   :config
   (general-define-key
    :prefix my-leader
+   :keymaps 'global-map
    :states '(normal)
-   "gs" 'magit-status))
+   "gs" 'magit-status
+   "gb" 'magit-blame))
 
 ;; Evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -273,13 +403,7 @@
      (define-key evil-normal-state-map (kbd ";") 'evil-ex)
      (define-key evil-normal-state-map (kbd ":") 'evil-repeat-find-char)
 
-     (evil-define-key 'insert global-map
-       (kbd "") 'evil-window-left
-       (kbd "C-j") 'evil-window-down
-       (kbd "C-k") 'evil-window-up
-       (kbd "C-l") 'evil-window-right)
-
-     (evil-define-key 'normal global-map
+     (evil-define-key '(normal visual) global-map
        (kbd "C-h") 'evil-window-left
        (kbd "C-j") 'evil-window-down
        (kbd "C-k") 'evil-window-up
@@ -322,3 +446,8 @@
     :ensure t
     :config
     (global-evil-surround-mode t)))
+
+(require 'diminish)
+(diminish 'auto-revert-mode)
+(diminish 'global-whitespace-mode)
+(diminish 'undo-tree-mode)
