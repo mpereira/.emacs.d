@@ -67,6 +67,32 @@
     (if (search-backward "(" nil t)
         (message "%s" (eval (read-from-whole-string (thing-at-point 'sexp)))))))
 
+(defun toggle-window-split ()
+  (interactive)
+  (if (= (count-windows) 2)
+      (let* ((this-win-buffer (window-buffer))
+             (next-win-buffer (window-buffer (next-window)))
+             (this-win-edges (window-edges (selected-window)))
+             (next-win-edges (window-edges (next-window)))
+             (this-win-2nd (not (and (<= (car this-win-edges)
+                                         (car next-win-edges))
+                                     (<= (cadr this-win-edges)
+                                         (cadr next-win-edges)))))
+             (splitter
+              (if (= (car this-win-edges)
+                     (car (window-edges (next-window))))
+                  'split-window-horizontally
+                'split-window-vertically)))
+        (delete-other-windows)
+        (let ((first-win (selected-window)))
+          (funcall splitter)
+          (if this-win-2nd (other-window 1))
+          (set-window-buffer (selected-window) this-win-buffer)
+          (set-window-buffer (next-window) next-win-buffer)
+          (select-window first-win)
+          (if this-win-2nd (other-window 1))))
+    (message "Can only toggle window split for 2 windows")))
+
 ;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bar-mode -1)
@@ -89,7 +115,7 @@
 (setq uniquify-buffer-name-style 'forward)
 
 (require 'saveplace)
-(setq-default save-place t)
+(save-place-mode t)
 
 (require 'savehist)
 (setq savehist-additional-variables '(search-ring regexp-search-ring)
@@ -149,8 +175,16 @@
   :config
   (setq my-leader ",")
 
-  (setq general-default-keymaps 'evil-normal-state-map
-        general-default-states 'normal)
+  (general-define-key
+   "<escape>" 'keyboard-quit)
+
+  (general-define-key
+   :keymaps '(minibuffer-local-map
+              minibuffer-local-ns-map
+              minibuffer-local-completion-map
+              minibuffer-local-must-match-map
+              minibuffer-local-isearch-map)
+   "<escape>" 'minibuffer-keyboard-quit)
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
@@ -177,25 +211,26 @@
    "ee" 'eval-region)
 
   (general-define-key
-   :keymaps 'global-map
    :states '(normal visual)
    "<s-return>" 'toggle-frame-fullscreen
    "s-+" 'text-scale-increase
    "s--" 'text-scale-decrease)
 
   (general-define-key
-   :keymaps 'global-map
    :states '(normal visual)
    :prefix my-leader
    "," 'mode-line-other-buffer
    "dk" 'describe-key
    "df" 'describe-function
    "dv" 'describe-variable
+   "sh" 'eshell
    "b" 'switch-to-buffer
    "w" 'save-buffer
    "q" 'evil-quit
    "hs" 'split-window-vertically
-   "vs" 'split-window-horizontally))
+   "vs" 'split-window-horizontally
+   "hv" 'toggle-window-split
+   "vh" 'toggle-window-split))
 
 ;; expand-region ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -203,7 +238,6 @@
   :ensure t
   :config
   (general-define-key
-   :keymaps 'global-map
    :states '(normal visual)
    "+" 'er/expand-region))
 
@@ -220,7 +254,7 @@
   :config
   (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 
-;; Lispy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; lispy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package lispy
   :ensure t
@@ -236,76 +270,55 @@
    "{" 'lispy-braces
    "}" 'lispy-close-curly))
 
-;; Lispyville ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; lispyville ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package lispyville
   :ensure t
   :after evil lispy
-  :diminish (lispyville-mode "LY")
+  :diminish lispyville-mode
   :config
   (add-hook 'lispy-mode-hook 'lispyville-mode)
-  (evil-define-key 'normal lispyville-mode-map
-    (kbd "y") 'lispyville-yank
-    (kbd "d") 'lispyville-delete
-    (kbd "c") 'lispyville-change
-    (kbd "x") 'lispyville-delete-char-or-splice
-    (kbd "Y") 'lispyville-yank-line
-    (kbd "D") 'lispy-kill
-    (kbd "C") 'lispyville-change-line
-    (kbd "X") 'lispyville-delete-char-or-splice-backwards
-    (kbd "B") 'lispyville-backward-sexp
-    ;; FIXME: W
-    (kbd "W") 'lispyville-forward-sexp
-    (kbd "(") 'lispyville-backward-up-list
-    (kbd ")") 'lispyville-up-list
-    ;; FIXME: barfs and slurps
-    (kbd ">)") 'lispyville->
-    (kbd "<)") 'lispyville-<
-    (kbd "<(") 'lispy-slurp
-    (kbd ">(") 'lispy-barf
-    (kbd "|") 'lispy-split
-    (kbd "_") 'lispy-join
-    (kbd "<f") 'lispyville-move-up
-    (kbd ">f") 'lispyville-move-down)
-
-  (evil-define-key 'visual lispyville-mode-map
-    (kbd "y") 'lispyville-yank
-    (kbd "d") 'lispyville-delete
-    (kbd "c") 'lispyville-change
-    (kbd "Y") 'lispyville-yank-line
-    (kbd "D") 'lispy-kill
-    (kbd "C") 'lispyville-change-line
-    (kbd "B") 'lispyville-backward-sexp
-    ;; FIXME: W
-    (kbd "W") 'lispyville-forward-sexp
-    (kbd "(") 'lispyville-backward-up-list
-    (kbd ")") 'lispyville-up-list)
-
-  (evil-define-key 'insert lispyville-mode-map
-    (kbd "ESC") 'lispyville-normal-state)
 
   (general-define-key
    :states '(normal visual)
    :keymaps 'lispyville-mode-map
    :prefix my-leader
-   "R" 'lispy-raise-sexp))
+   "R" 'lispy-raise-sexp)
 
-;; Auto-Complete ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (general-define-key
+   :keymaps '(lispyville-mode-map)
+   :states '(insert)
+   "ESC" 'lispyville-normal-state)
 
-(use-package auto-complete
-  :ensure t
-  :diminish auto-complete-mode
-  :config
-  (ac-config-default)
-  (ac-set-trigger-key "TAB")
-  (setq ac-auto-start nil)
-  (setq ac-use-quick-help t)
-  (setq ac-quick-help-delay 0.5)
-  (setq ac-use-menu-map t)
-  (define-key ac-menu-map "\C-j" 'ac-next)
-  (define-key ac-menu-map "\C-k" 'ac-previous))
+  (general-define-key
+   :keymaps '(lispyville-mode-map)
+   :states '(normal visual)
+   "y" 'lispyville-yank
+   "d" 'lispyville-delete
+   "c" 'lispyville-change
+   "Y" 'lispyville-yank-line
+   "D" 'lispy-kill
+   "C" 'lispyville-change-line
+   "B" 'lispyville-backward-sexp
+   ;; FIXME: W
+   "W" 'lispyville-forward-sexp
+   "(" 'lispyville-backward-up-list
+   ")" 'lispyville-up-list)
 
-;; Which-key ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (general-define-key
+   :keymaps '(lispyville-mode-map)
+   :states '(normal)
+   ;; FIXME: barfs and slurps
+   ">)" 'lispyville->
+   "<)" 'lispyville-<
+   "<(" 'lispy-slurp
+   ">(" 'lispy-barf
+   "|" 'lispy-split
+   "_" 'lispy-join
+   "<f" 'lispyville-move-up
+   ">f" 'lispyville-move-down))
+
+;; which-key ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package which-key
   :ensure t
@@ -319,30 +332,106 @@
   :ensure t
   :config
   (projectile-global-mode)
-  (setq projectile-enable-caching t)
+  (setq projectile-enable-caching t))
+
+;; find-file-in-project ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package find-file-in-project
+  :ensure t)
+
+;; ivy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package ivy
+  :ensure t
+  :diminish ivy-mode
+  :config
+  (ivy-mode t)
+
+  (setq ivy-height 20)
+
   (general-define-key
-   :keymaps 'global-map
-   :states '(normal)
+   :keymaps 'ivy-minibuffer-map
+   "C-j" 'ivy-next-line
+   "C-k" 'ivy-previous-line
+   "C-f" 'ivy-scroll-up-command
+   "C-b" 'ivy-scroll-down-command
+   "C-h" 'ivy-beginning-of-buffer
+   "C-l" 'ivy-end-of-buffer
+   "<escape>" 'minibuffer-keyboard-quit))
+
+;; counsel ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package counsel
+  :ensure t
+  :after ivy
+  :config
+  (general-define-key
+   :states '(normal visual)
    :prefix my-leader
-   "pf" 'projectile-find-file
-   "ps" 'projectile-switch-project))
+   "ff" 'counsel-find-file
+   "fb" 'ivy-switch-buffer)
+
+  (general-define-key
+   :keymaps '(emacs-lisp-mode-map)
+   :states '(normal visual)
+   :prefix my-leader
+   "fv" 'counsel-describe-variable
+   "fl" 'counsel-find-library
+   "fF" 'counsel-describe-function))
+
+;; counsel-projectile ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package counsel-projectile
+  :ensure t
+  :after counsel projectile
+  :config
+  (setq projectile-switch-project-action 'counsel-projectile-find-file)
+
+  (general-define-key
+   :states '(normal visual)
+   :prefix my-leader
+   "ps" 'counsel-projectile-switch-project
+   "pb" 'counsel-projectile-switch-to-buffer
+   "pf" 'counsel-projectile-find-file
+   "pg" 'counsel-projectile-ag
+   "/" 'swiper))
 
 ;; neotree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package neotree
   :ensure t
   :config
+  (defun neotree-project-dir ()
+    "Open NeoTree using the git root."
+    (interactive)
+    (let ((project-dir (ffip-project-root))
+          (file-name (buffer-file-name)))
+      (if project-dir
+          (progn
+            (neotree-dir project-dir)
+            (neotree-find file-name))
+        (message "Could not find git project root."))))
+
+  (setq neo-smart-open t)
+
   (general-define-key
-   :keymaps 'global-map
    :states '(normal visual)
    :prefix my-leader
-   "tt" 'neotree-projectile-action)
+   "tt" 'neotree-project-dir)
+
+  (general-define-key
+   :keymaps 'neotree-mode-map
+   :states '(normal visual)
+   :prefix my-leader
+   "tt" 'neotree-hide)
 
   (general-define-key
    :keymaps 'neotree-mode-map
    :states '(normal visual)
    "RET" 'neotree-enter
-   "q" 'neotree-hide)
+   "TAB" 'neotree-enter
+   "r" 'neotree-refresh
+   "q" 'neotree-hide))
 
 ;; clojure-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -357,7 +446,8 @@
   (general-define-key
    :keymaps 'cider-mode-map
    :states '(normal visual)
-   "K" 'cider-doc)
+   "K" 'cider-doc
+   "gf" 'cider-find-var)
 
   (general-define-key
    :keymaps 'cider-mode-map
@@ -367,6 +457,7 @@
 
   (general-define-key
    :keymaps 'cider-mode-map
+
    :states '(normal)
    :prefix my-leader
    "ee" 'cider-eval-sexp-at-point)
@@ -377,54 +468,55 @@
    :prefix my-leader
    "ee" 'cider-eval-region))
 
-;; Magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package magit
   :ensure t
   :config
   (general-define-key
    :prefix my-leader
-   :keymaps 'global-map
    :states '(normal)
    "gs" 'magit-status
    "gb" 'magit-blame))
 
-;; Evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; magit-gh-pulls ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package magit-gh-pulls
+  :ensure t
+  :after magit
+  :config
+  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+
+;; evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package evil
   :ensure t
   :init
   :config
-  (add-hook
-   'evil-mode-hook
-   (lambda ()
-     (setq evil-shift-width 2)
-
-     (define-key evil-normal-state-map (kbd ";") 'evil-ex)
-     (define-key evil-normal-state-map (kbd ":") 'evil-repeat-find-char)
-
-     (evil-define-key '(normal visual) global-map
-       (kbd "C-h") 'evil-window-left
-       (kbd "C-j") 'evil-window-down
-       (kbd "C-k") 'evil-window-up
-       (kbd "C-l") 'evil-window-right)))
-
-  (add-hook
-   'occur-mode-hook
-   (lambda ()
-     (evil-add-hjkl-bindings occur-mode-map 'emacs
-       (kbd "/")       'evil-search-forward
-       (kbd "j")       'evil-search-next
-       (kbd "k")       'evil-search-previous
-       (kbd "C-d")     'evil-scroll-down
-       (kbd "C-u")     'evil-scroll-up
-       (kbd "C-w C-w") 'other-window)))
-
   (evil-mode t)
+
+  (setq evil-shift-width 2)
+
+  (general-define-key
+   :keymaps '(evil-motion-state-map)
+   ";" 'evil-ex
+   ":" 'evil-repeat-find-char)
+
+  (general-define-key
+   "s-h" 'evil-window-left
+   "s-j" 'evil-window-down
+   "s-k" 'evil-window-up
+   "s-l" 'evil-window-right)
 
   (use-package evil-magit
     :after magit
-    :ensure t)
+    :ensure t
+    :config
+    (general-define-key
+     :keymaps 'magit-mode-map
+     :states '(normal visual)
+     "j" 'magit-section-forward
+     "k" 'magit-section-backward))
 
   (use-package evil-extra-operator
     :ensure t
@@ -439,8 +531,9 @@
   (use-package evil-nerd-commenter
     :ensure t
     :config
-    (evil-define-key 'normal global-map
-      (kbd "gc") 'evilnc-comment-operator))
+    (general-define-key
+     :keymaps '(normal)
+     "gc" 'evilnc-comment-operator))
 
   (use-package evil-surround
     :ensure t
@@ -451,3 +544,4 @@
 (diminish 'auto-revert-mode)
 (diminish 'global-whitespace-mode)
 (diminish 'undo-tree-mode)
+(diminish 'whitespace-mode)
