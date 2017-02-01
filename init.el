@@ -452,7 +452,6 @@
 
   (general-define-key
    :keymaps 'cider-mode-map
-
    :states '(normal)
    :prefix my-leader
    "ee" 'cider-eval-sexp-at-point)
@@ -462,6 +461,33 @@
    :states '(visual)
    :prefix my-leader
    "ee" 'cider-eval-region))
+
+;; diff-hl
+
+(use-package diff-hl
+  :ensure t
+  :config
+  (global-diff-hl-mode t)
+  (diff-hl-flydiff-mode t)
+
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+
+  (set-face-foreground 'diff-hl-insert "none")
+  (set-face-foreground 'diff-hl-delete "none")
+  (set-face-foreground 'diff-hl-change "none")
+  (set-face-background 'diff-hl-insert "green4")
+  (set-face-background 'diff-hl-delete "red4")
+  (set-face-background 'diff-hl-change "yellow3")
+
+  (general-define-key
+   :states '(normal visual)
+   :prefix my-leader
+   "hu" 'diff-hl-revert-hunk)
+
+  (general-define-key
+   :states '(normal visual)
+   "]c" 'diff-hl-next-hunk
+   "[c" 'diff-hl-previous-hunk))
 
 ;; magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
