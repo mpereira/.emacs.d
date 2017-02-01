@@ -369,12 +369,7 @@
    :states '(normal visual)
    :prefix my-leader
    "ff" 'counsel-find-file
-   "fb" 'ivy-switch-buffer)
-
-  (general-define-key
-   :keymaps '(emacs-lisp-mode-map)
-   :states '(normal visual)
-   :prefix my-leader
+   "fb" 'ivy-switch-buffer
    "fv" 'counsel-describe-variable
    "fl" 'counsel-find-library
    "fF" 'counsel-describe-function))
