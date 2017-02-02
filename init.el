@@ -2,7 +2,9 @@
 
 (package-initialize)
 
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(add-to-list
+ 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/"))
 
 (unless package-archive-contents
   (package-refresh-contents))
@@ -24,7 +26,7 @@
 ;; Helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; https://www.emacswiki.org/emacs/DescribeThingAtPoint
-(defun describe-thing-at-point ()
+(defun mpereira/describe-thing-at-point ()
   "Show the documentation of the Elisp function and variable near point.
   This checks in turn:
   -- for a function name where point is
@@ -48,7 +50,7 @@
 
 ;; FIXME: popup is showing at random positions.
 ;; FIXME: help-xref-interned creates a help buffer.
-(defun describe-thing-at-point-in-popup ()
+(defun mpereira/describe-thing-at-point-in-popup ()
   (interactive)
   (let* ((thing (symbol-at-point))
          (help-xref-following t)
@@ -59,7 +61,7 @@
     (pos-tip-show content nil nil nil 999)))
 
 (require 'thingatpt)
-(defun eval-sexp-at-or-surrounding-pt ()
+(defun mpereira/eval-sexp-at-or-surrounding-pt ()
   "Evaluate the sexp following the point, or surrounding the point"
   (interactive)
   (save-excursion
@@ -67,7 +69,21 @@
     (if (search-backward "(" nil t)
         (message "%s" (eval (read-from-whole-string (thing-at-point 'sexp)))))))
 
-(defun toggle-window-split ()
+(defun mpereira/split-window-below-and-switch ()
+  "Split the window horizontally then switch to the new window."
+  (interactive)
+  (split-window-below)
+  (balance-windows)
+  (other-window 1))
+
+(defun mpereira/split-window-right-and-switch ()
+  "Split the window vertically then switch to the new window."
+  (interactive)
+  (split-window-right)
+  (balance-windows)
+  (other-window 1))
+
+(defun mpereira/toggle-window-split ()
   (interactive)
   (if (= (count-windows) 2)
       (let* ((this-win-buffer (window-buffer))
@@ -150,6 +166,10 @@
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
 
+;; sqli
+
+(add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
+
 ;; exec-path-from-shell
 
 (use-package exec-path-from-shell
@@ -189,8 +209,8 @@
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
    :states '(normal visual)
-   "C-S-k" 'describe-thing-at-point
-   "K" 'describe-thing-at-point-in-popup)
+   "C-S-k" 'mpereira/describe-thing-at-point
+   "K" 'mpereira/describe-thing-at-point-in-popup)
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
@@ -202,7 +222,7 @@
    :keymaps 'emacs-lisp-mode-map
    :states '(normal)
    :prefix my-leader
-   "ee" 'eval-sexp-at-or-surrounding-pt)
+   "ee" 'mpereira/eval-sexp-at-or-surrounding-pt)
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
@@ -227,10 +247,10 @@
    "b" 'switch-to-buffer
    "w" 'save-buffer
    "q" 'evil-quit
-   "hs" 'split-window-vertically
-   "vs" 'split-window-horizontally
-   "hv" 'toggle-window-split
-   "vh" 'toggle-window-split))
+   "hs" 'mpereira/split-window-below-and-switch
+   "vs" 'mpereira/split-window-right-and-switch
+   "hv" 'mpereira/toggle-window-split
+   "vh" 'mpereira/toggle-window-split))
 
 ;; expand-region ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -252,7 +272,47 @@
   :ensure t
   :diminish aggressive-indent-mode
   :config
-  (add-hook 'prog-mode-hook 'aggressive-indent-mode))
+  (add-hook 'prog-mode-hook 'aggressive-indent-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'sql-mode))
+
+;; gist
+
+(use-package gist
+  :ensure t
+  :config
+  (general-define-key
+   :states '(normal visual)
+   :prefix my-leader
+   "gip" 'gist-region-or-buffer-private
+   "gii" 'gist-region-or-buffer
+   "gil" 'gist-list)
+
+  (general-define-key
+   :keymaps '(gist-list-menu-mode-map)
+   "g" nil
+   "k" nil)
+
+  (general-define-key
+   :keymaps '(gist-list-menu-mode-map)
+   "C-j" 'next-line
+   "C-k" 'previous-line
+   "j" 'next-line
+   "k" 'previous-line
+   "C-f" 'scroll-up-command
+   "C-b" 'scroll-down-command
+   "r" 'gist-list-reload
+   "gg" 'beginning-of-buffer
+   "G" 'end-of-buffer
+   "/" 'evil-search-forward
+   "n" 'evil-search-next
+   "N" 'evil-search-previous
+   "X" 'gist-kill-current))
+
+;; markdown-mode
+
+(use-package markdown-mode
+  :ensure t
+  :diminish markdown-live-preview-mode)
 
 ;; lispy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -332,10 +392,13 @@
   :ensure t
   :config
   (projectile-global-mode)
-  (setq projectile-enable-caching t))
+  (setq projectile-enable-caching t)
+  (setq projectile-mode-line '(:eval (format " project[%s]"
+                                             (projectile-project-name)))))
 
 ;; find-file-in-project ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Only using this for ffip-project-root.
 (use-package find-file-in-project
   :ensure t)
 
@@ -428,9 +491,20 @@
    "r" 'neotree-refresh
    "q" 'neotree-hide))
 
+;; slamhound ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package slamhound
+  :after cider
+  :ensure t)
+
 ;; clojure-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package clojure-mode
+  :ensure t)
+
+;; clojure-cheatsheet ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package clojure-cheatsheet
   :ensure t)
 
 ;; cider ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -494,6 +568,8 @@
 (use-package magit
   :ensure t
   :config
+  (add-hook 'with-editor-mode-hook 'evil-insert-state)
+
   (general-define-key
    :prefix my-leader
    :states '(normal)
