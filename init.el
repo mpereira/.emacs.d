@@ -268,7 +268,8 @@ exist in any structured movement package is mind-boggling to me."
   :config
   (setq exec-path-from-shell-variables
         (append exec-path-from-shell-variables
-                '("SONIAN_USER"
+                '("OPSCODE_USER"
+                  "SONIAN_USER"
                   "SONIAN_RELEASES_REPO_URL"
                   "SONIAN_RELEASES_REPO_USERNAME"
                   "SONIAN_RELEASES_REPO_PASSWORD"
