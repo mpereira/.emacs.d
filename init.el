@@ -25,11 +25,12 @@
 
 ;; Helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; https://www.emacswiki.org/emacs/DescribeThingAtPoint
+;; Modified https://www.emacswiki.org/emacs/DescribeThingAtPoint
 (defun mpereira/describe-thing-at-point ()
   "Show the documentation of the Elisp function and variable near point.
   This checks in turn:
   -- for a function name where point is
+  -- for a keymap name where point is
   -- for a variable name where point is
   -- for a surrounding function call"
   (interactive)
@@ -45,7 +46,9 @@
                            (let ((obj (read (current-buffer))))
                              (and (symbolp obj) (fboundp obj) obj))))))
            (describe-function sym))
-          ((setq sym (variable-at-point)) (describe-variable sym))
+          ((setq sym (variable-at-point)) (if (keymapp (symbol-value sym))
+                                              (describe-keymap sym)
+                                            (describe-variable sym)))
           ((setq sym (function-at-point)) (describe-function sym)))))
 
 ;; FIXME: popup is showing at random positions.
@@ -109,6 +112,92 @@
           (if this-win-2nd (other-window 1))))
     (message "Can only toggle window split for 2 windows")))
 
+(with-eval-after-load "lispy"
+  (defun mpereira/inside-or-at-the-end-of-string ()
+    (when (lispy--in-string-p)
+      (let* ((p (point))
+             (bounds (lispy--bounds-string)))
+        (and (not (= p (car bounds)))
+             (not (= p (cdr bounds)))))))
+
+  (defun mpereira/backward-sexp (arg)
+    "Moves to the beginning of the previous ARG nth sexp."
+    (interactive "p")
+    (if (mpereira/inside-or-at-the-end-of-string)
+        (let ((bounds (lispy--bounds-string)))
+          (goto-char (car bounds))
+          (backward-sexp (- arg 1)))
+      (backward-sexp arg)))
+
+  (defun mpereira/forward-sexp (arg)
+    "Moves to the beginning of the next ARG nth sexp. The fact that this doesn't
+exist in any structured movement package is mind-boggling to me."
+    (interactive "p")
+    (when (mpereira/inside-or-at-the-end-of-string)
+      (let ((bounds (lispy--bounds-string)))
+        (goto-char (- (car bounds) 1))))
+    (dotimes (i arg)
+      (forward-sexp 1)
+      (if (looking-at lispy-right)
+          (backward-sexp 1)
+        (progn
+          (forward-sexp 1)
+          (backward-sexp 1))))))
+
+;; Based on
+;;
+;; https://github.com/bbatsov/persp-projectile/
+;; blob/7686633acf44402fa90429759cca6a155e4df2b9/persp-projectile.el#L66
+;;
+;; and
+;;
+;; https://github.com/syl20bnr/spacemacs/
+;; blob/b7e51d70aa3fb81df2da6dc16d9652a002ba5e6b/
+;; layers/%2Bspacemacs/spacemacs-layouts/funcs.el#352
+(with-eval-after-load "ivy"
+  (with-eval-after-load "projectile"
+    (with-eval-after-load "perspective"
+      (defun mpereira/ivy-persp-switch-project (arg)
+        (interactive "P")
+        (ivy-read "Switch to Project Perspective: "
+                  (if (projectile-project-p)
+                      (cons (abbreviate-file-name (projectile-project-root))
+                            (projectile-relevant-known-projects))
+                    projectile-known-projects)
+                  :action
+                  (lambda (project)
+                    (let* ((name (file-name-nondirectory
+                                  (directory-file-name project)))
+                           (persp (gethash name perspectives-hash)))
+                      (cond
+                       ;; Project-specific perspective already exists.
+                       ((and persp (not (equal persp persp-curr)))
+                        (persp-switch name))
+                       ;; Project-specific perspective doesn't exist.
+                       ((not persp)
+                        (let ((frame (selected-frame)))
+                          (persp-switch name)
+                          (projectile-switch-project-by-name project)
+                          ;; Clean up if we switched to a new
+                          ;; frame. `helm' for one allows finding files in
+                          ;; new frames so this is a real possibility.
+                          (when (not (equal frame (selected-frame)))
+                            (with-selected-frame frame
+                              (persp-kill name)))))))))))))
+
+(with-eval-after-load "evil"
+  (with-eval-after-load "lispyville"
+    (defun mpereira/insert-to-beginning-of-list (arg)
+      (interactive "p")
+      (lispyville-backward-up-list)
+      (evil-forward-char)
+      (evil-insert arg))
+
+    (defun mpereira/append-to-end-of-list (arg)
+      (interactive "p")
+      (lispyville-up-list)
+      (evil-insert arg))))
+
 ;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bar-mode -1)
@@ -166,6 +255,8 @@
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
 
+(setq mpereira/leader ",")
+
 ;; sqli
 
 (add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
@@ -193,8 +284,6 @@
 (use-package general
   :ensure t
   :config
-  (setq my-leader ",")
-
   (general-define-key
    "<escape>" 'keyboard-quit)
 
@@ -208,26 +297,27 @@
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
-   :states '(normal visual)
+   :states '(normal)
    "C-S-k" 'mpereira/describe-thing-at-point
    "K" 'mpereira/describe-thing-at-point-in-popup)
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
-   :states '(normal visual)
-   :prefix my-leader
+   :states '(normal)
+   :prefix mpereira/leader
    "eE" 'eval-buffer)
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
    :states '(normal)
-   :prefix my-leader
-   "ee" 'mpereira/eval-sexp-at-or-surrounding-pt)
+   :prefix mpereira/leader
+   "ee" 'mpereira/eval-sexp-at-or-surrounding-pt
+   "e:" 'eval-expression)
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
    :states '(visual)
-   :prefix my-leader
+   :prefix mpereira/leader
    "ee" 'eval-region)
 
   (general-define-key
@@ -238,12 +328,11 @@
 
   (general-define-key
    :states '(normal visual)
-   :prefix my-leader
-   "," 'mode-line-other-buffer
+   :prefix mpereira/leader
+   "," 'evil-buffer
    "dk" 'describe-key
    "df" 'describe-function
    "dv" 'describe-variable
-   "sh" 'eshell
    "b" 'switch-to-buffer
    "w" 'save-buffer
    "q" 'evil-quit
@@ -260,6 +349,29 @@
   (general-define-key
    :states '(normal visual)
    "+" 'er/expand-region))
+
+;; rainbow-delimiters ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package rainbow-delimiters
+  :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
+
+;; help-fns+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package help-fns+
+  :ensure t)
+
+;; recentf ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package recentf
+  :ensure t)
+
+;; es-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package es-mode
+  :ensure t)
 
 ;; pos-tip ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -282,7 +394,7 @@
   :config
   (general-define-key
    :states '(normal visual)
-   :prefix my-leader
+   :prefix mpereira/leader
    "gip" 'gist-region-or-buffer-private
    "gii" 'gist-region-or-buffer
    "gil" 'gist-list)
@@ -322,13 +434,34 @@
   :config
   (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
   (add-hook 'clojure-mode-hook 'lispy-mode)
+
+  ;; Disable most lispy mappings.
+  (setq lispy-mode-map lispy-mode-map-base)
+  (setcdr (assq 'lispy-mode minor-mode-map-alist)
+          lispy-mode-map)
+
   (general-define-key
    :keymaps 'lispy-mode-map
    :states '(insert)
+   "<backspace>" 'lispy-delete-backward
+   "<deletechar>" 'lispy-delete
+   ")" 'lispy-right-nostring
+   "\"" 'lispy-doublequote
    "[" 'lispy-brackets
    "]" 'lispy-close-square
    "{" 'lispy-braces
-   "}" 'lispy-close-curly))
+   "}" 'lispy-close-curly)
+
+  (general-define-key
+   :keymaps 'lispy-mode-map
+   :states '(normal)
+   :prefix mpereira/leader
+   "r" 'lispy-raise-sexp
+   "R" 'lispy-raise-some
+   "(" 'lispy-wrap-round
+   "[" 'lispy-wrap-brackets
+   "{" 'lispy-wrap-braces
+   "c" 'lispy-clone))
 
 ;; lispyville ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -339,11 +472,7 @@
   :config
   (add-hook 'lispy-mode-hook 'lispyville-mode)
 
-  (general-define-key
-   :states '(normal visual)
-   :keymaps 'lispyville-mode-map
-   :prefix my-leader
-   "R" 'lispy-raise-sexp)
+  (lispyville-set-key-theme '(operators))
 
   (general-define-key
    :keymaps '(lispyville-mode-map)
@@ -352,31 +481,28 @@
 
   (general-define-key
    :keymaps '(lispyville-mode-map)
-   :states '(normal visual)
-   "y" 'lispyville-yank
-   "d" 'lispyville-delete
-   "c" 'lispyville-change
-   "Y" 'lispyville-yank-line
-   "D" 'lispy-kill
-   "C" 'lispyville-change-line
-   "B" 'lispyville-backward-sexp
-   ;; FIXME: W
-   "W" 'lispyville-forward-sexp
-   "(" 'lispyville-backward-up-list
-   ")" 'lispyville-up-list)
-
-  (general-define-key
-   :keymaps '(lispyville-mode-map)
    :states '(normal)
-   ;; FIXME: barfs and slurps
-   ">)" 'lispyville->
-   "<)" 'lispyville-<
-   "<(" 'lispy-slurp
-   ">(" 'lispy-barf
+   "S" 'lispyville-change-whole-line
+   "B" 'mpereira/backward-sexp
+   "gA" 'mpereira/append-to-end-of-list
+   "gI" 'mpereira/insert-to-beginning-of-list
+   "W" 'mpereira/forward-sexp
+   "(" 'lispyville-backward-up-list
+   ")" 'lispyville-up-list
+   "C-(" 'lispyville-beginning-of-defun
+   "C-)" 'lispyville-end-of-defun
+   "{" 'lispyville-previous-opening
+   "}" 'lispyville-next-opening
+   ">)" 'lispy-forward-slurp-sexp
+   "<)" 'lispy-forward-barf-sexp
+   "<(" 'lispy-backward-slurp-sexp
+   ">(" 'lispy-backward-barf-sexp
    "|" 'lispy-split
    "_" 'lispy-join
-   "<f" 'lispyville-move-up
-   ">f" 'lispyville-move-down))
+   "<f" 'lispyville-drag-backward
+   ">f" 'lispyville-drag-forward
+   "C-9" 'lispy-describe-inline
+   "C-0" 'lispy-arglist-inline))
 
 ;; which-key ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -392,15 +518,38 @@
   :ensure t
   :config
   (projectile-global-mode)
-  (setq projectile-enable-caching t)
+  (setq projectile-enable-caching nil)
   (setq projectile-mode-line '(:eval (format " project[%s]"
-                                             (projectile-project-name)))))
+                                             (projectile-project-name))))
+  (general-define-key
+   :states '(normal)
+   :prefix mpereira/leader
+   "shh" 'projectile-run-eshell
+   "shc" 'projectile-run-async-shell-command-in-root))
 
-;; find-file-in-project ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; perspective ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Only using this for ffip-project-root.
-(use-package find-file-in-project
-  :ensure t)
+(use-package perspective
+  :ensure t
+  :config
+  (persp-mode t))
+
+;; persp-projectile ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package persp-projectile
+  :ensure t
+  :after perspective projectile)
+
+;; avy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package avy
+  :ensure t
+  :config
+  (setq avy-all-windows nil)
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "fw" 'avy-goto-word-or-subword-1))
 
 ;; ivy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -422,6 +571,20 @@
    "C-l" 'ivy-end-of-buffer
    "<escape>" 'minibuffer-keyboard-quit))
 
+;; command-log-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package command-log-mode
+  :ensure t
+  :diminish command-log-mode
+  :config
+  (setq command-log-mode-auto-show t)
+  (setq command-log-mode-window-size 60))
+
+;; wgrep ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package wgrep
+  :ensure t)
+
 ;; counsel ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package counsel
@@ -430,7 +593,8 @@
   :config
   (general-define-key
    :states '(normal visual)
-   :prefix my-leader
+   :prefix mpereira/leader
+   "fy" 'counsel-yank-pop
    "ff" 'counsel-find-file
    "fb" 'ivy-switch-buffer
    "fv" 'counsel-describe-variable
@@ -447,8 +611,8 @@
 
   (general-define-key
    :states '(normal visual)
-   :prefix my-leader
-   "ps" 'counsel-projectile-switch-project
+   :prefix mpereira/leader
+   "ps" 'mpereira/ivy-persp-switch-project
    "pb" 'counsel-projectile-switch-to-buffer
    "pf" 'counsel-projectile-find-file
    "pg" 'counsel-projectile-ag
@@ -458,11 +622,12 @@
 
 (use-package neotree
   :ensure t
+  :after projectile
   :config
   (defun neotree-project-dir ()
     "Open NeoTree using the git root."
     (interactive)
-    (let ((project-dir (ffip-project-root))
+    (let ((project-dir (projectile-project-root))
           (file-name (buffer-file-name)))
       (if project-dir
           (progn
@@ -474,13 +639,13 @@
 
   (general-define-key
    :states '(normal visual)
-   :prefix my-leader
+   :prefix mpereira/leader
    "tt" 'neotree-project-dir)
 
   (general-define-key
    :keymaps 'neotree-mode-map
    :states '(normal visual)
-   :prefix my-leader
+   :prefix mpereira/leader
    "tt" 'neotree-hide)
 
   (general-define-key
@@ -511,6 +676,7 @@
 
 (use-package cider
   :ensure t
+  :diminish cider--debug-mode
   :config
   (general-define-key
    :keymaps 'cider-mode-map
@@ -521,19 +687,19 @@
   (general-define-key
    :keymaps 'cider-mode-map
    :states '(normal visual)
-   :prefix my-leader
+   :prefix mpereira/leader
    "eE" 'cider-eval-buffer)
 
   (general-define-key
    :keymaps 'cider-mode-map
    :states '(normal)
-   :prefix my-leader
+   :prefix mpereira/leader
    "ee" 'cider-eval-sexp-at-point)
 
   (general-define-key
    :keymaps 'cider-mode-map
    :states '(visual)
-   :prefix my-leader
+   :prefix mpereira/leader
    "ee" 'cider-eval-region))
 
 ;; diff-hl
@@ -555,7 +721,7 @@
 
   (general-define-key
    :states '(normal visual)
-   :prefix my-leader
+   :prefix mpereira/leader
    "hu" 'diff-hl-revert-hunk)
 
   (general-define-key
@@ -571,10 +737,11 @@
   (add-hook 'with-editor-mode-hook 'evil-insert-state)
 
   (general-define-key
-   :prefix my-leader
    :states '(normal)
+   :prefix mpereira/leader
    "gs" 'magit-status
-   "gb" 'magit-blame))
+   "gb" 'magit-blame
+   "gd" 'magit-diff-unstaged))
 
 ;; magit-gh-pulls ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -593,6 +760,8 @@
   (evil-mode t)
 
   (setq evil-shift-width 2)
+  (setq evil-move-cursor-back t)
+  (setq evil-move-beyond-eol nil)
 
   (general-define-key
    :keymaps '(evil-motion-state-map)
@@ -618,9 +787,14 @@
   (use-package evil-extra-operator
     :ensure t
     :init
-    (setq evil-extra-operator-eval-key (kbd "ge"))
+    (setq evil-extra-operator-eval-key "ge")
     :config
     (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
+
+  (use-package evil-exchange
+    :ensure t
+    :config
+    (evil-exchange-install))
 
   (use-package evil-escape
     :ensure t)
