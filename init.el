@@ -730,6 +730,11 @@ exist in any structured movement package is mind-boggling to me."
    "]c" 'diff-hl-next-hunk
    "[c" 'diff-hl-previous-hunk))
 
+;; browse-at-remote ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package browse-at-remote
+  :ensure t)
+
 ;; magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package magit
