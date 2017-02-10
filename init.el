@@ -16,6 +16,8 @@
 (eval-when-compile
   (require 'use-package))
 
+(require 'tramp)
+
 ;; Color theme ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package ample-theme
@@ -306,13 +308,9 @@ exist in any structured movement package is mind-boggling to me."
    :keymaps 'emacs-lisp-mode-map
    :states '(normal)
    :prefix mpereira/leader
-   "eE" 'eval-buffer)
-
-  (general-define-key
-   :keymaps 'emacs-lisp-mode-map
-   :states '(normal)
-   :prefix mpereira/leader
    "ee" 'mpereira/eval-sexp-at-or-surrounding-pt
+   "e(" 'eval-defun
+   "eE" 'eval-buffer
    "e:" 'eval-expression)
 
   (general-define-key
@@ -358,6 +356,19 @@ exist in any structured movement package is mind-boggling to me."
   :config
   (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
+
+;; yaml-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package yaml-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+  (add-hook 'yaml-mode-hook
+            (lambda ()
+              (general-define-key
+               :keymaps '(yaml-mode-map)
+               :states '(insert)
+               "RET" 'newline-and-indent))))
 
 ;; help-fns+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -532,6 +543,8 @@ exist in any structured movement package is mind-boggling to me."
 
 (use-package perspective
   :ensure t
+  :init
+  (setq persp-show-modestring nil)
   :config
   (persp-mode t))
 
@@ -641,13 +654,13 @@ exist in any structured movement package is mind-boggling to me."
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
-   "tt" 'neotree-project-dir)
+   "pt" 'neotree-project-dir)
 
   (general-define-key
    :keymaps 'neotree-mode-map
    :states '(normal visual)
    :prefix mpereira/leader
-   "tt" 'neotree-hide)
+   "pt" 'neotree-hide)
 
   (general-define-key
    :keymaps 'neotree-mode-map
@@ -687,15 +700,17 @@ exist in any structured movement package is mind-boggling to me."
 
   (general-define-key
    :keymaps 'cider-mode-map
-   :states '(normal visual)
-   :prefix mpereira/leader
-   "eE" 'cider-eval-buffer)
-
-  (general-define-key
-   :keymaps 'cider-mode-map
    :states '(normal)
    :prefix mpereira/leader
-   "ee" 'cider-eval-sexp-at-point)
+   "ee" 'cider-eval-sexp-at-point
+   "e(" 'cider-eval-defun-at-point
+   "eE" 'cider-eval-buffer
+   "td" 'cider-debug-defun-at-point
+   "tt" 'cider-test-run-test
+   "tr" 'cider-test-rerun-test
+   "tT" 'cider-test-run-ns-tests
+   "tR" 'cider-test-rerun-failed-tests
+   "pt" 'cider-test-run-project-tests)
 
   (general-define-key
    :keymaps 'cider-mode-map
@@ -787,8 +802,10 @@ exist in any structured movement package is mind-boggling to me."
     (general-define-key
      :keymaps 'magit-mode-map
      :states '(normal visual)
-     "j" 'magit-section-forward
-     "k" 'magit-section-backward))
+     "j" 'evil-next-visual-line
+     "k" 'evil-previous-visual-line
+     "C-j" 'magit-section-forward
+     "C-k" 'magit-section-backward))
 
   (use-package evil-extra-operator
     :ensure t
