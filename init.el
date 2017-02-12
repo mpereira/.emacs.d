@@ -236,6 +236,7 @@ exist in any structured movement package is mind-boggling to me."
   (add-hook hook #'whitespace-mode))
 (setq-default show-trailing-whitespace t)
 
+(setq-default fill-column 80)
 (setq comment-column 80)
 
 (prefer-coding-system 'utf-8)
