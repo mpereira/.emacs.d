@@ -4,6 +4,7 @@
 /ac-comphist.dat
 /auto-save-list
 /backups
+/custom.el
 /elpa
 /eshell
 /layouts
@@ -13,6 +14,7 @@
 /recentf
 /savehist
 /semanticdb
+/sessions
 /tramp
 /url
 /var
