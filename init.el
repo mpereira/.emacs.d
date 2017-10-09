@@ -17,6 +17,8 @@
 (eval-when-compile
   (require 'use-package))
 
+;; To upgrade packages: M-x list-packages U x (C-z to get out of evil mode)
+
 ;; Tramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'tramp)
@@ -43,7 +45,7 @@
 
 ;; mode-line ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Depends on the diff-hl package for diff-hl-changes.  Adding this to the mode
+;; Depends on the diff-hl package for diff-hl-changes. Adding this to the mode
 ;; line degrades performance.
 (defun mpereira/-mode-line-git-modifications ()
   (let ((symbols '((insert . "+")
@@ -392,6 +394,9 @@ exist in any structured movement package is mind-boggling to me."
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
+;; Switches to help buffer when they are opened.
+(setq help-window-select t)
+
 (require 'linum)
 (dolist (hook '(prog-mode-hook text-mode-hook))
   (add-hook hook #'linum-mode))
@@ -456,8 +461,6 @@ exist in any structured movement package is mind-boggling to me."
 
 (setq mpereira/leader ",")
 
-(setq explicit-shell-file-name "/usr/local/bin/fish")
-
 ;; eshell ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'eshell)
@@ -471,10 +474,12 @@ exist in any structured movement package is mind-boggling to me."
 ;; behavior.
 (setq shell-prefer-lisp-functions nil)
 
-(add-hook 'eshell-mode-hook
-          (lambda ()
-            (add-to-list 'eshell-visual-commands "ssh")
-            (add-to-list 'eshell-visual-commands "tail")))
+;; Visual commands are commands which require a proper terminal. eshell will run
+;; them in a term buffer when you invoke them.
+(setq eshell-visual-commands
+      '("less" "tmux" "htop" "top" "bash" "zsh" "fish" "glances"))
+(setq eshell-visual-subcommands
+      '(("git" "log" "l" "diff" "show")))
 
 ;; s ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -502,7 +507,15 @@ exist in any structured movement package is mind-boggling to me."
               time-string)))))
   (minibuffer-line-mode t))
 
-;; undo-tree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; beacon ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package beacon
+  :ensure t
+  :config
+  (beacon-mode 1)
+  (setq beacon-size 40))
+
+;; undo-tree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (diminish 'undo-tree-mode)
 
@@ -563,8 +576,8 @@ exist in any structured movement package is mind-boggling to me."
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
    :states '(normal)
-   "C-S-k" 'mpereira/describe-thing-at-point
-   "K" 'mpereira/describe-thing-at-point-in-popup)
+   "K" 'mpereira/describe-thing-at-point
+   "C-S-k" 'mpereira/describe-thing-at-point-in-popup)
 
   (general-define-key
    :keymaps 'emacs-lisp-mode-map
@@ -585,6 +598,9 @@ exist in any structured movement package is mind-boggling to me."
    "M-F" 'toggle-frame-fullscreen
    "M-+" 'text-scale-increase
    "M--" 'text-scale-decrease)
+
+  (eval-after-load 'evil-ex
+    '(evil-ex-define-cmd "bD" 'mpereira/delete-file-and-buffer))
 
   (general-define-key
    :states '(normal visual)
@@ -609,6 +625,25 @@ exist in any structured movement package is mind-boggling to me."
    :keymaps 'evil-ex-search-keymap
    "<escape>" 'minibuffer-keyboard-quit))
 
+;; google-this ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package google-this
+  :ensure t
+  :config
+  (google-this-mode 1)
+
+  (general-define-key
+   ;; :keymaps '(google-this-mode-submap)
+   :states '(normal)
+   :prefix mpereira/leader
+   "fg" 'google-this)
+
+  (general-define-key
+   ;; :keymaps '(google-this-mode-submap)
+   :states '(visual)
+   :prefix mpereira/leader
+   "fg" 'google-this-region))
+
 ;; company-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package company
@@ -618,62 +653,7 @@ exist in any structured movement package is mind-boggling to me."
 
 ;; ansi-term ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Make esc work from terminal emacs.
-;; https://github.com/chrisdone/god-mode/issues/43#issuecomment-67193877
-;; http://lists.gnu.org/archive/html/bug-gnu-emacs/2013-07/msg00209.html
-;; (defvar personal/fast-keyseq-timeout 200)
-
-;; (defun mpereira/-tty-ESC-filter (map)
-;;   (if (and (equal (this-single-command-keys) [?\e])
-;;            (sit-for (/ mpereira/fast-keyseq-timeout 1000.0)))
-;;       [escape] map))
-
-;; (defun mpereira/-lookup-key (map key)
-;;   (catch 'found
-;;     (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
-
-;; (defun mpereira/catch-tty-ESC ()
-;;   "Setup key mappings of current terminal to turn a tty's ESC into `escape'."
-;;   (when (memq (terminal-live-p (frame-terminal)) '(t pc))
-;;     (let ((esc-binding (mpereira/-lookup-key input-decode-map ?\e)))
-;;       (define-key input-decode-map
-;;         [?\e] `(menu-item "" ,esc-binding :filter mpereira/-tty-ESC-filter)))))
-
-;; (mpereira/catch-tty-ESC)
-
-(defun term-send-esc ()
-  "Send ESC in term mode."
-  (interactive)
-  (term-send-raw-string "\e"))
-
-(defun term-toggle-mode ()
-  "Toggles term between line mode and char mode"
-  (interactive)
-  (if (term-in-line-mode)
-      (term-char-mode)
-    (term-line-mode)))
-
-(general-define-key
- :keymaps '(term-mode-map term-raw-map)
- :states '(emacs)
- "<escape>" 'term-send-esc
- "C-t" 'term-toggle-mode
- ;; "<return>" 'term-send-foo
- )
-
-(general-define-key
- :keymaps 'term-mode-map
- :states '(insert normal visual)
- "C-t" 'term-toggle-mode
- ;; "<return>" 'term-send-foo
- )
-
-(general-define-key
- :keymaps 'term-raw-map
- :states '(insert normal visual)
- "C-t" 'term-toggle-mode
- ;; "<return>" 'term-send-foo
- )
+(setq explicit-shell-file-name "/usr/local/bin/fish")
 
 ;; FIXME
 (general-define-key
@@ -704,6 +684,10 @@ exist in any structured movement package is mind-boggling to me."
                             (setq-local term-eol-on-send nil)
                             (setq-local show-trailing-whitespace nil)
                             (setq-local global-hl-line-mode nil)))
+
+;; sql ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'sql)
 
 (add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
 
@@ -823,7 +807,7 @@ exist in any structured movement package is mind-boggling to me."
    "N" 'evil-search-previous
    "X" 'gist-kill-current))
 
-;; markdown-mode
+;; markdown-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package markdown-mode
   :ensure t
@@ -928,7 +912,9 @@ exist in any structured movement package is mind-boggling to me."
   (general-define-key
    :states '(normal)
    :prefix mpereira/leader
-   "sh" 'projectile-run-term
+   ;; FIXME: make it possible to open multiple eshells per project.
+   "sh" 'projectile-run-eshell
+   "sH" 'projectile-run-term
    "sc" 'projectile-run-async-shell-command-in-root))
 
 ;; perspective ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1051,22 +1037,12 @@ exist in any structured movement package is mind-boggling to me."
    "pf" 'counsel-projectile-find-file
    "pg" 'counsel-projectile-ag)
 
+  ;; FIXME: was this only needed to be run on runtime when I had those keys
+  ;; mapped to something else?
   (general-define-key
    :states '(normal visual)
    "/" 'evil-search-forward
-   "?" 'evil-search-backward)
-
-  ;; (general-define-key
-  ;;  :states '(normal visual)
-  ;;  "/" 'swiper
-  ;;  "?" 'swiper)
-
-  ;; FIXME: n and N are reversed after swiper?
-  ;; (general-define-key
-  ;;  :states '(normal visual)
-  ;;  "n" 'evil-search-previous
-  ;;  "N" 'evil-search-next)
-  )
+   "?" 'evil-search-backward))
 
 ;; neotree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
