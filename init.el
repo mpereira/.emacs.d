@@ -993,6 +993,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (general-define-key
  :keymaps '(org-agenda-mode-map)
+ "c" 'org-agenda-capture
  "d" 'org-agenda-deadline
  "h" nil
  "j" 'org-agenda-next-line
