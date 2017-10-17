@@ -1,0 +1,9 @@
+* .emacs.d
+
+Evil emacs configuration.
+
+* Author
+  [[http://murilopereira.com][Murilo Pereira]]
+
+* License
+  [[http://opensource.org/licenses/MIT][MIT]]

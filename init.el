@@ -17,7 +17,16 @@
 (eval-when-compile
   (require 'use-package))
 
-;; To upgrade packages: M-x list-packages U x (C-z to get out of evil mode)
+;; * Stuff I keep forgetting:
+;; ** Upgrade packages: M-x list-packages (C-z to get out of evil mode) U x
+;; ** Paste into the minibuffer: C-y
+;; ** org mode file links to search patterns can't start with open parens:
+;;    https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
+;; ** EXPRESSION can be used only once per `org-agenda-prefix-format'.
+
+;; Uncomment this to terminate init.el loading early.
+;; (with-current-buffer " *load*"
+;;   (goto-char (point-max)))
 
 ;; Tramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -37,120 +46,108 @@
 ;; Color theme ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; https://emacsthemes.com
+;; http://daylerees.github.io/
 ;; http://raebear.net/comp/emacscolors.html
-(use-package ample-theme
+
+;; doom-themes dependency.
+;; Make sure to run `M-x all-the-icons-install-fonts` on new installs.
+(use-package all-the-icons
+  :ensure t)
+
+(use-package doom-themes
   :ensure t
-  :defer t
-  :init (load-theme 'ample t))
+  :config
+  (load-theme 'doom-tomorrow-night t)
+
+  ;; Enable flashing mode-line on errors.
+  (doom-themes-visual-bell-config)
+
+  ;; Enable custom neotree theme
+  (doom-themes-neotree-config)
+
+  ;; Correct (and improve) org-mode's native fontification.
+  (doom-themes-org-config))
 
 ;; mode-line ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Depends on the diff-hl package for diff-hl-changes. Adding this to the mode
-;; line degrades performance.
-(defun mpereira/-mode-line-git-modifications ()
-  (let ((symbols '((insert . "+")
-                   (change . "~")
-                   (delete . "-")))
-        (modifications (->> (diff-hl-changes)
-                            (-group-by (lambda (item) (nth 2 item)))
-                            (-map (lambda (group)
-                                    (let* ((key (car group))
-                                           (items (cdr group)))
-                                      (-reduce-from (lambda (memo item)
-                                                      (list key
-                                                            (+ (nth 1 memo)
-                                                               (nth 1 item))))
-                                                    (list key 0)
-                                                    items))))
-                            (-map (lambda (aggregate)
-                                    (apply 'cons aggregate))))))
-    (->> symbols
-         (-map (lambda (symbol)
-                 (let* ((symbol* (cdr symbol))
-                        (count (alist-get (car symbol) modifications)))
-                   (cons symbol* count))))
-         (-filter (lambda (item) (cdr item)))
-         (-map (lambda (item)
-                 (format "%s%s" (car item) (cdr item))))
-         (s-join " "))))
+(with-eval-after-load "magit"
+  (defconst mpereira/mode-line-projectile
+    '(:eval
+      (let ((face 'modeline-buffer-id))
+        (when (projectile-project-name)
+          (concat
+           (propertize " " 'face face)
+           (propertize (format "%s" (projectile-project-name)) 'face face)
+           (propertize " " 'face face))))))
 
-(defvar mpereira/mode-line-git-modifications
-  '(:eval
-    (concat
-     " "
-     (propertize (mpereira/-mode-line-git-modifications)
-                 'face '(:foreground "gray25" :weight light))
-     " ")))
+  (defconst mpereira/mode-line-vc
+    '(:eval
+      (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
+        (let ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
+              (face 'magit-branch-current))
+          (concat
+           (propertize " " 'face face)
+           (propertize (format "%s" branch) 'face face)
+           (propertize " " 'face face))))))
 
-(defvar mpereira/mode-line-projectile
-  '(:eval
-    (if (projectile-project-name)
+  (defun mpereira/shorten-directory (dir max-length)
+    "Show up to MAX-LENGTH characters of a directory name DIR."
+    (let ((directory-truncation-string (if (char-displayable-p ?…) "…/" ".../"))
+          (longname (abbreviate-file-name dir)))
+      ;; If it fits, return the string.
+      (if (<= (string-width longname) max-length) longname
+        ;; If it doesn't, shorten it.
+        (let ((path (reverse (split-string longname "/")))
+              (output ""))
+          (when (and path (equal "" (car path)))
+            (setq path (cdr path)))
+          (let ((max (- max-length (string-width directory-truncation-string))))
+            ;; Concat as many levels as possible, leaving 4 chars for safety.
+            (while (and path (<= (string-width (concat (car path) "/" output))
+                                 max))
+              (setq output (concat (car path) "/" output))
+              (setq path (cdr path))))
+          ;; If we had to shorten, prepend .../
+          (when path
+            (setq output (concat directory-truncation-string output)))
+          output))))
+
+  (defconst mpereira/mode-line-buffer
+    '(:eval
+      (let ((modified-or-ro-symbol (cond
+                                    ((and buffer-file-name (buffer-modified-p))
+                                     "~")
+                                    (buffer-read-only ":RO")
+                                    (t "")))
+            (face 'bold)
+            (directory-face 'shadow)
+            (modified-symbol-face 'default)
+            (directory (if buffer-file-name
+                           (mpereira/shorten-directory default-directory 15)
+                         "")))
         (concat
-         (propertize " "
-                     'face '())
-         (propertize (format "%s" (projectile-project-name)))
-         (propertize " "
-                     'face '()))
-      "")))
+         (propertize " " 'face face)
+         (propertize (format "%s" directory) 'face directory-face)
+         (propertize "%b" 'face face)
+         (propertize modified-or-ro-symbol 'face modified-symbol-face)
+         (propertize " " 'face face)))))
 
-(defun mpereira/mode-line-git ()
-  (let ((branch (mapconcat 'concat (cdr (split-string vc-mode "[:-]")) "-")))
-    (concat
-     (propertize " "
-                 'face '())
-     (propertize (format "%s" branch)
-                 'face '(:foreground "gray18" :weight bold))
-     (propertize " "
-                 'face '()))))
+  (defconst mpereira/mode-line-major-mode
+    '(:eval
+      (propertize " %m " 'face 'font-lock-comment-face)))
 
-(defvar mpereira/mode-line-vc
-  '(:eval
-    (when vc-mode
-      (cond
-       ((string-match "Git[:-]" vc-mode) (mpereira/mode-line-git))
-       (t (format "%s" vc-mode))))))
+  (defconst mpereira/mode-line-buffer-position
+    '(:eval
+      (unless eshell-mode
+        (propertize " %p %l,%c " 'face 'tooltip))))
 
-;; TODO: Make this show shortened directory prefixed to the buffer name if
-;; outside the context of a projectile project.
-(defvar mpereira/mode-line-buffer
-  '(:eval
-    (let ((modified-symbol (if (buffer-modified-p) "~" "")))
-      (concat
-       (propertize " " 'face '(:background "gray48"))
-       (propertize
-        "%b"
-        'face '(:background "gray48" :foreground "gray18" :weight bold))
-       (propertize
-        modified-symbol
-        'face '(:background "gray48" :foreground "gray28" :weight light))
-       (propertize " " 'face '(:background "gray48"))))))
 
-(defvar mpereira/mode-line-major-mode
-  (concat
-   (propertize " "
-               'face '())
-   (propertize "%m"
-               'face '(:foreground "gray18" :weight bold))
-   (propertize " "
-               'face '())))
-
-;; TODO: align this to the right.
-(defvar mpereira/mode-line-buffer-position
-  '(:propertize
-    " %p %l,%c "
-    face (:background "cornsilk4" :foreground "gray25" :weight light)))
-
-(setq-default mode-line-format
-              (list mpereira/mode-line-projectile
-                    mpereira/mode-line-vc
-                    mpereira/mode-line-buffer
-                    ;; FIXME: Emacs gets too slow when this is turned on. Is
-                    ;; there a more efficient way to get this information?
-                    ;; mpereira/mode-line-git-modifications
-                    mpereira/mode-line-major-mode
-                    (format "%10s" "")
-                    mpereira/mode-line-buffer-position
-                    mode-line-end-spaces))
+  (setq-default mode-line-format (list mpereira/mode-line-projectile
+                                       mpereira/mode-line-vc
+                                       mpereira/mode-line-buffer
+                                       mpereira/mode-line-major-mode
+                                       mpereira/mode-line-buffer-position
+                                       mode-line-end-spaces)))
 
 ;; Helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -169,6 +166,19 @@
           (delete-file filename)
           (message "Deleted file %s" filename)
           (kill-buffer))))))
+
+(defun mpereira/rename-file-and-buffer ()
+  "Rename the current buffer and file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " filename)))
+        (cond
+         ((vc-backend filename) (vc-rename-file filename new-name))
+         (t
+          (rename-file filename new-name t)
+          (set-visited-file-name new-name t t)))))))
 
 ;; Modified https://www.emacswiki.org/emacs/DescribeThingAtPoint
 (defun mpereira/describe-thing-at-point ()
@@ -196,24 +206,7 @@
                                             (describe-variable sym)))
           ((setq sym (function-at-point)) (describe-function sym)))))
 
-;; FIXME: popup is showing at random positions.
-;; FIXME: help-xref-interned creates a help buffer.
-(defun mpereira/describe-thing-at-point-in-popup ()
-  (interactive)
-  (let* ((thing (symbol-at-point))
-         (content (save-window-excursion
-                    (with-temp-buffer
-                      (let* ((standard-output (current-buffer))
-                             (help-xref-following t))
-                        (help-mode)
-                        (describe-symbol thing)
-                        (buffer-string))))))
-    ;; (message content)
-    (if (null content)
-        (message (concat "Can't describe \"" thing "\""))
-      (pos-tip-show content nil nil nil 0))))
-
-(require 'thingatpt) ;; for thing-at-point.
+(require 'thingatpt) ;; for `thing-at-point'.
 (defun mpereira/eval-sexp-at-or-surrounding-pt ()
   "Evaluate the sexp following the point, or surrounding the point"
   (interactive)
@@ -261,6 +254,11 @@
           (select-window first-win)
           (if this-win-2nd (other-window 1))))
     (message "Can only toggle window split for 2 windows")))
+
+(defun mpereira/indent-buffer ()
+  "Indents the current buffer."
+  (interactive)
+  (indent-region (point-min) (point-max)))
 
 (with-eval-after-load "lispy"
   (defun mpereira/inside-or-at-the-end-of-string ()
@@ -348,11 +346,6 @@ exist in any structured movement package is mind-boggling to me."
       (lispyville-up-list)
       (evil-insert arg))))
 
-(defun indent-buffer ()
-  "Indents the current buffer."
-  (interactive)
-  (indent-region (point-min) (point-max)))
-
 ;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'diminish)
@@ -392,9 +385,19 @@ exist in any structured movement package is mind-boggling to me."
 (setq mac-control-modifier 'control)
 (setq ns-function-modifier 'hyper)
 
+;; Start scratch buffers in text-mode.
+(setq initial-major-mode 'text-mode)
+
+;; Make cursor the width of the character it is under e.g. full width of a TAB.
+(setq x-stretch-cursor t)
+
+;; By default Emacs thinks a sentence is a full-stop followed by 2 spaces. Make
+;; it a full-stop and 1 space.
+(setq sentence-end-double-space nil)
+
 (fset 'yes-or-no-p 'y-or-n-p)
 
-;; Switches to help buffer when they are opened.
+;; Switch to help buffer when it's opened.
 (setq help-window-select t)
 
 (require 'linum)
@@ -408,6 +411,9 @@ exist in any structured movement package is mind-boggling to me."
 ;; Remember point position between sessions.
 (require 'saveplace)
 (save-place-mode t)
+
+;; Don't create companion files.
+(setq create-lockfiles nil)
 
 ;; Save a bunch of session state stuff.
 (require 'savehist)
@@ -461,18 +467,31 @@ exist in any structured movement package is mind-boggling to me."
 
 (setq mpereira/leader ",")
 
+;; general ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package general
+  :ensure t)
+
 ;; eshell ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'eshell)
+(require 'em-dirs) ;; for `eshell/pwd'.
+
+;; Don't display the "Welcome to the Emacs shell" banner.
+(setq eshell-banner-message "")
+
+;; TODO: understand the consequences os this.
+(setenv "PAGER" "cat")
 
 (setq eshell-scroll-to-bottom-on-input 'all)
-(setq shell-error-if-no-glob t)
-(setq shell-hist-ignoredups t)
-(setq shell-save-history-on-exit t)
-(setq shell-destroy-buffer-when-process-dies t)
+(setq eshell-buffer-maximum-lines 20000)
+(setq eshell-error-if-no-glob t)
+(setq eshell-hist-ignoredups t)
+(setq eshell-save-history-on-exit t)
+(setq eshell-destroy-buffer-when-process-dies t)
 ;; `find` and `chmod` behave differently on eshell than unix shells. Prefer unix
 ;; behavior.
-(setq shell-prefer-lisp-functions nil)
+(setq eshell-prefer-lisp-functions nil)
 
 ;; Visual commands are commands which require a proper terminal. eshell will run
 ;; them in a term buffer when you invoke them.
@@ -480,6 +499,145 @@ exist in any structured movement package is mind-boggling to me."
       '("less" "tmux" "htop" "top" "bash" "zsh" "fish" "glances"))
 (setq eshell-visual-subcommands
       '(("git" "log" "l" "diff" "show")))
+
+(defun eshell/clear ()
+  (interactive)
+  (let ((inhibit-read-only t))
+    (erase-buffer))
+  (eshell-send-input))
+
+(defun mpereira/eshell-clear ()
+  (interactive)
+  (eshell/clear)
+  (eshell-send-input))
+
+(defun mpereira/counsel-esh-history ()
+  "Browse Eshell history."
+  (interactive)
+  (setq ivy-completion-beg (eshell-bol))
+  (setq ivy-completion-end (point))
+  (let ((elements eshell-history-ring)
+        (initial-input (buffer-substring-no-properties ivy-completion-beg ivy-completion-end)))
+    (ivy-read "Symbol name: "
+              (delete-dups
+               (when (> (ring-size elements) 0)
+                 (ring-elements elements)))
+              :action #'ivy-completion-in-region-action
+              :initial-input initial-input)))
+
+;; eshell-mode-map needs to be configured in an `eshell-mode-hook'.
+;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2016-02/msg01532.html
+(defun mpereira/initialize-eshell ()
+  (interactive)
+  (setq pcomplete-cycle-completions nil)
+  (setq-local beacon-mode nil)
+
+  (general-define-key
+   :states '(normal visual)
+   :keymaps '(eshell-mode-map)
+   "C-k" 'eshell-previous-prompt
+   "C-j" 'eshell-next-prompt)
+
+  (general-define-key
+   :states '(insert)
+   :keymaps '(eshell-mode-map)
+   "C-k" 'eshell-previous-input
+   "C-j" 'eshell-next-input
+   "C-/" 'mpereira/counsel-esh-history
+   ;; https://github.com/ksonney/spacemacs/commit/297945a45696e235c6983a78acdf05b5f0e015ca
+   "C-l" 'mpereira/eshell-clear))
+
+(add-hook 'eshell-mode-hook 'mpereira/initialize-eshell)
+(add-hook 'eshell-exit-hook (lambda ()
+                              (interactive)
+                              (unless (one-window-p)
+                                (delete-window))))
+
+(defun mpereira/remote-p ()
+  (tramp-tramp-file-p default-directory))
+
+(defun mpereira/remote-user ()
+  "Return remote user name."
+  (tramp-file-name-user (tramp-dissect-file-name default-directory)))
+
+(defun mpereira/remote-host ()
+  "Return remote host."
+  ;; `tramp-file-name-real-host' is removed and replaced by
+  ;; `tramp-file-name-host' in Emacs 26, see
+  ;; https://github.com/kaihaosw/eshell-prompt-extras/issues/18
+  (if (fboundp 'tramp-file-name-real-host)
+      (tramp-file-name-real-host (tramp-dissect-file-name default-directory))
+    (tramp-file-name-host (tramp-dissect-file-name default-directory))))
+
+
+;; https://www.emacswiki.org/emacs/EshellPrompt
+(defun mpereira/fish-path (path)
+  "Return a potentially trimmed-down version of the directory PATH, replacing
+parent directories with their initial characters to try to get the character
+length of PATH (sans directory slashes) down to MAX-LEN."
+  (let* ((components (split-string (abbreviate-file-name path) "/"))
+         (max-len 30)
+         (len (+ (1- (length components))
+                 (cl-reduce '+ components :key 'length)))
+         (str ""))
+    (while (and (> len max-len)
+                (cdr components))
+      (setq str (concat str
+                        (cond ((= 0 (length (car components))) "/")
+                              ((= 1 (length (car components)))
+                               (concat (car components) "/"))
+                              (t
+                               (if (string= "."
+                                            (string (elt (car components) 0)))
+                                   (concat (substring (car components) 0 2)
+                                           "/")
+                                 (string (elt (car components) 0) ?/)))))
+            len (- len (1- (length (car components))))
+            components (cdr components)))
+    (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
+
+(defun mpereira/eshell-prompt ()
+  (let ((user-name (if (mpereira/remote-p)
+                       (mpereira/remote-user)
+                     (user-login-name)))
+        (host-name (if (mpereira/remote-p)
+                       (mpereira/remote-host)
+                     (system-name))))
+    (concat
+     (propertize user-name 'face '(:foreground "green"))
+     " "
+     (propertize "at" 'face 'eshell-ls-unreadable)
+     " "
+     (propertize host-name 'face '(:foreground "cyan"))
+     " "
+     (propertize "in" 'face 'eshell-ls-unreadable)
+     " "
+     (propertize (mpereira/fish-path (eshell/pwd)) 'face 'dired-directory)
+     "\n"
+     (propertize (if (= (user-uid) 0)
+                     "#"
+                   "$")
+                 'face 'eshell-prompt)
+     " ")))
+
+;; Unused (for now?)
+(setq mpereira/eshell-prompt-string
+      (let ((prompt (mpereira/eshell-prompt))
+            (inhibit-read-only t))
+        (set-text-properties 0 (length prompt) nil prompt)
+        prompt))
+
+(setq eshell-prompt-function 'mpereira/eshell-prompt)
+(setq eshell-prompt-regexp "^[$#] ")
+;; This causes the prompt to not be protected.
+;; (setq eshell-highlight-prompt nil)
+
+;; restart-emacs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package restart-emacs
+  :ensure t
+  :config
+  (setq restart-emacs-restore-frames t))
 
 ;; s ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -530,7 +688,192 @@ exist in any structured movement package is mind-boggling to me."
 
 (setq-default js-indent-level 2)
 
+;; mappings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(general-define-key
+ "<escape>" 'keyboard-quit)
+
+(general-define-key
+ :keymaps '(minibuffer-local-map
+            minibuffer-local-ns-map
+            minibuffer-local-completion-map
+            minibuffer-local-must-match-map
+            minibuffer-local-isearch-map)
+ "<escape>" 'minibuffer-keyboard-quit)
+
+;; FIXME: isn't M-x bound in insert mode in the first place and why doesn't
+;; this binding work?
+(general-define-key
+ :states '(insert)
+ "M-x" 'execute-extended-command)
+
+(general-define-key
+ :states '(insert)
+ "TAB" 'company-complete)
+
+(general-define-key
+ :keymaps 'emacs-lisp-mode-map
+ :states '(normal)
+ "K" 'mpereira/describe-thing-at-point
+ "C-S-k" 'mpereira/describe-thing-at-point-in-popup)
+
+(general-define-key
+ :keymaps 'emacs-lisp-mode-map
+ :states '(normal)
+ :prefix mpereira/leader
+ "ee" 'mpereira/eval-sexp-at-or-surrounding-pt
+ "e(" 'eval-defun
+ "eE" 'eval-buffer
+ "e:" 'eval-expression)
+
+(general-define-key
+ :keymaps 'emacs-lisp-mode-map
+ :states '(visual)
+ :prefix mpereira/leader
+ "ee" 'eval-region)
+
+(general-define-key
+ "M-F" 'toggle-frame-fullscreen
+ "M-+" 'text-scale-increase
+ "M--" 'text-scale-decrease)
+
+(eval-after-load 'evil-ex
+  '(evil-ex-define-cmd "bD" 'mpereira/delete-file-and-buffer))
+
+(general-define-key
+ :states '(normal visual)
+ :prefix mpereira/leader
+ "," 'evil-buffer
+ "u" 'undo-tree-visualize
+ "b" 'switch-to-buffer
+ "dk" 'describe-key
+ "dm" 'describe-mode
+ "w" 'save-buffer
+ "q" 'evil-quit
+ "hs" 'mpereira/split-window-below-and-switch
+ "vs" 'mpereira/split-window-right-and-switch
+ "hv" 'mpereira/toggle-window-split
+ "vh" 'mpereira/toggle-window-split)
+
+;; Return to original cursor position when cancelling search.
+(general-define-key
+ :keymaps 'isearch-mode-map
+ "<escape>" 'isearch-cancel)
+(general-define-key
+ :keymaps 'evil-ex-search-keymap
+ "<escape>" 'minibuffer-keyboard-quit)
+
 ;; org-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq org-directory "~/Dropbox/org/")
+
+(setq org-modules '(org-habit org-info))
+
+(setq org-return-follows-link t)
+
+(setq org-log-done 'time)
+
+;; Show empty line between collapsed trees if they are separated by just 1
+;; line break.
+(setq org-cycle-separator-lines 1)
+
+;; org-clock stuff.
+(setq org-clock-idle-time 15)
+(setq org-clock-mode-line-total 'current)
+(setq org-clock-in-switch-to-state "DOING")
+
+(setq org-agenda-files (list org-directory))
+;; Full screen org-agenda.
+(setq org-agenda-window-setup 'only-window)
+;; Don't destroy window splits.
+(setq org-agenda-restore-windows-after-quit t)
+
+(setq org-agenda-tags-column -110)
+
+(defun mpereira/org-current-is-todo ()
+  (string= "TODO" (org-get-todo-state)))
+
+(defun mpereira/org-skip-all-but-first ()
+  "Skip all but the first non-done entry."
+  (let (should-skip-entry)
+    (unless (mpereira/org-current-is-todo)
+      (setq should-skip-entry t))
+    (save-excursion
+      (while (and (not should-skip-entry) (org-goto-sibling t))
+        (when (mpereira/org-current-is-todo)
+          (setq should-skip-entry t))))
+    (when should-skip-entry
+      (or (outline-next-heading)
+          (goto-char (point-max))))))
+
+(defun mpereira/org-entry-get-at-point (property)
+  (org-entry-get (point) property))
+
+(defun mpereira/deadline-or-scheduled ()
+  (interactive)
+  (cond
+   ((mpereira/org-entry-get-at-point "DEADLINE") "DEADLINE")
+   ((mpereira/org-entry-get-at-point "SCHEDULED") "SCHEDULED")))
+
+(defun mpereira/org-entry-get-timestamp-at-point ()
+  (interactive)
+  (let ((timestamp (or (mpereira/org-entry-get-at-point "DEADLINE")
+                       (mpereira/org-entry-get-at-point "SCHEDULED"))))
+    (format-time-string "%e %8B %Y" (org-read-date t t timestamp))))
+
+(defun mpereira/org-agenda-tags-suffix ()
+  (interactive)
+  (format "%s %10s"
+          (mpereira/org-entry-get-timestamp-at-point)
+          (mpereira/deadline-or-scheduled)))
+
+(defun mpereira/custom-agenda ()
+  (interactive)
+  (let* ((settings
+          '((todo "DOING"
+                  ((org-agenda-overriding-header "\nDoing\n")))
+            (agenda "" ((org-deadline-warning-days 0)
+                        (org-agenda-span 'day)
+                        (org-agenda-use-time-grid t)
+                        (org-agenda-format-date "")
+                        (org-agenda-overriding-header
+                         (concat
+                          "\nToday "
+                          "(" (format-time-string "%A, %B %d" (current-time)) ")"))))
+            (agenda "" ((org-agenda-start-day "+1d")
+                        (org-agenda-start-on-weekday nil)
+                        (org-agenda-overriding-header "\nNext 7 Days\n")))
+            (tags-todo (concat "SCHEDULED>\"<+7d>\"&SCHEDULED<=\"<+120d>\""
+                               "|"
+                               "DEADLINE>\"<+7d>\"&DEADLINE<=\"<+120d>\"/!")
+                       ((org-tags-match-list-sublevels t)
+                        (org-agenda-prefix-format
+                         " %-12:c %(mpereira/org-agenda-tags-suffix)  ")
+                        (org-agenda-sorting-strategy '(timestamp-up))
+                        (org-agenda-remove-times-when-in-prefix nil)
+                        (org-agenda-overriding-header
+                         "\nNext Deadlines and Schedules\n")))
+            (todo "TODO"
+                  ((org-agenda-skip-function #'mpereira/org-skip-all-but-first)
+                   (org-agenda-overriding-header "\nNext Project Tasks\n")))))
+         (inbox-file (concat org-directory "inbox.org"))
+         (inbox-buffer (get-file-buffer inbox-file))
+         (inbox (with-current-buffer inbox-buffer
+                  (org-element-contents (org-element-parse-buffer 'headline))))
+         (_ (when inbox
+              (add-to-list
+               'settings
+               '(todo "TODO"
+                      ((org-agenda-overriding-header "\nInbox\n")
+                       (org-agenda-files (list inbox-file)))))))
+         (org-agenda-custom-commands (list
+                                      (list
+                                       "c" "Custom agenda view"
+                                       settings
+                                       '((org-agenda-block-separator ?\-))))))
+    (org-agenda nil "c")))
+
+(setq org-tags-column -80)
 
 ;; Fontify code in code blocks.
 (setq org-src-fontify-natively t)
@@ -545,85 +888,126 @@ exist in any structured movement package is mind-boggling to me."
                                     "DOING(d!)"
                                     "WAITING(w@/!)"
                                     "|"
+                                    "SOMEDAY(s@/!)"
+                                    "CANCELLED(c@/!)"
                                     "DONE(D!)")))
 
-;; general ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq org-capture-templates
+      '(("t" "Inbox" entry
+         (file "inbox.org")
+         "* TODO %i%?")
+        ("T" "Tickler" entry
+         (file "tickler.org")
+         "* %i%? \n  :PROPERTIES:\n  :CREATED: %U\n  :END:\n  %^t")
+        ("j" "Journal" entry
+         (file+olp+datetree "ego.org" "Journal")
+         "* %U %^{Title}\n  %?")))
 
-(use-package general
-  :ensure t
-  :config
-  (general-define-key
-   "<escape>" 'keyboard-quit)
+(add-hook 'org-capture-mode-hook #'evil-insert-state)
 
-  (general-define-key
-   :keymaps '(minibuffer-local-map
-              minibuffer-local-ns-map
-              minibuffer-local-completion-map
-              minibuffer-local-must-match-map
-              minibuffer-local-isearch-map)
-   "<escape>" 'minibuffer-keyboard-quit)
+(setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
 
-  ;; FIXME: isn't M-x bound in insert mode in the first place and why doesn't
-  ;; this binding work?
-  (general-define-key
-   :states '(insert)
-   "M-x" 'execute-extended-command)
+(setq org-refile-use-outline-path 'file)
+(setq org-outline-path-complete-in-steps nil)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
 
-  (general-define-key
-   :states '(insert)
-   "TAB" 'company-complete)
+;; `org-reverse-note-order' set to true along with the two following hooks gets
+;; us two things after refiling:
+;; 1. Line breaks between top-level headings are maintained.
+;; 2. Entries are sorted and top-level heading visibility is set to CHILDREN.
+(setq org-reverse-note-order t)
 
-  (general-define-key
-   :keymaps 'emacs-lisp-mode-map
-   :states '(normal)
-   "K" 'mpereira/describe-thing-at-point
-   "C-S-k" 'mpereira/describe-thing-at-point-in-popup)
+(defun mpereira/org-sort-parent-entries (&rest args)
+  ;; `org-sort-entries' doesn't respect `save-excursion'.
+  (let ((origin (point)))
+    (org-up-heading-safe)
+    (apply #'org-sort-entries args)
+    (goto-char origin)))
 
-  (general-define-key
-   :keymaps 'emacs-lisp-mode-map
-   :states '(normal)
-   :prefix mpereira/leader
-   "ee" 'mpereira/eval-sexp-at-or-surrounding-pt
-   "e(" 'eval-defun
-   "eE" 'eval-buffer
-   "e:" 'eval-expression)
+(add-hook 'org-after-refile-insert-hook
+          (lambda ()
+            (interactive)
+            (mpereira/org-sort-parent-entries nil ?o)))
 
-  (general-define-key
-   :keymaps 'emacs-lisp-mode-map
-   :states '(visual)
-   :prefix mpereira/leader
-   "ee" 'eval-region)
+(defun mpereira/org-cycle-cycle ()
+  (org-cycle)
+  ;; https://www.mail-archive.com/emacs-orgmode@gnu.org/msg86779.html
+  (ignore-errors
+    (org-cycle)))
 
-  (general-define-key
-   "M-F" 'toggle-frame-fullscreen
-   "M-+" 'text-scale-increase
-   "M--" 'text-scale-decrease)
+(add-hook 'org-after-sorting-entries-or-items-hook #'mpereira/org-cycle-cycle)
 
-  (eval-after-load 'evil-ex
-    '(evil-ex-define-cmd "bD" 'mpereira/delete-file-and-buffer))
+(general-define-key
+ :states '(normal visual)
+ :prefix mpereira/leader
+ :infix "o"
+ "a" 'mpereira/custom-agenda
+ "A" 'org-agenda
+ "c" 'org-capture
+ "l" 'org-store-link
+ "D" 'org-check-deadlines)
 
-  (general-define-key
-   :states '(normal visual)
-   :prefix mpereira/leader
-   "," 'evil-buffer
-   "u" 'undo-tree-visualize
-   "b" 'switch-to-buffer
-   "dk" 'describe-key
-   "dm" 'describe-mode
-   "w" 'save-buffer
-   "q" 'evil-quit
-   "hs" 'mpereira/split-window-below-and-switch
-   "vs" 'mpereira/split-window-right-and-switch
-   "hv" 'mpereira/toggle-window-split
-   "vh" 'mpereira/toggle-window-split)
+(general-define-key
+ :keymaps '(org-mode-map)
+ :states '(normal)
+ "(" 'org-up-element
+ ")" 'outline-next-visible-heading
+ "C-S-h" 'org-metaleft
+ "C-S-j" 'org-metadown
+ "C-S-k" 'org-metaup
+ "C-S-l" 'org-metaright
+ "C-j" 'org-forward-heading-same-level
+ "C-k" 'org-backward-heading-same-level)
 
-  ;; Return to original cursor position when cancelling search.
-  (general-define-key
-   :keymaps 'isearch-mode-map
-   "<escape>" 'isearch-cancel)
-  (general-define-key
-   :keymaps 'evil-ex-search-keymap
-   "<escape>" 'minibuffer-keyboard-quit))
+(general-define-key
+ :keymaps '(org-mode-map)
+ :states '(normal visual)
+ :prefix mpereira/leader
+ :infix "o"
+ "!" 'org-time-stamp-inactive
+ "." 'org-time-stamp
+ "|" 'org-columns
+ "\\" 'org-columns
+ "Cc" 'org-clock-cancel
+ "Cd" 'org-clock-display
+ "Ci" 'org-clock-in
+ "Cl" 'org-clock-in-last
+ "Co" 'org-clock-out
+ "d" 'org-deadline
+ "b" 'org-tree-to-indirect-buffer
+ "B" 'outline-show-branches
+ "i" 'org-insert-link
+ "p" 'org-set-property
+ "r" 'org-refile
+ "s" 'org-schedule
+ "S" 'org-sort-entries
+ "t" 'org-set-tags)
+
+(general-define-key
+ :keymaps '(org-columns-map)
+ "s" (lambda ()
+       (interactive)
+       (org-columns-quit)
+       (org-sort-entries nil ?r)
+       (org-columns)))
+
+(general-define-key
+ :keymaps '(org-agenda-mode-map)
+ "d" 'org-agenda-deadline
+ "h" nil
+ "j" 'org-agenda-next-line
+ "k" 'org-agenda-previous-line
+ "l" nil
+ "r" (lambda ()
+       (interactive)
+       (org-agenda-refile nil nil t)
+       ;; FIXME: this hack prevents `org-agenda-undo' to work.
+       (mpereira/custom-agenda))
+ "s" 'org-agenda-schedule
+ "T" 'org-agenda-set-tags
+ "u" 'org-agenda-undo
+ "C-j" 'org-agenda-next-item
+ "C-k" 'org-agenda-previous-item)
 
 ;; google-this ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -649,7 +1033,23 @@ exist in any structured movement package is mind-boggling to me."
 (use-package company
   :ensure t
   :config
-  (add-hook 'after-init-hook 'global-company-mode))
+  (add-hook 'after-init-hook 'global-company-mode)
+
+  (setq company-require-match 'never)
+
+  (general-define-key
+   :keymaps '(company-active-map)
+   "C-j" 'company-select-next
+   "C-k" 'company-select-previous))
+
+;; company-quickhelp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; SOMEDAY: pos-tip doesn't seem to work correctly in macOS. Maybe it will on
+;; Emacs 25?
+;; (use-package company-quickhelp
+;;   :ensure t
+;;   :config
+;;   (company-quickhelp-mode 1))
 
 ;; ansi-term ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -759,6 +1159,8 @@ exist in any structured movement package is mind-boggling to me."
 
 ;; pos-tip ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; SOMEDAY: pos-tip doesn't seem to work correctly in macOS. Maybe it will on
+;; Emacs 25?
 (use-package pos-tip
   :ensure t)
 
@@ -907,13 +1309,20 @@ exist in any structured movement package is mind-boggling to me."
   (projectile-global-mode)
 
   (setq projectile-enable-caching nil)
-  (setq projectile-require-project-root nil)
+  (setq projectile-require-project-root t)
+
+  (defun mpereira/projectile-eshell ()
+    (interactive)
+    (if (projectile-project-p)
+        (let ((eshell-buffer-name (concat "*eshell " (projectile-project-name) "*")))
+          (projectile-with-default-dir (projectile-project-root)
+            (eshell t)))
+      (eshell t)))
 
   (general-define-key
    :states '(normal)
    :prefix mpereira/leader
-   ;; FIXME: make it possible to open multiple eshells per project.
-   "sh" 'projectile-run-eshell
+   "sh" 'mpereira/projectile-eshell
    "sH" 'projectile-run-term
    "sc" 'projectile-run-async-shell-command-in-root))
 
@@ -961,6 +1370,7 @@ exist in any structured movement package is mind-boggling to me."
   :config
   (ivy-mode t)
 
+  (setq ivy-use-selectable-prompt t)
   (setq ivy-height 20)
   (setq ivy-wrap t)
 
@@ -1179,7 +1589,12 @@ exist in any structured movement package is mind-boggling to me."
 ;; browse-at-remote ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package browse-at-remote
-  :ensure t)
+  :ensure t
+  :config
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "go" 'browse-at-remote))
 
 ;; magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1206,52 +1621,7 @@ exist in any structured movement package is mind-boggling to me."
    "g<" 'smerge-keep-mine
    "g>" 'smerge-keep-other)
 
-  ;; FIXME: workaround for mode line vc branch information not updating with
-  ;; branch changes.
-  (defun mpereira/redraw ()
-    (interactive)
-    (vc-refresh-state)
-    (redraw-modeline)
-    (redraw-display))
-
-  (general-define-key
-   :states '(normal)
-   "C-l" 'mpereira/redraw))
-
-;; Doesn't seem to be working?
-;; Update vc mode line information after checking out branches.
-;; https://github.com/magit/magit/wiki/magit-update-uncommitted-buffer-hook
-;;   (defvar magit--modified-files nil)
-
-;;   (defun magit-maybe-cache-modified-files ()
-;;     "Maybe save a list of modified files.
-;; That list is later used by `magit-update-uncommitted-buffers',
-;; provided it is a member of `magit-post-refresh-hook'.  If it is
-;; not, then don't save anything here."
-;;     (when (memq 'magit-update-uncommitted-buffers magit-post-refresh-hook)
-;;       (setq magit--modified-files (magit-modified-files t))))
-
-;;   (add-hook 'magit-pre-refresh-hook #'magit-maybe-cache-modified-files)
-;;   (add-hook 'magit-pre-call-git-hook #'magit-maybe-cache-modified-files)
-;;   (add-hook 'magit-pre-start-git-hook #'magit-maybe-cache-modified-files)
-
-;;   (defun magit-update-uncommitted-buffers ()
-;;     "Update some file-visiting buffers belonging to the current repository.
-;; Run `magit-update-uncommitted-buffer-hook' for each buffer
-;; which visits a file inside the current repository that had
-;; uncommitted changes before running the current Magit command
-;; and/or that does so now."
-;;     (let ((topdir (magit-toplevel)))
-;;       (dolist (file (delete-consecutive-dups
-;;                      (sort (nconc (magit-modified-files t)
-;;                                   magit--modified-files)
-;;                            #'string<)))
-;;         (--when-let (find-buffer-visiting (expand-file-name file topdir))
-;;           (with-current-buffer it
-;;             (run-hooks 'magit-update-uncommitted-buffer-hook))))))
-
-;;   (add-hook 'magit-post-refresh-hook #'magit-update-uncommitted-buffers)
-;;   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
+  (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
 
 ;; magit-gh-pulls ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1284,6 +1654,23 @@ exist in any structured movement package is mind-boggling to me."
   :config
   (evil-mode t)
 
+  ;; Make it possible for other modes to use these bindings (e.g. company mode
+  ;; uses it for navigating completions).
+  (general-define-key
+   :keymaps '(evil-insert-state-map)
+   "C-j" nil
+   "C-k" nil)
+
+  (advice-add 'evil-ex-search-next
+              :after
+              (lambda (&rest x)
+                (evil-scroll-line-to-center (line-number-at-pos))))
+
+  (advice-add 'evil-ex-search-previous
+              :after
+              (lambda (&rest x)
+                (evil-scroll-line-to-center (line-number-at-pos))))
+
   (fset 'evil-visual-update-x-selection 'ignore)
 
   (evil-set-initial-state 'package-menu-mode 'normal)
@@ -1310,82 +1697,118 @@ exist in any structured movement package is mind-boggling to me."
     :ensure t
     :config
     (add-hook 'org-mode-hook 'evil-org-mode)
+
+    ;; Org todo notes don't have a mode, so change to insert state based on its
+    ;; buffer name.
+    ;; FIXME: doesn't seem to be working anymore?
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (if (string= "*Org Note*" (buffer-name))
+                    (evil-change-state 'insert))))
+
+    (defmacro calendar-action (func)
+      `(lambda ()
+         (interactive)
+         (org-eval-in-calendar '(,func 1))))
+
+    (general-define-key
+     :keymaps '(org-read-date-minibuffer-local-map)
+     "q" 'minibuffer-keyboard-quit
+     "l" (calendar-action calendar-forward-day)
+     "h" (calendar-action calendar-backward-day)
+     "j" (calendar-action calendar-forward-week)
+     "k" (calendar-action calendar-backward-week)
+     ">" (calendar-action calendar-forward-month)
+     "<" (calendar-action calendar-backward-month)
+     "}" (calendar-action calendar-forward-year)
+     "{" (calendar-action calendar-backward-year)
+     "0" (calendar-action calendar-beginning-of-week)
+     "$" (calendar-action calendar-end-of-week))
+
+    (evil-set-initial-state 'calendar-mode 'emacs)
+
+    (general-define-key
+     :keymaps '(calendar-mode-map)
+     "l" 'calendar-forward-day
+     "h" 'calendar-backward-day
+     "h" 'calendar-backward-day
+     "j" 'calendar-forward-week
+     "k" 'calendar-backward-week
+     ">" 'calendar-forward-month
+     "<" 'calendar-backward-month
+     "}" 'calendar-forward-year
+     "{" 'calendar-backward-year
+     "0" 'calendar-beginning-of-week
+     "$" 'calendar-end-of-week)
+
     (add-hook 'evil-org-mode-hook
               (lambda ()
-                (evil-org-set-key-theme
-                 '(operators navigation textobjects shift todo heading))
-                ;; FIXME: evil-org-open-below doesn't work and
-                ;; evil-org-open-above seems to do what evil-org-open-below
-                ;; should be doing.
-                (general-define-key
-                 :keymaps 'evil-org-mode-map
-                 :states '(normal)
-                 "o" 'evil-open-below
-                 "O" 'evil-open-above)))
-    ;; FIXME: what's the mode for org todo notes?
-    (evil-set-initial-state 'org-note-mode 'insert))
+                (evil-org-set-key-theme '(operators
+                                          navigation
+                                          textobjects
+                                          todo))))
 
-  (use-package evil-magit
-    :after magit
-    :ensure t
-    :config
-    (general-define-key
-     :keymaps 'magit-mode-map
-     :states '(normal visual)
-     "j" 'evil-next-visual-line
-     "k" 'evil-previous-visual-line
-     "C-j" 'magit-section-forward
-     "C-k" 'magit-section-backward)
+    (use-package evil-magit
+      :after magit
+      :ensure t
+      :config
+      (general-define-key
+       :keymaps 'magit-mode-map
+       :states '(normal visual)
+       "j" 'evil-next-visual-line
+       "k" 'evil-previous-visual-line
+       "C-j" 'magit-section-forward
+       "C-k" 'magit-section-backward)
 
-    (general-define-key
-     :states '(normal)
-     :keymaps '(git-rebase-mode-map)
-     "x" 'git-rebase-kill-line
-     "C-j" 'git-rebase-move-line-down
-     "C-k" 'git-rebase-move-line-up))
+      (general-define-key
+       :states '(normal)
+       :keymaps '(git-rebase-mode-map)
+       "x" 'git-rebase-kill-line
+       "C-j" 'git-rebase-move-line-down
+       "C-k" 'git-rebase-move-line-up))
 
-  (use-package evil-extra-operator
-    :ensure t
-    :init
-    (setq evil-extra-operator-eval-key "ge")
-    :config
-    (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
+    (use-package evil-extra-operator
+      :ensure t
+      :init
+      (setq evil-extra-operator-eval-key "ge")
+      :config
+      (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
 
-  (use-package evil-exchange
-    :ensure t
-    :config
-    (evil-exchange-install))
+    (use-package evil-exchange
+      :ensure t
+      :config
+      (evil-exchange-install))
 
-  (use-package evil-escape
-    :ensure t
-    :diminish evil-escape-mode
-    :config
-    (evil-escape-mode)
-    (setq evil-escape-key-sequence "kj"))
+    (use-package evil-escape
+      :ensure t
+      :diminish evil-escape-mode
+      :config
+      (evil-escape-mode)
+      (setq evil-escape-key-sequence "kj"))
 
-  (use-package evil-nerd-commenter
-    :ensure t
-    :config
-    (general-define-key
-     :keymaps '(normal)
-     "gc" 'evilnc-comment-operator))
+    (use-package evil-nerd-commenter
+      :ensure t
+      :config
+      (general-define-key
+       :keymaps '(normal)
+       "gc" 'evilnc-comment-operator))
 
-  (use-package evil-surround
-    :ensure t
-    :config
-    (global-evil-surround-mode t))
+    (use-package evil-surround
+      :ensure t
+      :config
+      (global-evil-surround-mode t))
 
-  (use-package evil-goggles
-    :ensure t
-    :diminish evil-goggles-mode
-    :config
-    (evil-goggles-mode)
+    (use-package evil-goggles
+      :ensure t
+      :diminish evil-goggles-mode
+      :config
+      (evil-goggles-mode)
 
-    ;; Optionally use diff-mode's faces; as a result, deleted text will be
-    ;; highlighed with `diff-removed` face which is typically some red color (as
-    ;; defined by the color theme) other faces such as `diff-added` will be used
-    ;; for other actions.
-    (evil-goggles-use-diff-faces)))
+      ;; Optionally use diff-mode's faces; as a result, deleted text will be
+      ;; highlighed with `diff-removed` face which is typically some red color (as
+      ;; defined by the color theme) other faces such as `diff-added` will be used
+      ;; for other actions.
+      (evil-goggles-use-diff-faces))))
 
 ;; mingus ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
