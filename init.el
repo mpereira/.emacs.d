@@ -721,16 +721,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :keymaps 'emacs-lisp-mode-map
  :states '(normal)
  :prefix mpereira/leader
- "ee" 'mpereira/eval-sexp-at-or-surrounding-pt
- "e(" 'eval-defun
- "eE" 'eval-buffer
- "e:" 'eval-expression)
+ :infix "e"
+ "e" 'mpereira/eval-sexp-at-or-surrounding-pt
+ "(" 'eval-defun
+ "E" 'eval-buffer
+ ":" 'eval-expression)
 
 (general-define-key
  :keymaps 'emacs-lisp-mode-map
  :states '(visual)
  :prefix mpereira/leader
- "ee" 'eval-region)
+ :infix "e"
+ "e" 'eval-region)
 
 (general-define-key
  "M-F" 'toggle-frame-fullscreen
@@ -963,6 +965,13 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :keymaps '(org-mode-map)
  :states '(normal visual)
  :prefix mpereira/leader
+ :infix "f"
+ "o" 'counsel-org-goto)
+
+(general-define-key
+ :keymaps '(org-mode-map)
+ :states '(normal visual)
+ :prefix mpereira/leader
  :infix "o"
  "!" 'org-time-stamp-inactive
  "." 'org-time-stamp
@@ -1042,15 +1051,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :keymaps '(company-active-map)
    "C-j" 'company-select-next
    "C-k" 'company-select-previous))
-
-;; company-quickhelp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; SOMEDAY: pos-tip doesn't seem to work correctly in macOS. Maybe it will on
-;; Emacs 25?
-;; (use-package company-quickhelp
-;;   :ensure t
-;;   :config
-;;   (company-quickhelp-mode 1))
 
 ;; ansi-term ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1183,9 +1183,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
-   "gip" 'gist-region-or-buffer-private
-   "gii" 'gist-region-or-buffer
-   "gil" 'gist-list)
+   :infix "gi"
+   "p" 'gist-region-or-buffer-private
+   "i" 'gist-region-or-buffer
+   "l" 'gist-list)
 
   (general-define-key
    :keymaps '(gist-list-menu-mode-map)
@@ -1307,7 +1308,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package projectile
   :ensure t
   :config
-  (projectile-global-mode)
+  (projectile-mode t)
 
   (setq projectile-enable-caching nil)
   (setq projectile-require-project-root t)
@@ -1323,9 +1324,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (general-define-key
    :states '(normal)
    :prefix mpereira/leader
-   "sh" 'mpereira/projectile-eshell
-   "sH" 'projectile-run-term
-   "sc" 'projectile-run-async-shell-command-in-root))
+   :infix "s"
+   "h" 'mpereira/projectile-eshell
+   "H" 'projectile-run-term
+   "c" 'projectile-run-async-shell-command-in-root))
 
 ;; perspective ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1345,7 +1347,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (general-define-key
    :states '(normal)
    :prefix mpereira/leader
-   "pp" 'persp-switch-last))
+   :infix "p"
+   "p" 'persp-switch-last))
 
 ;; term-projectile ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1413,14 +1416,15 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
-   "fb" 'ivy-switch-buffer
-   "ff" 'counsel-find-file
-   "fk" 'describe-keymap
-   "fl" 'counsel-find-library
-   "fn" 'counsel-describe-function
-   "fp" 'package-list-packages-no-fetch
-   "fv" 'counsel-describe-variable
-   "fy" 'counsel-yank-pop))
+   :infix "f"
+   "b" 'ivy-switch-buffer
+   "f" 'counsel-find-file
+   "k" 'describe-keymap
+   "l" 'counsel-find-library
+   "n" 'counsel-describe-function
+   "p" 'package-list-packages-no-fetch
+   "v" 'counsel-describe-variable
+   "y" 'counsel-yank-pop))
 
 ;; swiper ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1443,17 +1447,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
-   "ps" 'mpereira/ivy-persp-switch-project
-   "pb" 'counsel-projectile-switch-to-buffer
-   "pf" 'counsel-projectile-find-file
-   "pg" 'counsel-projectile-ag)
-
-  ;; FIXME: was this only needed to be run on runtime when I had those keys
-  ;; mapped to something else?
-  (general-define-key
-   :states '(normal visual)
-   "/" 'evil-search-forward
-   "?" 'evil-search-backward))
+   :infix "p"
+   "s" 'mpereira/ivy-persp-switch-project
+   "b" 'counsel-projectile-switch-to-buffer
+   "f" 'counsel-projectile-find-file
+   "g" 'counsel-projectile-ag))
 
 ;; neotree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1477,13 +1475,15 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
-   "pt" 'neotree-project-dir)
+   :infix "p"
+   "t" 'neotree-project-dir)
 
   (general-define-key
    :keymaps 'neotree-mode-map
    :states '(normal visual)
    :prefix mpereira/leader
-   "pt" 'neotree-hide)
+   :infix "p"
+   "t" 'neotree-hide)
 
   (general-define-key
    :keymaps 'neotree-mode-map
@@ -1661,16 +1661,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :keymaps '(evil-insert-state-map)
    "C-j" nil
    "C-k" nil)
-
-  (advice-add 'evil-ex-search-next
-              :after
-              (lambda (&rest x)
-                (evil-scroll-line-to-center (line-number-at-pos))))
-
-  (advice-add 'evil-ex-search-previous
-              :after
-              (lambda (&rest x)
-                (evil-scroll-line-to-center (line-number-at-pos))))
 
   (fset 'evil-visual-update-x-selection 'ignore)
 
