@@ -857,7 +857,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                   ((org-agenda-skip-function #'mpereira/org-skip-all-but-first)
                    (org-agenda-overriding-header "\nNext Project Tasks\n")))))
          (inbox-file (concat org-directory "inbox.org"))
-         (inbox-buffer (get-file-buffer inbox-file))
+         (inbox-buffer (find-file-noselect inbox-file))
          (inbox (with-current-buffer inbox-buffer
                   (org-element-contents (org-element-parse-buffer 'headline))))
          (_ (when inbox
