@@ -718,14 +718,20 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "C-S-k" 'mpereira/describe-thing-at-point-in-popup)
 
 (general-define-key
- :keymaps 'emacs-lisp-mode-map
+ :keymaps '(global-map)
+ :states '(normal visual)
+ :prefix mpereira/leader
+ :infix "e"
+ ":" 'eval-expression)
+
+(general-define-key
+ :keymaps '(emacs-lisp-mode-map)
  :states '(normal)
  :prefix mpereira/leader
  :infix "e"
  "e" 'mpereira/eval-sexp-at-or-surrounding-pt
  "(" 'eval-defun
- "E" 'eval-buffer
- ":" 'eval-expression)
+ "E" 'eval-buffer)
 
 (general-define-key
  :keymaps 'emacs-lisp-mode-map
@@ -1632,15 +1638,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :config
   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
 
-;; magithub ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Worse than magit-gh-pulls somehow. Check again in the future?
-
-;; (use-package magithub
-;;   :ensure nil
-;;   :after magit
-;;   :config (magithub-feature-autoinject t))
-
 ;; evil ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package evil
@@ -1689,13 +1686,13 @@ length of PATH (sans directory slashes) down to MAX-LEN."
     :config
     (add-hook 'org-mode-hook 'evil-org-mode)
 
-    ;; Org todo notes don't have a mode, so change to insert state based on its
-    ;; buffer name.
-    ;; FIXME: doesn't seem to be working anymore?
+    ;; Org todo notes don't have a specific major mode, so change to insert
+    ;; state based on its buffer name.
+    ;; FIXME: doesn't seem to be working.
     (add-hook 'org-mode-hook
               (lambda ()
-                (if (string= "*Org Note*" (buffer-name))
-                    (evil-change-state 'insert))))
+                (when (string= "*Org Note*" (buffer-name))
+                  (evil-insert-state))))
 
     (defmacro calendar-action (func)
       `(lambda ()
