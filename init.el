@@ -384,6 +384,7 @@ exist in any structured movement package is mind-boggling to me."
 ;; Shh...
 (setq inhibit-startup-echo-area-message t)
 (setq inhibit-startup-screen t)
+(setq initial-scratch-message nil)
 (setq ring-bell-function 'ignore)
 
 ;; macOS modifiers.
@@ -406,6 +407,9 @@ exist in any structured movement package is mind-boggling to me."
 
 ;; Switch to help buffer when it's opened.
 (setq help-window-select t)
+
+;; Don't recenter buffer point when point goes outside window.
+(setq scroll-conservatively 100)
 
 (require 'linum)
 (dolist (hook '(prog-mode-hook text-mode-hook))
@@ -455,6 +459,9 @@ exist in any structured movement package is mind-boggling to me."
 (setq-default indent-tabs-mode nil)
 
 (setq-default tab-width 2)
+
+;; Finder's "Open with Emacs" creates a buffer in the existing Emacs frame.
+(setq ns-pop-up-frames nil)
 
 (setq select-enable-clipboard t
       select-enable-primary t
@@ -724,8 +731,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (general-define-key
  :keymaps 'emacs-lisp-mode-map
  :states '(normal)
- "K" 'mpereira/describe-thing-at-point
- "C-S-k" 'mpereira/describe-thing-at-point-in-popup)
+ "K" 'mpereira/describe-thing-at-point)
 
 (general-define-key
  :keymaps '(global-map)
@@ -845,6 +851,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
           (mpereira/org-entry-get-timestamp-at-point)
           (mpereira/deadline-or-scheduled)))
 
+(defun mpereira/org-agenda-project-name-prefix-format ()
+  (s-truncate 20 (car (org-get-outline-path t))))
+
 (defun mpereira/custom-agenda ()
   (interactive)
   (let* ((settings
@@ -873,6 +882,14 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                          "\nNext Deadlines and Schedules\n")))
             (todo "TODO"
                   ((org-agenda-skip-function #'mpereira/org-skip-all-but-first)
+                   (org-agenda-sorting-strategy '(deadline-up
+                                                  scheduled-up
+                                                  time-up
+                                                  timestamp-up
+                                                  todo-state-up
+                                                  alpha-up))
+                   (org-agenda-prefix-format
+                    " %-12:c %-22(mpereira/org-agenda-project-name-prefix-format)")
                    (org-agenda-overriding-header "\nNext Tasks\n")))))
          (inbox-file (concat org-directory "inbox.org"))
          (inbox-buffer (find-file-noselect inbox-file))
@@ -933,6 +950,9 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 
 ;; Fontify code in code blocks.
 (setq org-src-fontify-natively t)
+
+;; Make TAB act as if it were issued in a buffer of the language’s major mode.
+(setq org-src-tab-acts-natively t)
 
 (org-babel-do-load-languages 'org-babel-load-languages
                              '((sh . t)
@@ -1055,6 +1075,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
  "d" 'org-deadline
  "b" 'org-tree-to-indirect-buffer
  "B" 'outline-show-branches
+ "f" 'org-attach
  "i" 'org-insert-link
  "n" 'org-add-note
  "p" 'org-set-property
@@ -1829,8 +1850,8 @@ block (excluding the line with `org-agenda-block-separator' characters)."
        :states '(normal)
        :keymaps '(git-rebase-mode-map)
        "x" 'git-rebase-kill-line
-       "C-j" 'git-rebase-move-line-down
-       "C-k" 'git-rebase-move-line-up))
+       "C-S-j" 'git-rebase-move-line-down
+       "C-S-k" 'git-rebase-move-line-up))
 
     (use-package evil-extra-operator
       :ensure t
