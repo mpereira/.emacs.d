@@ -23,6 +23,13 @@
 ;; ** org mode file links to search patterns can't start with open parens:
 ;;    https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 ;; ** EXPRESSION can be used only once per `org-agenda-prefix-format'.
+;; ** Emulate C-u (universal-argument)
+;; *** For raw prefix arg (interactive "P")
+;;     (let ((current-prefix-arg '(4)))
+;;       (call-interactively 'some-func))
+;; *** Otherwise
+;;     (let ((current-prefix-arg 4))
+;;       (call-interactively 'some-func))
 
 ;; Uncomment this to terminate init.el loading early.
 ;; (with-current-buffer " *load*"
@@ -661,7 +668,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
               (propertize (make-string (- (frame-text-cols)
                                           (string-width time-string))
                                        ?\s)
-                          'face '(:background "gray13")) ;; ample/bg
+                          'face '(:background "gray13"))
               time-string)))))
   (minibuffer-line-mode t))
 
@@ -863,7 +870,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                          "\nNext Deadlines and Schedules\n")))
             (todo "TODO"
                   ((org-agenda-skip-function #'mpereira/org-skip-all-but-first)
-                   (org-agenda-overriding-header "\nNext Project Tasks\n")))))
+                   (org-agenda-overriding-header "\nNext Tasks\n")))))
          (inbox-file (concat org-directory "inbox.org"))
          (inbox-buffer (find-file-noselect inbox-file))
          (inbox (with-current-buffer inbox-buffer
@@ -871,15 +878,53 @@ length of PATH (sans directory slashes) down to MAX-LEN."
          (_ (when inbox
               (add-to-list
                'settings
-               '(todo "TODO"
+               `(todo "TODO"
                       ((org-agenda-overriding-header "\nInbox\n")
-                       (org-agenda-files (list inbox-file)))))))
+                       (org-agenda-files (list ,inbox-file)))))))
          (org-agenda-custom-commands (list
                                       (list
                                        "c" "Custom agenda view"
                                        settings
                                        '((org-agenda-block-separator ?\-))))))
     (org-agenda nil "c")))
+
+;; Redo agenda after capturing.
+(add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
+
+;; https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html
+(defun mpereira/org-agenda-delete-empty-blocks ()
+  "Remove empty agenda blocks.
+A block is identified as empty if there are fewer than 2 non-empty lines in the
+block (excluding the line with `org-agenda-block-separator' characters)."
+  (when org-agenda-compact-blocks
+    (user-error "Cannot delete empty compact blocks"))
+  (setq buffer-read-only nil)
+  (save-excursion
+    (goto-char (point-min))
+    (let* ((blank-line-re "^\\s-*$")
+           (content-line-count (if (looking-at-p blank-line-re) 0 1))
+           (start-pos (point))
+           (block-re (format "%c\\{10,\\}" org-agenda-block-separator)))
+      (while (and (not (eobp)) (forward-line))
+        (cond
+         ((looking-at-p block-re)
+          (when (< content-line-count 2)
+            (delete-region start-pos (1+ (point-at-bol))))
+          (setq start-pos (point))
+          (forward-line)
+          (setq content-line-count (if (looking-at-p blank-line-re) 0 1)))
+         ((not (looking-at-p blank-line-re))
+          (setq content-line-count (1+ content-line-count)))))
+      (when (< content-line-count 2)
+        (delete-region start-pos (point-max)))
+      (goto-char (point-min))
+      ;; The above strategy can leave a separator line at the beginning of the
+      ;; buffer.
+      (when (looking-at-p block-re)
+        (delete-region (point) (1+ (point-at-eol))))))
+  (setq buffer-read-only t))
+
+(add-hook 'org-agenda-finalize-hook #'mpereira/org-agenda-delete-empty-blocks)
 
 (setq org-tags-column -80)
 
@@ -945,6 +990,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (add-hook 'org-after-sorting-entries-or-items-hook #'mpereira/org-cycle-cycle)
 
+;; Save org buffers after some operations.
+(dolist (hook '(org-refile
+                org-agenda-add-note
+                org-agenda-deadline
+                org-agenda-kill
+                org-agenda-refile
+                org-agenda-schedule
+                org-agenda-set-property
+                org-agenda-set-tags))
+  ;; https://github.com/bbatsov/helm-projectile/issues/51
+  (advice-add hook :after (lambda (&rest _) (org-save-all-org-buffers))))
+
 (general-define-key
  :states '(normal visual)
  :prefix mpereira/leader
@@ -974,6 +1031,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :infix "f"
  "o" 'counsel-org-goto)
 
+(defun mpereira/call-interactively-with-prefix-arg (prefix-arg func)
+  (let ((current-prefix-arg prefix-arg))
+    (call-interactively func)))
+
 (general-define-key
  :keymaps '(org-mode-map)
  :states '(normal visual)
@@ -992,11 +1053,19 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "b" 'org-tree-to-indirect-buffer
  "B" 'outline-show-branches
  "i" 'org-insert-link
+ "n" 'org-add-note
  "p" 'org-set-property
  "r" 'org-refile
+ "Rd" (lambda ()
+        (interactive)
+        (mpereira/call-interactively-with-prefix-arg '(4) 'org-deadline))
+ "Rs" (lambda ()
+        (interactive)
+        (mpereira/call-interactively-with-prefix-arg '(4) 'org-schedule))
  "s" 'org-schedule
  "S" 'org-sort-entries
- "t" 'org-set-tags)
+ "t" 'org-set-tags
+ "x" 'org-cut-subtree)
 
 (general-define-key
  :keymaps '(org-columns-map)
@@ -1008,20 +1077,25 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (general-define-key
  :keymaps '(org-agenda-mode-map)
+ "/" 'org-agenda-filter-by-regexp
  "c" 'org-agenda-capture
  "d" 'org-agenda-deadline
- "h" nil
- "j" 'org-agenda-next-line
- "k" 'org-agenda-previous-line
- "l" nil
- "r" (lambda ()
+ "g" (lambda ()
        (interactive)
-       (org-agenda-refile nil nil t)
-       ;; FIXME: this hack prevents `org-agenda-undo' to work.
-       (mpereira/custom-agenda))
+       (org-agenda-filter-remove-all)
+       (org-save-all-org-buffers)
+       (org-agenda-redo-all))
+ "h" nil
+ "j" 'org-agenda-next-item
+ "k" 'org-agenda-previous-item
+ "l" nil
+ "n" 'org-agenda-add-note
+ "r" 'org-agenda-refile
  "s" 'org-agenda-schedule
  "T" 'org-agenda-set-tags
  "u" 'org-agenda-undo
+ "w" nil
+ "x" 'org-agenda-kill
  "C-j" 'org-agenda-next-item
  "C-k" 'org-agenda-previous-item)
 
