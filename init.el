@@ -481,6 +481,10 @@ exist in any structured movement package is mind-boggling to me."
 
 (setq mpereira/leader ",")
 
+;; secrets ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(load-file "secrets.el")
+
 ;; general ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package general
@@ -1127,6 +1131,20 @@ block (excluding the line with `org-agenda-block-separator' characters)."
  "x" 'org-agenda-kill
  "C-j" 'org-agenda-next-item
  "C-k" 'org-agenda-previous-item)
+
+;; org-gcal ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package org-gcal
+  :ensure t
+  :config
+  (setq mpereira/org-gcal-directory (concat org-directory "gcal/"))
+  (setq org-gcal-client-id mpereira/secret-org-gcal-client-id
+        org-gcal-client-secret mpereira/secret-org-gcal-client-secret
+        org-gcal-file-alist `(("murilo@murilopereira.com"
+                               .
+                               ,(concat mpereira/org-gcal-directory
+                                        "calendar.org"))))
+  (add-to-list 'org-agenda-files mpereira/org-gcal-directory t))
 
 ;; google-this ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

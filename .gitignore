@@ -1,6 +1,7 @@
 /*TAGS*
 /.cache
 /.dir-locals.el
+/.org-id-locations
 /ac-comphist.dat
 /auto-save-list
 /backups
@@ -14,6 +15,7 @@
 /projectile*
 /recentf
 /savehist
+/secrets.el
 /semanticdb
 /sessions
 /tramp
