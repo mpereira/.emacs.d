@@ -1857,69 +1857,69 @@ block (excluding the line with `org-agenda-block-separator' characters)."
                 (evil-org-set-key-theme '(operators
                                           navigation
                                           textobjects
-                                          todo))))
+                                          todo)))))
 
-    (use-package evil-magit
-      :after magit
-      :ensure t
-      :config
-      (general-define-key
-       :keymaps 'magit-mode-map
-       :states '(normal visual)
-       "j" 'evil-next-visual-line
-       "k" 'evil-previous-visual-line
-       "C-j" 'magit-section-forward
-       "C-k" 'magit-section-backward)
+  (use-package evil-magit
+    :after magit
+    :ensure t
+    :config
+    (general-define-key
+     :keymaps 'magit-mode-map
+     :states '(normal visual)
+     "j" 'evil-next-visual-line
+     "k" 'evil-previous-visual-line
+     "C-j" 'magit-section-forward
+     "C-k" 'magit-section-backward)
 
-      (general-define-key
-       :states '(normal)
-       :keymaps '(git-rebase-mode-map)
-       "x" 'git-rebase-kill-line
-       "C-S-j" 'git-rebase-move-line-down
-       "C-S-k" 'git-rebase-move-line-up))
+    (general-define-key
+     :states '(normal)
+     :keymaps '(git-rebase-mode-map)
+     "x" 'git-rebase-kill-line
+     "C-S-j" 'git-rebase-move-line-down
+     "C-S-k" 'git-rebase-move-line-up))
 
-    (use-package evil-extra-operator
-      :ensure t
-      :init
-      (setq evil-extra-operator-eval-key "ge")
-      :config
-      (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
+  (use-package evil-extra-operator
+    :ensure t
+    :init
+    (setq evil-extra-operator-eval-key "ge")
+    :config
+    (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
 
-    (use-package evil-exchange
-      :ensure t
-      :config
-      (evil-exchange-install))
+  (use-package evil-exchange
+    :ensure t
+    :config
+    (evil-exchange-install))
 
-    (use-package evil-escape
-      :ensure t
-      :diminish evil-escape-mode
-      :config
-      (evil-escape-mode)
-      (setq evil-escape-key-sequence "kj"))
+  (use-package evil-escape
+    :ensure t
+    :diminish evil-escape-mode
+    :config
+    (evil-escape-mode)
+    (setq evil-escape-key-sequence "kj"))
 
-    (use-package evil-nerd-commenter
-      :ensure t
-      :config
-      (general-define-key
-       :keymaps '(normal)
-       "gc" 'evilnc-comment-operator))
+  (use-package evil-nerd-commenter
+    :ensure t
+    :config
+    (general-define-key
+     :keymaps '(normal)
+     "gc" 'evilnc-comment-operator))
 
-    (use-package evil-surround
-      :ensure t
-      :config
-      (global-evil-surround-mode t))
+  (use-package evil-surround
+    :ensure t
+    :config
+    (global-evil-surround-mode t))
 
-    (use-package evil-goggles
-      :ensure t
-      :diminish evil-goggles-mode
-      :config
-      (evil-goggles-mode)
+  (use-package evil-goggles
+    :ensure t
+    :diminish evil-goggles-mode
+    :config
+    (evil-goggles-mode)
 
-      ;; Optionally use diff-mode's faces; as a result, deleted text will be
-      ;; highlighed with `diff-removed` face which is typically some red color (as
-      ;; defined by the color theme) other faces such as `diff-added` will be used
-      ;; for other actions.
-      (evil-goggles-use-diff-faces))))
+    ;; Optionally use diff-mode's faces; as a result, deleted text will be
+    ;; highlighed with `diff-removed` face which is typically some red color
+    ;; (as defined by the color theme) other faces such as `diff-added` will
+    ;; be used for other actions.
+    (evil-goggles-use-diff-faces)))
 
 ;; mingus ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
