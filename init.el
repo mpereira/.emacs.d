@@ -516,7 +516,10 @@ exist in any structured movement package is mind-boggling to me."
 (defun mpereira/eshell-clear ()
   (interactive)
   (eshell/clear)
-  (eshell-send-input))
+  (eshell-send-input)
+  ;; FIXME: this is a hack to scroll cursor to top.
+  (set-window-start (selected-window) (point))
+  (scroll-down 1))
 
 (defun mpereira/counsel-esh-history ()
   "Browse Eshell history."
