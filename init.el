@@ -666,6 +666,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package dash
   :ensure t)
 
+;; suggest ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package suggest
+  :ensure t)
+
 ;; minibuffer-line ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package minibuffer-line
