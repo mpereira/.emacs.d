@@ -1749,6 +1749,8 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    "g<" 'smerge-keep-mine
    "g>" 'smerge-keep-other)
 
+  ;; This makes magit slow when there are a lot of buffers. See:
+  ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
 
 ;; magit-gh-pulls ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
