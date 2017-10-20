@@ -895,29 +895,46 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (defun mpereira/deadline-or-scheduled ()
   (interactive)
   (cond
-   ((mpereira/org-entry-at-point-get "DEADLINE") "DEADLINE")
-   ((mpereira/org-entry-at-point-get "SCHEDULED") "SCHEDULED")))
-
-(defun mpereira/org-entry-get-timestamp-at-point ()
-  (interactive)
-  (let ((timestamp (or (mpereira/org-entry-at-point-get "DEADLINE")
-                       (mpereira/org-entry-at-point-get "SCHEDULED"))))
-    (format-time-string "%e %8B %Y" (org-read-date t t timestamp))))
+   ((mpereira/org-entry-at-point-get "DEADLINE") "Deadline")
+   ((mpereira/org-entry-at-point-get "SCHEDULED") "Scheduled")))
 
 (defun mpereira/org-agenda-tags-suffix ()
   (interactive)
-  (format "%s %10s"
-          (mpereira/org-entry-get-timestamp-at-point)
-          (mpereira/deadline-or-scheduled)))
+  (let* ((timestamp (or (mpereira/org-entry-at-point-get "DEADLINE")
+                        (mpereira/org-entry-at-point-get "SCHEDULED")))
+         (current (calendar-date-string (calendar-current-date)))
+         (days (time-to-number-of-days (time-subtract
+                                        (org-read-date nil t timestamp)
+                                        (org-read-date nil t current))))
+         (string (format-time-string "%d %b %Y" (org-read-date t t timestamp))))
+    (format "In %dd (%s) %10s:"
+            days
+            string
+            (mpereira/deadline-or-scheduled))))
 
 (defun mpereira/org-agenda-project-name-prefix-format ()
   (s-truncate 20 (car (org-get-outline-path t))))
+
+(defun mpereira/org-agenda-format-date (date)
+  "Format a DATE string for display in the daily/weekly agenda.
+This function makes sure that dates are aligned for easy reading."
+  (let* ((dayname (calendar-day-name date))
+         (day (cadr date))
+         (day-of-week (calendar-day-of-week date))
+         (month (car date))
+         (monthname (calendar-month-name month))
+         (year (nth 2 date)))
+    (format "\n%-9s %2d %s"
+            dayname day monthname year)))
+
+(setq org-agenda-format-date 'mpereira/org-agenda-format-date)
 
 (defun mpereira/custom-agenda ()
   (interactive)
   (let* ((settings
           '((todo "DOING"
                   ((org-agenda-overriding-header "\nDoing\n")
+                   (org-agenda-prefix-format " %i %-18c%?-12t% s")
                    (org-agenda-skip-function
                     '(org-agenda-skip-entry-if 'scheduled))))
             (agenda ""
@@ -925,6 +942,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                      (org-agenda-span 'day)
                      (org-agenda-use-time-grid t)
                      (org-agenda-format-date "")
+                     (org-agenda-prefix-format " %i %-18c%?-12t% s")
                      (org-habit-show-habits nil)
                      (org-agenda-overriding-header
                       (concat
@@ -932,8 +950,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                        "(" (format-time-string "%A, %B %d" (current-time)) ")"))))
             (agenda ""
                     ((org-agenda-start-day "+1d")
+                     (org-agenda-span 'week)
                      (org-agenda-start-on-weekday nil)
-                     (org-agenda-overriding-header "\nNext 7 Days\n")))
+                     (org-agenda-prefix-format " %i %-18c%?-12t% s")
+                     (org-agenda-overriding-header "\nNext 7 Days")))
             (tags-todo (concat "SCHEDULED>\"<+7d>\"&SCHEDULED<=\"<+120d>\""
                                "|"
                                "DEADLINE>\"<+7d>\"&DEADLINE<=\"<+120d>\"/!")
@@ -941,16 +961,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                          '(org-agenda-skip-entry-if 'todo 'done))
                         (org-tags-match-list-sublevels t)
                         (org-agenda-prefix-format
-                         " %-12:c %(mpereira/org-agenda-tags-suffix)  ")
+                         " %-18c %(mpereira/org-agenda-tags-suffix)  ")
                         (org-agenda-sorting-strategy '(timestamp-up))
                         (org-agenda-remove-times-when-in-prefix nil)
                         (org-agenda-overriding-header
-                         "\nNext Deadlines and Schedules\n")))
+                         "\nNext Task Deadlines and Schedules\n")))
             (agenda ""
                     ((org-agenda-skip-function
                       'mpereira/org-skip-subtree-unless-habit)
                      (org-agenda-span 'day)
                      (org-agenda-format-date "")
+                     (org-agenda-prefix-format
+                      " %i %-18c%?-12t% s")
                      (org-habit-show-all-today t)
                      (org-agenda-overriding-header "\nHabits")))
             (todo "TODO"
@@ -967,7 +989,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                                                   todo-state-up
                                                   alpha-up))
                    (org-agenda-prefix-format
-                    " %-12:c %-22(mpereira/org-agenda-project-name-prefix-format)")
+                    " %-18c %-22(mpereira/org-agenda-project-name-prefix-format)")
                    (org-agenda-overriding-header "\nNext Tasks\n")))))
          (inbox-file (concat org-directory "inbox.org"))
          (inbox-buffer (find-file-noselect inbox-file))
