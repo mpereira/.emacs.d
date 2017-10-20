@@ -483,7 +483,7 @@ exist in any structured movement package is mind-boggling to me."
 
 ;; secrets ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(load-file "secrets.el")
+(load-file "~/.emacs.d/secrets.el")
 
 ;; general ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -517,6 +517,9 @@ exist in any structured movement package is mind-boggling to me."
       '("less" "tmux" "htop" "top" "bash" "zsh" "fish" "glances"))
 (setq eshell-visual-subcommands
       '(("git" "log" "l" "diff" "show")))
+
+;; Eshell needs this variable set in addition to the PATH environment variable.
+(setq-default eshell-path-env (getenv "PATH"))
 
 (defun eshell/clear ()
   (interactive)
@@ -562,7 +565,12 @@ exist in any structured movement package is mind-boggling to me."
   (general-define-key
    :states '(insert)
    :keymaps '(eshell-mode-map)
+   ;; TAB here doesn't work for some reason.
+   "<tab>" 'completion-at-point
    "C-k" 'eshell-previous-input
+   ;; TODO: when on an empty prompt and going up and back down (or down and back
+   ;; up), make it so that the prompt is empty again instead of cycling back to
+   ;; the first input.
    "C-j" 'eshell-next-input
    "C-/" 'mpereira/counsel-esh-history
    ;; https://github.com/ksonney/spacemacs/commit/297945a45696e235c6983a78acdf05b5f0e015ca
@@ -740,6 +748,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (general-define-key
  :keymaps 'emacs-lisp-mode-map
  :states '(normal)
+ "C-]" 'xref-find-definitions-other-window
  "K" 'mpereira/describe-thing-at-point)
 
 (general-define-key
@@ -816,42 +825,83 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (setq org-clock-in-switch-to-state "DOING")
 
 (setq org-agenda-files (list org-directory))
+
 ;; Full screen org-agenda.
 (setq org-agenda-window-setup 'only-window)
 ;; Don't destroy window splits.
 (setq org-agenda-restore-windows-after-quit t)
+;; Show only the current instance of a repeating timestamp.
+(setq org-agenda-repeating-timestamp-show-all nil)
+;; Don't look for free-form time string in headline.
+(setq org-agenda-search-headline-for-time nil)
 
 (setq org-agenda-tags-column -110)
 
-(defun mpereira/org-current-is-todo ()
-  (string= "TODO" (org-get-todo-state)))
+(setq org-attach-auto-tag "attachment")
+
+(defun mpereira/org-current-subtree-state-p (state)
+  (string= state (org-get-todo-state)))
+
+(defun mpereira/org-up-heading-top-level ()
+  "Move to the top level heading."
+  (while (not (= 1 (org-outline-level)))
+    (org-up-heading-safe)))
 
 (defun mpereira/org-skip-all-but-first ()
   "Skip all but the first non-done entry."
   (let (should-skip-entry)
-    (unless (mpereira/org-current-is-todo)
-      (setq should-skip-entry t))
-    (save-excursion
-      (while (and (not should-skip-entry) (org-goto-sibling t))
-        (when (mpereira/org-current-is-todo)
-          (setq should-skip-entry t))))
-    (when should-skip-entry
-      (or (outline-next-heading)
-          (goto-char (point-max))))))
+    (unless (mpereira/org-current-state-p "TODO"))
+    (setq should-skip-entry t))
+  (save-excursion
+    (while (and (not should-skip-entry) (org-goto-sibling t))
+      (when (mpereira/org-current-state-p "TODO"))
+      (setq should-skip-entry t)))
+  (when should-skip-entry
+    (or (outline-next-heading)
+        (goto-char (point-max)))))
 
-(defun mpereira/org-entry-get-at-point (property)
+(defun mpereira/org-skip-subtree-if-habit ()
+  "Skip an agenda entry if it has a STYLE property equal to \"habit\"."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (string= (org-entry-get nil "STYLE") "habit")
+        subtree-end
+      nil)))
+
+(defun mpereira/org-skip-subtree-unless-habit ()
+  "Skip an agenda entry unless it has a STYLE property equal to \"habit\"."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (string= (org-entry-get nil "STYLE") "habit")
+        nil
+      subtree-end)))
+
+(defun mpereira/org-skip-inbox ()
+  "Skip agenda entries coming from the inbox."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (string= (org-get-category) "inbox")
+        subtree-end
+      nil)))
+
+(defun mpereira/org-skip-someday-projects-subheadings ()
+  "Skip agenda entries under a project with state \"SOMEDAY\"."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (mpereira/org-up-heading-top-level)
+    (if (mpereira/org-current-subtree-state-p "SOMEDAY")
+        subtree-end
+      nil)))
+
+(defun mpereira/org-entry-at-point-get (property)
   (org-entry-get (point) property))
 
 (defun mpereira/deadline-or-scheduled ()
   (interactive)
   (cond
-   ((mpereira/org-entry-get-at-point "DEADLINE") "DEADLINE")
-   ((mpereira/org-entry-get-at-point "SCHEDULED") "SCHEDULED")))
+   ((mpereira/org-entry-at-point-get "DEADLINE") "DEADLINE")
+   ((mpereira/org-entry-at-point-get "SCHEDULED") "SCHEDULED")))
 
 (defun mpereira/org-entry-get-timestamp-at-point ()
   (interactive)
-  (let ((timestamp (or (mpereira/org-entry-get-at-point "DEADLINE")
-                       (mpereira/org-entry-get-at-point "SCHEDULED"))))
+  (let ((timestamp (or (mpereira/org-entry-at-point-get "DEADLINE")
+                       (mpereira/org-entry-at-point-get "SCHEDULED"))))
     (format-time-string "%e %8B %Y" (org-read-date t t timestamp))))
 
 (defun mpereira/org-agenda-tags-suffix ()
@@ -867,30 +917,49 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (interactive)
   (let* ((settings
           '((todo "DOING"
-                  ((org-agenda-overriding-header "\nDoing\n")))
-            (agenda "" ((org-deadline-warning-days 0)
-                        (org-agenda-span 'day)
-                        (org-agenda-use-time-grid t)
-                        (org-agenda-format-date "")
-                        (org-agenda-overriding-header
-                         (concat
-                          "\nToday "
-                          "(" (format-time-string "%A, %B %d" (current-time)) ")"))))
-            (agenda "" ((org-agenda-start-day "+1d")
-                        (org-agenda-start-on-weekday nil)
-                        (org-agenda-overriding-header "\nNext 7 Days\n")))
+                  ((org-agenda-overriding-header "\nDoing\n")
+                   (org-agenda-skip-function
+                    '(org-agenda-skip-entry-if 'scheduled))))
+            (agenda ""
+                    ((org-deadline-warning-days 0)
+                     (org-agenda-span 'day)
+                     (org-agenda-use-time-grid t)
+                     (org-agenda-format-date "")
+                     (org-habit-show-habits nil)
+                     (org-agenda-overriding-header
+                      (concat
+                       "\nToday "
+                       "(" (format-time-string "%A, %B %d" (current-time)) ")"))))
+            (agenda ""
+                    ((org-agenda-start-day "+1d")
+                     (org-agenda-start-on-weekday nil)
+                     (org-agenda-overriding-header "\nNext 7 Days\n")))
             (tags-todo (concat "SCHEDULED>\"<+7d>\"&SCHEDULED<=\"<+120d>\""
                                "|"
                                "DEADLINE>\"<+7d>\"&DEADLINE<=\"<+120d>\"/!")
-                       ((org-tags-match-list-sublevels t)
+                       ((org-agenda-skip-function
+                         '(org-agenda-skip-entry-if 'todo 'done))
+                        (org-tags-match-list-sublevels t)
                         (org-agenda-prefix-format
                          " %-12:c %(mpereira/org-agenda-tags-suffix)  ")
                         (org-agenda-sorting-strategy '(timestamp-up))
                         (org-agenda-remove-times-when-in-prefix nil)
                         (org-agenda-overriding-header
                          "\nNext Deadlines and Schedules\n")))
+            (agenda ""
+                    ((org-agenda-skip-function
+                      'mpereira/org-skip-subtree-unless-habit)
+                     (org-agenda-span 'day)
+                     (org-agenda-format-date "")
+                     (org-habit-show-all-today t)
+                     (org-agenda-overriding-header "\nHabits")))
             (todo "TODO"
-                  ((org-agenda-skip-function #'mpereira/org-skip-all-but-first)
+                  ((org-agenda-skip-function
+                    '(or (org-agenda-skip-entry-if 'scheduled 'deadline)
+                         (mpereira/org-skip-inbox)
+                         (mpereira/org-skip-subtree-if-habit)
+                         (mpereira/org-skip-all-but-first)
+                         (mpereira/org-skip-someday-projects-subheadings)))
                    (org-agenda-sorting-strategy '(deadline-up
                                                   scheduled-up
                                                   time-up
@@ -981,9 +1050,12 @@ block (excluding the line with `org-agenda-block-separator' characters)."
       '(("t" "Inbox" entry
          (file "inbox.org")
          "* TODO %i%?")
-        ("T" "Tickler" entry
-         (file "tickler.org")
-         "* %i%? \n  :PROPERTIES:\n  :CREATED: %U\n  :END:\n  %^t")
+        ("c" "Calendar" entry
+         (file "gcal/calendar.org")
+         "* %i%?\n  %^{When?}t")
+        ("a" "Appointment" entry
+         (file "appointments.org")
+         "* %i%?\n  %^{When?}t")
         ("j" "Journal" entry
          (file+olp+datetree "ego.org" "Journal")
          "* %U %^{Title}\n  %?")))
@@ -1108,16 +1180,40 @@ block (excluding the line with `org-agenda-block-separator' characters)."
        (org-sort-entries nil ?r)
        (org-columns)))
 
+(defun mpereira/org-gcal-entry-at-point-p ()
+  (when-let ((link (org-entry-get (point) "LINK")))
+    (string-match "Go to gcal web page" link)))
+
+;; Empirically, 2 seconds seems to be good enough.
+(setq mpereira/org-gcal-request-timeout 2)
+
 (general-define-key
  :keymaps '(org-agenda-mode-map)
  "/" 'org-agenda-filter-by-regexp
- "c" 'org-agenda-capture
+ "c" (lambda ()
+       (interactive)
+       ;; When capturing to a calendar org-gcal sends a network request that
+       ;; reorders the calendar headings on completion, causing them to have a
+       ;; different order than the agenda entries. Here we install a buffer
+       ;; local hook that will sync the agenda entries with the calendar
+       ;; headings.
+       (add-hook 'org-capture-after-finalize-hook
+                 (lambda ()
+                   (interactive)
+                   (run-at-time mpereira/org-gcal-request-timeout
+                                nil
+                                #'org-agenda-maybe-redo))
+                 nil
+                 t)
+       (org-agenda-capture))
  "d" 'org-agenda-deadline
+ "f" 'org-attach
+ "F" 'org-gcal-sync
  "g" (lambda ()
        (interactive)
        (org-agenda-filter-remove-all)
        (org-save-all-org-buffers)
-       (org-agenda-redo-all))
+       (org-agenda-maybe-redo))
  "h" nil
  "j" 'org-agenda-next-item
  "k" 'org-agenda-previous-item
@@ -1128,7 +1224,21 @@ block (excluding the line with `org-agenda-block-separator' characters)."
  "T" 'org-agenda-set-tags
  "u" 'org-agenda-undo
  "w" nil
- "x" 'org-agenda-kill
+ "x" (lambda ()
+       (interactive)
+       (save-window-excursion
+         (let ((agenda-buffer (current-buffer)))
+           (org-agenda-goto)
+           (if (mpereira/org-gcal-entry-at-point-p)
+               (progn
+                 (org-gcal-delete-at-point)
+                 ;; org-gcal only removes the calendar headings after the
+                 ;; network request finishes.
+                 (run-at-time mpereira/org-gcal-request-timeout
+                              nil #'org-agenda-maybe-redo))
+             (progn
+               (quit-window)
+               (org-agenda-kill))))))
  "C-j" 'org-agenda-next-item
  "C-k" 'org-agenda-previous-item)
 
@@ -1144,7 +1254,13 @@ block (excluding the line with `org-agenda-block-separator' characters)."
                                .
                                ,(concat mpereira/org-gcal-directory
                                         "calendar.org"))))
-  (add-to-list 'org-agenda-files mpereira/org-gcal-directory t))
+  (add-to-list 'org-agenda-files mpereira/org-gcal-directory t)
+  
+  ;; https://github.com/myuhe/org-gcal.el/issues/50#issuecomment-231525887
+  (defun mpereira/org-gcal--notify (title mes)
+    (message "org-gcal::%s - %s" title mes))
+
+  (fset 'org-gcal--notify 'mpereira/org-gcal--notify))
 
 ;; google-this ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1510,6 +1626,11 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   ;; (add-hook 'ivy-occur-grep-mode-hook 'ivy-wgrep-change-to-wgrep-mode)
 
   (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "." 'ivy-resume)
+
+  (general-define-key
    :keymaps 'ivy-minibuffer-map
    "C-j" 'ivy-next-line
    "C-k" 'ivy-previous-line
@@ -1518,6 +1639,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    "C-o" 'ivy-occur
    "C-h" 'ivy-beginning-of-buffer
    "C-l" 'ivy-end-of-buffer
+   "C-/" 'ivy-avy
    "<escape>" 'minibuffer-keyboard-quit))
 
 ;; command-log-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1544,10 +1666,12 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    :states '(normal visual)
    :prefix mpereira/leader
    :infix "f"
+   ":" 'counsel-expression-history
    "b" 'ivy-switch-buffer
    "f" 'counsel-find-file
-   "k" 'describe-keymap
+   "k" 'counsel-descbinds
    "l" 'counsel-find-library
+   "m" 'describe-keymap
    "n" 'counsel-describe-function
    "p" 'package-list-packages-no-fetch
    "v" 'counsel-describe-variable
@@ -1736,18 +1860,19 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   (general-define-key
    :states '(normal)
    :prefix mpereira/leader
-   "gb" 'magit-blame
-   "gc" 'magit-commit-popup
-   "gd" 'magit-diff-buffer-file
-   "gD" 'magit-diff-unstaged
-   "gl" 'magit-log-buffer-file
-   "gL" 'magit-log-all
-   "gp" 'magit-push-popup
-   "gs" 'magit-status
-   "gw" 'magit-stage-file
-   "gW" 'magit-stage-modified
-   "g<" 'smerge-keep-mine
-   "g>" 'smerge-keep-other)
+   :infix "g"
+   "b" 'magit-blame
+   "c" 'magit-commit-popup
+   "d" 'magit-diff-buffer-file
+   "D" 'magit-diff-unstaged
+   "l" 'magit-log-buffer-file
+   "L" 'magit-log-all
+   "p" 'magit-push-popup
+   "s" 'magit-status
+   "w" 'magit-stage-file
+   "W" 'magit-stage-modified
+   "<" 'smerge-keep-mine
+   ">" 'smerge-keep-other)
 
   ;; This makes magit slow when there are a lot of buffers. See:
   ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
