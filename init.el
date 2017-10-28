@@ -463,6 +463,9 @@ exist in any structured movement package is mind-boggling to me."
 ;; Finder's "Open with Emacs" creates a buffer in the existing Emacs frame.
 (setq ns-pop-up-frames nil)
 
+;; Week start on monday.
+(setq calendar-week-start-day 1)
+
 (setq select-enable-clipboard t
       select-enable-primary t
       save-interprogram-paste-before-kill t
@@ -489,6 +492,28 @@ exist in any structured movement package is mind-boggling to me."
 
 (use-package general
   :ensure t)
+
+;; helm (for eshell completion) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package helm
+  :ensure t
+  :config
+  (setq helm-display-header-line nil
+        helm-autoresize-min-height 10
+        helm-autoresize-max-height 10
+        helm-split-window-in-side-p nil
+        helm-M-x-fuzzy-match t
+        helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t
+        helm-apropos-fuzzy-match t)
+
+  (general-define-key
+   :keymaps '(helm-map)
+   "C-o" 'helm-copy-to-buffer
+   "C-k" 'helm-previous-line
+   "C-j" 'helm-next-line
+   "C-f" 'helm-next-page
+   "C-b" 'helm-previous-page))
 
 ;; eshell ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -522,10 +547,9 @@ exist in any structured movement package is mind-boggling to me."
 (setq-default eshell-path-env (getenv "PATH"))
 
 (defun eshell/clear ()
-  (interactive)
   (let ((inhibit-read-only t))
-    (erase-buffer))
-  (eshell-send-input))
+    (erase-buffer)
+    (eshell-send-input)))
 
 (defun mpereira/eshell-clear ()
   (interactive)
@@ -553,6 +577,7 @@ exist in any structured movement package is mind-boggling to me."
 ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2016-02/msg01532.html
 (defun mpereira/initialize-eshell ()
   (interactive)
+  ;; We're using helm instead of pcomplete now, maybe remove this?
   (setq pcomplete-cycle-completions nil)
   (setq-local beacon-mode nil)
 
@@ -566,7 +591,7 @@ exist in any structured movement package is mind-boggling to me."
    :states '(insert)
    :keymaps '(eshell-mode-map)
    ;; TAB here doesn't work for some reason.
-   "<tab>" 'completion-at-point
+   "<tab>" 'helm-esh-pcomplete
    "C-k" 'eshell-previous-input
    ;; TODO: when on an empty prompt and going up and back down (or down and back
    ;; up), make it so that the prompt is empty again instead of cycling back to
@@ -577,10 +602,6 @@ exist in any structured movement package is mind-boggling to me."
    "C-l" 'mpereira/eshell-clear))
 
 (add-hook 'eshell-mode-hook 'mpereira/initialize-eshell)
-(add-hook 'eshell-exit-hook (lambda ()
-                              (interactive)
-                              (unless (one-window-p)
-                                (delete-window))))
 
 (defun mpereira/remote-p ()
   (tramp-tramp-file-p default-directory))
@@ -805,6 +826,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :keymaps 'evil-ex-search-keymap
  "<escape>" 'minibuffer-keyboard-quit)
 
+(general-define-key
+ :keymaps '(help-mode-map)
+ "<" 'help-go-back
+ ">" 'help-go-forward)
+
 ;; org-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq org-directory "~/Dropbox/org/")
@@ -850,15 +876,15 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (defun mpereira/org-skip-all-but-first ()
   "Skip all but the first non-done entry."
   (let (should-skip-entry)
-    (unless (mpereira/org-current-state-p "TODO"))
-    (setq should-skip-entry t))
-  (save-excursion
-    (while (and (not should-skip-entry) (org-goto-sibling t))
-      (when (mpereira/org-current-state-p "TODO"))
-      (setq should-skip-entry t)))
-  (when should-skip-entry
-    (or (outline-next-heading)
-        (goto-char (point-max)))))
+    (unless (mpereira/org-current-subtree-state-p "TODO")
+      (setq should-skip-entry t))
+    (save-excursion
+      (while (and (not should-skip-entry) (org-goto-sibling t))
+        (when (mpereira/org-current-subtree-state-p "TODO"))
+        (setq should-skip-entry t)))
+    (when should-skip-entry
+      (or (outline-next-heading)
+          (goto-char (point-max))))))
 
 (defun mpereira/org-skip-subtree-if-habit ()
   "Skip an agenda entry if it has a STYLE property equal to \"habit\"."
@@ -937,6 +963,9 @@ This function makes sure that dates are aligned for easy reading."
                    (org-agenda-prefix-format " %i %-18c%?-12t% s")
                    (org-agenda-skip-function
                     '(org-agenda-skip-entry-if 'scheduled))))
+            (todo "WAITING"
+                  ((org-agenda-overriding-header "\nWaiting\n")
+                   (org-agenda-prefix-format " %i %-18c%?-12t% s")))
             (agenda ""
                     ((org-deadline-warning-days 0)
                      (org-agenda-span 'day)
@@ -954,11 +983,12 @@ This function makes sure that dates are aligned for easy reading."
                      (org-agenda-start-on-weekday nil)
                      (org-agenda-prefix-format " %i %-18c%?-12t% s")
                      (org-agenda-overriding-header "\nNext 7 Days")))
-            (tags-todo (concat "SCHEDULED>\"<+7d>\"&SCHEDULED<=\"<+120d>\""
+            (tags-todo (concat "SCHEDULED>\"<+8d>\"&SCHEDULED<=\"<+120d>\""
                                "|"
-                               "DEADLINE>\"<+7d>\"&DEADLINE<=\"<+120d>\"/!")
+                               "DEADLINE>\"<+8d>\"&DEADLINE<=\"<+120d>\"/!")
                        ((org-agenda-skip-function
                          '(org-agenda-skip-entry-if 'todo 'done))
+                        ;; FIXME: line below probably unneeded.
                         (org-tags-match-list-sublevels t)
                         (org-agenda-prefix-format
                          " %-18c %(mpereira/org-agenda-tags-suffix)  ")
@@ -1007,6 +1037,117 @@ This function makes sure that dates are aligned for easy reading."
                                        settings
                                        '((org-agenda-block-separator ?\-))))))
     (org-agenda nil "c")))
+
+(defun mpereira/yesterday ()
+  (time-subtract (current-time) (days-to-time 1)))
+
+(defun mpereira/time-to-calendar-date (time)
+  (let* ((decoded-time (decode-time time))
+         (day (nth 3 decoded-time))
+         (month (nth 4 decoded-time))
+         (year (nth 5 decoded-time)))
+    (list month day year)))
+
+(defun mpereira/format-calendar-date-Y-m-d (calendar-date)
+  (format-time-string "%Y-%m-%d"
+                      (mpereira/calendar-date-to-time calendar-date)))
+
+(defun mpereira/format-calendar-date-d-m-Y (calendar-date)
+  (format-time-string "%d %B %Y"
+                      (mpereira/calendar-date-to-time calendar-date)))
+
+(defun mpereira/calendar-date-to-time (calendar-date)
+  (let* ((day (calendar-extract-day calendar-date))
+         (month (calendar-extract-month calendar-date))
+         (year (calendar-extract-year calendar-date)))
+    (encode-time 0 0 0 day month year)))
+
+(defun mpereira/calendar-read-date (string)
+  (mpereira/time-to-calendar-date (org-read-date t t string)))
+
+(defun mpereira/org-agenda-date-week-start (string)
+  "Returns the first day of the week at DATE."
+  (let* ((calendar-date (mpereira/calendar-read-date string)))
+    (mpereira/format-calendar-date-Y-m-d
+     (mpereira/time-to-calendar-date
+      (time-subtract
+       (mpereira/calendar-date-to-time calendar-date)
+       (days-to-time (if (zerop (calendar-day-of-week calendar-date))
+                         6 ;; magic.
+                       (- (calendar-day-of-week calendar-date)
+                          calendar-week-start-day))))))))
+
+(defun mpereira/org-agenda-date-week-end (string)
+  "Returns the last day of the week at DATE."
+  (let* ((calendar-date (mpereira/calendar-read-date string)))
+    (if (= (calendar-week-end-day) (calendar-day-of-week calendar-date))
+        string
+      (mpereira/format-calendar-date-Y-m-d
+       (mpereira/time-to-calendar-date
+        (time-add
+         (mpereira/calendar-date-to-time calendar-date)
+         (days-to-time (- 7 (calendar-day-of-week calendar-date)))))))))
+
+(defun mpereira/org-agenda-review-suffix-format ()
+  (let* ((timestamp (or (mpereira/org-entry-at-point-get "TIMESTAMP")
+                        (mpereira/org-entry-at-point-get "TIMESTAMP_IA")
+                        (mpereira/org-entry-at-point-get "DEADLINE")
+                        (mpereira/org-entry-at-point-get "SCHEDULED")))
+         (calendar-date (mpereira/calendar-read-date timestamp)))
+    (format "%s  %-22s"
+            (mpereira/format-calendar-date-Y-m-d calendar-date)
+            (mpereira/org-agenda-project-name-prefix-format))))
+
+(defun mpereira/org-agenda-review-search (start end)
+  (concat "TODO=\"DONE\""
+          "&"
+          "TIMESTAMP_IA>=\"<" start ">\""
+          "&"
+          "TIMESTAMP_IA<=\"<" end ">\""
+          "|"
+          "TIMESTAMP>=\"<" start ">\""
+          "&"
+          "TIMESTAMP<=\"<" end ">\""))
+
+(setq org-agenda-custom-commands
+      `(("r" "Review"
+         ((tags ,(mpereira/org-agenda-review-search "today" "+1d")
+                ((org-agenda-prefix-format " %i %-18c%?-12t% s")
+                 (org-agenda-overriding-header
+                  (concat
+                   "\nDone today "
+                   "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))))
+          (tags ,(mpereira/org-agenda-review-search "-1d" "today")
+                ((org-agenda-prefix-format " %i %-18c%?-12t% s")
+                 (org-agenda-overriding-header
+                  (concat
+                   "\nDone yesterday "
+                   "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))))
+          (tags ,(mpereira/org-agenda-review-search
+                  (mpereira/org-agenda-date-week-start
+                   (mpereira/format-calendar-date-Y-m-d
+                    (mpereira/calendar-read-date "today")))
+                  (mpereira/org-agenda-date-week-end
+                   (mpereira/format-calendar-date-Y-m-d
+                    (mpereira/calendar-read-date "today"))))
+                ((org-agenda-prefix-format
+                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                 (org-agenda-show-all-dates t)
+                 (org-agenda-sorting-strategy '(timestamp-down))
+                 (org-agenda-overriding-header "\nDone this week\n")))
+          (tags ,(mpereira/org-agenda-review-search
+                  (mpereira/org-agenda-date-week-start
+                   (mpereira/format-calendar-date-Y-m-d
+                    (mpereira/calendar-read-date "-1w")))
+                  (mpereira/org-agenda-date-week-end
+                   (mpereira/format-calendar-date-Y-m-d
+                    (mpereira/calendar-read-date "-1w"))))
+                ((org-agenda-prefix-format
+                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                 (org-agenda-show-all-dates t)
+                 (org-agenda-sorting-strategy '(timestamp-down))
+                 (org-agenda-overriding-header "\nDone last week\n"))))
+         ((org-agenda-block-separator ?\-)))))
 
 ;; Redo agenda after capturing.
 (add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
@@ -1084,7 +1225,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 
 (add-hook 'org-capture-mode-hook #'evil-insert-state)
 
-(setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
+(setq org-refile-targets '((org-agenda-files :maxlevel . 1)))
 
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
@@ -1133,7 +1274,9 @@ block (excluding the line with `org-agenda-block-separator' characters)."
  :prefix mpereira/leader
  :infix "o"
  "a" 'mpereira/custom-agenda
- "A" 'org-agenda
+ "A" (lambda ()
+       (interactive)
+       (org-agenda nil "r"))
  "c" 'org-capture
  "l" 'org-store-link
  "D" 'org-check-deadlines)
@@ -1192,6 +1335,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
  "s" 'org-schedule
  "S" 'org-sort-entries
  "t" 'org-set-tags
+ "u" 'org-toggle-link-display
  "x" 'org-cut-subtree)
 
 (general-define-key
@@ -1277,7 +1421,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
                                ,(concat mpereira/org-gcal-directory
                                         "calendar.org"))))
   (add-to-list 'org-agenda-files mpereira/org-gcal-directory t)
-  
+
   ;; https://github.com/myuhe/org-gcal.el/issues/50#issuecomment-231525887
   (defun mpereira/org-gcal--notify (title mes)
     (message "org-gcal::%s - %s" title mes))
@@ -1308,6 +1452,12 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 (use-package company
   :ensure t
   :config
+  (setq company-global-modes '(not eshell-mode
+                                   comint-mode
+                                   erc-mode
+                                   message-mode
+                                   help-mode))
+
   (add-hook 'after-init-hook 'global-company-mode)
 
   (setq company-require-match 'never)
@@ -1438,7 +1588,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   :config
   (add-hook 'prog-mode-hook 'aggressive-indent-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'sql-mode)
-  (add-to-list 'aggressive-indent-excluded-modes 'makefile-mode))
+  (add-to-list 'aggressive-indent-excluded-modes 'makefile-bsdmake-mode))
 
 ;; gist ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
