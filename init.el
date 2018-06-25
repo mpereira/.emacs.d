@@ -1,3 +1,35 @@
+;;
+;; * Dependencies
+;; ** ~/.emacs.d/circe-secrets.el
+;;    Exporting:
+;;    - mpereira/secret-circe-nickserv-password
+;; ** ~/.emacs.d/org-gcal-secrets.el
+;;    Exporting:
+;;    - mpereira/secret-org-gcal-client-id
+;;    - mpereira/secret-org-gcal-client-secret
+;;    - mpereira/secret-org-gcal-file-alist
+;; * Stuff I keep forgetting:
+;; ** Upgrade packages
+;; *** M-x list-packages (C-z to get out of evil mode) U x
+;; *** M-x paradox-list-packages f u
+;; ** Paste into the minibuffer: C-y
+;; ** org mode file links to search patterns can't start with open parens:
+;;    https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
+;; ** EXPRESSION can be used only once per `org-agenda-prefix-format'.
+;; ** Emulate C-u (universal-argument)
+;; *** For raw prefix arg (interactive "P")
+;;     (let ((current-prefix-arg '(4)))
+;;       (call-interactively 'some-func))
+;; *** Otherwise
+;;     (let ((current-prefix-arg 4))
+;;       (call-interactively 'some-func))
+;; ** Run `exec-path-from-shell-initialize' and open a new eshell buffer after
+;;    modifying PATH.
+
+;; Uncomment this to terminate init.el loading early.
+;; (with-current-buffer " *load*"
+;;   (goto-char (point-max)))
+
 (require 'package)
 
 (package-initialize)
@@ -17,23 +49,15 @@
 (eval-when-compile
   (require 'use-package))
 
-;; * Stuff I keep forgetting:
-;; ** Upgrade packages: M-x list-packages (C-z to get out of evil mode) U x
-;; ** Paste into the minibuffer: C-y
-;; ** org mode file links to search patterns can't start with open parens:
-;;    https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
-;; ** EXPRESSION can be used only once per `org-agenda-prefix-format'.
-;; ** Emulate C-u (universal-argument)
-;; *** For raw prefix arg (interactive "P")
-;;     (let ((current-prefix-arg '(4)))
-;;       (call-interactively 'some-func))
-;; *** Otherwise
-;;     (let ((current-prefix-arg 4))
-;;       (call-interactively 'some-func))
-
-;; Uncomment this to terminate init.el loading early.
-;; (with-current-buffer " *load*"
-;;   (goto-char (point-max)))
+;; Currently only being used for perspective.
+(use-package quelpa
+  :ensure t
+  :config
+  (quelpa
+   '(quelpa-use-package
+     :fetcher github
+     :repo "quelpa/quelpa-use-package"))
+  (require 'quelpa-use-package))
 
 ;; Tramp ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -46,6 +70,7 @@
               tramp-file-name-regexp))
 
 ;; Server ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (require 'server)
 (unless (server-running-p)
   (server-start))
@@ -56,109 +81,97 @@
 ;; http://daylerees.github.io/
 ;; http://raebear.net/comp/emacscolors.html
 
-;; doom-themes dependency.
-;; Make sure to run `M-x all-the-icons-install-fonts` on new installs.
-(use-package all-the-icons
-  :ensure t)
-
-(use-package doom-themes
+(use-package srcery-theme
   :ensure t
   :config
-  (load-theme 'doom-tomorrow-night t)
-
-  ;; Enable flashing mode-line on errors.
-  (doom-themes-visual-bell-config)
-
-  ;; Enable custom neotree theme
-  (doom-themes-neotree-config)
-
-  ;; Correct (and improve) org-mode's native fontification.
-  (doom-themes-org-config))
+  (load-theme 'srcery t))
 
 ;; mode-line ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(with-eval-after-load "magit"
-  (defconst mpereira/mode-line-projectile
-    '(:eval
-      (let ((face 'modeline-buffer-id))
-        (when (projectile-project-name)
-          (concat
-           (propertize " " 'face face)
-           (propertize (format "%s" (projectile-project-name)) 'face face)
-           (propertize " " 'face face))))))
+(with-eval-after-load "projectile"
+  (with-eval-after-load "eshell"
+    (with-eval-after-load "magit"
+      (defconst mpereira/mode-line-projectile
+        '(:eval
+          (let ((face 'modeline-buffer-id))
+            (when (projectile-project-name)
+              (concat
+               (propertize " " 'face face)
+               (propertize (format "%s" (projectile-project-name)) 'face face)
+               (propertize " " 'face face))))))
 
-  (defconst mpereira/mode-line-vc
-    '(:eval
-      (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
-        (let ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
-              (face 'magit-branch-current))
-          (concat
-           (propertize " " 'face face)
-           (propertize (format "%s" branch) 'face face)
-           (propertize " " 'face face))))))
+      (defconst mpereira/mode-line-vc
+        '(:eval
+          (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
+            (let ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
+                  (face 'magit-branch-current))
+              (concat
+               (propertize " " 'face face)
+               (propertize (format "%s" branch) 'face face)
+               (propertize " " 'face face))))))
 
-  (defun mpereira/shorten-directory (dir max-length)
-    "Show up to MAX-LENGTH characters of a directory name DIR."
-    (let ((directory-truncation-string (if (char-displayable-p ?…) "…/" ".../"))
-          (longname (abbreviate-file-name dir)))
-      ;; If it fits, return the string.
-      (if (<= (string-width longname) max-length) longname
-        ;; If it doesn't, shorten it.
-        (let ((path (reverse (split-string longname "/")))
-              (output ""))
-          (when (and path (equal "" (car path)))
-            (setq path (cdr path)))
-          (let ((max (- max-length (string-width directory-truncation-string))))
-            ;; Concat as many levels as possible, leaving 4 chars for safety.
-            (while (and path (<= (string-width (concat (car path) "/" output))
-                                 max))
-              (setq output (concat (car path) "/" output))
-              (setq path (cdr path))))
-          ;; If we had to shorten, prepend .../
-          (when path
-            (setq output (concat directory-truncation-string output)))
-          output))))
+      ;; FIXME: shows incorrect directory sometimes.
+      (defun mpereira/shorten-directory (dir max-length)
+        "Show up to MAX-LENGTH characters of a directory name DIR."
+        (let ((directory-truncation-string (if (char-displayable-p ?…) "…/" ".../"))
+              (longname (abbreviate-file-name dir)))
+          ;; If it fits, return the string.
+          (if (<= (string-width longname) max-length) longname
+            ;; If it doesn't, shorten it.
+            (let ((path (reverse (split-string longname "/")))
+                  (output ""))
+              (when (and path (equal "" (car path)))
+                (setq path (cdr path)))
+              (let ((max (- max-length (string-width directory-truncation-string))))
+                ;; Concat as many levels as possible, leaving 4 chars for safety.
+                (while (and path (<= (string-width (concat (car path) "/" output))
+                                     max))
+                  (setq output (concat (car path) "/" output))
+                  (setq path (cdr path))))
+              ;; If we had to shorten, prepend .../
+              (when path
+                (setq output (concat directory-truncation-string output)))
+              output))))
 
-  (defconst mpereira/mode-line-buffer
-    '(:eval
-      (let ((modified-or-ro-symbol (cond
-                                    ((and buffer-file-name (buffer-modified-p))
-                                     "~")
-                                    (buffer-read-only ":RO")
-                                    (t "")))
-            (face 'bold)
-            (directory-face 'shadow)
-            (modified-symbol-face 'default)
-            (directory (if buffer-file-name
-                           (mpereira/shorten-directory default-directory 15)
-                         "")))
-        (concat
-         (propertize " " 'face face)
-         (propertize (format "%s" directory) 'face directory-face)
-         (propertize "%b" 'face face)
-         (propertize modified-or-ro-symbol 'face modified-symbol-face)
-         (propertize " " 'face face)))))
+      (defconst mpereira/mode-line-buffer
+        '(:eval
+          (let ((modified-or-ro-symbol (cond
+                                        ((and buffer-file-name (buffer-modified-p))
+                                         "~")
+                                        (buffer-read-only ":RO")
+                                        (t "")))
+                (face 'bold)
+                (directory-face 'shadow)
+                (modified-symbol-face 'default)
+                (directory (if buffer-file-name
+                               (mpereira/shorten-directory default-directory 15)
+                             "")))
+            (concat
+             (propertize " " 'face face)
+             (propertize (format "%s" directory) 'face directory-face)
+             (propertize "%b" 'face face)
+             (propertize modified-or-ro-symbol 'face modified-symbol-face)
+             (propertize " " 'face face)))))
 
-  (defconst mpereira/mode-line-major-mode
-    '(:eval
-      (propertize " %m " 'face 'font-lock-comment-face)))
+      (defconst mpereira/mode-line-major-mode
+        '(:eval
+          (propertize " %m " 'face 'font-lock-comment-face)))
 
-  (defconst mpereira/mode-line-buffer-position
-    '(:eval
-      (unless eshell-mode
-        (propertize " %p %l,%c " 'face 'tooltip))))
+      (defconst mpereira/mode-line-buffer-position
+        '(:eval
+          (unless eshell-mode
+            (propertize " %p %l,%c " 'face 'tooltip))))
 
-
-  (setq-default mode-line-format (list mpereira/mode-line-projectile
-                                       mpereira/mode-line-vc
-                                       mpereira/mode-line-buffer
-                                       mpereira/mode-line-major-mode
-                                       mpereira/mode-line-buffer-position
-                                       mode-line-end-spaces)))
+      (setq-default mode-line-format (list mpereira/mode-line-projectile
+                                           mpereira/mode-line-vc
+                                           mpereira/mode-line-buffer
+                                           mpereira/mode-line-major-mode
+                                           mpereira/mode-line-buffer-position
+                                           mode-line-end-spaces)))))
 
 ;; Helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun mpereira/setq-local-show-trailing-whitespace-nil ()
+(defun mpereira/hide-trailing-whitespace ()
   (interactive)
   (setq-local show-trailing-whitespace nil))
 
@@ -188,8 +201,11 @@
           (set-visited-file-name new-name t t)))))))
 
 ;; Modified https://www.emacswiki.org/emacs/DescribeThingAtPoint
+;; Depends on helpful for `helpful-function' and `helpful-variable'.
+;; Depends on help-fns+ for `describe-keymap'.
+;; TODO: use `helpful-at-point' as a master fallback.
 (defun mpereira/describe-thing-at-point ()
-  "Show the documentation of the Elisp function and variable near point.
+  "Show a help buffer for the symbol at point.
   This checks in turn:
   -- for a function name where point is
   -- for a keymap name where point is
@@ -207,13 +223,15 @@
                            (skip-chars-forward "`'")
                            (let ((obj (read (current-buffer))))
                              (and (symbolp obj) (fboundp obj) obj))))))
-           (describe-function sym))
+           (helpful-function sym))
           ((setq sym (variable-at-point)) (if (keymapp (symbol-value sym))
                                               (describe-keymap sym)
-                                            (describe-variable sym)))
-          ((setq sym (function-at-point)) (describe-function sym)))))
+                                            (helpful-variable sym)))
+          ((setq sym (function-at-point)) (helpful-function sym)))))
 
-(require 'thingatpt) ;; for `thing-at-point'.
+(require 'thingatpt)
+
+;; Depends on 'thingatpt' for `thing-at-point'.
 (defun mpereira/eval-sexp-at-or-surrounding-pt ()
   "Evaluate the sexp following the point, or surrounding the point"
   (interactive)
@@ -299,16 +317,11 @@ exist in any structured movement package is mind-boggling to me."
           (forward-sexp 1)
           (backward-sexp 1))))))
 
-;; Based on
+;; https://github.com/syl20bnr/spacemacs/blob/
+;; b7e51d70aa3fb81df2da6dc16d9652a002ba5e6b/layers/%2Bspacemacs/
+;; spacemacs-layouts/funcs.el#352
 ;;
-;; https://github.com/bbatsov/persp-projectile/
-;; blob/7686633acf44402fa90429759cca6a155e4df2b9/persp-projectile.el#L66
-;;
-;; and
-;;
-;; https://github.com/syl20bnr/spacemacs/
-;; blob/b7e51d70aa3fb81df2da6dc16d9652a002ba5e6b/
-;; layers/%2Bspacemacs/spacemacs-layouts/funcs.el#352
+;; plus `projectile-persp-switch-project'
 (with-eval-after-load "ivy"
   (with-eval-after-load "projectile"
     (with-eval-after-load "perspective"
@@ -319,26 +332,7 @@ exist in any structured movement package is mind-boggling to me."
                       (cons (abbreviate-file-name (projectile-project-root))
                             (projectile-relevant-known-projects))
                     projectile-known-projects)
-                  :action
-                  (lambda (project)
-                    (let* ((name (file-name-nondirectory
-                                  (directory-file-name project)))
-                           (persp (gethash name perspectives-hash)))
-                      (cond
-                       ;; Project-specific perspective already exists.
-                       ((and persp (not (equal persp persp-curr)))
-                        (persp-switch name))
-                       ;; Project-specific perspective doesn't exist.
-                       ((not persp)
-                        (let ((frame (selected-frame)))
-                          (persp-switch name)
-                          (projectile-switch-project-by-name project)
-                          ;; Clean up if we switched to a new frame. `helm' for
-                          ;; one allows finding files in new frames so this is a
-                          ;; real possibility.
-                          (when (not (equal frame (selected-frame)))
-                            (with-selected-frame frame
-                              (persp-kill name)))))))))))))
+                  :action #'projectile-persp-switch-project)))))
 
 (with-eval-after-load "evil"
   (with-eval-after-load "lispyville"
@@ -355,7 +349,9 @@ exist in any structured movement package is mind-boggling to me."
 
 ;; Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(require 'diminish)
+(use-package diminish
+  :ensure t)
+
 (diminish 'auto-revert-mode)
 
 (menu-bar-mode -1)
@@ -411,9 +407,11 @@ exist in any structured movement package is mind-boggling to me."
 ;; Don't recenter buffer point when point goes outside window.
 (setq scroll-conservatively 100)
 
-(require 'linum)
+(defun enable-line-numbers ()
+  (setq display-line-numbers t))
+
 (dolist (hook '(prog-mode-hook text-mode-hook))
-  (add-hook hook #'linum-mode))
+  (add-hook hook #'enable-line-numbers))
 
 ;; Better unique names for similarly-named file buffers.
 (require 'uniquify)
@@ -436,14 +434,21 @@ exist in any structured movement package is mind-boggling to me."
 ;; Show trailing whitespace.
 (require 'whitespace)
 (setq whitespace-style '(face lines-tail trailing))
-(dolist (hook '(prog-mode-hook text-mode-hook))
-  (add-hook hook #'whitespace-mode))
-(setq-default show-trailing-whitespace t)
+;; Whitespace mode has been a pain in the ass recently, disabled it.
+;; (dolist (hook '(prog-mode-hook text-mode-hook))
+;;   (add-hook hook #'whitespace-mode))
 (diminish 'whitespace-mode)
 
 ;; 80 columns.
+(setq-default whitespace-line-column 80)
 (setq-default fill-column 80)
 (setq-default comment-column 80)
+
+(add-hook 'java-mode-hook
+          (lambda ()
+            (setq-local whitespace-line-column 120)
+            (setq-local fill-column 120)
+            (setq-local comment-column 120)))
 
 ;; UTF8 stuff.
 (prefer-coding-system 'utf-8)
@@ -484,14 +489,51 @@ exist in any structured movement package is mind-boggling to me."
 
 (setq mpereira/leader ",")
 
-;; secrets ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Make cursor movement an order of magnitude faster.
+;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
+(setq auto-window-vscroll nil)
 
-(load-file "~/.emacs.d/secrets.el")
+;; Make eshell append to history after each command.
+;; https://emacs.stackexchange.com/questions/18564/merge-history-from-multiple-eshells
+;; (setq eshell-save-history-on-exit nil)
+;; (defun eshell-append-history ()
+;;   "Call `eshell-write-history' with the `append' parameter set to `t'."
+;;   (when eshell-history-ring
+;;     (let ((newest-cmd-ring (make-ring 1)))
+;;       (ring-insert newest-cmd-ring (car (ring-elements eshell-history-ring)))
+;;       (let ((eshell-history-ring newest-cmd-ring))
+;;         (eshell-write-history eshell-history-file-name t)))))
+;; (add-hook 'eshell-pre-command-hook #'eshell-append-history)
+
+;; Shared history.
+;; https://www.reddit.com/r/emacs/comments/6y3q4k/yes_eshell_is_my_main_shell/dorfje0
+;; TODO: make this per project.
+(defvar eshell-history-global-ring nil
+  "The history ring shared across Eshell sessions.")
+
+(defun eshell-hist-use-global-history ()
+  "Make Eshell history shared across different sessions."
+  (unless eshell-history-global-ring
+    (let (eshell-history-ring)
+      (when eshell-history-file-name
+        (eshell-read-history nil t))
+      (setq eshell-history-global-ring eshell-history-ring))
+    (unless eshell-history-ring (setq eshell-history-global-ring (make-ring eshell-history-size))))
+  (setq eshell-history-ring eshell-history-global-ring))
+
+(add-hook 'eshell-mode-hook 'eshell-hist-use-global-history)
 
 ;; general ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package general
   :ensure t)
+
+;; paradox ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package paradox
+  :ensure t
+  :config
+  (paradox-enable))
 
 ;; helm (for eshell completion) ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -519,19 +561,29 @@ exist in any structured movement package is mind-boggling to me."
 
 (require 'eshell)
 (require 'em-dirs) ;; for `eshell/pwd'.
+(require 'em-smart)
 
 ;; Don't display the "Welcome to the Emacs shell" banner.
 (setq eshell-banner-message "")
 
-;; TODO: understand the consequences os this.
+(setenv "LANG" "en_US.UTF-8")
+(setenv "LC_ALL" "en_US.UTF-8")
+(setenv "LC_CTYPE" "en_US.UTF-8")
+
+;; Don't page shell output.
 (setenv "PAGER" "cat")
 
 (setq eshell-scroll-to-bottom-on-input 'all)
 (setq eshell-buffer-maximum-lines 20000)
+(setq eshell-history-size 1000000)
 (setq eshell-error-if-no-glob t)
 (setq eshell-hist-ignoredups t)
+;; Don't cycle from last to first command in history.
+;; The variable below doesn't do the above.
+;; (setq eshell-hist-move-to-end nil)
 (setq eshell-save-history-on-exit t)
-(setq eshell-destroy-buffer-when-process-dies t)
+;; Eshell
+(setq eshell-destroy-buffer-when-process-dies nil)
 ;; `find` and `chmod` behave differently on eshell than unix shells. Prefer unix
 ;; behavior.
 (setq eshell-prefer-lisp-functions nil)
@@ -539,12 +591,12 @@ exist in any structured movement package is mind-boggling to me."
 ;; Visual commands are commands which require a proper terminal. eshell will run
 ;; them in a term buffer when you invoke them.
 (setq eshell-visual-commands
-      '("less" "tmux" "htop" "top" "bash" "zsh" "fish" "glances"))
+      '("less" "htop" "top" "bash" "zsh" "fish" "glances"))
 (setq eshell-visual-subcommands
       '(("git" "log" "l" "diff" "show")))
 
-;; Eshell needs this variable set in addition to the PATH environment variable.
-(setq-default eshell-path-env (getenv "PATH"))
+;; Remove ansi color escape sequences from output.
+(add-hook 'eshell-preoutput-filter-functions 'ansi-color-filter-apply)
 
 (defun eshell/clear ()
   (let ((inhibit-read-only t))
@@ -577,9 +629,16 @@ exist in any structured movement package is mind-boggling to me."
 ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2016-02/msg01532.html
 (defun mpereira/initialize-eshell ()
   (interactive)
-  ;; We're using helm instead of pcomplete now, maybe remove this?
+  ;; TODO: We're using helm instead of pcomplete now, maybe remove this?
   (setq pcomplete-cycle-completions nil)
   (setq-local beacon-mode nil)
+
+  ;; Eshell needs this variable set in addition to the PATH environment variable.
+  (setq-default eshell-path-env (getenv "PATH"))
+
+  (general-define-key
+   :keymaps '(eshell-mode-map)
+   "C-c C-c" 'term-interrupt-subjob)
 
   (general-define-key
    :states '(normal visual)
@@ -618,7 +677,6 @@ exist in any structured movement package is mind-boggling to me."
   (if (fboundp 'tramp-file-name-real-host)
       (tramp-file-name-real-host (tramp-dissect-file-name default-directory))
     (tramp-file-name-host (tramp-dissect-file-name default-directory))))
-
 
 ;; https://www.emacswiki.org/emacs/EshellPrompt
 (defun mpereira/fish-path (path)
@@ -704,6 +762,37 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package suggest
   :ensure t)
 
+;; rg ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package rg
+  :after wgrep-ag
+  :ensure t
+  :config
+  (add-hook 'rg-mode-hook 'wgrep-ag-setup))
+
+;; deadgrep ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package deadgrep
+  :ensure nil
+  :quelpa (deadgrep
+           :fetcher github
+           :repo "Wilfred/deadgrep"))
+
+;; ag ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package ag
+  :ensure t)
+
+;; wgrep-ag ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package wgrep-ag
+  :ensure t)
+
+;; centered-window ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package centered-window
+  :ensure t)
+
 ;; minibuffer-line ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package minibuffer-line
@@ -734,7 +823,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (dolist (hook '(undo-tree-mode-hook
                 undo-tree-visualizer-mode-hook))
-  (add-hook hook 'mpereira/setq-local-show-trailing-whitespace-nil))
+  (add-hook hook 'mpereira/hide-trailing-whitespace))
 
 (setq undo-tree-visualizer-timestamps t)
 (setq undo-tree-visualizer-diff t)
@@ -775,6 +864,12 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (general-define-key
  :keymaps '(global-map)
  :states '(normal visual)
+ :prefix "g"
+ "q" 'fill-paragraph)
+
+(general-define-key
+ :keymaps '(global-map)
+ :states '(normal visual)
  :prefix mpereira/leader
  :infix "e"
  ":" 'eval-expression)
@@ -806,11 +901,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (general-define-key
  :states '(normal visual)
  :prefix mpereira/leader
- "," 'evil-buffer
+ :infix "d"
+ "b" 'describe-buffer
+ "f" 'find-function-on-key
+ "k" 'describe-key
+ "m" 'describe-mode)
+
+(general-define-key
+ :states '(normal visual)
+ :prefix mpereira/leader
+ "," 'evil-switch-to-windows-last-buffer
  "u" 'undo-tree-visualize
  "b" 'switch-to-buffer
- "dk" 'describe-key
- "dm" 'describe-mode
  "w" 'save-buffer
  "q" 'evil-quit
  "hs" 'mpereira/split-window-below-and-switch
@@ -831,7 +933,14 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "<" 'help-go-back
  ">" 'help-go-forward)
 
+(general-define-key
+ :keymaps '(helpful-mode-map deadgrep-mode-map)
+ :states '(normal visual)
+ "q" 'kill-buffer-and-window)
+
 ;; org-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'org)
 
 (setq org-directory "~/Dropbox/org/")
 
@@ -848,7 +957,24 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 ;; org-clock stuff.
 (setq org-clock-idle-time 15)
 (setq org-clock-mode-line-total 'current)
-(setq org-clock-in-switch-to-state "DOING")
+;; Maybe automatically switching to DOING is not the best idea.
+;; (setq org-clock-in-switch-to-state "DOING")
+
+;; Resume clocking task when emacs is restarted.
+(org-clock-persistence-insinuate)
+;; Save the running clock and all clock history when exiting Emacs, load it on
+;; startup.
+(setq org-clock-persist t)
+;; Resume clocking task on clock-in if the clock is open.
+(setq org-clock-in-resume t)
+;; Do not prompt to resume an active clock, just resume it.
+(setq org-clock-persist-query-resume nil)
+;; Clock out when moving task to a done state.
+(setq org-clock-out-when-done t)
+;; Include current clocking task in clock reports.
+(setq org-clock-report-include-clocking-task t)
+;; Use pretty things for the clocktable.
+(setq org-pretty-entities nil)
 
 (setq org-agenda-files (list org-directory))
 
@@ -864,6 +990,29 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (setq org-agenda-tags-column -110)
 
 (setq org-attach-auto-tag "attachment")
+
+(add-hook 'org-mode-hook (lambda () (setq-local display-line-numbers nil)))
+
+;; org-gcal ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(use-package org-gcal
+  :ensure t
+  :config
+  (setq-default mpereira/org-gcal-directory (concat org-directory "gcal/"))
+  (load-file "~/.emacs.d/org-gcal-secrets.el")
+  (setq org-gcal-client-id mpereira/secret-org-gcal-client-id)
+  (setq org-gcal-client-secret mpereira/secret-org-gcal-client-secret)
+  (setq org-gcal-file-alist mpereira/secret-org-gcal-file-alist)
+  (add-to-list 'org-agenda-files mpereira/org-gcal-directory t)
+
+  ;; https://github.com/myuhe/org-gcal.el/issues/50#issuecomment-231525887
+  (defun mpereira/org-gcal--notify (title mes)
+    (message "org-gcal::%s - %s" title mes))
+
+  (fset 'org-gcal--notify 'mpereira/org-gcal--notify))
+
+;; more org-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun mpereira/org-current-subtree-state-p (state)
   (string= state (org-get-todo-state)))
@@ -963,6 +1112,11 @@ This function makes sure that dates are aligned for easy reading."
                    (org-agenda-prefix-format " %i %-18c%?-12t% s")
                    (org-agenda-skip-function
                     '(org-agenda-skip-entry-if 'scheduled))))
+            (todo "BLOCKED"
+                  ((org-agenda-overriding-header "\Blocked\n")
+                   (org-agenda-prefix-format " %i %-18c%?-12t% s")
+                   (org-agenda-skip-function
+                    '(org-agenda-skip-entry-if 'scheduled))))
             (todo "WAITING"
                   ((org-agenda-overriding-header "\nWaiting\n")
                    (org-agenda-prefix-format " %i %-18c%?-12t% s")))
@@ -973,6 +1127,8 @@ This function makes sure that dates are aligned for easy reading."
                      (org-agenda-format-date "")
                      (org-agenda-prefix-format " %i %-18c%?-12t% s")
                      (org-habit-show-habits nil)
+                     (org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
                      (org-agenda-overriding-header
                       (concat
                        "\nToday "
@@ -982,12 +1138,14 @@ This function makes sure that dates are aligned for easy reading."
                      (org-agenda-span 'week)
                      (org-agenda-start-on-weekday nil)
                      (org-agenda-prefix-format " %i %-18c%?-12t% s")
-                     (org-agenda-overriding-header "\nNext 7 Days")))
+                     (org-agenda-overriding-header "\nNext 7 Days")
+                     (org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))))
             (tags-todo (concat "SCHEDULED>\"<+8d>\"&SCHEDULED<=\"<+120d>\""
                                "|"
                                "DEADLINE>\"<+8d>\"&DEADLINE<=\"<+120d>\"/!")
                        ((org-agenda-skip-function
-                         '(org-agenda-skip-entry-if 'todo 'done))
+                         '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
                         ;; FIXME: line below probably unneeded.
                         (org-tags-match-list-sublevels t)
                         (org-agenda-prefix-format
@@ -996,15 +1154,6 @@ This function makes sure that dates are aligned for easy reading."
                         (org-agenda-remove-times-when-in-prefix nil)
                         (org-agenda-overriding-header
                          "\nNext Task Deadlines and Schedules\n")))
-            (agenda ""
-                    ((org-agenda-skip-function
-                      'mpereira/org-skip-subtree-unless-habit)
-                     (org-agenda-span 'day)
-                     (org-agenda-format-date "")
-                     (org-agenda-prefix-format
-                      " %i %-18c%?-12t% s")
-                     (org-habit-show-all-today t)
-                     (org-agenda-overriding-header "\nHabits")))
             (todo "TODO"
                   ((org-agenda-skip-function
                     '(or (org-agenda-skip-entry-if 'scheduled 'deadline)
@@ -1196,7 +1345,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 (setq org-src-tab-acts-natively t)
 
 (org-babel-do-load-languages 'org-babel-load-languages
-                             '((sh . t)
+                             '((shell . t)
                                (emacs-lisp . t)))
 
 (setq org-confirm-babel-evaluate nil)
@@ -1204,6 +1353,9 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 (setq org-todo-keywords '((sequence "TODO(t!)"
                                     "DOING(d!)"
                                     "WAITING(w@/!)"
+                                    "BLOCKED(b@/!)"
+                                    "REVIEW(r@/!)"
+                                    "FEEDBACK(f!)"
                                     "|"
                                     "SOMEDAY(s@/!)"
                                     "CANCELLED(c@/!)"
@@ -1220,8 +1372,10 @@ block (excluding the line with `org-agenda-block-separator' characters)."
          (file "appointments.org")
          "* %i%?\n  %^{When?}t")
         ("j" "Journal" entry
-         (file+olp+datetree "ego.org" "Journal")
-         "* %U %^{Title}\n  %?")))
+         (file+olp+datetree "journal.org" "Journal")
+         "* %U %^{Title}\n  %?"
+         :tree-type week
+         :empty-lines-after 1)))
 
 (add-hook 'org-capture-mode-hook #'evil-insert-state)
 
@@ -1278,8 +1432,11 @@ block (excluding the line with `org-agenda-block-separator' characters)."
        (interactive)
        (org-agenda nil "r"))
  "c" 'org-capture
- "l" 'org-store-link
- "D" 'org-check-deadlines)
+ "Ci" 'org-clock-in-last
+ "Co" 'org-clock-out
+ "Cg" 'org-clock-goto
+ "D" 'org-check-deadlines
+ "l" 'org-store-link)
 
 (general-define-key
  :keymaps '(org-mode-map)
@@ -1319,6 +1476,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
  "Cl" 'org-clock-in-last
  "Co" 'org-clock-out
  "d" 'org-deadline
+ "D" 'org-archive-subtree
  "b" 'org-tree-to-indirect-buffer
  "B" 'outline-show-branches
  "f" 'org-attach
@@ -1408,25 +1566,46 @@ block (excluding the line with `org-agenda-block-separator' characters)."
  "C-j" 'org-agenda-next-item
  "C-k" 'org-agenda-previous-item)
 
-;; org-gcal ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package org-gcal
-  :ensure t
-  :config
-  (setq mpereira/org-gcal-directory (concat org-directory "gcal/"))
-  (setq org-gcal-client-id mpereira/secret-org-gcal-client-id
-        org-gcal-client-secret mpereira/secret-org-gcal-client-secret
-        org-gcal-file-alist `(("murilo@murilopereira.com"
-                               .
-                               ,(concat mpereira/org-gcal-directory
-                                        "calendar.org"))))
-  (add-to-list 'org-agenda-files mpereira/org-gcal-directory t)
-
-  ;; https://github.com/myuhe/org-gcal.el/issues/50#issuecomment-231525887
-  (defun mpereira/org-gcal--notify (title mes)
-    (message "org-gcal::%s - %s" title mes))
-
-  (fset 'org-gcal--notify 'mpereira/org-gcal--notify))
+;; Archive subtrees under the same hierarchy as original in the archive files.
+;; https://github.com/Fuco1/.emacs.d/blob/b55c7e85d87186f16c395bd35f289da0b5bb84b1/files/org-defs.el#L1582-L1619
+(defadvice org-archive-subtree (around fix-hierarchy activate)
+  (let* ((fix-archive-p (and (not current-prefix-arg)
+                             (not (use-region-p))))
+         (afile (org-extract-archive-file (org-get-local-archive-location)))
+         (buffer (or (find-buffer-visiting afile) (find-file-noselect afile))))
+    ad-do-it
+    (when fix-archive-p
+      (with-current-buffer buffer
+        (goto-char (point-max))
+        (while (org-up-heading-safe))
+        (let* ((olpath (org-entry-get (point) "ARCHIVE_OLPATH"))
+               (path (and olpath (split-string olpath "/")))
+               (level 1)
+               tree-text)
+          (when olpath
+            (org-mark-subtree)
+            (setq tree-text (buffer-substring (region-beginning) (region-end)))
+            (let (this-command) (org-cut-subtree))
+            (goto-char (point-min))
+            (save-restriction
+              (widen)
+              (-each path
+                (lambda (heading)
+                  (if (re-search-forward
+                       (rx-to-string
+                        `(: bol (repeat ,level "*") (1+ " ") ,heading)) nil t)
+                      (org-narrow-to-subtree)
+                    (goto-char (point-max))
+                    (unless (looking-at "^")
+                      (insert "\n"))
+                    (insert (make-string level ?*)
+                            " "
+                            heading
+                            "\n"))
+                  (cl-incf level)))
+              (widen)
+              (org-end-of-subtree t t)
+              (org-paste-subtree level tree-text))))))))
 
 ;; google-this ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1436,13 +1615,11 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   (google-this-mode 1)
 
   (general-define-key
-   ;; :keymaps '(google-this-mode-submap)
    :states '(normal)
    :prefix mpereira/leader
    "fg" 'google-this)
 
   (general-define-key
-   ;; :keymaps '(google-this-mode-submap)
    :states '(visual)
    :prefix mpereira/leader
    "fg" 'google-this-region))
@@ -1464,12 +1641,21 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 
   (general-define-key
    :keymaps '(company-active-map)
+   "C-b" 'company-previous-page
+   "C-f" 'company-next-page
    "C-j" 'company-select-next
    "C-k" 'company-select-previous))
 
 ;; ansi-term ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq explicit-shell-file-name "/usr/local/bin/fish")
+
+;; Infinite buffer.
+(setq term-buffer-maximum-size 0)
+
+;; Emacs 26 has this defaulted to `t', which causes the point to not be movable
+;; from the process mark.
+(setq term-char-mode-point-at-process-mark nil)
 
 ;; FIXME
 (general-define-key
@@ -1506,16 +1692,6 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 (require 'sql)
 
 (add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
-
-;; xclip ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package xclip
-  :ensure t
-  :config
-  ;; For copy/paste on terminal emacs clients.
-  ;; Would it be possible to get this working for a Chromebook emacsclient
-  ;; started from Secure Shell?
-  (turn-on-xclip))
 
 ;; writeroom-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1561,9 +1737,27 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    :states '(insert)
    "RET" 'newline-and-indent))
 
+;; elpy ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package elpy
+  :ensure t
+  :config
+  ;; Disable elpy for now, the visual errors are annoying.
+  ;; (elpy-enable)
+  (setq elpy-rpc-python-command "python3")
+  (setq python-shell-interpreter "python3"))
+
 ;; help-fns+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package help-fns+
+  :ensure nil
+  :quelpa (help-fns+
+           :fetcher github
+           :repo "emacsmirror/help-fns-plus"))
+
+;; helpful ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package helpful
   :ensure t)
 
 ;; es-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1747,7 +1941,12 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 ;; perspective ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package perspective
-  :ensure t
+  :ensure nil
+  ;; TODO: switch back to upstream perspective when they merge these changes.
+  :quelpa (perspective
+           :fetcher github
+           :repo "john2x/perspective-el"
+           :branch "no-frame-local-vars")
   :init
   (setq persp-show-modestring nil)
   :config
@@ -1793,10 +1992,6 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   (setq ivy-height 20)
   (setq ivy-wrap t)
 
-  ;; FIXME: the following does change ivy-occur buffers to wgrep mode but it is
-  ;; nonfunctional.
-  ;; (add-hook 'ivy-occur-grep-mode-hook 'ivy-wgrep-change-to-wgrep-mode)
-
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
@@ -1811,7 +2006,7 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    "C-o" 'ivy-occur
    "C-h" 'ivy-beginning-of-buffer
    "C-l" 'ivy-end-of-buffer
-   "C-/" 'ivy-avy
+   "C-/" 'ivy-restrict-to-matches
    "<escape>" 'minibuffer-keyboard-quit))
 
 ;; command-log-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1826,6 +2021,13 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 ;; wgrep ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package wgrep
+  :ensure t
+  :config
+  (setq wgrep-auto-save-buffer t))
+
+;; fzf ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package fzf
   :ensure t)
 
 ;; counsel ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1834,6 +2036,8 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   :ensure t
   :after ivy
   :config
+  (setq counsel-find-file-ignore-regexp "/vendor/")
+
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
@@ -1857,7 +2061,12 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   (general-define-key
    :keymaps '(swiper-map swiper-all-map ivy-minibuffer-map)
    "<escape>" 'minibuffer-keyboard-quit ;; is this still needed?
-   "C-r" 'evil-paste-from-register))
+   "C-r" 'evil-paste-from-register)
+
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "/" 'swiper))
 
 ;; counsel-projectile ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1874,7 +2083,8 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    "s" 'mpereira/ivy-persp-switch-project
    "b" 'counsel-projectile-switch-to-buffer
    "f" 'counsel-projectile-find-file
-   "g" 'counsel-projectile-ag))
+   "g" 'rg-project
+   "G" 'rg-dwim-project-dir))
 
 ;; neotree ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1894,6 +2104,8 @@ block (excluding the line with `org-agenda-block-separator' characters)."
         (message "Could not find git project root."))))
 
   (setq neo-smart-open t)
+  (setq neo-window-fixed-size nil)
+  (setq neo-window-width 60)
 
   (general-define-key
    :states '(normal visual)
@@ -1927,6 +2139,17 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 (use-package scala-mode
   :ensure t)
 
+;; meghanada ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (use-package meghanada
+;;   :ensure t
+;;   :config
+;;   (add-hook 'java-mode-hook
+;;             (lambda ()
+;;               (meghanada-mode t)
+;;               (setq c-basic-offset 4)
+;;               (add-hook 'before-save-hook 'meghanada-code-beautify-before-save))))
+
 ;; clojure-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package clojure-mode
@@ -1935,12 +2158,6 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 ;; inf-clojure ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package inf-clojure
-  :ensure t)
-
-;; clojure-cheatsheet ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; TODO: navigate clojure-cheatsheet buffer with consistent keybindings.
-(use-package clojure-cheatsheet
   :ensure t)
 
 ;; cider ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2005,6 +2222,16 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    "]c" 'diff-hl-next-hunk
    "[c" 'diff-hl-previous-hunk))
 
+;; auto-dim-other-buffers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package auto-dim-other-buffers
+  :ensure t
+  :config
+  (setq auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)
+  (add-hook 'after-init-hook #'auto-dim-other-buffers-mode)
+  (custom-set-faces
+   '(auto-dim-other-buffers-face ((t (:background "gray4"))))))
+
 ;; redtick ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package redtick
@@ -2015,10 +2242,18 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 (use-package browse-at-remote
   :ensure t
   :config
+  ;; Permanent SHA link.
+  (setq browse-at-remote-prefer-symbolic nil)
+
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
    "go" 'browse-at-remote))
+
+;; git-timemachine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package git-timemachine
+  :ensure t)
 
 ;; magit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -2028,6 +2263,9 @@ block (excluding the line with `org-agenda-block-separator' characters)."
   (add-hook 'with-editor-mode-hook 'evil-insert-state)
 
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+  ;; FIXME: not working?
+  ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
+  (setq magit-list-refs-sortby "-creatordate")
 
   (general-define-key
    :states '(normal)
@@ -2037,18 +2275,34 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    "c" 'magit-commit-popup
    "d" 'magit-diff-buffer-file
    "D" 'magit-diff-unstaged
+   "f" 'magit-find-file
+   "g" 'counsel-git-grep
    "l" 'magit-log-buffer-file
    "L" 'magit-log-all
    "p" 'magit-push-popup
    "s" 'magit-status
+   "t" 'git-timemachine-toggle
    "w" 'magit-stage-file
    "W" 'magit-stage-modified
    "<" 'smerge-keep-mine
-   ">" 'smerge-keep-other)
+   ">" 'smerge-keep-other
+   "<" 'smerge-keep-mine
+   "[" 'git-timemachine-show-previous-revision
+   "]" 'git-timemachine-show-next-revision)
 
   ;; This makes magit slow when there are a lot of buffers. See:
   ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
+
+;; magit-todos ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package magit-todos
+  :ensure nil
+  :quelpa (magit-todos
+           :fetcher github
+           :repo "alphapapa/magit-todos")
+  :after magit
+  :config
+  (add-hook 'magit-mode-hook 'magit-todos-mode))
 
 ;; magit-gh-pulls ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -2063,8 +2317,8 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 (use-package evil
   :ensure t
   :init
-  (setq evil-symbol-word-search t)
-  (setq evil-shift-width 2)
+  (setq-default evil-symbol-word-search t)
+  (setq-default evil-shift-width 2)
   (setq evil-move-cursor-back t)
   (setq evil-move-beyond-eol nil)
   (setq evil-want-Y-yank-to-eol t)
@@ -2087,6 +2341,13 @@ block (excluding the line with `org-agenda-block-separator' characters)."
    :keymaps '(evil-motion-state-map)
    ";" 'evil-ex
    ":" 'evil-repeat-find-char)
+
+  ;; TODO: Make this not override magit's stash popup.
+  ;; (general-define-key
+  ;;  :states '(normal)
+  ;;  :infix "z"
+  ;;  "C" 'evil-close-folds
+  ;;  "O" 'evil-open-folds)
 
   ;; Using `bind-keys*` instead of `general-define-key` because term-mode-map
   ;; binds these to term-send-raw.
@@ -2187,13 +2448,6 @@ block (excluding the line with `org-agenda-block-separator' characters)."
     :config
     (evil-exchange-install))
 
-  (use-package evil-escape
-    :ensure t
-    :diminish evil-escape-mode
-    :config
-    (evil-escape-mode)
-    (setq evil-escape-key-sequence "kj"))
-
   (use-package evil-nerd-commenter
     :ensure t
     :config
@@ -2218,6 +2472,29 @@ block (excluding the line with `org-agenda-block-separator' characters)."
     ;; be used for other actions.
     (evil-goggles-use-diff-faces)))
 
+;; circe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package circe
+  :ensure t
+  :config
+  (enable-circe-color-nicks)
+
+  (load-file "~/.emacs.d/circe-secrets.el")
+
+  (load "lui-logging" nil t)
+  (enable-lui-logging-globally)
+
+  (setq circe-default-nick "mpereira"
+        circe-default-user "mpereira"
+        circe-default-realname "mpereira")
+  (setq circe-reduce-lurker-spam t)
+  (setq circe-network-options
+        `(("Freenode"
+           :host "chat.freenode.net"
+           :nickserv-password ,mpereira/secret-circe-nickserv-password
+           :tls t
+           :channels (:after-auth "#emacs" "#clojure")))))
+
 ;; mingus ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package mingus
@@ -2230,4 +2507,10 @@ block (excluding the line with `org-agenda-block-separator' characters)."
 
   (dolist (hook '(mingus-browse-hook
                   mingus-playlist-hooks))
-    (add-hook hook 'mpereira/setq-local-show-trailing-whitespace-nil)))
+    (add-hook hook 'mpereira/hide-trailing-whitespace)))
+
+;; dockerfile-mode ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package dockerfile-mode
+  :ensure t
+  :mode "Dockerfile.*\\'")

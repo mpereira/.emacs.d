@@ -1,3 +1,4 @@
+/*-secrets.el
 /*TAGS*
 /.cache
 /.dir-locals.el
@@ -10,9 +11,13 @@
 /elpa
 /eshell
 /layouts
+/meghanada
 /network-security.data
+/org-clock-save.el
+/org-gcal
 /places
 /projectile*
+/quelpa
 /recentf
 /savehist
 /secrets.el
