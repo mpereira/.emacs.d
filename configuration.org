@@ -1,5 +1,3 @@
-# -*- org-adapt-indentation: nil; -*-
-
 * Table of Contents
 :PROPERTIES:
 :TOC:      this
@@ -91,7 +89,7 @@
   -  [[#magit][magit]]
   -  [[#magit-todos][magit-todos]]
   -  [[#magit-gh-pulls][magit-gh-pulls]]
-  -  [[#org-bullets][org-bullets]]
+  -  [[#org-make-toc][org-make-toc]]
   -  [[#org-bullets][org-bullets]]
   -  [[#evil-org][evil-org]]
   -  [[#evil-magit][evil-magit]]
@@ -2678,3 +2676,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :ensure t
   :mode "Dockerfile.*\\'")
 #+END_SRC
+
+# Local Variables:
+# before-save-hook: org-make-toc
+# org-adapt-indentation: nil
+# End:
