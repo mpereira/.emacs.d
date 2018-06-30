@@ -562,7 +562,7 @@ exist in any structured movement package is mind-boggling to me."
 
       (defconst mpereira/mode-line-projectile
         '(:eval
-          (let ((face 'modeline-buffer-id))
+          (let ((face 'gnus-group-mail-1))
             (when (projectile-project-name)
               (concat
                (propertize " " 'face face)
@@ -603,7 +603,7 @@ exist in any structured movement package is mind-boggling to me."
 
       (defconst mpereira/mode-line-major-mode
         '(:eval
-          (propertize " %m " 'face 'font-lock-comment-face)))
+          (propertize " %m  " 'face 'font-lock-comment-face)))
 
       (defconst mpereira/mode-line-buffer-position
         '(:eval
@@ -1179,10 +1179,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :keymaps '(global-map)
  :states '(insert)
  "M-x" 'execute-extended-command)
-
-(general-define-key
- :states '(insert)
- "TAB" 'company-complete)
 
 (general-define-key
  :keymaps '(global-map)
@@ -1789,13 +1785,16 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :config
   (setq company-global-modes '(not eshell-mode
                                    comint-mode
-                                   erc-mode
                                    message-mode
                                    help-mode))
 
   (add-hook 'after-init-hook 'global-company-mode)
 
   (setq company-require-match 'never)
+
+  (general-define-key
+   :states '(insert)
+   "TAB" 'company-complete)
 
   (general-define-key
    :keymaps '(company-active-map)
