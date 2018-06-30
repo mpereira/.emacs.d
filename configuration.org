@@ -1,22 +1,24 @@
 # -*- org-adapt-indentation: nil; -*-
 
 * Dependencies
-** ~/.emacs.d/circe-secrets.el
-Exporting:
-- mpereira/secret-circe-nickserv-password
-** ~/.emacs.d/org-gcal-secrets.el
-Exporting:
-- mpereira/secret-org-gcal-client-id
-- mpereira/secret-org-gcal-client-secret
-- mpereira/secret-org-gcal-file-alist
+- =ag=
+- =ripgrep=
+- =fish=
+- =python3=
+- =~/.emacs.d/circe-secrets.el=
+  - =mpereira/secret-circe-nickserv-password=
+- =~/.emacs.d/org-gcal-secrets.el=
+  - =mpereira/secret-org-gcal-client-id=
+  - =mpereira/secret-org-gcal-client-secret=
+  - =mpereira/secret-org-gcal-file-alist=
 
 * Stuff I keep forgetting
-** Upgrade packages: M-x paradox-list-packages (C-z to get out of evil mode) f u U x
-** Paste into the minibuffer: C-y
+** Upgrade packages: =M-x list-packages f u U x=
+** Paste into the minibuffer: =C-y=
 ** org mode file links to search patterns can't start with open parens
 https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
-** EXPRESSION can be used only once per `org-agenda-prefix-format'
-** Emulate C-u (universal-argument)
+** =EXPRESSION= can be used only once per ~org-agenda-prefix-format~
+** Emulate =C-u= (universal-argument)
 *** For raw prefix arg (interactive "P")
 #+BEGIN_SRC emacs-lisp
 (let ((current-prefix-arg '(4)))
@@ -27,7 +29,7 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 (let ((current-prefix-arg 4))
   (call-interactively 'some-func))
 #+END_SRC
-** Run `exec-path-from-shell-initialize' and open a new eshell buffer after modifying PATH
+** Run ~exec-path-from-shell-initialize~ and open a new eshell buffer after modifying =PATH=
 ** Terminate init.el loading early
 #+BEGIN_SRC emacs-lisp
 (with-current-buffer " *load*"
