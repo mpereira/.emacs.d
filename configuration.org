@@ -679,14 +679,6 @@ Sources:
   :ensure t)
 #+END_SRC
 
-* paradox
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package paradox
-  :ensure t
-  :config
-  (paradox-enable))
-#+END_SRC
-
 * exec-path-from-shell
 This needs to be loaded before code that depends on PATH modifications, e.g.
 ~executable-find~.
@@ -700,6 +692,59 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
                 '("SSH_AUTH_SOCK"
                   "SSH_AGENT_PID")))
   (exec-path-from-shell-initialize))
+#+END_SRC
+
+* evil
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil
+  :ensure t
+  :init
+  (setq-default evil-symbol-word-search t)
+  (setq-default evil-shift-width 2)
+  (setq evil-move-cursor-back t)
+  (setq evil-move-beyond-eol nil)
+  (setq evil-want-Y-yank-to-eol t)
+  (setq evil-want-C-u-scroll t)
+  :config
+  (evil-mode t)
+
+  ;; Make it possible for other modes to use these bindings (e.g. company mode
+  ;; uses it for navigating completions).
+  (general-define-key
+   :keymaps '(evil-insert-state-map)
+   "C-j" nil
+   "C-k" nil)
+
+  (fset 'evil-visual-update-x-selection 'ignore)
+
+  (general-define-key
+   :keymaps '(evil-motion-state-map)
+   ";" 'evil-ex
+   ;; TODO: do I even use this?
+   ":" 'evil-repeat-find-char)
+
+  ;; TODO: Make this not override magit's stash popup.
+  ;; (general-define-key
+  ;;  :states '(normal)
+  ;;  :infix "z"
+  ;;  "C" 'evil-close-folds
+  ;;  "O" 'evil-open-folds)
+
+  ;; Using `bind-keys*' instead of `general-define-key' because `term-mode-map'
+  ;; binds these to `term-send-raw'.
+  (bind-keys*
+   ("M-h" . evil-window-left)
+   ("M-j" . evil-window-down)
+   ("M-k" . evil-window-up)
+   ("M-l" . evil-window-right)))
+#+END_SRC
+
+* paradox
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package paradox
+  :ensure t
+  :config
+  (paradox-enable))
 #+END_SRC
 
 * eshell
@@ -723,9 +768,6 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 (setq eshell-history-size 1000000)
 (setq eshell-error-if-no-glob t)
 (setq eshell-hist-ignoredups t)
-;; Don't cycle from last to first command in history.
-;; The variable below doesn't do the above.
-;; (setq eshell-hist-move-to-end nil)
 (setq eshell-save-history-on-exit t)
 ;; `find` and `chmod` behave differently on eshell than unix shells. Prefer unix
 ;; behavior.
@@ -1392,7 +1434,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :config
   (setq-default mpereira/org-gcal-directory (concat org-directory "gcal/"))
 
-  (load-file (concat user-emacs-directory "org-gcal-secrets.el"))
+  (load-file (expand-file-name "org-gcal-secrets.el" user-emacs-directory))
 
   (setq org-gcal-client-id mpereira/secret-org-gcal-client-id)
   (setq org-gcal-client-secret mpereira/secret-org-gcal-client-secret)
@@ -2334,164 +2376,149 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
 #+END_SRC
 
-* evil
+* org-bullets
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil
+(use-package org-bullets
   :ensure t
-  :init
-  (setq-default evil-symbol-word-search t)
-  (setq-default evil-shift-width 2)
-  (setq evil-move-cursor-back t)
-  (setq evil-move-beyond-eol nil)
-  (setq evil-want-Y-yank-to-eol t)
-  (setq evil-want-C-u-scroll t)
+  :after org
   :config
-  (evil-mode t)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
 
-  ;; Make it possible for other modes to use these bindings (e.g. company mode
-  ;; uses it for navigating completions).
+* evil-org
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-org
+  :ensure t
+  :after evil org
+  :config
+  (add-hook 'org-mode-hook 'evil-org-mode)
+
+  ;; Org todo notes don't have a specific major mode, so change to insert
+  ;; state based on its buffer name.
+  ;; FIXME: doesn't seem to be working.
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (when (string= "*Org Note*" (buffer-name))
+                (evil-insert-state))))
+
+  (defmacro calendar-action (func)
+    `(lambda ()
+        (interactive)
+        (org-eval-in-calendar '(,func 1))))
+
   (general-define-key
-   :keymaps '(evil-insert-state-map)
-   "C-j" nil
-   "C-k" nil)
+    :keymaps '(org-read-date-minibuffer-local-map)
+    "q" 'minibuffer-keyboard-quit
+    "l" (calendar-action calendar-forward-day)
+    "h" (calendar-action calendar-backward-day)
+    "j" (calendar-action calendar-forward-week)
+    "k" (calendar-action calendar-backward-week)
+    ">" (calendar-action calendar-forward-month)
+    "<" (calendar-action calendar-backward-month)
+    "}" (calendar-action calendar-forward-year)
+    "{" (calendar-action calendar-backward-year)
+    "0" (calendar-action calendar-beginning-of-week)
+    "$" (calendar-action calendar-end-of-week))
 
-  (fset 'evil-visual-update-x-selection 'ignore)
-
-  (evil-set-initial-state 'package-menu-mode 'normal)
+  (evil-set-initial-state 'calendar-mode 'emacs)
 
   (general-define-key
-   :keymaps '(evil-motion-state-map)
-   ";" 'evil-ex
-   ":" 'evil-repeat-find-char)
+    :keymaps '(calendar-mode-map)
+    "l" 'calendar-forward-day
+    "h" 'calendar-backward-day
+    "h" 'calendar-backward-day
+    "j" 'calendar-forward-week
+    "k" 'calendar-backward-week
+    ">" 'calendar-forward-month
+    "<" 'calendar-backward-month
+    "}" 'calendar-forward-year
+    "{" 'calendar-backward-year
+    "0" 'calendar-beginning-of-week
+    "$" 'calendar-end-of-week)
 
-  ;; TODO: Make this not override magit's stash popup.
-  ;; (general-define-key
-  ;;  :states '(normal)
-  ;;  :infix "z"
-  ;;  "C" 'evil-close-folds
-  ;;  "O" 'evil-open-folds)
+  (add-hook 'evil-org-mode-hook
+            (lambda ()
+              (evil-org-set-key-theme '(operators
+                                        navigation
+                                        textobjects
+                                        todo)))))
+#+END_SRC
 
-  ;; Using `bind-keys*` instead of `general-define-key` because term-mode-map
-  ;; binds these to term-send-raw.
-  (bind-keys*
-   ("M-h" . evil-window-left)
-   ("M-j" . evil-window-down)
-   ("M-k" . evil-window-up)
-   ("M-l" . evil-window-right))
+* evil-magit
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-magit
+  :after evil magit
+  :ensure t
+  :config
+  (general-define-key
+    :keymaps 'magit-mode-map
+    :states '(normal visual)
+    "j" 'evil-next-visual-line
+    "k" 'evil-previous-visual-line
+    "C-j" 'magit-section-forward
+    "C-k" 'magit-section-backward)
 
-  (use-package org-bullets
-    :ensure t
-    :config
-    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  (general-define-key
+    :states '(normal)
+    :keymaps '(git-rebase-mode-map)
+    "x" 'git-rebase-kill-line
+    "C-S-j" 'git-rebase-move-line-down
+    "C-S-k" 'git-rebase-move-line-up))
+#+END_SRC
 
-  (use-package evil-org
-    :ensure t
-    :config
-    (add-hook 'org-mode-hook 'evil-org-mode)
+* evil-extra-operator
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-extra-operator
+  :ensure t
+  :after evil
+  :init
+  (setq evil-extra-operator-eval-key "ge")
+  :config
+  (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
+#+END_SRC
 
-    ;; Org todo notes don't have a specific major mode, so change to insert
-    ;; state based on its buffer name.
-    ;; FIXME: doesn't seem to be working.
-    (add-hook 'org-mode-hook
-              (lambda ()
-                (when (string= "*Org Note*" (buffer-name))
-                  (evil-insert-state))))
+* evil-exchange
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-exchange
+  :ensure t
+  :after evil
+  :config
+  (evil-exchange-install))
+#+END_SRC
 
-    (defmacro calendar-action (func)
-      `(lambda ()
-         (interactive)
-         (org-eval-in-calendar '(,func 1))))
+* evil-nerd-commenter
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-nerd-commenter
+  :ensure t
+  :after evil
+  :config
+  (general-define-key
+    :keymaps '(normal)
+    "gc" 'evilnc-comment-operator))
+#+END_SRC
 
-    (general-define-key
-     :keymaps '(org-read-date-minibuffer-local-map)
-     "q" 'minibuffer-keyboard-quit
-     "l" (calendar-action calendar-forward-day)
-     "h" (calendar-action calendar-backward-day)
-     "j" (calendar-action calendar-forward-week)
-     "k" (calendar-action calendar-backward-week)
-     ">" (calendar-action calendar-forward-month)
-     "<" (calendar-action calendar-backward-month)
-     "}" (calendar-action calendar-forward-year)
-     "{" (calendar-action calendar-backward-year)
-     "0" (calendar-action calendar-beginning-of-week)
-     "$" (calendar-action calendar-end-of-week))
+* evil-surround
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-surround
+  :ensure t
+  :after evil
+  :config
+  (global-evil-surround-mode t))
+#+END_SRC
 
-    (evil-set-initial-state 'calendar-mode 'emacs)
+* evil-goggles
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-goggles
+  :ensure t
+  :after evil
+  :config
+  (evil-goggles-mode)
 
-    (general-define-key
-     :keymaps '(calendar-mode-map)
-     "l" 'calendar-forward-day
-     "h" 'calendar-backward-day
-     "h" 'calendar-backward-day
-     "j" 'calendar-forward-week
-     "k" 'calendar-backward-week
-     ">" 'calendar-forward-month
-     "<" 'calendar-backward-month
-     "}" 'calendar-forward-year
-     "{" 'calendar-backward-year
-     "0" 'calendar-beginning-of-week
-     "$" 'calendar-end-of-week)
-
-    (add-hook 'evil-org-mode-hook
-              (lambda ()
-                (evil-org-set-key-theme '(operators
-                                          navigation
-                                          textobjects
-                                          todo)))))
-
-  (use-package evil-magit
-    :after magit
-    :ensure t
-    :config
-    (general-define-key
-     :keymaps 'magit-mode-map
-     :states '(normal visual)
-     "j" 'evil-next-visual-line
-     "k" 'evil-previous-visual-line
-     "C-j" 'magit-section-forward
-     "C-k" 'magit-section-backward)
-
-    (general-define-key
-     :states '(normal)
-     :keymaps '(git-rebase-mode-map)
-     "x" 'git-rebase-kill-line
-     "C-S-j" 'git-rebase-move-line-down
-     "C-S-k" 'git-rebase-move-line-up))
-
-  (use-package evil-extra-operator
-    :ensure t
-    :init
-    (setq evil-extra-operator-eval-key "ge")
-    :config
-    (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
-
-  (use-package evil-exchange
-    :ensure t
-    :config
-    (evil-exchange-install))
-
-  (use-package evil-nerd-commenter
-    :ensure t
-    :config
-    (general-define-key
-     :keymaps '(normal)
-     "gc" 'evilnc-comment-operator))
-
-  (use-package evil-surround
-    :ensure t
-    :config
-    (global-evil-surround-mode t))
-
-  (use-package evil-goggles
-    :ensure t
-    :config
-    (evil-goggles-mode)
-
-    ;; Optionally use diff-mode's faces; as a result, deleted text will be
-    ;; highlighed with `diff-removed` face which is typically some red color
-    ;; (as defined by the color theme) other faces such as `diff-added` will
-    ;; be used for other actions.
-    (evil-goggles-use-diff-faces)))
+  ;; Optionally use diff-mode's faces; as a result, deleted text will be
+  ;; highlighed with `diff-removed` face which is typically some red color
+  ;; (as defined by the color theme) other faces such as `diff-added` will
+  ;; be used for other actions.
+  (evil-goggles-use-diff-faces))
 #+END_SRC
 
 * circe
@@ -2501,7 +2528,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :config
   (enable-circe-color-nicks)
 
-  (load-file "~/.emacs.d/circe-secrets.el")
+  (load-file (expand-file-name "circe-secrets.el" user-emacs-directory))
 
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
