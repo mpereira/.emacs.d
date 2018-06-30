@@ -1975,13 +1975,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package perspective
   :ensure nil
-  ;; TODO: switch back to upstream perspective when they merge these changes.
   :quelpa (perspective
            :fetcher github
-           :repo "john2x/perspective-el"
-           :branch "no-frame-local-vars")
-  :init
-  (setq persp-show-modestring nil)
+           :repo "nex3/perspective-el")
   :config
   (persp-mode t))
 #+END_SRC
