@@ -11,9 +11,7 @@ Exporting:
 - mpereira/secret-org-gcal-file-alist
 
 * Stuff I keep forgetting
-** Upgrade packages
-*** M-x list-packages (C-z to get out of evil mode) U x
-*** M-x paradox-list-packages (C-z to get out of evil mode) f u U x
+** Upgrade packages: M-x paradox-list-packages (C-z to get out of evil mode) f u U x
 ** Paste into the minibuffer: C-y
 ** org mode file links to search patterns can't start with open parens
 https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
@@ -89,35 +87,6 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
          (t
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
-
-;; Modified https://www.emacswiki.org/emacs/DescribeThingAtPoint
-;; Depends on helpful for `helpful-function' and `helpful-variable'.
-;; Depends on help-fns+ for `describe-keymap'.
-;; TODO: use `helpful-at-point' as a master fallback.
-(defun mpereira/describe-thing-at-point ()
-  "Show a help buffer for the symbol at point.
-  This checks in turn:
-  -- for a function name where point is
-  -- for a keymap name where point is
-  -- for a variable name where point is
-  -- for a surrounding function call"
-  (interactive)
-  (let (sym)
-    (cond ((setq sym (ignore-errors
-                       (with-syntax-table emacs-lisp-mode-syntax-table
-                         (save-excursion
-                           (or (not (zerop (skip-syntax-backward "_w")))
-                               (eq (char-syntax (char-after (point))) ?w)
-                               (eq (char-syntax (char-after (point))) ?_)
-                               (forward-sexp -1))
-                           (skip-chars-forward "`'")
-                           (let ((obj (read (current-buffer))))
-                             (and (symbolp obj) (fboundp obj) obj))))))
-           (helpful-function sym))
-          ((setq sym (variable-at-point)) (if (keymapp (symbol-value sym))
-                                              (describe-keymap sym)
-                                            (helpful-variable sym)))
-          ((setq sym (function-at-point)) (helpful-function sym)))))
 
 (require 'thingatpt)
 
@@ -458,6 +427,12 @@ exist in any structured movement package is mind-boggling to me."
             (projectile-with-default-dir (projectile-project-root)
               (eshell t)))
         (eshell t)))))
+
+(defun mpereira/enable-line-numbers ()
+  (setq display-line-numbers t))
+
+(defun mpereira/disable-line-numbers ()
+  (setq display-line-numbers nil))
 #+END_SRC
 
 * Configure Mode Line
@@ -628,14 +603,8 @@ Sources:
 ;; Don't recenter buffer point when point goes outside window.
 (setq scroll-conservatively 100)
 
-(defun enable-line-numbers ()
-  (setq display-line-numbers t))
-
-(defun disable-line-numbers ()
-  (setq display-line-numbers t))
-
 (dolist (hook '(prog-mode-hook text-mode-hook))
-  (add-hook hook #'enable-line-numbers))
+  (add-hook hook #'mpereira/enable-line-numbers))
 
 ;; Better unique names for similarly-named file buffers.
 (require 'uniquify)
@@ -658,20 +627,13 @@ Sources:
 ;; Show trailing whitespace.
 (require 'whitespace)
 (setq whitespace-style '(face lines-tail trailing))
-;; Whitespace mode has been a pain in the ass recently, disabled it.
-;; (dolist (hook '(prog-mode-hook text-mode-hook))
-;;   (add-hook hook #'whitespace-mode))
+(dolist (hook '(prog-mode-hook text-mode-hook))
+  (add-hook hook #'whitespace-mode))
 
 ;; 80 columns.
 (setq-default whitespace-line-column 80)
 (setq-default fill-column 80)
 (setq-default comment-column 80)
-
-(add-hook 'java-mode-hook
-          (lambda ()
-            (setq-local whitespace-line-column 120)
-            (setq-local fill-column 120)
-            (setq-local comment-column 120)))
 
 ;; UTF8 stuff.
 (prefer-coding-system 'utf-8)
@@ -694,7 +656,6 @@ Sources:
 ;; Week start on monday.
 (setq calendar-week-start-day 1)
 
-
 (setq select-enable-clipboard t
       select-enable-primary t
       save-interprogram-paste-before-kill t
@@ -705,47 +666,11 @@ Sources:
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
 
-;; sh-mode indentation.
-(add-hook 'sh-mode-hook
-          (lambda ()
-            (setq-local sh-basic-offset 2)
-            (setq-local sh-indentation 2)))
-
 (setq mpereira/leader ",")
 
 ;; Make cursor movement an order of magnitude faster.
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
-
-;; Make eshell append to history after each command.
-;; https://emacs.stackexchange.com/questions/18564/merge-history-from-multiple-eshells
-;; (setq eshell-save-history-on-exit nil)
-;; (defun eshell-append-history ()
-;;   "Call `eshell-write-history' with the `append' parameter set to `t'."
-;;   (when eshell-history-ring
-;;     (let ((newest-cmd-ring (make-ring 1)))
-;;       (ring-insert newest-cmd-ring (car (ring-elements eshell-history-ring)))
-;;       (let ((eshell-history-ring newest-cmd-ring))
-;;         (eshell-write-history eshell-history-file-name t)))))
-;; (add-hook 'eshell-pre-command-hook #'eshell-append-history)
-
-;; Shared history.
-;; https://www.reddit.com/r/emacs/comments/6y3q4k/yes_eshell_is_my_main_shell/dorfje0
-;; TODO: make this per project.
-(defvar eshell-history-global-ring nil
-  "The history ring shared across Eshell sessions.")
-
-(defun eshell-hist-use-global-history ()
-  "Make Eshell history shared across different sessions."
-  (unless eshell-history-global-ring
-    (let (eshell-history-ring)
-      (when eshell-history-file-name
-        (eshell-read-history nil t))
-      (setq eshell-history-global-ring eshell-history-ring))
-    (unless eshell-history-ring (setq eshell-history-global-ring (make-ring eshell-history-size))))
-  (setq eshell-history-ring eshell-history-global-ring))
-
-(add-hook 'eshell-mode-hook 'eshell-hist-use-global-history)
 #+END_SRC
 
 * general
@@ -962,6 +887,36 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 ;; This causes the prompt to not be protected.
 ;; (setq eshell-highlight-prompt nil)
+
+;; Make eshell append to history after each command.
+;; https://emacs.stackexchange.com/questions/18564/merge-history-from-multiple-eshells
+;; (setq eshell-save-history-on-exit nil)
+;; (defun eshell-append-history ()
+;;   "Call `eshell-write-history' with the `append' parameter set to `t'."
+;;   (when eshell-history-ring
+;;     (let ((newest-cmd-ring (make-ring 1)))
+;;       (ring-insert newest-cmd-ring (car (ring-elements eshell-history-ring)))
+;;       (let ((eshell-history-ring newest-cmd-ring))
+;;         (eshell-write-history eshell-history-file-name t)))))
+;; (add-hook 'eshell-pre-command-hook #'eshell-append-history)
+
+;; Shared history.
+;; https://www.reddit.com/r/emacs/comments/6y3q4k/yes_eshell_is_my_main_shell/dorfje0
+;; TODO: make this per project.
+(defvar eshell-history-global-ring nil
+  "The history ring shared across Eshell sessions.")
+
+(defun eshell-hist-use-global-history ()
+  "Make Eshell history shared across different sessions."
+  (unless eshell-history-global-ring
+    (let (eshell-history-ring)
+      (when eshell-history-file-name
+        (eshell-read-history nil t))
+      (setq eshell-history-global-ring eshell-history-ring))
+    (unless eshell-history-ring (setq eshell-history-global-ring (make-ring eshell-history-size))))
+  (setq eshell-history-ring eshell-history-global-ring))
+
+(add-hook 'eshell-mode-hook 'eshell-hist-use-global-history)
 #+END_SRC
 
 * fish-completion
@@ -973,14 +928,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (if (executable-find "fish")
       (global-fish-completion-mode)
     (message "fish executable not found, not enabling fish-completion-mode")))
-#+END_SRC
-
-* restart-emacs
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package restart-emacs
-  :ensure t
-  :config
-  (setq restart-emacs-restore-frames t))
 #+END_SRC
 
 * s
@@ -1065,12 +1012,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (setq undo-tree-visualizer-diff t)
 #+END_SRC
 
-* js
-#+BEGIN_SRC emacs-lisp :tangle yes
-(setq-default js-indent-level 2)
-#+END_SRC
-
-* mappings
+* Mappings
 #+BEGIN_SRC emacs-lisp :tangle yes
 (general-define-key
  "<escape>" 'keyboard-quit)
@@ -1179,10 +1121,32 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :keymaps '(emacs-lisp-mode-map)
  :states '(normal)
  "C-]" 'xref-find-definitions-other-window
- "K" 'mpereira/describe-thing-at-point)
+ "K" 'helpful-at-point)
 #+END_SRC
 
-* org-mode
+* Java
+#+BEGIN_SRC emacs-lisp :tangle yes
+(add-hook 'java-mode-hook
+          (lambda ()
+            (setq-local whitespace-line-column 120)
+            (setq-local fill-column 120)
+            (setq-local comment-column 120)))
+#+END_SRC
+
+* Javascript
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq-default js-indent-level 2)
+#+END_SRC
+
+* Shell script
+#+BEGIN_SRC emacs-lisp :tangle yes
+(add-hook 'sh-mode-hook
+          (lambda ()
+            (setq-local sh-basic-offset 2)
+            (setq-local sh-indentation 2)))
+#+END_SRC
+
+* Org mode
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq org-directory "~/Dropbox/org/")
 
@@ -1198,7 +1162,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (setq org-attach-auto-tag "attachment")
 
-(add-hook 'org-mode-hook #'disable-line-numbers)
+(add-hook 'org-mode-hook #'mpereira/disable-line-numbers)
 
 (setq org-tags-column -80)
 
@@ -1802,7 +1766,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 * helpful
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package helpful
-  :ensure t)
+  :ensure t
+  :config
+  (setq-default helpful--view-literal nil))
 #+END_SRC
 
 * es-mode
@@ -2190,14 +2156,15 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * meghanada
 #+BEGIN_SRC emacs-lisp :tangle yes
-;; (use-package meghanada
-;;   :ensure t
-;;   :config
-;;   (add-hook 'java-mode-hook
-;;             (lambda ()
-;;               (meghanada-mode t)
-;;               (setq c-basic-offset 4)
-;;               (add-hook 'before-save-hook 'meghanada-code-beautify-before-save))))
+(use-package meghanada
+  :ensure t
+  :config
+  ;; (add-hook 'java-mode-hook
+  ;;           (lambda ()
+  ;;             (meghanada-mode t)
+  ;;             (setq c-basic-offset 4)
+  ;;             (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+  )
 #+END_SRC
 
 * clojure-mode
@@ -2284,12 +2251,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (add-hook 'after-init-hook #'auto-dim-other-buffers-mode)
   (custom-set-faces
    '(auto-dim-other-buffers-face ((t (:background "gray4"))))))
-#+END_SRC
-
-* redtick
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package redtick
-  :ensure t)
 #+END_SRC
 
 * browse-at-remote
