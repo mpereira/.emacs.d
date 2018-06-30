@@ -34,6 +34,18 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
   (goto-char (point-max)))
 #+END_SRC
 
+* s
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package s
+  :ensure t)
+#+END_SRC
+
+* dash
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package dash
+  :ensure t)
+#+END_SRC
+
 * Helper functions
 #+BEGIN_SRC emacs-lisp :tangle yes
 ;; FIXME: shows incorrect directory sometimes.
@@ -972,18 +984,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
     (message "fish executable not found, not enabling fish-completion-mode")))
 #+END_SRC
 
-* s
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package s
-  :ensure t)
-#+END_SRC
-
-* dash
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package dash
-  :ensure t)
-#+END_SRC
-
 * suggest
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package suggest
@@ -1432,7 +1432,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package org-gcal
   :ensure t
   :config
-  (setq-default mpereira/org-gcal-directory (concat org-directory "gcal/"))
+  (setq mpereira/org-gcal-directory (concat org-directory "gcal/"))
 
   (load-file (expand-file-name "org-gcal-secrets.el" user-emacs-directory))
 
