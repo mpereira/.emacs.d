@@ -1,5 +1,109 @@
 # -*- org-adapt-indentation: nil; -*-
 
+* Table of Contents
+:PROPERTIES:
+:TOC:      this
+:END:
+  -  [[#dependencies][Dependencies]]
+  -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
+    -  [[#upgrade-packages-m-x-list-packages-f-u-u-x][Upgrade packages: =M-x list-packages f u U x=]]
+    -  [[#paste-into-the-minibuffer-c-y][Paste into the minibuffer: =C-y=]]
+    -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
+    -  [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][=EXPRESSION= can be used only once per ~org-agenda-prefix-format~]]
+    -  [[#emulate-c-u-universal-argument][Emulate =C-u= (universal-argument)]]
+      -  [[#for-raw-prefix-arg-interactive-p][For raw prefix arg (interactive "P")]]
+      -  [[#otherwise][Otherwise]]
+    -  [[#run-exec-path-from-shell-initialize-and-open-a-new-eshell-buffer-after-modifying-path][Run ~exec-path-from-shell-initialize~ and open a new eshell buffer after modifying =PATH=]]
+    -  [[#terminate-initel-loading-early][Terminate init.el loading early]]
+  -  [[#s][s]]
+  -  [[#dash][dash]]
+  -  [[#helper-functions][Helper functions]]
+  -  [[#configure-mode-line][Configure Mode Line]]
+  -  [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
+  -  [[#tramp][Tramp]]
+  -  [[#server][Server]]
+  -  [[#color-theme][Color theme]]
+  -  [[#options][Options]]
+  -  [[#general][general]]
+  -  [[#exec-path-from-shell][exec-path-from-shell]]
+  -  [[#evil][evil]]
+  -  [[#paradox][paradox]]
+  -  [[#eshell][eshell]]
+  -  [[#fish-completion][fish-completion]]
+  -  [[#suggest][suggest]]
+  -  [[#rg][rg]]
+  -  [[#ag][ag]]
+  -  [[#wgrep-ag][wgrep-ag]]
+  -  [[#centered-window][centered-window]]
+  -  [[#minibuffer-line][minibuffer-line]]
+  -  [[#beacon][beacon]]
+  -  [[#undo-tree][undo-tree]]
+  -  [[#mappings][Mappings]]
+  -  [[#emacs-lisp][Emacs Lisp]]
+  -  [[#java][Java]]
+  -  [[#javascript][Javascript]]
+  -  [[#shell-script][Shell script]]
+  -  [[#org-mode][Org mode]]
+  -  [[#org-clocking][Org Clocking]]
+  -  [[#org-gcal][org-gcal]]
+  -  [[#org-agenda][Org Agenda]]
+  -  [[#google-this][google-this]]
+  -  [[#company-mode][company-mode]]
+  -  [[#ansi-term][ansi-term]]
+  -  [[#sql][sql]]
+  -  [[#default-text-scale][default-text-scale]]
+  -  [[#expand-region][expand-region]]
+  -  [[#rainbow-delimiters][rainbow-delimiters]]
+  -  [[#yaml-mode][yaml-mode]]
+  -  [[#elpy][elpy]]
+  -  [[#help-fns][help-fns+]]
+  -  [[#helpful][helpful]]
+  -  [[#es-mode][es-mode]]
+  -  [[#aggressive-indent][aggressive-indent]]
+  -  [[#gist][gist]]
+  -  [[#markdown-mode][markdown-mode]]
+  -  [[#lispy][lispy]]
+  -  [[#lispyville][lispyville]]
+  -  [[#which-key][which-key]]
+  -  [[#projectile][projectile]]
+  -  [[#perspective][perspective]]
+  -  [[#persp-projectile][persp-projectile]]
+  -  [[#term-projectile][term-projectile]]
+  -  [[#avy][avy]]
+  -  [[#ivy][ivy]]
+  -  [[#ivy-posframe][ivy-posframe]]
+  -  [[#command-log-mode][command-log-mode]]
+  -  [[#wgrep][wgrep]]
+  -  [[#counsel][counsel]]
+  -  [[#swiper][swiper]]
+  -  [[#counsel-projectile][counsel-projectile]]
+  -  [[#neotree][neotree]]
+  -  [[#slamhound][slamhound]]
+  -  [[#scala-mode][scala-mode]]
+  -  [[#meghanada][meghanada]]
+  -  [[#clojure-mode][clojure-mode]]
+  -  [[#inf-clojure][inf-clojure]]
+  -  [[#cider][cider]]
+  -  [[#diff-hl][diff-hl]]
+  -  [[#auto-dim-other-buffers][auto-dim-other-buffers]]
+  -  [[#browse-at-remote][browse-at-remote]]
+  -  [[#git-timemachine][git-timemachine]]
+  -  [[#magit][magit]]
+  -  [[#magit-todos][magit-todos]]
+  -  [[#magit-gh-pulls][magit-gh-pulls]]
+  -  [[#org-bullets][org-bullets]]
+  -  [[#org-bullets][org-bullets]]
+  -  [[#evil-org][evil-org]]
+  -  [[#evil-magit][evil-magit]]
+  -  [[#evil-extra-operator][evil-extra-operator]]
+  -  [[#evil-exchange][evil-exchange]]
+  -  [[#evil-nerd-commenter][evil-nerd-commenter]]
+  -  [[#evil-surround][evil-surround]]
+  -  [[#evil-goggles][evil-goggles]]
+  -  [[#circe][circe]]
+  -  [[#mingus][mingus]]
+  -  [[#dockerfile-mode][dockerfile-mode]]
+
 * Dependencies
 - =ag=
 - =ripgrep=
@@ -2376,6 +2480,13 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :after magit
   :config
   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+#+END_SRC
+
+* org-make-toc
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package org-make-toc
+  :ensure t
+  :after org)
 #+END_SRC
 
 * org-bullets
