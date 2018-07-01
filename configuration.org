@@ -152,15 +152,15 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 
 * Helper functions
 #+BEGIN_SRC emacs-lisp :tangle yes
-;; FIXME: shows incorrect directory sometimes.
-(defun mpereira/shorten-directory (dir max-length)
+(defun mpereira/shorten-directory (project-root-dir dir max-length)
   "Show up to MAX-LENGTH characters of a directory name DIR."
-  (let ((directory-truncation-string (if (char-displayable-p ?…) "…/" ".../"))
-        (longname (abbreviate-file-name dir)))
+  (let* ((directory-truncation-string (if (char-displayable-p ?…) "…/" ".../"))
+         (project-dir (s-chop-prefix project-root-dir dir))
+         (dir-short (abbreviate-file-name project-dir)))
     ;; If it fits, return the string.
-    (if (<= (string-width longname) max-length) longname
+    (if (<= (string-width dir-short) max-length) dir-short
       ;; If it doesn't, shorten it.
-      (let ((path (reverse (split-string longname "/")))
+      (let ((path (reverse (split-string dir-short "/")))
             (output ""))
         (when (and path (equal "" (car path)))
           (setq path (cdr path)))
@@ -556,11 +556,11 @@ exist in any structured movement package is mind-boggling to me."
 (with-eval-after-load "projectile"
   (with-eval-after-load "eshell"
     (with-eval-after-load "magit"
-      (setq mpereira/mode-line-max-directory-length 15)
+      (setq mpereira/mode-line-max-directory-length 20)
 
       (defconst mpereira/mode-line-projectile
         '(:eval
-          (let ((face 'gnus-group-mail-1))
+          (let ((face 'bold))
             (when (projectile-project-name)
               (concat
                (propertize " " 'face face)
@@ -580,24 +580,29 @@ exist in any structured movement package is mind-boggling to me."
       (defconst mpereira/mode-line-buffer
         '(:eval
           (let ((modified-or-ro-symbol (cond
-                                        ((and buffer-file-name (buffer-modified-p))
+                                        ((and buffer-file-name
+                                              (buffer-modified-p))
                                          "~")
                                         (buffer-read-only ":RO")
                                         (t "")))
-                (face 'bold)
-                (directory-face 'shadow)
-                (modified-symbol-face 'default)
+                ;; Not using %b because it sometimes prepends the directory
+                ;; name.
+                (buffer-name* (file-name-nondirectory (buffer-name)))
+                (buffer-name-face 'gnus-summary-normal-ticked)
+                (directory-face 'gnus-summary-normal-undownloaded)
+                (modified-or-ro-symbol-face 'gnus-summary-normal-undownloaded)
                 (directory (if buffer-file-name
                                (mpereira/shorten-directory
+                                (projectile-project-root)
                                 default-directory
                                 mpereira/mode-line-max-directory-length)
                              "")))
             (concat
-             (propertize " " 'face face)
+             (propertize " " 'face buffer-name-face)
              (propertize (format "%s" directory) 'face directory-face)
-             (propertize "%b" 'face face)
-             (propertize modified-or-ro-symbol 'face modified-symbol-face)
-             (propertize " " 'face face)))))
+             (propertize (format "%s" buffer-name*) 'face buffer-name-face)
+             (propertize modified-or-ro-symbol 'face modified-or-ro-symbol-face)
+             (propertize " " 'face buffer-name-face)))))
 
       (defconst mpereira/mode-line-major-mode
         '(:eval
