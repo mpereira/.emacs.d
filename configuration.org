@@ -1934,9 +1934,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package aggressive-indent
   :ensure t
   :config
-  (add-hook 'prog-mode-hook 'aggressive-indent-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'sql-mode)
-  (add-to-list 'aggressive-indent-excluded-modes 'makefile-bsdmake-mode))
+  (add-to-list 'aggressive-indent-excluded-modes 'makefile-bsdmake-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'python-mode)
+  (add-hook 'prog-mode-hook 'aggressive-indent-mode))
 #+END_SRC
 
 * gist
