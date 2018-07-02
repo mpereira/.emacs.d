@@ -2168,7 +2168,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   ;; Override `ivy-display-functions-alist' to have all ivy completions be shown
   ;; at point with a few exceptions.
   (setq ivy-display-functions-alist
-        '((magit-checkout . ivy-display-function-fallback)
+        '((magit-reset-soft . ivy-display-function-fallback)
+          (magit-reset-hard . ivy-display-function-fallback)
+          (magit-checkout . ivy-display-function-fallback)
           (swiper . ivy-posframe-display-at-frame-center)
           (t . ivy-posframe-display-at-point)))
   (ivy-posframe-enable))
