@@ -2205,6 +2205,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :states '(normal visual)
    :prefix mpereira/leader
    :infix "f"
+   ";" 'counsel-minibuffer-history
    ":" 'counsel-expression-history
    "b" 'ivy-switch-buffer
    "f" 'counsel-find-file
