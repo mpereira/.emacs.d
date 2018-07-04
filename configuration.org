@@ -87,6 +87,7 @@
   -  [[#magit][magit]]
   -  [[#magit-todos][magit-todos]]
   -  [[#magit-gh-pulls][magit-gh-pulls]]
+  -  [[#wolfram-alpha][Wolfram Alpha]]
   -  [[#org-make-toc][org-make-toc]]
   -  [[#org-bullets][org-bullets]]
   -  [[#evil-org][evil-org]]
@@ -105,12 +106,16 @@
 - =ripgrep=
 - =fish=
 - =python3=
+- [[https://github.com/settings/tokens][GitHub personal token]] (for magit, gist, etc.)
+- [[http://developer.wolframalpha.com/portal/myapps/][Wolfram Alpha AppID]] (for wolfram)
 - =~/.emacs.d/circe-secrets.el=
   - =mpereira/secret-circe-nickserv-password=
 - =~/.emacs.d/org-gcal-secrets.el=
   - =mpereira/secret-org-gcal-client-id=
   - =mpereira/secret-org-gcal-client-secret=
   - =mpereira/secret-org-gcal-file-alist=
+- =~/.emacs.d/wolfram-secrets.el=
+  - =mpereira/secret-wolfram-alpha-app-id=
 
 * Stuff I keep forgetting
 ** org mode file links to search patterns can't start with open parens
@@ -2504,6 +2509,23 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :after magit
   :config
   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+#+END_SRC
+
+* Wolfram Alpha
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package wolfram
+  :ensure t
+  :config
+  (load-file (expand-file-name "wolfram-secrets.el" user-emacs-directory))
+
+  (setq wolfram-alpha-app-id mpereira/secret-wolfram-alpha-app-id)
+
+  (general-define-key
+   :keymaps '(global-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   :infix "e"
+   "w" 'wolfram-alpha))
 #+END_SRC
 
 * org-make-toc
