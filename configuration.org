@@ -705,6 +705,15 @@ Sources:
 (setq initial-scratch-message nil)
 (setq ring-bell-function 'ignore)
 
+;; Minimal titlebar for macOS.
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
+(setq ns-use-proxy-icon nil)
+(setq frame-title-format nil)
+
+;; Make Finder's "Open with Emacs" create a buffer in the existing Emacs frame.
+(setq ns-pop-up-frames nil)
+
 ;; macOS modifiers.
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier 'super)
@@ -773,9 +782,6 @@ Sources:
 
 ;; Make TABs be displayed with a width of 2.
 (setq-default tab-width 2)
-
-;; Finder's "Open with Emacs" creates a buffer in the existing Emacs frame.
-(setq ns-pop-up-frames nil)
 
 ;; Week start on monday.
 (setq calendar-week-start-day 1)
@@ -1321,6 +1327,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 ;; Don't close all other windows when exiting the src buffer.
 (setq org-src-window-setup 'other-window)
+
 ;; Fontify code in code blocks.
 (setq org-src-fontify-natively t)
 
