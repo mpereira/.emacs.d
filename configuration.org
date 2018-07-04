@@ -694,6 +694,14 @@ Sources:
 ;; Highlight current line.
 (global-hl-line-mode t)
 
+;; Don't create backup~ files.
+(setq make-backup-files nil)
+
+;; Don't create #autosave# files.
+(setq auto-save-default nil)
+
+;; Don't lock files.
+(setq create-lockfiles nil)
 
 ;; Shh...
 (setq inhibit-startup-echo-area-message t)
@@ -735,9 +743,6 @@ Sources:
 ;; Remember point position between sessions.
 (require 'saveplace)
 (save-place-mode t)
-
-;; Don't create companion files.
-(setq create-lockfiles nil)
 
 ;; Save a bunch of session state stuff.
 (require 'savehist)
