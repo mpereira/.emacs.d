@@ -736,7 +736,7 @@ Sources:
 (dolist (hook '(prog-mode-hook text-mode-hook))
   (add-hook hook #'mpereira/enable-line-numbers))
 
-;; Better unique names for similarly-named file buffers.
+;; Better unique buffer names for files with the same base name.
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 
@@ -775,6 +775,7 @@ Sources:
 ;; Make it impossible to insert tabs.
 (setq-default indent-tabs-mode nil)
 
+;; Make TABs be displayed with a width of 2.
 (setq-default tab-width 2)
 
 ;; Finder's "Open with Emacs" creates a buffer in the existing Emacs frame.
