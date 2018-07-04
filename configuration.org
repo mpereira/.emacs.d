@@ -550,6 +550,10 @@ exist in any structured movement package is mind-boggling to me."
 
 (defun mpereira/disable-line-numbers ()
   (setq display-line-numbers nil))
+
+(setq mpereira/leader ",")
+
+(setq mpereira/dropbox-directory (expand-file-name "~/Dropbox"))
 #+END_SRC
 
 * Configure Mode Line
@@ -804,8 +808,6 @@ Sources:
 ;; Make cursor movement an order of magnitude faster.
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
-
-(setq mpereira/leader ",")
 #+END_SRC
 
 * general
@@ -1309,7 +1311,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * Org mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq org-directory "~/Dropbox/org/")
+(setq org-directory (expand-file-name "org" mpereira/dropbox-directory))
 
 (setq org-modules '(org-habit org-info))
 
