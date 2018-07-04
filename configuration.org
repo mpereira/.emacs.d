@@ -2466,24 +2466,24 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :states '(normal)
    :prefix mpereira/leader
    :infix "g"
+   "/" 'counsel-git-log
+   "<" 'smerge-keep-mine
+   ">" 'smerge-keep-other
+   "[" 'git-timemachine-show-previous-revision
+   "]" 'git-timemachine-show-next-revision
    "b" 'magit-blame
    "c" 'magit-commit-popup
    "d" 'magit-diff-buffer-file
    "D" 'magit-diff-unstaged
    "f" 'magit-find-file
    "g" 'counsel-git-grep
-   "l" 'magit-log-buffer-file
    "L" 'magit-log-all
+   "l" 'magit-log-buffer-file
    "p" 'magit-push-popup
    "s" 'magit-status
    "t" 'git-timemachine-toggle
    "w" 'magit-stage-file
-   "W" 'magit-stage-modified
-   "<" 'smerge-keep-mine
-   ">" 'smerge-keep-other
-   "<" 'smerge-keep-mine
-   "[" 'git-timemachine-show-previous-revision
-   "]" 'git-timemachine-show-next-revision)
+   "W" 'magit-stage-modified)
 
   ;; This makes magit slow when there are a lot of buffers. See:
   ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
