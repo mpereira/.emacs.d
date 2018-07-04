@@ -2691,6 +2691,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
   (load-file (expand-file-name "circe-secrets.el" user-emacs-directory))
 
+  (setq lui-logging-directory (expand-file-name "emacs-logs"
+                                                mpereira/dropbox-directory))
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
 
