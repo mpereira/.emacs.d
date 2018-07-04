@@ -666,6 +666,10 @@ Sources:
 
 * Options
 #+BEGIN_SRC emacs-lisp :tangle yes
+;; Don't append customizations to init.el.
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(load custom-file)
+
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
@@ -690,9 +694,6 @@ Sources:
 ;; Highlight current line.
 (global-hl-line-mode t)
 
-;; Don't append customizations to init.el.
-(setq custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file)
 
 ;; Shh...
 (setq inhibit-startup-echo-area-message t)
