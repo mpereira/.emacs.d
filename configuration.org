@@ -1323,6 +1323,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 ;; Don't indent src block content.
 (setq org-edit-src-content-indentation 0)
 
+;; Don't close all other windows when exiting the src buffer.
+(setq org-src-window-setup 'other-window)
 ;; Fontify code in code blocks.
 (setq org-src-fontify-natively t)
 
