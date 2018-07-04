@@ -687,11 +687,7 @@ Sources:
 ;; Break lines automatically when typing.
 (auto-fill-mode t)
 
-;; Show line and column numbers in mode line.
-(line-number-mode t)
-(column-number-mode t)
-
-;; Highlight current line;
+;; Highlight current line.
 (global-hl-line-mode t)
 
 ;; Don't append customizations to init.el.
