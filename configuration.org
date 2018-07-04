@@ -790,11 +790,11 @@ Sources:
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
 
-(setq mpereira/leader ",")
-
 ;; Make cursor movement an order of magnitude faster.
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
+
+(setq mpereira/leader ",")
 #+END_SRC
 
 * general
