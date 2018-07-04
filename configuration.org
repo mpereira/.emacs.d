@@ -2078,7 +2078,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package which-key
   :ensure t
   :config
-  (which-key-mode))
+  (which-key-mode)
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "<tab>" 'which-key-show-top-level))
 #+END_SRC
 
 * projectile
