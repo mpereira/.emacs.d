@@ -4,8 +4,6 @@
 :END:
   -  [[#dependencies][Dependencies]]
   -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
-    -  [[#upgrade-packages-m-x-list-packages-f-u-u-x][Upgrade packages: =M-x list-packages f u U x=]]
-    -  [[#paste-into-the-minibuffer-c-y][Paste into the minibuffer: =C-y=]]
     -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
     -  [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][=EXPRESSION= can be used only once per ~org-agenda-prefix-format~]]
     -  [[#emulate-c-u-universal-argument][Emulate =C-u= (universal-argument)]]
@@ -115,8 +113,6 @@
   - =mpereira/secret-org-gcal-file-alist=
 
 * Stuff I keep forgetting
-** Upgrade packages: =M-x list-packages f u U x=
-** Paste into the minibuffer: =C-y=
 ** org mode file links to search patterns can't start with open parens
 https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 ** =EXPRESSION= can be used only once per ~org-agenda-prefix-format~
