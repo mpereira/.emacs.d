@@ -966,8 +966,9 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (general-define-key
    :states '(normal visual)
    :keymaps '(eshell-mode-map)
-   "C-k" 'eshell-previous-prompt
-   "C-j" 'eshell-next-prompt)
+   "0" 'eshell-bol
+   "C-j" 'eshell-next-prompt
+   "C-k" 'eshell-previous-prompt)
 
   (general-define-key
    :states '(insert)
