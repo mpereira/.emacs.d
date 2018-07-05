@@ -2700,6 +2700,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (setq circe-default-nick "mpereira"
         circe-default-user "mpereira"
         circe-default-realname "mpereira")
+  (setq circe-default-part-message "Bye.")
+  (setq circe-default-quit-message "Bye.")
   (setq circe-reduce-lurker-spam t)
   (setq circe-network-options
         `(("Freenode"
