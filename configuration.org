@@ -1602,7 +1602,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 ;; Don't look for free-form time string in headline.
 (setq org-agenda-search-headline-for-time nil)
 
-(setq org-agenda-tags-column -110)
+(setq org-agenda-tags-column -120)
 
 (setq org-agenda-format-date 'mpereira/org-agenda-format-date)
 
