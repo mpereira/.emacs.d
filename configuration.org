@@ -70,10 +70,11 @@
   -  [[#avy][avy]]
   -  [[#ivy][ivy]]
   -  [[#ivy-posframe][ivy-posframe]]
-  -  [[#command-log-mode][command-log-mode]]
-  -  [[#wgrep][wgrep]]
-  -  [[#counsel][counsel]]
   -  [[#swiper][swiper]]
+  -  [[#counsel][counsel]]
+  -  [[#wgrep][wgrep]]
+  -  [[#counsel-org-clock][counsel-org-clock]]
+  -  [[#command-log-mode][command-log-mode]]
   -  [[#counsel-projectile][counsel-projectile]]
   -  [[#neotree][neotree]]
   -  [[#slamhound][slamhound]]
@@ -1431,7 +1432,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
        (interactive)
        (org-agenda nil "r"))
  "c" 'org-capture
- "Ci" 'org-clock-in-last
+ "Ci" 'org-clock-in
  "Co" 'org-clock-out
  "Cg" 'org-clock-goto
  "D" 'org-check-deadlines
@@ -2237,52 +2238,16 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (ivy-posframe-enable))
 #+END_SRC
 
-* command-log-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package command-log-mode
-  :ensure t
-  :config
-  (setq command-log-mode-auto-show t)
-  (setq command-log-mode-window-size 60))
-#+END_SRC
-
-* wgrep
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package wgrep
-  :ensure t
-  :config
-  (setq wgrep-auto-save-buffer t))
-#+END_SRC
-
-* counsel
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package counsel
-  :ensure t
-  :after ivy
-  :config
-  (setq counsel-find-file-ignore-regexp "/vendor/")
-
-  (general-define-key
-   :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "f"
-   ";" 'counsel-minibuffer-history
-   ":" 'counsel-expression-history
-   "b" 'ivy-switch-buffer
-   "f" 'counsel-find-file
-   "k" 'counsel-descbinds
-   "l" 'counsel-find-library
-   "m" 'describe-keymap
-   "n" 'counsel-describe-function
-   "p" 'package-list-packages-no-fetch
-   "v" 'counsel-describe-variable
-   "y" 'counsel-yank-pop))
-#+END_SRC
-
 * swiper
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package swiper
-  :ensure t
+  :ensure nil
+  ;; TODO: revert to Melpa package when this gets released:
+  ;; https://github.com/abo-abo/swiper/pull/1649
+  :quelpa (swiper
+           :fetcher github
+           :repo "seagle0128/swiper"
+           :branch "master")
   :config
   (general-define-key
    :keymaps '(swiper-map swiper-all-map ivy-minibuffer-map)
@@ -2293,6 +2258,57 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :states '(normal visual)
    :prefix mpereira/leader
    "/" 'swiper))
+#+END_SRC
+
+* counsel
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package counsel
+  :ensure t
+  :after ivy swiper
+  :config
+  (setq counsel-find-file-ignore-regexp "/vendor/")
+
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   :infix "f"
+   ";" 'counsel-minibuffer-history
+   ":" 'counsel-expression-history
+   "b" 'ivy-switch-buffer
+   "c" 'counsel-org-clock-history
+   "f" 'counsel-find-file
+   "k" 'counsel-descbinds
+   "l" 'counsel-find-library
+   "m" 'describe-keymap
+   "n" 'counsel-describe-function
+   "p" 'package-list-packages-no-fetch
+   "v" 'counsel-describe-variable
+   "y" 'counsel-yank-pop))
+#+END_SRC
+
+* wgrep
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package wgrep
+  :ensure t
+  :config
+  (setq wgrep-auto-save-buffer t))
+#+END_SRC
+
+* counsel-org-clock
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package counsel-org-clock
+  :ensure t
+  :config
+  (setq counsel-org-clock-default-action 'clock-in))
+#+END_SRC
+
+* command-log-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package command-log-mode
+  :ensure t
+  :config
+  (setq command-log-mode-auto-show t)
+  (setq command-log-mode-window-size 60))
 #+END_SRC
 
 * counsel-projectile
