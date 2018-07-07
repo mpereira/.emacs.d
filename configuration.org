@@ -44,6 +44,7 @@
   -  [[#org-gcal][org-gcal]]
   -  [[#org-agenda][Org Agenda]]
   -  [[#google-this][google-this]]
+  -  [[#evil-multiedit][evil-multiedit]]
   -  [[#company-mode][company-mode]]
   -  [[#ansi-term][ansi-term]]
   -  [[#sql][sql]]
@@ -1799,6 +1800,27 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :states '(visual)
    :prefix mpereira/leader
    "fg" 'google-this-region))
+#+END_SRC
+
+* evil-multiedit
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-multiedit
+  :ensure t
+  :after evil
+  :config
+  (setq evil-multiedit-follow-matches t)
+
+  (general-define-key
+   :states '(normal)
+   "C-n" 'evil-multiedit-match-and-next
+   "C-p" 'evil-multiedit-match-and-prev
+   "C-N" 'evil-multiedit-match-all)
+
+  (general-define-key
+   :states '(visual)
+   "C-n" 'evil-multiedit-match-symbol-and-next
+   "C-p" 'evil-multiedit-match-symbol-and-prev
+   "C-N" 'evil-multiedit-match-all))
 #+END_SRC
 
 * company-mode
