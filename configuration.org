@@ -2744,10 +2744,16 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
   (load-file (expand-file-name "circe-secrets.el" user-emacs-directory))
 
+  ;; Logging.
   (setq lui-logging-directory (expand-file-name "emacs-logs"
                                                 mpereira/dropbox-directory))
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
+
+  ;; Automatic reconnect.
+  (setq circe-lagmon-timer-tick 60)
+  (load "circe-lagmon" nil t)
+  (circe-lagmon-mode)
 
   (setq circe-default-nick "mpereira"
         circe-default-user "mpereira"
