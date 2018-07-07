@@ -1572,7 +1572,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package org-gcal
   :ensure t
   :config
-  (setq mpereira/org-gcal-directory (concat org-directory "gcal/"))
+  (setq mpereira/org-gcal-directory (expand-file-name "gcal" org-directory))
 
   (load-file (expand-file-name "org-gcal-secrets.el" user-emacs-directory))
 
@@ -1671,7 +1671,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                    (org-agenda-prefix-format
                     " %-18c %-22(mpereira/org-agenda-project-name-prefix-format)")
                    (org-agenda-overriding-header "\nNext Tasks\n")))))
-         (inbox-file (concat org-directory "inbox.org"))
+         (inbox-file (expand-file-name "inbox.org" org-directory))
          (inbox-buffer (find-file-noselect inbox-file))
          (inbox (with-current-buffer inbox-buffer
                   (org-element-contents (org-element-parse-buffer 'headline))))
