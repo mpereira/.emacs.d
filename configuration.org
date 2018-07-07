@@ -963,7 +963,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 
   (general-define-key
    :keymaps '(eshell-mode-map)
-   "C-c C-c" 'term-interrupt-subjob)
+   "C-c C-c" 'eshell-interrupt-process)
 
   (general-define-key
    :states '(normal visual)
