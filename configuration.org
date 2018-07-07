@@ -101,6 +101,7 @@
   -  [[#circe][circe]]
   -  [[#mingus][mingus]]
   -  [[#dockerfile-mode][dockerfile-mode]]
+  -  [[#json-mode][json-mode]]
 
 * Dependencies
 - =ag=
@@ -2753,6 +2754,17 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package dockerfile-mode
   :ensure t
   :mode "Dockerfile.*\\'")
+#+END_SRC
+
+# Local Variables:
+# before-save-hook: org-make-toc
+# org-adapt-indentation: nil
+# End:
+
+* json-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package json-mode
+  :ensure t)
 #+END_SRC
 
 # Local Variables:
