@@ -39,6 +39,7 @@
   -  [[#java][Java]]
   -  [[#javascript][Javascript]]
   -  [[#shell-script][Shell script]]
+  -  [[#python][Python]]
   -  [[#org-mode][Org mode]]
   -  [[#org-clocking][Org Clocking]]
   -  [[#org-gcal][org-gcal]]
@@ -1310,6 +1311,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
           (lambda ()
             (setq-local sh-basic-offset 2)
             (setq-local sh-indentation 2)))
+#+END_SRC
+
+* Python
+#+BEGIN_SRC emacs-lisp :tangle yes
+(with-eval-after-load "elpy"
+  (general-define-key
+   :keymaps '(python-mode-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   :infix "e"
+   "e" 'elpy-shell-send-statement
+   "p" 'elpy-shell-send-group))
 #+END_SRC
 
 * Org mode
