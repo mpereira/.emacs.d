@@ -1200,8 +1200,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
             minibuffer-local-isearch-map)
  "<escape>" 'minibuffer-keyboard-quit)
 
-;; FIXME: isn't M-x bound in insert mode in the first place and why doesn't
-;; this binding work?
+;; FIXME: isn't M-x bound in insert mode in the first place and why doesn't this
+;; binding work?
 (general-define-key
  :keymaps '(global-map)
  :states '(insert)
