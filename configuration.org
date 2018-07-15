@@ -812,6 +812,9 @@ Sources:
 ;; Make cursor movement an order of magnitude faster.
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
+
+;; Delete trailing whitespace on save.
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
 
 * general
