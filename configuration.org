@@ -22,6 +22,7 @@
   -  [[#options][Options]]
   -  [[#general][general]]
   -  [[#exec-path-from-shell][exec-path-from-shell]]
+  -  [[#with-editor][with-editor]]
   -  [[#evil][evil]]
   -  [[#paradox][paradox]]
   -  [[#eshell][eshell]]
@@ -836,6 +837,17 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
                 '("SSH_AUTH_SOCK"
                   "SSH_AGENT_PID")))
   (exec-path-from-shell-initialize))
+#+END_SRC
+
+* with-editor
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package with-editor
+ :ensure t
+  :config
+  (add-hook 'eshell-mode-hook 'with-editor-export-editor)
+  (add-hook 'term-exec-hook   'with-editor-export-editor)
+  (add-hook 'shell-mode-hook  'with-editor-export-editor))
 #+END_SRC
 
 * evil
