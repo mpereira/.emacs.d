@@ -832,10 +832,10 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 (use-package exec-path-from-shell
   :ensure t
   :config
-  (setq exec-path-from-shell-variables
-        (append exec-path-from-shell-variables
-                '("SSH_AUTH_SOCK"
-                  "SSH_AGENT_PID")))
+  (dolist (shell-variable '("PYTHONPATH"
+                            "SSH_AUTH_SOCK"
+                            "SSH_AGENT_PID"))
+    (add-to-list 'exec-path-from-shell-variables shell-variable))
   (exec-path-from-shell-initialize))
 #+END_SRC
 
