@@ -816,6 +816,10 @@ Sources:
 
 ;; Delete trailing whitespace on save.
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
+
+(setq display-time-world-list '(("Europe/Berlin" "Hamburg")
+                                ("America/Sao_Paulo" "São Paulo")
+                                ("America/Los_Angeles" "San Francisco")))
 #+END_SRC
 
 * general
