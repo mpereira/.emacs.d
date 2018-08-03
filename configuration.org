@@ -974,6 +974,8 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (setq pcomplete-cycle-completions nil)
   (setq pcomplete-ignore-case t)
 
+  (eshell/alias "e" "find-file $1")
+
   ;; Disable beacon-mode.
   (beacon-mode -1)
 
