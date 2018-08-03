@@ -955,11 +955,9 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 (defun mpereira/ivy-eshell-history ()
   "Browse Eshell history."
   (interactive)
-  (setq current-input-start (eshell-bol))
-  (setq current-input-end (point-at-eol))
   (let ((elements eshell-history-ring)
-        (current-input (buffer-substring-no-properties current-input-start
-                                                       current-input-end)))
+        (current-input (buffer-substring-no-properties (eshell-bol)
+                                                       (point-at-eol))))
     (ivy-read "Command: "
               (delete-dups
                (when (> (ring-size elements) 0)
