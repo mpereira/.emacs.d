@@ -1,3 +1,6 @@
+(setq debug-on-error t)
+(setq gc-cons-threshold (* 128 1024 1024))
+
 (require 'package)
 
 (package-initialize)
@@ -21,3 +24,6 @@
   :ensure org-plus-contrib)
 
 (org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory))
+
+(setq gc-cons-threshold (* 20 1024 1024))
+(setq debug-on-error nil)

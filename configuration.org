@@ -3,27 +3,28 @@
 :TOC:      this
 :END:
   -  [[#dependencies][Dependencies]]
-  -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
-    -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
-    -  [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][=EXPRESSION= can be used only once per ~org-agenda-prefix-format~]]
-    -  [[#emulate-c-u-universal-argument][Emulate =C-u= (universal-argument)]]
-      -  [[#for-raw-prefix-arg-interactive-p][For raw prefix arg (interactive "P")]]
-      -  [[#otherwise][Otherwise]]
-    -  [[#run-exec-path-from-shell-initialize-and-open-a-new-eshell-buffer-after-modifying-path][Run ~exec-path-from-shell-initialize~ and open a new eshell buffer after modifying =PATH=]]
-    -  [[#terminate-initel-loading-early][Terminate init.el loading early]]
   -  [[#s][s]]
   -  [[#dash][dash]]
   -  [[#helper-functions][Helper functions]]
-  -  [[#configure-mode-line][Configure Mode Line]]
   -  [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
   -  [[#tramp][Tramp]]
   -  [[#server][Server]]
-  -  [[#color-theme][Color theme]]
   -  [[#options][Options]]
+  -  [[#color-theme][Color theme]]
+  -  [[#configure-mode-line][Configure Mode Line]]
   -  [[#general][general]]
   -  [[#exec-path-from-shell][exec-path-from-shell]]
   -  [[#with-editor][with-editor]]
   -  [[#evil][evil]]
+    -  [[#evil-org][evil-org]]
+    -  [[#evil-magit][evil-magit]]
+    -  [[#evil-extra-operator][evil-extra-operator]]
+    -  [[#evil-exchange][evil-exchange]]
+    -  [[#evil-nerd-commenter][evil-nerd-commenter]]
+    -  [[#evil-surround][evil-surround]]
+    -  [[#evil-goggles][evil-goggles]]
+    -  [[#evil-collection][evil-collection]]
+    -  [[#evil-multiedit][evil-multiedit]]
   -  [[#paradox][paradox]]
   -  [[#eshell][eshell]]
   -  [[#fish-completion][fish-completion]]
@@ -36,75 +37,116 @@
   -  [[#beacon][beacon]]
   -  [[#undo-tree][undo-tree]]
   -  [[#mappings][Mappings]]
+  -  [[#company-mode][company-mode]]
+  -  [[#flycheck][Flycheck]]
+    -  [[#flycheck][flycheck]]
+    -  [[#flycheck-inline][flycheck-inline]]
+    -  [[#flycheck-posframe][flycheck-posframe]]
   -  [[#emacs-lisp][Emacs Lisp]]
   -  [[#java][Java]]
+    -  [[#meghanada][meghanada]]
+  -  [[#clojure][Clojure]]
+    -  [[#clojure-mode][clojure-mode]]
+    -  [[#inf-clojure][inf-clojure]]
+    -  [[#cider][cider]]
+    -  [[#slamhound][slamhound]]
+  -  [[#rust][Rust]]
+    -  [[#rust-mode][rust-mode]]
+    -  [[#racer][racer]]
+    -  [[#flycheck-rust][flycheck-rust]]
+    -  [[#ob-rust][ob-rust]]
   -  [[#javascript][Javascript]]
   -  [[#shell-script][Shell script]]
   -  [[#python][Python]]
+    -  [[#elpy][elpy]]
+    -  [[#blacken][blacken]]
+  -  [[#json][JSON]]
+    -  [[#json-mode][json-mode]]
+    -  [[#json-navigator][json-navigator]]
   -  [[#org-mode][Org mode]]
-  -  [[#org-clocking][Org Clocking]]
-  -  [[#org-gcal][org-gcal]]
-  -  [[#org-agenda][Org Agenda]]
+    -  [[#org-clocking][Org Clocking]]
+    -  [[#org-gcal][org-gcal]]
+    -  [[#org-agenda][Org Agenda]]
+    -  [[#counsel-org-clock][counsel-org-clock]]
+    -  [[#org-bullets][org-bullets]]
+    -  [[#org-make-toc][org-make-toc]]
+    -  [[#ox-jira][ox-jira]]
+    -  [[#ox-gfm][ox-gfm]]
+    -  [[#ox-hugo][ox-hugo]]
+    -  [[#ox-pandoc][ox-pandoc]]
+  -  [[#scala][Scala]]
+    -  [[#scala-mode][scala-mode]]
+  -  [[#go][Go]]
+    -  [[#go-mode][go-mode]]
+  -  [[#sql][SQL]]
+  -  [[#markdown][Markdown]]
+    -  [[#markdown-mode][markdown-mode]]
+  -  [[#toml][TOML]]
+    -  [[#toml-mode][toml-mode]]
+  -  [[#yaml][YAML]]
+    -  [[#yaml-mode][yaml-mode]]
+  -  [[#docker][Docker]]
+    -  [[#docker][docker]]
+    -  [[#dockerfile-mode][dockerfile-mode]]
   -  [[#google-this][google-this]]
-  -  [[#evil-multiedit][evil-multiedit]]
-  -  [[#company-mode][company-mode]]
   -  [[#ansi-term][ansi-term]]
-  -  [[#sql][sql]]
   -  [[#default-text-scale][default-text-scale]]
   -  [[#expand-region][expand-region]]
   -  [[#rainbow-delimiters][rainbow-delimiters]]
-  -  [[#yaml-mode][yaml-mode]]
-  -  [[#elpy][elpy]]
+  -  [[#osascripts][osascripts]]
   -  [[#help-fns][help-fns+]]
   -  [[#helpful][helpful]]
+  -  [[#lsp][LSP]]
+    -  [[#lsp-mode][lsp-mode]]
+    -  [[#lsp-ui][lsp-ui]]
+    -  [[#lsp-rust][lsp-rust]]
+  -  [[#eglot][eglot]]
   -  [[#es-mode][es-mode]]
   -  [[#aggressive-indent][aggressive-indent]]
   -  [[#gist][gist]]
-  -  [[#markdown-mode][markdown-mode]]
   -  [[#lispy][lispy]]
   -  [[#lispyville][lispyville]]
   -  [[#which-key][which-key]]
   -  [[#projectile][projectile]]
+    -  [[#term-projectile][term-projectile]]
   -  [[#perspective][perspective]]
-  -  [[#persp-projectile][persp-projectile]]
-  -  [[#term-projectile][term-projectile]]
+    -  [[#persp-projectile][persp-projectile]]
   -  [[#avy][avy]]
   -  [[#ivy][ivy]]
+  -  [[#prescient][prescient]]
+    -  [[#ivy-prescient][ivy-prescient]]
+    -  [[#company-prescient][company-prescient]]
   -  [[#ivy-posframe][ivy-posframe]]
   -  [[#swiper][swiper]]
   -  [[#counsel][counsel]]
   -  [[#wgrep][wgrep]]
-  -  [[#counsel-org-clock][counsel-org-clock]]
   -  [[#command-log-mode][command-log-mode]]
   -  [[#counsel-projectile][counsel-projectile]]
   -  [[#neotree][neotree]]
-  -  [[#slamhound][slamhound]]
-  -  [[#scala-mode][scala-mode]]
-  -  [[#meghanada][meghanada]]
-  -  [[#clojure-mode][clojure-mode]]
-  -  [[#inf-clojure][inf-clojure]]
-  -  [[#cider][cider]]
+  -  [[#dired-sidebar][dired-sidebar]]
   -  [[#diff-hl][diff-hl]]
-  -  [[#auto-dim-other-buffers][auto-dim-other-buffers]]
+  -  [[#dimmer][dimmer]]
   -  [[#browse-at-remote][browse-at-remote]]
   -  [[#git-timemachine][git-timemachine]]
   -  [[#magit][magit]]
-  -  [[#magit-todos][magit-todos]]
-  -  [[#magit-gh-pulls][magit-gh-pulls]]
+    -  [[#magit-todos][magit-todos]]
+    -  [[#magit-gh-pulls][magit-gh-pulls]]
+    -  [[#magithub][magithub]]
   -  [[#wolfram-alpha][Wolfram Alpha]]
-  -  [[#org-make-toc][org-make-toc]]
-  -  [[#org-bullets][org-bullets]]
-  -  [[#evil-org][evil-org]]
-  -  [[#evil-magit][evil-magit]]
-  -  [[#evil-extra-operator][evil-extra-operator]]
-  -  [[#evil-exchange][evil-exchange]]
-  -  [[#evil-nerd-commenter][evil-nerd-commenter]]
-  -  [[#evil-surround][evil-surround]]
-  -  [[#evil-goggles][evil-goggles]]
   -  [[#circe][circe]]
   -  [[#mingus][mingus]]
-  -  [[#dockerfile-mode][dockerfile-mode]]
-  -  [[#json-mode][json-mode]]
+  -  [[#synosaurus][synosaurus]]
+  -  [[#unfill][unfill]]
+  -  [[#smex][smex]]
+  -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
+    -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
+    -  [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][=EXPRESSION= can be used only once per ~org-agenda-prefix-format~]]
+    -  [[#emulate-c-u-universal-argument][Emulate =C-u= (universal-argument)]]
+      -  [[#for-raw-prefix-arg-interactive-p][For raw prefix arg (interactive "P")]]
+      -  [[#otherwise][Otherwise]]
+    -  [[#after-modifying-path][After modifying =PATH=]]
+    -  [[#terminate-initel-loading-early][Terminate init.el loading early]]
+    -  [[#change-font-m-x-x-select-font][Change font: =M-x x-select-font=]]
 
 * Dependencies
 - =ag=
@@ -113,6 +155,7 @@
 - =python3=
 - [[https://github.com/settings/tokens][GitHub personal token]] (for magit, gist, etc.)
 - [[http://developer.wolframalpha.com/portal/myapps/][Wolfram Alpha AppID]] (for wolfram)
+- TODO: Google Apps Calendar (for org-gcal)
 - =~/.emacs.d/circe-secrets.el=
   - =mpereira/secret-circe-nickserv-password=
 - =~/.emacs.d/org-gcal-secrets.el=
@@ -121,28 +164,6 @@
   - =mpereira/secret-org-gcal-file-alist=
 - =~/.emacs.d/wolfram-secrets.el=
   - =mpereira/secret-wolfram-alpha-app-id=
-
-* Stuff I keep forgetting
-** org mode file links to search patterns can't start with open parens
-https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
-** =EXPRESSION= can be used only once per ~org-agenda-prefix-format~
-** Emulate =C-u= (universal-argument)
-*** For raw prefix arg (interactive "P")
-#+BEGIN_SRC emacs-lisp
-(let ((current-prefix-arg '(4)))
-  (call-interactively 'some-func))
-#+END_SRC
-*** Otherwise
-#+BEGIN_SRC emacs-lisp
-(let ((current-prefix-arg 4))
-  (call-interactively 'some-func))
-#+END_SRC
-** Run ~exec-path-from-shell-initialize~ and open a new eshell buffer after modifying =PATH=
-** Terminate init.el loading early
-#+BEGIN_SRC emacs-lisp
-(with-current-buffer " *load*"
-  (goto-char (point-max)))
-#+END_SRC
 
 * s
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -158,6 +179,10 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 
 * Helper functions
 #+BEGIN_SRC emacs-lisp :tangle yes
+(defmacro comment (&rest body)
+  "Comment out one or more s-expressions."
+  nil)
+
 (defun mpereira/shorten-directory (project-root-dir dir max-length)
   "Show up to MAX-LENGTH characters of a directory name DIR."
   (let* ((directory-truncation-string (if (char-displayable-p ?…) "…/" ".../"))
@@ -556,79 +581,68 @@ exist in any structured movement package is mind-boggling to me."
 (defun mpereira/disable-line-numbers ()
   (setq display-line-numbers nil))
 
+(defun mpereira/maybe-enable-aggressive-indent-mode ()
+  (when (not
+         (or (cl-member-if #'derived-mode-p aggressive-indent-excluded-modes)
+             buffer-read-only))
+    (aggressive-indent-mode)))
+
+(defun mpereira/lock-screen ()
+  (interactive)
+  ;; TODO: make file path joining portable.
+  (let ((command (concat "/System"
+                         "/Library"
+                         "/CoreServices"
+                         "/Menu\\ Extras"
+                         "/User.menu"
+                         "/Contents"
+                         "/Resources"
+                         "/CGSession"
+                         " "
+                         "-suspend")))
+    (shell-command command)))
+
+(defun mpereira/toggle-maximize-buffer (&optional centered-p)
+  "Toggle maximize buffer."
+  (interactive)
+  (if (= 1 (length (window-list)))
+      (progn
+        (set-window-configuration mpereira/saved-window-configuration)
+        (goto-char mpereira/saved-point)
+        (when mpereira/saved-centered-p
+          (centered-window-mode-toggle))
+        (setq mpereira/saved-window-configuration nil)
+        (setq mpereira/saved-point nil)
+        (setq mpereira/saved-centered-p nil))
+    (setq mpereira/saved-window-configuration (current-window-configuration))
+    (setq mpereira/saved-point (point))
+    (setq mpereira/saved-centered-p centered-p)
+    (delete-other-windows)
+    (when centered-p
+      (centered-window-mode))))
+
+(defun mpereira/epoch-at-point-to-timestamp ()
+  "TODO: docstring"
+  (interactive)
+  (if-let (thing (counsel-symbol-at-point))
+      (let* ((seconds (string-to-number thing))
+             (time (seconds-to-time seconds))
+             (timestamp (format-time-string "%Y-%m-%d %a %H:%M:%S" time)))
+        (kill-new timestamp)
+        (message timestamp)
+        timestamp)))
+
+(defun mpereira/pwd ()
+  "TODO: docstring"
+  (interactive)
+  (let ((path (buffer-file-name)))
+    (kill-new path)
+    (message path)
+    path))
+
 (setq mpereira/leader ",")
 
 (setq mpereira/dropbox-directory (expand-file-name "~/Dropbox"))
-#+END_SRC
-
-* Configure Mode Line
-#+BEGIN_SRC emacs-lisp :tangle yes
-(with-eval-after-load "projectile"
-  (with-eval-after-load "eshell"
-    (with-eval-after-load "magit"
-      (setq mpereira/mode-line-max-directory-length 20)
-
-      (defconst mpereira/mode-line-projectile
-        '(:eval
-          (let ((face 'bold))
-            (when (projectile-project-name)
-              (concat
-               (propertize " " 'face face)
-               (propertize (format "%s" (projectile-project-name)) 'face face)
-               (propertize " " 'face face))))))
-
-      (defconst mpereira/mode-line-vc
-        '(:eval
-          (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
-            (let ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
-                  (face 'magit-branch-current))
-              (concat
-               (propertize " " 'face face)
-               (propertize (format "%s" branch) 'face face)
-               (propertize " " 'face face))))))
-
-      (defconst mpereira/mode-line-buffer
-        '(:eval
-          (let ((modified-or-ro-symbol (cond
-                                        ((and buffer-file-name
-                                              (buffer-modified-p))
-                                         "~")
-                                        (buffer-read-only ":RO")
-                                        (t "")))
-                ;; Not using %b because it sometimes prepends the directory
-                ;; name.
-                (buffer-name* (file-name-nondirectory (buffer-name)))
-                (buffer-name-face 'gnus-summary-normal-ticked)
-                (directory-face 'gnus-summary-normal-undownloaded)
-                (modified-or-ro-symbol-face 'gnus-summary-normal-undownloaded)
-                (directory (if buffer-file-name
-                               (mpereira/shorten-directory
-                                (projectile-project-root)
-                                default-directory
-                                mpereira/mode-line-max-directory-length)
-                             "")))
-            (concat
-             (propertize " " 'face buffer-name-face)
-             (propertize (format "%s" directory) 'face directory-face)
-             (propertize (format "%s" buffer-name*) 'face buffer-name-face)
-             (propertize modified-or-ro-symbol 'face modified-or-ro-symbol-face)
-             (propertize " " 'face buffer-name-face)))))
-
-      (defconst mpereira/mode-line-major-mode
-        '(:eval
-          (propertize " %m  " 'face 'font-lock-comment-face)))
-
-      (defconst mpereira/mode-line-buffer-position
-        '(:eval
-          (unless eshell-mode
-            (propertize " %p %l,%c " 'face 'tooltip))))
-
-      (setq-default mode-line-format (list mpereira/mode-line-projectile
-                                           mpereira/mode-line-vc
-                                           mpereira/mode-line-buffer
-                                           mpereira/mode-line-major-mode
-                                           mpereira/mode-line-buffer-position
-                                           mode-line-end-spaces)))))
 #+END_SRC
 
 * quelpa and quelpa-use-package
@@ -657,21 +671,9 @@ exist in any structured movement package is mind-boggling to me."
 * Server
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'server)
+
 (unless (server-running-p)
   (server-start))
-#+END_SRC
-
-* Color theme
-Sources:
-- https://emacsthemes.com
-- http://daylerees.github.io/
-- http://raebear.net/comp/emacscolors.html
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package srcery-theme
-  :ensure t
-  :config
-  (load-theme 'srcery t))
 #+END_SRC
 
 * Options
@@ -689,7 +691,7 @@ Sources:
 (set-face-attribute 'default nil :height 150)
 
 ;; Start in full-screen.
-(toggle-frame-fullscreen)
+(add-hook 'after-init-hook #'toggle-frame-fullscreen)
 
 ;; Show matching parens.
 (setq show-paren-delay 0)
@@ -703,6 +705,9 @@ Sources:
 
 ;; Highlight current line.
 (global-hl-line-mode t)
+
+;; Provide undo/redo commands for window changes.
+(winner-mode t)
 
 ;; Don't create backup~ files.
 (setq make-backup-files nil)
@@ -774,7 +779,9 @@ Sources:
 (require 'whitespace)
 (setq whitespace-style '(face lines-tail trailing))
 (dolist (hook '(prog-mode-hook text-mode-hook))
-  (add-hook hook #'whitespace-mode))
+  ;; Disabling whitespace mode for now.
+  ;; (add-hook hook #'whitespace-mode)
+  )
 
 ;; 80 columns.
 (setq-default whitespace-line-column 80)
@@ -822,6 +829,93 @@ Sources:
                                 ("America/Los_Angeles" "San Francisco")))
 #+END_SRC
 
+* Color theme
+Sources:
+- https://emacsthemes.com
+- http://daylerees.github.io/
+- http://raebear.net/comp/emacscolors.html
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package srcery-theme
+  :ensure t
+  :defer t)
+
+(use-package doom-themes
+  :ensure t
+  :config
+  (add-hook 'after-init-hook (lambda () (load-theme 'doom-spacegrey t)) t))
+#+END_SRC
+
+* Configure Mode Line
+#+BEGIN_SRC emacs-lisp :tangle yes
+(with-eval-after-load "projectile"
+  (with-eval-after-load "eshell"
+    (with-eval-after-load "magit"
+      (setq mpereira/mode-line-max-directory-length 20)
+
+      (defconst mpereira/mode-line-projectile
+        '(:eval
+          (let ((face 'bold))
+            (when (projectile-project-name)
+              (concat
+               (propertize " " 'face face)
+               (propertize (format "%s" (projectile-project-name)) 'face face)
+               (propertize " " 'face face))))))
+
+      (defconst mpereira/mode-line-vc
+        '(:eval
+          (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
+            (let ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
+                  (face 'magit-branch-current))
+              (concat
+               (propertize " " 'face face)
+               (propertize (format "%s" branch) 'face face)
+               (propertize " " 'face face))))))
+
+      (defconst mpereira/mode-line-buffer
+        '(:eval
+          (let ((modified-or-ro-symbol (cond
+                                        ((and buffer-file-name
+                                              (buffer-modified-p))
+                                         "~")
+                                        (buffer-read-only ":RO")
+                                        (t "")))
+                ;; Not using %b because it sometimes prepends the directory
+                ;; name.
+                (buffer-name* (file-name-nondirectory (buffer-name)))
+                (buffer-name-face 'mode-line-buffer-id)
+                (directory-face 'mode-line-inactive)
+                (modified-or-ro-symbol-face 'magit-refname-wip)
+                (directory (if (projectile-project-p)
+                               (mpereira/shorten-directory
+                                (projectile-project-root)
+                                default-directory
+                                mpereira/mode-line-max-directory-length)
+                             "")))
+            (concat
+             (propertize " " 'face buffer-name-face)
+             (propertize (format "%s" directory) 'face directory-face)
+             (propertize (format "%s" buffer-name*) 'face buffer-name-face)
+             (propertize modified-or-ro-symbol 'face modified-or-ro-symbol-face)
+             (propertize " " 'face buffer-name-face)))))
+
+      (defconst mpereira/mode-line-major-mode
+        '(:eval
+          (propertize " %m  " 'face 'font-lock-comment-face)))
+
+      (defconst mpereira/mode-line-buffer-position
+        '(:eval
+          (unless eshell-mode
+            (propertize " %p %l,%c " 'face 'org-todo))))
+
+      (setq-default mode-line-format (list mpereira/mode-line-projectile
+                                           mpereira/mode-line-vc
+                                           mpereira/mode-line-buffer
+                                           mpereira/mode-line-major-mode
+                                           mpereira/mode-line-buffer-position
+                                           mode-line-end-spaces)))))
+#+END_SRC
+
 * general
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package general
@@ -844,7 +938,6 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 #+END_SRC
 
 * with-editor
-
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package with-editor
  :ensure t
@@ -898,6 +991,200 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
    ("M-k" . evil-window-up)
    ("M-l" . evil-window-right)))
 #+END_SRC
+** evil-org
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-org
+  :ensure t
+  :after evil org
+  :config
+  (add-hook 'org-mode-hook 'evil-org-mode)
+
+  ;; Org todo notes don't have a specific major mode, so change to insert
+  ;; state based on its buffer name.
+  ;; FIXME: doesn't seem to be working.
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (when (string= "*Org Note*" (buffer-name))
+                (evil-insert-state))))
+
+  (defmacro calendar-action (func)
+    `(lambda ()
+       (interactive)
+       (org-eval-in-calendar '(,func 1))))
+
+  (general-define-key
+   :keymaps '(org-read-date-minibuffer-local-map)
+   "q" 'minibuffer-keyboard-quit
+   "l" (calendar-action calendar-forward-day)
+   "h" (calendar-action calendar-backward-day)
+   "j" (calendar-action calendar-forward-week)
+   "k" (calendar-action calendar-backward-week)
+   ">" (calendar-action calendar-forward-month)
+   "<" (calendar-action calendar-backward-month)
+   "}" (calendar-action calendar-forward-year)
+   "{" (calendar-action calendar-backward-year)
+   "0" (calendar-action calendar-beginning-of-week)
+   "$" (calendar-action calendar-end-of-week))
+
+  ;; TODO: can we replace all of this with evil-collection?
+  (evil-set-initial-state 'calendar-mode 'emacs)
+
+  (general-define-key
+   :keymaps '(calendar-mode-map)
+   "l" 'calendar-forward-day
+   "h" 'calendar-backward-day
+   "h" 'calendar-backward-day
+   "j" 'calendar-forward-week
+   "k" 'calendar-backward-week
+   ">" 'calendar-forward-month
+   "<" 'calendar-backward-month
+   "}" 'calendar-forward-year
+   "{" 'calendar-backward-year
+   "0" 'calendar-beginning-of-week
+   "$" 'calendar-end-of-week)
+
+  (add-hook 'evil-org-mode-hook
+            (lambda ()
+              (evil-org-set-key-theme '(operators
+                                        navigation
+                                        textobjects
+                                        todo)))))
+#+END_SRC
+** evil-magit
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-magit
+  :after evil magit
+  :ensure t
+  :config
+  (general-define-key
+    :keymaps 'magit-mode-map
+    :states '(normal visual)
+    "j" 'evil-next-visual-line
+    "k" 'evil-previous-visual-line
+    "C-j" 'magit-section-forward
+    "C-k" 'magit-section-backward)
+
+  (general-define-key
+    :states '(normal)
+    :keymaps '(git-rebase-mode-map)
+    "x" 'git-rebase-kill-line
+    "C-S-j" 'git-rebase-move-line-down
+    "C-S-k" 'git-rebase-move-line-up))
+#+END_SRC
+** evil-extra-operator
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-extra-operator
+  :ensure t
+  :after evil
+  :init
+  (setq evil-extra-operator-eval-key "ge")
+  :config
+  (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
+#+END_SRC
+** evil-exchange
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-exchange
+  :ensure t
+  :after evil
+  :config
+  (evil-exchange-install))
+#+END_SRC
+** evil-nerd-commenter
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-nerd-commenter
+  :ensure t
+  :after evil
+  :config
+  (general-define-key
+    :keymaps '(normal)
+    "gc" 'evilnc-comment-operator))
+#+END_SRC
+** evil-surround
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-surround
+  :ensure t
+  :after evil
+  :config
+  (global-evil-surround-mode t))
+#+END_SRC
+** evil-goggles
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-goggles
+  :ensure t
+  :after evil
+  :config
+  (evil-goggles-mode)
+
+  ;; Optionally use diff-mode's faces; as a result, deleted text will be
+  ;; highlighed with `diff-removed` face which is typically some red color
+  ;; (as defined by the color theme) other faces such as `diff-added` will
+  ;; be used for other actions.
+  (evil-goggles-use-diff-faces))
+#+END_SRC
+** evil-collection
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (evil-collection-init '(package-menu))
+
+  ;; Disabling this for now because:
+  ;; 1. Can't run :s/foo/bar/ commands in minibuffer
+  ;; 2. Some inputs are read-only (navigating directories, annoying)
+  ;; 3. Something else?
+  ;; (evil-collection-init '(minibuffer))
+  ;;
+  ;; ESC is `abort-recursive-edit' in the evil-collection minibuffer bindings.
+  ;; FIXME: ESC not exiting when using posframe.
+  ;; (general-define-key
+  ;;  :keymaps '(minibuffer-local-map
+  ;;             minibuffer-local-ns-map
+  ;;             minibuffer-local-completion-map
+  ;;             minibuffer-local-must-match-map
+  ;;             minibuffer-local-isearch-map
+  ;;             evil-ex-completion-map)
+  ;;  :states '(normal)
+  ;;  "<escape>" 'minibuffer-keyboard-quit)
+
+  ;; (evil-collection-init '(custom
+  ;;                         debugger
+  ;;                         man))
+  )
+#+END_SRC
+** evil-multiedit
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-multiedit
+  :ensure t
+  :after evil
+  :config
+  (setq evil-multiedit-follow-matches t)
+
+  (general-define-key
+   :states '(normal)
+   "C-RET" 'evil-multiedit-toggle-marker-here
+   "RET" 'evil-multiedit-toggle-or-restrict-region
+   "C-k" 'evil-multiedit-prev
+   "C-j" 'evil-multiedit-next
+   "C-n" 'evil-multiedit-match-and-next
+   "C-p" 'evil-multiedit-match-and-prev
+   "C-S-n" 'evil-multiedit-match-all)
+
+  (general-define-key
+   :states '(visual)
+   "C-RET" 'evil-multiedit-toggle-marker-here
+   "C-k" 'evil-multiedit-prev
+   "C-j" 'evil-multiedit-next
+   "C-n" 'evil-multiedit-match-symbol-and-next
+   "C-p" 'evil-multiedit-match-symbol-and-prev
+   "C-S-n" 'evil-multiedit-match-all)
+
+  (general-define-key
+   :keymaps '(evil-multiedit-state-map)
+   "RET" 'evil-multiedit-toggle-or-restrict-region
+   "C-k" 'evil-multiedit-prev
+   "C-j" 'evil-multiedit-next))
+#+END_SRC
 
 * paradox
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -945,7 +1232,15 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 
 (defun eshell/clear ()
   (let ((inhibit-read-only t))
-    (erase-buffer)))
+    (erase-buffer)
+    ;; This fixes the scenario where `ivy-completion-in-region-action' tries to
+    ;; delete a region delimited by these two variables after they went out of
+    ;; sync due to clearing an eshell buffer. The symptoms are broken completion
+    ;; insertion and messages like: "Args out of range: #<buffer *eshell*>,
+    ;; 237506, 237518" in the messages buffer. Should probably check with the
+    ;; ivy people if this should be handled by ivy itself instead?
+    (setq ivy-completion-beg nil)
+    (setq ivy-completion-end nil)))
 
 (defun mpereira/eshell-clear ()
   (interactive)
@@ -955,9 +1250,12 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 (defun mpereira/ivy-eshell-history ()
   "Browse Eshell history."
   (interactive)
-  (let ((elements eshell-history-ring)
-        (current-input (buffer-substring-no-properties (eshell-bol)
-                                                       (point-at-eol))))
+  (let* ((elements eshell-history-ring)
+         (start (eshell-bol))
+         (end (point-at-eol))
+         (_ (message (format "%s" (list (buffer-name) start end))))
+         (current-input (buffer-substring-no-properties start
+                                                        end)))
     (ivy-read "Command: "
               (delete-dups
                (when (> (ring-size elements) 0)
@@ -975,9 +1273,6 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (setq pcomplete-ignore-case t)
 
   (eshell/alias "e" "find-file $1")
-
-  ;; Disable beacon-mode.
-  (beacon-mode -1)
 
   ;; Eshell needs this variable set in addition to the PATH environment variable.
   (setq-default eshell-path-env (getenv "PATH"))
@@ -1178,7 +1473,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
               (propertize (make-string (- (frame-text-cols)
                                           (string-width time-string))
                                        ?\s)
-                          'face '(:background "gray13"))
+                          'face 'default)
               time-string)))))
   (minibuffer-line-mode t))
 #+END_SRC
@@ -1187,6 +1482,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package beacon
   :ensure t
+  :init
+  (add-to-list 'beacon-dont-blink-major-modes 'eshell-mode)
   :config
   (beacon-mode 1)
   (setq beacon-size 40))
@@ -1194,7 +1491,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * undo-tree
 #+BEGIN_SRC emacs-lisp :tangle yes
-
 (dolist (hook '(undo-tree-mode-hook
                 undo-tree-visualizer-mode-hook))
   (add-hook hook 'mpereira/hide-trailing-whitespace))
@@ -1236,7 +1532,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :infix "e"
  ":" 'eval-expression)
 
+;; TODO: make this not override org mode?
+;; (general-define-key
+;;  :keymaps '(global-map)
+;;  :states '(normal visual)
+;;  :prefix "C-c"
+;;  "C-o" 'browse-url)
+
 (general-define-key
+ "M-b" (lambda ()
+         (interactive)
+         (mpereira/toggle-maximize-buffer t))
+ "M-m" #'mpereira/toggle-maximize-buffer
  "M-F" 'toggle-frame-fullscreen
  "M-=" 'default-text-scale-reset
  "M-+" 'default-text-scale-increase
@@ -1244,6 +1551,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (eval-after-load 'evil-ex
   '(evil-ex-define-cmd "bD" 'mpereira/delete-file-and-buffer))
+
+(eval-after-load 'evil-ex
+  '(evil-ex-define-cmd "pwd" 'mpereira/pwd))
 
 (general-define-key
  :states '(normal visual)
@@ -1284,6 +1594,100 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :keymaps '(helpful-mode-map deadgrep-mode-map)
  :states '(normal visual)
  "q" 'kill-buffer-and-window)
+
+(with-eval-after-load "counsel"
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   :infix "f"
+   ";" 'counsel-minibuffer-history
+   ":" 'counsel-expression-history
+   "b" 'ivy-switch-buffer
+   "c" 'counsel-org-clock-history
+   "f" 'counsel-find-file
+   "k" 'counsel-descbinds
+   "l" 'counsel-find-library
+   "m" 'describe-keymap
+   "n" 'counsel-describe-function
+   "p" 'package-list-packages-no-fetch
+   "v" 'counsel-describe-variable
+   "y" 'counsel-yank-pop))
+#+END_SRC
+
+* company-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package company
+  :ensure t
+  :config
+  (setq company-global-modes '(not eshell-mode
+                                   comint-mode
+                                   message-mode
+                                   help-mode))
+
+  (add-hook 'after-init-hook 'global-company-mode)
+
+  (setq company-tooltip-align-annotations t)
+  (setq company-require-match 'never)
+
+  (general-define-key
+   :states '(insert)
+   "TAB" 'company-complete)
+
+  (general-define-key
+   :keymaps '(company-active-map)
+   "C-b" 'company-previous-page
+   "C-f" 'company-next-page
+   "C-j" 'company-select-next
+   "C-k" 'company-select-previous))
+#+END_SRC
+
+* Flycheck
+** flycheck
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package flycheck
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps '(flycheck-mode-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   :infix "1"
+   "c" 'flycheck-buffer
+   "e" 'flycheck-explain-error-at-point
+   "h" 'flycheck-display-error-at-point
+   "j" 'flycheck-next-error
+   "k" 'flycheck-previous-error
+   "l" 'flycheck-list-errors
+   "n" 'flycheck-next-error
+   "p" 'flycheck-previous-error)
+
+  (setq flycheck-display-errors-delay 0.3))
+#+END_SRC
+** flycheck-inline
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package flycheck-inline
+  :ensure t
+  :init
+  ;; Draw a nice-looking padding around the overlays.
+  (dolist (face '(flycheck-inline-info flycheck-inline-warning flycheck-inline-error))
+    (let ((background (face-attribute 'custom-modified :background)))
+      (set-face-attribute face nil :box `(:line-width 5 :color ,background))
+      (set-face-attribute face nil :background background)))
+  :config
+  (flycheck-inline-mode))
+#+END_SRC
+** flycheck-posframe
+Currently disabled because I'm using [[flycheck-inline][flycheck-inline]] instead. It has better
+support for showing full context for errors. flycheck-posframe only shows
+context for the thing currently being hovered.
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package flycheck-posframe
+  :ensure t
+  :after flycheck
+  :config
+  (flycheck-posframe-configure-pretty-defaults)
+  ;; (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
+  )
 #+END_SRC
 
 * Emacs Lisp
@@ -1319,6 +1723,121 @@ length of PATH (sans directory slashes) down to MAX-LEN."
             (setq-local fill-column 120)
             (setq-local comment-column 120)))
 #+END_SRC
+** meghanada
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package meghanada
+  :ensure t
+  :config
+  ;; (add-hook 'java-mode-hook
+  ;;           (lambda ()
+  ;;             (meghanada-mode t)
+  ;;             (setq c-basic-offset 4)
+  ;;             (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+  )
+#+END_SRC
+
+* Clojure
+** clojure-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package clojure-mode
+  :ensure t)
+#+END_SRC
+** inf-clojure
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package inf-clojure
+  :ensure t)
+#+END_SRC
+** cider
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package cider
+  :ensure t
+  :config
+  (setq cider-prompt-for-symbol nil)
+  (setq cider-repl-display-help-banner nil)
+
+  (general-define-key
+   :keymaps 'cider-mode-map
+   :states '(normal visual)
+   "K" 'cider-doc
+   "gf" 'cider-find-var)
+
+  (general-define-key
+   :keymaps 'cider-mode-map
+   :states '(normal)
+   :prefix mpereira/leader
+   "ee" 'cider-eval-sexp-at-point
+   "e(" 'cider-eval-defun-at-point
+   "eE" 'cider-eval-buffer
+   "dd" 'cider-debug-defun-at-point
+   "tt" 'cider-test-run-test
+   "tr" 'cider-test-rerun-test
+   "tT" 'cider-test-run-ns-tests
+   "tR" 'cider-test-rerun-failed-tests
+   "pt" 'cider-test-run-project-tests)
+
+  (general-define-key
+   :keymaps 'cider-mode-map
+   :states '(visual)
+   :prefix mpereira/leader
+   "ee" 'cider-eval-region))
+#+END_SRC
+** slamhound
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package slamhound
+  :after cider
+  :ensure t)
+#+END_SRC
+
+* Rust
+** rust-mode
+Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package rust-mode
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps '(rust-mode-map)
+   :states '(normal visual)
+   "C-9" 'racer-describe-tooltip
+   "C-K" 'racer-describe-tooltip
+   "C-]" 'racer-find-definition
+   "K" 'racer-describe)
+
+  (with-eval-after-load "flycheck"
+    (add-hook 'rust-mode-hook #'flycheck-mode))
+
+  (with-eval-after-load "eglot"
+    (add-hook 'rust-mode-hook #'eglot-ensure))
+
+  (with-eval-after-load "lsp-mode"
+    ;; (add-hook 'rust-mode-hook #'lsp-rust-enable t)
+    ))
+#+END_SRC
+** racer
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package racer
+  :ensure t
+  :config
+  (general-define-key
+   :states '(normal)
+   :keymaps '(racer-help-mode-map)
+   "q" 'kill-buffer-and-window)
+
+  (add-hook 'rust-mode-hook #'racer-mode))
+#+END_SRC
+** flycheck-rust
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package flycheck-rust
+  :ensure t
+  :after rust-mode
+  :config
+  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+#+END_SRC
+** ob-rust
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ob-rust
+  :ensure t)
+#+END_SRC
 
 * Javascript
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1339,10 +1858,51 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (general-define-key
    :keymaps '(python-mode-map)
    :states '(normal visual)
+   "K" 'elpy-doc)
+
+  (general-define-key
+   :keymaps '(python-mode-map)
+   :states '(normal visual)
    :prefix mpereira/leader
    :infix "e"
    "e" 'elpy-shell-send-statement
    "p" 'elpy-shell-send-group))
+#+END_SRC
+
+** elpy
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package elpy
+  :ensure t
+  :init
+  (setq flycheck-python-pycompile-executable "python3")
+  (setq elpy-rpc-python-command "python3")
+  (setq python-shell-interpreter "python3")
+  :config
+  (elpy-enable))
+#+END_SRC
+** blacken
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package blacken
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps '(python-mode-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   ;; FIXME: why doesn't this work?
+   "S-f" 'blacken-buffer))
+#+END_SRC
+
+* JSON
+** json-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package json-mode
+  :ensure t)
+#+END_SRC
+** json-navigator
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package json-navigator
+  :ensure t)
 #+END_SRC
 
 * Org mode
@@ -1355,6 +1915,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (setq org-log-done 'time)
 
+;; TODO: is this needed?
+(setq org-catch-invisible-edits 'show)
+
 ;; Show empty line between collapsed trees if they are separated by just 1
 ;; line break.
 (setq org-cycle-separator-lines 1)
@@ -1364,6 +1927,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (add-hook 'org-mode-hook #'mpereira/disable-line-numbers)
 
 (setq org-tags-column -80)
+
+;; TODO: improve this?
+(face-spec-set 'org-tag '((t :box (:color "gray30" :line-width 1))))
 
 ;; Don't indent src block content.
 (setq org-edit-src-content-indentation 0)
@@ -1461,7 +2027,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :keymaps '(org-mode-map)
  :states '(normal)
  "(" 'org-up-element
- ")" 'outline-next-visible-heading
+ ")" 'org-down-element
+ "k" 'evil-previous-visual-line
+ "j" 'evil-next-visual-line
  "C-S-h" 'org-metaleft
  "C-S-j" 'org-metadown
  "C-S-k" 'org-metaup
@@ -1475,6 +2043,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :prefix mpereira/leader
  :infix "f"
  "o" 'counsel-org-goto)
+
+(general-define-key
+  :keymaps '(org-mode-map)
+  :states '(normal visual)
+  "gq" 'fill-paragraph)
 
 (general-define-key
  :keymaps '(org-mode-map)
@@ -1496,6 +2069,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "B" 'outline-show-branches
  "f" 'org-attach
  "i" 'org-insert-link
+ "k" 'org-cut-subtree
  "n" 'org-add-note
  "p" 'org-set-property
  "r" 'org-refile
@@ -1509,7 +2083,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "S" 'org-sort-entries
  "t" 'org-set-tags
  "u" 'org-toggle-link-display
- "x" 'org-cut-subtree)
+ "x" 'org-export-dispatch
+ "y" 'org-copy-subtree)
 
 (general-define-key
  :keymaps '(org-columns-map)
@@ -1561,7 +2136,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
               (org-paste-subtree level tree-text))))))))
 #+END_SRC
 
-* Org Clocking
+** Org Clocking
 #+BEGIN_SRC emacs-lisp :tangle yes
 ;; org-clock stuff.
 (setq org-clock-idle-time 15)
@@ -1586,8 +2161,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 ;; Use pretty things for the clocktable.
 (setq org-pretty-entities nil)
 #+END_SRC
-
-* org-gcal
+** org-gcal
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package org-gcal
   :ensure t
@@ -1606,8 +2180,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
   (fset 'org-gcal--notify 'mpereira/org-gcal--notify))
 #+END_SRC
-
-* Org Agenda
+** Org Agenda
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq org-agenda-files (list org-directory
                              mpereira/org-gcal-directory))
@@ -1817,6 +2390,119 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "C-j" 'org-agenda-next-item
  "C-k" 'org-agenda-previous-item)
 #+END_SRC
+** counsel-org-clock
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package counsel-org-clock
+  :ensure t
+  :config
+  (setq counsel-org-clock-default-action 'clock-in))
+#+END_SRC
+** org-bullets
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package org-bullets
+  :ensure t
+  :after org
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
+** org-make-toc
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package org-make-toc
+  :ensure t
+  :after org)
+#+END_SRC
+** ox-jira
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ox-jira
+  :ensure t)
+#+END_SRC
+** ox-gfm
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ox-gfm
+  :ensure t)
+#+END_SRC
+** ox-hugo
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ox-hugo
+  :ensure t)
+#+END_SRC
+** ox-pandoc
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ox-pandoc
+  :ensure t)
+#+END_SRC
+
+* Scala
+** scala-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package scala-mode
+  :ensure t)
+#+END_SRC
+
+* Go
+** go-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package go-mode
+  :ensure t)
+#+END_SRC
+
+* SQL
+#+BEGIN_SRC emacs-lisp :tangle yes
+(require 'sql)
+
+(add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
+#+END_SRC
+
+* Markdown
+** markdown-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package markdown-mode
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps 'markdown-mode-map
+   :states '(normal visual)
+   "TAB" 'markdown-cycle
+   "(" 'markdown-up-heading
+   "k" 'evil-previous-visual-line
+   "j" 'evil-next-visual-line
+   "C-k" 'markdown-outline-previous-same-level
+   "C-j" 'markdown-outline-next-same-level))
+#+END_SRC
+
+* TOML
+** toml-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package toml-mode
+  :ensure t)
+#+END_SRC
+
+* YAML
+** yaml-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package yaml-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.yml(?:\\.j2)?\\'" . yaml-mode))
+
+  (general-define-key
+   :keymaps '(yaml-mode-map)
+   :states '(insert)
+   "RET" 'newline-and-indent))
+#+END_SRC
+
+* Docker
+** docker
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package docker
+  :ensure t)
+#+END_SRC
+** dockerfile-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package dockerfile-mode
+  :ensure t
+  :mode "Dockerfile.*\\'")
+#+END_SRC
 
 * google-this
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1836,53 +2522,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "fg" 'google-this-region))
 #+END_SRC
 
-* evil-multiedit
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-multiedit
-  :ensure t
-  :after evil
-  :config
-  (setq evil-multiedit-follow-matches t)
-
-  (general-define-key
-   :states '(normal)
-   "C-n" 'evil-multiedit-match-and-next
-   "C-p" 'evil-multiedit-match-and-prev
-   "C-N" 'evil-multiedit-match-all)
-
-  (general-define-key
-   :states '(visual)
-   "C-n" 'evil-multiedit-match-symbol-and-next
-   "C-p" 'evil-multiedit-match-symbol-and-prev
-   "C-N" 'evil-multiedit-match-all))
-#+END_SRC
-
-* company-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package company
-  :ensure t
-  :config
-  (setq company-global-modes '(not eshell-mode
-                                   comint-mode
-                                   message-mode
-                                   help-mode))
-
-  (add-hook 'after-init-hook 'global-company-mode)
-
-  (setq company-require-match 'never)
-
-  (general-define-key
-   :states '(insert)
-   "TAB" 'company-complete)
-
-  (general-define-key
-   :keymaps '(company-active-map)
-   "C-b" 'company-previous-page
-   "C-f" 'company-next-page
-   "C-j" 'company-select-next
-   "C-k" 'company-select-previous))
-#+END_SRC
-
 * ansi-term
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq explicit-shell-file-name "/usr/local/bin/fish")
@@ -1895,41 +2534,44 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (setq term-char-mode-point-at-process-mark nil)
 
 (general-define-key
- ;; FIXME: do we need both keymaps?
- :keymaps '(term-raw-map term-mode-map)
+ :keymaps '(term-raw-map)
  :states '(normal)
- "p" 'term-paste
- ;; FIXME: can we make P paste before?
- "P" 'term-paste)
+ "p" 'term-paste)
 
 (general-define-key
- ;; FIXME: do we need both keymaps?
- :keymaps '(term-raw-map term-mode-map)
+ :keymaps '(term-raw-map)
  :states '(insert)
  "M-v" 'term-paste)
 
+(general-define-key
+ ;; TODO: are both necessary? C-c C-c wasn't working just with `term-raw-map' so
+ ;; I added `term-mode-map' and re-evaluated, started working in a term buffer.
+ :keymaps '(term-raw-map term-mode-map)
+ :prefix "C-c"
+ ;; https://github.com/noctuid/general.el
+ ;; #how-do-i-prevent-key-sequence-starts-with-non-prefix-key-errors
+ "" nil
+ "C-c" #'term-interrupt-subjob)
+
+;; FIXME: some eshell commands create term buffers. Make those not be killed.
 ;; Kill term buffers when term process exits.
-(defadvice term-sentinel (around my-advice-term-sentinel (proc msg))
-  (if (memq (process-status proc) '(signal exit))
-      (let ((buffer (process-buffer proc)))
-        ad-do-it
-        (kill-buffer buffer))
-    ad-do-it))
+;; (defadvice term-sentinel (around my-advice-term-sentinel (proc msg))
+;;   (if (memq (process-status proc) '(signal exit))
+;;       (let ((buffer (process-buffer proc)))
+;;         ad-do-it
+;;         (kill-buffer buffer))
+;;     ad-do-it))
 
-(ad-activate 'term-sentinel)
+;; (ad-activate 'term-sentinel)
 
-(add-hook 'term-mode-hook (lambda ()
-                            (setq-local term-prompt-regexp "^\$ +")
-                            (setq-local term-eol-on-send nil)
-                            (setq-local show-trailing-whitespace nil)
-                            (setq-local global-hl-line-mode nil)))
-#+END_SRC
+(add-hook 'term-mode-hook #'mpereira/hide-trailing-whitespace)
 
-* sql
-#+BEGIN_SRC emacs-lisp :tangle yes
-(require 'sql)
+(defun mpereira/initialize-term ()
+  (setq-local term-prompt-regexp "^\$ +")
+  ;; TODO: why is this needed?
+  (setq-local term-eol-on-send nil))
 
-(add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
+(add-hook 'term-mode-hook #'mpereira/initialize-term)
 #+END_SRC
 
 * default-text-scale
@@ -1956,28 +2598,13 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode))
 #+END_SRC
 
-* yaml-mode
+* osascripts
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package yaml-mode
-  :ensure t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.yml(?:\\.j2)?\\'" . yaml-mode))
-
-  (general-define-key
-   :keymaps '(yaml-mode-map)
-   :states '(insert)
-   "RET" 'newline-and-indent))
-#+END_SRC
-
-* elpy
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package elpy
-  :ensure t
-  :config
-  ;; Disable elpy for now, the visual errors are annoying.
-  ;; (elpy-enable)
-  (setq elpy-rpc-python-command "python3")
-  (setq python-shell-interpreter "python3"))
+(use-package osascripts
+  :ensure nil
+  :quelpa (osascripts
+           :fetcher github
+           :repo "leoliu/osascripts"))
 #+END_SRC
 
 * help-fns+
@@ -1994,7 +2621,40 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package helpful
   :ensure t
   :config
-  (setq-default helpful--view-literal nil))
+  (setq-default helpful--view-literal t))
+#+END_SRC
+
+* LSP
+** lsp-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package lsp-mode
+  :ensure t
+  :config
+  (with-eval-after-load "lsp-ui"
+    (add-hook 'lsp-mode-hook 'lsp-ui-mode))))
+#+END_SRC
+** lsp-ui
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package lsp-ui
+  :ensure t)
+#+END_SRC
+** lsp-rust
+Depends on =rls-preview=, =rust-analysis= and =rust-src=. Please check the [[https://github.com/rust-lang-nursery/rls#setup][RLS
+install instructions]] for more details.
+
+Disabled for now. Using [[flycheck-inline]] instead.
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package lsp-rust
+  :ensure t
+  :after lsp-mode
+  :init
+  (setq lsp-rust-rls-command '("rustup" "run" "nightly" "rls" "--cli")))
+#+END_SRC
+
+* eglot
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package eglot
+  :ensure t)
 #+END_SRC
 
 * es-mode
@@ -2013,7 +2673,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (add-to-list 'aggressive-indent-excluded-modes 'sql-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'makefile-bsdmake-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'python-mode)
-  (add-hook 'prog-mode-hook 'aggressive-indent-mode))
+  (add-hook 'prog-mode-hook #'mpereira/maybe-enable-aggressive-indent-mode))
 #+END_SRC
 
 * gist
@@ -2051,12 +2711,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "n" 'evil-search-next
    "N" 'evil-search-previous
    "X" 'gist-kill-current))
-#+END_SRC
-
-* markdown-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package markdown-mode
-  :ensure t)
 #+END_SRC
 
 * lispy
@@ -2158,6 +2812,23 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
   (setq projectile-enable-caching nil)
   (setq projectile-require-project-root t)
+  ;; With this, do I even need counsel-projectile?
+  (setq projectile-completion-system 'ivy)
+
+  ;; Define there here until counsel-projectile is broken.
+  ;; TODO: counsel-projectile broken:
+  ;; https://github.com/ericdanan/counsel-projectile/issues/93.
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   :infix "p"
+   "s" 'mpereira/ivy-persp-switch-project
+   ;; TODO: counsel-projectile broken: https://github.com/ericdanan/counsel-projectile/issues/93.
+   ;; "b" 'counsel-projectile-switch-to-buffer
+   "b" 'projectile-switch-to-buffer
+   "f" 'projectile-find-file
+   "g" 'rg-project
+   "G" 'rg-dwim-project-dir)
 
   (general-define-key
    :states '(normal)
@@ -2166,6 +2837,13 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "h" 'mpereira/projectile-eshell
    "H" 'projectile-run-term
    "c" 'projectile-run-async-shell-command-in-root))
+#+END_SRC
+
+** term-projectile
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package term-projectile
+  :ensure t
+  :after projectile)
 #+END_SRC
 
 * perspective
@@ -2179,7 +2857,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (persp-mode t))
 #+END_SRC
 
-* persp-projectile
+** persp-projectile
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package persp-projectile
   :ensure t
@@ -2190,13 +2868,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :prefix mpereira/leader
    :infix "p"
    "p" 'persp-switch-last))
-#+END_SRC
-
-* term-projectile
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package term-projectile
-  :ensure t
-  :after projectile)
 #+END_SRC
 
 * avy
@@ -2227,7 +2898,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "." 'ivy-resume)
 
   (general-define-key
-   :keymaps 'ivy-minibuffer-map
+   :keymaps '(ivy-minibuffer-map)
    "C-j" 'ivy-next-line
    "C-k" 'ivy-previous-line
    "C-f" 'ivy-scroll-up-command
@@ -2239,6 +2910,31 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "<escape>" 'minibuffer-keyboard-quit))
 #+END_SRC
 
+* prescient
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package prescient
+  :ensure t
+  :config
+  (prescient-persist-mode))
+#+END_SRC
+
+** ivy-prescient
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ivy-prescient
+  :ensure t
+  :after prescient
+  :config
+  (ivy-prescient-mode))
+#+END_SRC
+** company-prescient
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package company-prescient
+  :ensure t
+  :after prescient
+  :config
+  (company-prescient-mode))
+#+END_SRC
+
 * ivy-posframe
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ivy-posframe
@@ -2247,13 +2943,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :config
   ;; Override `ivy-display-functions-alist' to have all ivy completions be shown
   ;; at point with a few exceptions.
+  ;; (setq ivy-display-functions-alist
+  ;;       '((magit-push-current-to-upstream . ivy-display-function-fallback)
+  ;;         (magit-reset-soft . ivy-display-function-fallback)
+  ;;         (magit-reset-hard . ivy-display-function-fallback)
+  ;;         (magit-checkout . ivy-display-function-fallback)
+  ;;         (counsel-projectile-find-file . ivy-display-function-fallback)
+  ;;         (swiper . ivy-display-function-fallback)
+  ;;         (t . ivy-posframe-display-at-point)))
+
+  ;; Disable for now. Width-changing at-point frames are annoying.
   (setq ivy-display-functions-alist
-        '((magit-push-current-to-upstream . ivy-display-function-fallback)
-          (magit-reset-soft . ivy-display-function-fallback)
-          (magit-reset-hard . ivy-display-function-fallback)
-          (magit-checkout . ivy-display-function-fallback)
-          (swiper . ivy-display-function-fallback)
-          (t . ivy-posframe-display-at-point)))
+        '((t . ivy-display-function-fallback)))
   (ivy-posframe-enable))
 #+END_SRC
 
@@ -2285,24 +2986,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :ensure t
   :after ivy swiper
   :config
-  (setq counsel-find-file-ignore-regexp "/vendor/")
-
-  (general-define-key
-   :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "f"
-   ";" 'counsel-minibuffer-history
-   ":" 'counsel-expression-history
-   "b" 'ivy-switch-buffer
-   "c" 'counsel-org-clock-history
-   "f" 'counsel-find-file
-   "k" 'counsel-descbinds
-   "l" 'counsel-find-library
-   "m" 'describe-keymap
-   "n" 'counsel-describe-function
-   "p" 'package-list-packages-no-fetch
-   "v" 'counsel-describe-variable
-   "y" 'counsel-yank-pop))
+  (counsel-mode)
+  (setq counsel-find-file-ignore-regexp "/vendor/"))
 #+END_SRC
 
 * wgrep
@@ -2311,14 +2996,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :ensure t
   :config
   (setq wgrep-auto-save-buffer t))
-#+END_SRC
-
-* counsel-org-clock
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package counsel-org-clock
-  :ensure t
-  :config
-  (setq counsel-org-clock-default-action 'clock-in))
 #+END_SRC
 
 * command-log-mode
@@ -2333,6 +3010,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 * counsel-projectile
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package counsel-projectile
+  ;; TODO: counsel-projectile broken:
+  ;; https://github.com/ericdanan/counsel-projectile/issues/93
+  :disabled t
   :ensure t
   :after counsel projectile
   :config
@@ -2392,77 +3072,20 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "q" 'neotree-hide))
 #+END_SRC
 
-* slamhound
+* dired-sidebar
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package slamhound
-  :after cider
-  :ensure t)
-#+END_SRC
-
-* scala-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package scala-mode
-  :ensure t)
-#+END_SRC
-
-* meghanada
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package meghanada
+(use-package dired-sidebar
   :ensure t
+  :commands (dired-sidebar-toggle-sidebar)
   :config
-  ;; (add-hook 'java-mode-hook
-  ;;           (lambda ()
-  ;;             (meghanada-mode t)
-  ;;             (setq c-basic-offset 4)
-  ;;             (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
-  )
-#+END_SRC
-
-* clojure-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package clojure-mode
-  :ensure t)
-#+END_SRC
-
-* inf-clojure
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package inf-clojure
-  :ensure t)
-#+END_SRC
-
-* cider
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package cider
-  :ensure t
-  :config
-  (setq cider-prompt-for-symbol nil)
-  (setq cider-repl-display-help-banner nil)
-
-  (general-define-key
-   :keymaps 'cider-mode-map
-   :states '(normal visual)
-   "K" 'cider-doc
-   "gf" 'cider-find-var)
-
-  (general-define-key
-   :keymaps 'cider-mode-map
-   :states '(normal)
-   :prefix mpereira/leader
-   "ee" 'cider-eval-sexp-at-point
-   "e(" 'cider-eval-defun-at-point
-   "eE" 'cider-eval-buffer
-   "dd" 'cider-debug-defun-at-point
-   "tt" 'cider-test-run-test
-   "tr" 'cider-test-rerun-test
-   "tT" 'cider-test-run-ns-tests
-   "tR" 'cider-test-rerun-failed-tests
-   "pt" 'cider-test-run-project-tests)
-
-  (general-define-key
-   :keymaps 'cider-mode-map
-   :states '(visual)
-   :prefix mpereira/leader
-   "ee" 'cider-eval-region))
+  (use-package all-the-icons
+    :ensure t)
+  (use-package all-the-icons-dired
+    ;; M-x all-the-icons-install-fonts
+    :ensure t
+    :commands (all-the-icons-dired-mode)
+    :config
+    (add-hook 'dired-mode-hook #'all-the-icons-dired-mode)))
 #+END_SRC
 
 * diff-hl
@@ -2493,15 +3116,12 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "[c" 'diff-hl-previous-hunk))
 #+END_SRC
 
-* auto-dim-other-buffers
+* dimmer
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package auto-dim-other-buffers
+(use-package dimmer
   :ensure t
   :config
-  (setq auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)
-  (add-hook 'after-init-hook #'auto-dim-other-buffers-mode)
-  (custom-set-faces
-   '(auto-dim-other-buffers-face ((t (:background "gray4"))))))
+  (setq dimmer-fraction 0.5))
 #+END_SRC
 
 * browse-at-remote
@@ -2564,7 +3184,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
 #+END_SRC
 
-* magit-todos
+** magit-todos
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package magit-todos
   :ensure nil
@@ -2575,14 +3195,23 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :config
   (add-hook 'magit-mode-hook 'magit-todos-mode))
 #+END_SRC
-
-* magit-gh-pulls
+** magit-gh-pulls
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package magit-gh-pulls
   :ensure t
   :after magit
   :config
   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+#+END_SRC
+** magithub
+#+BEGIN_SRC emacs-lisp :tangle yes
+;; TODO: magithub doesn't seem to be able to fetch data from repositories under
+;; 2-factor authentication.
+(use-package magithub
+  :ensure t
+  :after magit
+  :config
+  (magithub-feature-autoinject t))
 #+END_SRC
 
 * Wolfram Alpha
@@ -2600,158 +3229,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :prefix mpereira/leader
    :infix "e"
    "w" 'wolfram-alpha))
-#+END_SRC
-
-* org-make-toc
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package org-make-toc
-  :ensure t
-  :after org)
-#+END_SRC
-
-* org-bullets
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package org-bullets
-  :ensure t
-  :after org
-  :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-#+END_SRC
-
-* evil-org
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-org
-  :ensure t
-  :after evil org
-  :config
-  (add-hook 'org-mode-hook 'evil-org-mode)
-
-  ;; Org todo notes don't have a specific major mode, so change to insert
-  ;; state based on its buffer name.
-  ;; FIXME: doesn't seem to be working.
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (when (string= "*Org Note*" (buffer-name))
-                (evil-insert-state))))
-
-  (defmacro calendar-action (func)
-    `(lambda ()
-        (interactive)
-        (org-eval-in-calendar '(,func 1))))
-
-  (general-define-key
-    :keymaps '(org-read-date-minibuffer-local-map)
-    "q" 'minibuffer-keyboard-quit
-    "l" (calendar-action calendar-forward-day)
-    "h" (calendar-action calendar-backward-day)
-    "j" (calendar-action calendar-forward-week)
-    "k" (calendar-action calendar-backward-week)
-    ">" (calendar-action calendar-forward-month)
-    "<" (calendar-action calendar-backward-month)
-    "}" (calendar-action calendar-forward-year)
-    "{" (calendar-action calendar-backward-year)
-    "0" (calendar-action calendar-beginning-of-week)
-    "$" (calendar-action calendar-end-of-week))
-
-  (evil-set-initial-state 'calendar-mode 'emacs)
-
-  (general-define-key
-    :keymaps '(calendar-mode-map)
-    "l" 'calendar-forward-day
-    "h" 'calendar-backward-day
-    "h" 'calendar-backward-day
-    "j" 'calendar-forward-week
-    "k" 'calendar-backward-week
-    ">" 'calendar-forward-month
-    "<" 'calendar-backward-month
-    "}" 'calendar-forward-year
-    "{" 'calendar-backward-year
-    "0" 'calendar-beginning-of-week
-    "$" 'calendar-end-of-week)
-
-  (add-hook 'evil-org-mode-hook
-            (lambda ()
-              (evil-org-set-key-theme '(operators
-                                        navigation
-                                        textobjects
-                                        todo)))))
-#+END_SRC
-
-* evil-magit
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-magit
-  :after evil magit
-  :ensure t
-  :config
-  (general-define-key
-    :keymaps 'magit-mode-map
-    :states '(normal visual)
-    "j" 'evil-next-visual-line
-    "k" 'evil-previous-visual-line
-    "C-j" 'magit-section-forward
-    "C-k" 'magit-section-backward)
-
-  (general-define-key
-    :states '(normal)
-    :keymaps '(git-rebase-mode-map)
-    "x" 'git-rebase-kill-line
-    "C-S-j" 'git-rebase-move-line-down
-    "C-S-k" 'git-rebase-move-line-up))
-#+END_SRC
-
-* evil-extra-operator
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-extra-operator
-  :ensure t
-  :after evil
-  :init
-  (setq evil-extra-operator-eval-key "ge")
-  :config
-  (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
-#+END_SRC
-
-* evil-exchange
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-exchange
-  :ensure t
-  :after evil
-  :config
-  (evil-exchange-install))
-#+END_SRC
-
-* evil-nerd-commenter
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-nerd-commenter
-  :ensure t
-  :after evil
-  :config
-  (general-define-key
-    :keymaps '(normal)
-    "gc" 'evilnc-comment-operator))
-#+END_SRC
-
-* evil-surround
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-surround
-  :ensure t
-  :after evil
-  :config
-  (global-evil-surround-mode t))
-#+END_SRC
-
-* evil-goggles
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package evil-goggles
-  :ensure t
-  :after evil
-  :config
-  (evil-goggles-mode)
-
-  ;; Optionally use diff-mode's faces; as a result, deleted text will be
-  ;; highlighed with `diff-removed` face which is typically some red color
-  ;; (as defined by the color theme) other faces such as `diff-added` will
-  ;; be used for other actions.
-  (evil-goggles-use-diff-faces))
 #+END_SRC
 
 * circe
@@ -2774,6 +3251,13 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (load "circe-lagmon" nil t)
   (circe-lagmon-mode)
 
+  ;; Timestamps in margins.
+  (setq lui-time-stamp-position 'right-margin)
+  (setq lui-time-stamp-format " %H:%M ")
+  (defun mpereira/circe-set-margin ()
+    (setq right-margin-width 7))
+  (add-hook 'lui-mode-hook #'mpereira/circe-set-margin)
+
   (setq circe-default-nick "mpereira"
         circe-default-user "mpereira"
         circe-default-realname "mpereira")
@@ -2785,7 +3269,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
            :host "chat.freenode.net"
            :nickserv-password ,mpereira/secret-circe-nickserv-password
            :tls t
-           :channels (:after-auth "#emacs" "#clojure")))))
+           :channels (:after-auth "#emacs"
+                                  "#clojure"
+                                  "##rust"
+                                  "#haskell")))))
 #+END_SRC
 
 * mingus
@@ -2803,23 +3290,57 @@ length of PATH (sans directory slashes) down to MAX-LEN."
     (add-hook hook 'mpereira/hide-trailing-whitespace)))
 #+END_SRC
 
-* dockerfile-mode
+* synosaurus
+Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package dockerfile-mode
-  :ensure t
-  :mode "Dockerfile.*\\'")
-#+END_SRC
-
-# Local Variables:
-# before-save-hook: org-make-toc
-# org-adapt-indentation: nil
-# End:
-
-* json-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package json-mode
+(use-package synosaurus
   :ensure t)
 #+END_SRC
+
+* unfill
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package unfill
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps '(global-map)
+   "M-q" 'unfill-toggle))
+#+END_SRC
+
+* smex
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package smex
+  :ensure t
+  :config
+  (smex-initialize)
+  (general-define-key
+   :keymaps '(global-map)
+   "M-X" 'smex-major-mode-commands))
+#+END_SRC
+
+* Stuff I keep forgetting
+** org mode file links to search patterns can't start with open parens
+https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
+** =EXPRESSION= can be used only once per ~org-agenda-prefix-format~
+** Emulate =C-u= (universal-argument)
+*** For raw prefix arg (interactive "P")
+#+BEGIN_SRC emacs-lisp
+(let ((current-prefix-arg '(4)))
+  (call-interactively 'some-func))
+#+END_SRC
+*** Otherwise
+#+BEGIN_SRC emacs-lisp
+(let ((current-prefix-arg 4))
+  (call-interactively 'some-func))
+#+END_SRC
+** After modifying =PATH=
+Run ~exec-path-from-shell-initialize~ on eshell buffers.
+** Terminate init.el loading early
+#+BEGIN_SRC emacs-lisp
+(with-current-buffer " *load*"
+  (goto-char (point-max)))
+#+END_SRC
+** Change font: =M-x x-select-font=
 
 # Local Variables:
 # before-save-hook: org-make-toc

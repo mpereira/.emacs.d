@@ -12,6 +12,7 @@
 /elpa
 /eshell
 /layouts
+/magithub
 /meghanada
 /network-security.data
 /org-clock-save.el
@@ -24,6 +25,7 @@
 /secrets.el
 /semanticdb
 /sessions
+/smex-items
 /tramp
 /url
 /var
