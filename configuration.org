@@ -91,6 +91,7 @@
   -  [[#google-this][google-this]]
   -  [[#ansi-term][ansi-term]]
   -  [[#default-text-scale][default-text-scale]]
+  -  [[#move-text][move-text]]
   -  [[#expand-region][expand-region]]
   -  [[#rainbow-delimiters][rainbow-delimiters]]
   -  [[#osascripts][osascripts]]
@@ -113,6 +114,7 @@
     -  [[#persp-projectile][persp-projectile]]
   -  [[#avy][avy]]
   -  [[#ivy][ivy]]
+  -  [[#ivy-rich][ivy-rich]]
   -  [[#prescient][prescient]]
     -  [[#ivy-prescient][ivy-prescient]]
     -  [[#company-prescient][company-prescient]]
@@ -1858,6 +1860,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (general-define-key
    :keymaps '(python-mode-map)
    :states '(normal visual)
+   "C-j" 'python-nav-forward-block
+   "C-k" 'python-nav-backward-block)
+
+  (general-define-key
+   :keymaps '(python-mode-map)
+   :states '(normal visual)
    "K" 'elpy-doc)
 
   (general-define-key
@@ -2580,6 +2588,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :ensure t)
 #+END_SRC
 
+* move-text
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package move-text
+  :ensure t)
+#+END_SRC
+
 * expand-region
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package expand-region
@@ -2910,6 +2924,14 @@ Disabled for now. Using [[flycheck-inline]] instead.
    "<escape>" 'minibuffer-keyboard-quit))
 #+END_SRC
 
+* ivy-rich
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ivy-rich
+  :ensure t
+  :config
+  (ivy-rich-mode 1))
+#+END_SRC
+
 * prescient
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package prescient
@@ -2917,7 +2939,6 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :config
   (prescient-persist-mode))
 #+END_SRC
-
 ** ivy-prescient
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ivy-prescient
