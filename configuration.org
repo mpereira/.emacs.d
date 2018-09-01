@@ -3345,19 +3345,19 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 ** =EXPRESSION= can be used only once per ~org-agenda-prefix-format~
 ** Emulate =C-u= (universal-argument)
 *** For raw prefix arg (interactive "P")
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (let ((current-prefix-arg '(4)))
   (call-interactively 'some-func))
 #+END_SRC
 *** Otherwise
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (let ((current-prefix-arg 4))
   (call-interactively 'some-func))
 #+END_SRC
 ** After modifying =PATH=
 Run ~exec-path-from-shell-initialize~ on eshell buffers.
 ** Terminate init.el loading early
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (with-current-buffer " *load*"
   (goto-char (point-max)))
 #+END_SRC
