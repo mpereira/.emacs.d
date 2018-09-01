@@ -1484,9 +1484,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package beacon
   :ensure t
-  :init
-  (add-to-list 'beacon-dont-blink-major-modes 'eshell-mode)
   :config
+  (add-to-list 'beacon-dont-blink-major-modes 'eshell-mode)
   (beacon-mode 1)
   (setq beacon-size 40))
 #+END_SRC
@@ -1669,13 +1668,12 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package flycheck-inline
   :ensure t
-  :init
+  :config
   ;; Draw a nice-looking padding around the overlays.
   (dolist (face '(flycheck-inline-info flycheck-inline-warning flycheck-inline-error))
     (let ((background (face-attribute 'custom-modified :background)))
       (set-face-attribute face nil :box `(:line-width 5 :color ,background))
       (set-face-attribute face nil :background background)))
-  :config
   (flycheck-inline-mode))
 #+END_SRC
 ** flycheck-posframe
@@ -2645,7 +2643,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :ensure t
   :config
   (with-eval-after-load "lsp-ui"
-    (add-hook 'lsp-mode-hook 'lsp-ui-mode))))
+    (add-hook 'lsp-mode-hook 'lsp-ui-mode)))
 #+END_SRC
 ** lsp-ui
 #+BEGIN_SRC emacs-lisp :tangle yes
