@@ -2927,6 +2927,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ivy-rich
   :ensure t
+  :after counsel
   :config
   (ivy-rich-mode 1))
 #+END_SRC
