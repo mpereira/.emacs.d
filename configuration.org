@@ -1782,10 +1782,11 @@ context for the thing currently being hovered.
    "ee" 'cider-eval-region))
 #+END_SRC
 ** slamhound
+Currently disabled because it's only available via Marmalade.
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package slamhound
-  :after cider
-  :ensure t)
+;; (use-package slamhound
+;;   :after cider
+;;   :ensure t)
 #+END_SRC
 
 * Rust
