@@ -22,7 +22,10 @@
 (use-package org
   :ensure org-plus-contrib)
 
+;; Prevent annoying local variable prompts.
+(setq enable-local-variables :all)
 (org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory))
+(setq enable-local-variables t)
 
 (setq gc-cons-threshold (* 20 1024 1024))
 (setq debug-on-error nil)
