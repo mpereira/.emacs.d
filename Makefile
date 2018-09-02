@@ -14,6 +14,9 @@ _ := $(shell mkdir $(TEST_HOME_EMACSD))
 .PHONY: \
 	test
 
+test-quick:
+	@$(EMACS) --debug-init 2>/dev/null
+
 test:
 	@cp init.el $(TEST_HOME_EMACSD)
 	@cp configuration.org $(TEST_HOME_EMACSD)
