@@ -1666,6 +1666,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+END_SRC
 ** flycheck-inline
 #+BEGIN_SRC emacs-lisp :tangle yes
+(require 'cus-edit) ;; for `custom-modified' face.
+
 (use-package flycheck-inline
   :ensure t
   :config
