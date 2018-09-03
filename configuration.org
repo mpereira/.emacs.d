@@ -26,6 +26,7 @@
     -  [[#evil-collection][evil-collection]]
     -  [[#evil-multiedit][evil-multiedit]]
   -  [[#paradox][paradox]]
+  -  [[#hideshow][hideshow]]
   -  [[#eshell][eshell]]
   -  [[#fish-completion][fish-completion]]
   -  [[#suggest][suggest]]
@@ -642,6 +643,15 @@ exist in any structured movement package is mind-boggling to me."
     (message path)
     path))
 
+(defun mpereira/make-hs-hide-level (n)
+  "TODO: docstring"
+  (lexical-let ((n n))
+    #'(lambda ()
+        (interactive)
+        (save-excursion
+          (goto-char (point-min))
+          (hs-hide-level n)))))
+
 (setq mpereira/leader ",")
 
 (setq mpereira/dropbox-directory (expand-file-name "~/Dropbox"))
@@ -1196,6 +1206,15 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (paradox-enable))
 #+END_SRC
 
+* hideshow
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package hideshow
+  :ensure t
+  :config
+  (setq hs-isearch-open t)
+  (add-hook 'prog-mode-hook #'hs-minor-mode))
+#+END_SRC
+
 * eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'eshell)
@@ -1577,6 +1596,16 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "vs" 'mpereira/split-window-right-and-switch
  "hv" 'mpereira/toggle-window-split
  "vh" 'mpereira/toggle-window-split)
+
+(general-define-key
+ :keymaps '(hs-minor-mode-map)
+ :prefix "z"
+ "0" #'hs-show-all
+ "1" (mpereira/make-hs-hide-level 1)
+ "2" (mpereira/make-hs-hide-level 2)
+ "3" (mpereira/make-hs-hide-level 3)
+ "4" (mpereira/make-hs-hide-level 4)
+ "5" (mpereira/make-hs-hide-level 5))
 
 ;; Return to original cursor position when cancelling search.
 (general-define-key
