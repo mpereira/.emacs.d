@@ -1607,6 +1607,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "4" (mpereira/make-hs-hide-level 4)
  "5" (mpereira/make-hs-hide-level 5))
 
+(general-define-key
+ :states '(normal visual)
+ :keymaps '(hs-minor-mode-map)
+ "TAB" #'hs-toggle-hiding)
+
 ;; Return to original cursor position when cancelling search.
 (general-define-key
  :keymaps '(isearch-mode-map)
