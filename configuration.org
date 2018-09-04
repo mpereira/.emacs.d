@@ -1696,7 +1696,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "n" 'flycheck-next-error
    "p" 'flycheck-previous-error)
 
-  (setq flycheck-display-errors-delay 0.3))
+  (setq flycheck-display-errors-delay 0.3)
+
+  (add-hook 'prog-mode-hook #'flycheck-mode))
 #+END_SRC
 ** flycheck-inline
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1839,9 +1841,6 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
    "C-K" 'racer-describe-tooltip
    "C-]" 'racer-find-definition
    "K" 'racer-describe)
-
-  (with-eval-after-load "flycheck"
-    (add-hook 'rust-mode-hook #'flycheck-mode))
 
   (with-eval-after-load "eglot"
     (add-hook 'rust-mode-hook #'eglot-ensure))
