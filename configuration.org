@@ -700,7 +700,7 @@ exist in any structured movement package is mind-boggling to me."
 (blink-cursor-mode -1)
 
 ;; Set default font size to 15.
-(set-face-attribute 'default nil :height 150)
+(set-face-attribute 'default nil :family "Consolas" :height 160)
 
 ;; Start in full-screen.
 (add-hook 'after-init-hook #'toggle-frame-fullscreen)
