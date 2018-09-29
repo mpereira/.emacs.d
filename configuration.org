@@ -1330,7 +1330,14 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
    "C-j" 'eshell-next-matching-input-from-input
    "C-/" 'mpereira/ivy-eshell-history
    ;; https://github.com/ksonney/spacemacs/commit/297945a45696e235c6983a78acdf05b5f0e015ca
-   "C-l" 'mpereira/eshell-clear))
+   "C-l" 'mpereira/eshell-clear)
+
+  ;; FIXME: workaround for a bug. When an eshell buffer is created the
+  ;; `eshell-mode-map' mappings are not set up, even through `eshell-mode-map'
+  ;; is correctly defined. Going to normal state sets them up for some reason.
+  (evil-normal-state)
+  (evil-insert-state)
+  (forward-char))
 
 (add-hook 'eshell-mode-hook 'mpereira/initialize-eshell)
 
