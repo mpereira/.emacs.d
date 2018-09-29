@@ -702,6 +702,9 @@ exist in any structured movement package is mind-boggling to me."
 ;; Set default font size to 15.
 (set-face-attribute 'default nil :family "Consolas" :height 160)
 
+;; Enable narrowing commands.
+(put 'narrow-to-region 'disabled nil)
+
 ;; Start in full-screen.
 (add-hook 'after-init-hook #'toggle-frame-fullscreen)
 
