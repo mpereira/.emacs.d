@@ -2237,6 +2237,8 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+END_SRC
 ** Org Agenda
 #+BEGIN_SRC emacs-lisp :tangle yes
+(require 'org-agenda)
+
 (setq org-agenda-files (list org-directory
                              mpereira/org-gcal-directory))
 
