@@ -643,6 +643,7 @@ exist in any structured movement package is mind-boggling to me."
     (message path)
     path))
 
+(eval-when-compile (require 'cl)) ;; for `lexical-let'.
 (defun mpereira/make-hs-hide-level (n)
   "TODO: docstring"
   (lexical-let ((n n))
