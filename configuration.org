@@ -957,11 +957,11 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 * with-editor
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package with-editor
- :ensure t
+  :ensure t
   :config
   (add-hook 'eshell-mode-hook 'with-editor-export-editor)
-  (add-hook 'term-exec-hook   'with-editor-export-editor)
-  (add-hook 'shell-mode-hook  'with-editor-export-editor))
+  (add-hook 'term-exec-hook 'with-editor-export-editor)
+  (add-hook 'shell-mode-hook 'with-editor-export-editor))
 #+END_SRC
 
 * evil
@@ -1074,19 +1074,19 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :config
   (general-define-key
-    :keymaps 'magit-mode-map
-    :states '(normal visual)
-    "j" 'evil-next-visual-line
-    "k" 'evil-previous-visual-line
-    "C-j" 'magit-section-forward
-    "C-k" 'magit-section-backward)
+   :keymaps 'magit-mode-map
+   :states '(normal visual)
+   "j" 'evil-next-visual-line
+   "k" 'evil-previous-visual-line
+   "C-j" 'magit-section-forward
+   "C-k" 'magit-section-backward)
 
   (general-define-key
-    :states '(normal)
-    :keymaps '(git-rebase-mode-map)
-    "x" 'git-rebase-kill-line
-    "C-S-j" 'git-rebase-move-line-down
-    "C-S-k" 'git-rebase-move-line-up))
+   :states '(normal)
+   :keymaps '(git-rebase-mode-map)
+   "x" 'git-rebase-kill-line
+   "C-S-j" 'git-rebase-move-line-down
+   "C-S-k" 'git-rebase-move-line-up))
 #+END_SRC
 ** evil-extra-operator
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1113,8 +1113,8 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :after evil
   :config
   (general-define-key
-    :keymaps '(normal)
-    "gc" 'evilnc-comment-operator))
+   :keymaps '(normal)
+   "gc" 'evilnc-comment-operator))
 #+END_SRC
 ** evil-surround
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1320,8 +1320,9 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
    ;; Uppercase TAB here doesn't work for some reason.
    ;; Overrides `eshell-pcomplete' because it doesn't work with ivy.
    "<tab>" 'completion-at-point
-   ;; TODO: `eshell-{previous,next}-matching-input-from-input' only work with prefix
-   ;; inputs, like "git". They don't do fuzzy matching.
+   ;; TODO: `eshell-{previous,next}-matching-input-from-input' only work with
+   ;; prefix inputs, like "git". They don't do fuzzy matching.
+   ;;
    ;; TODO: when on an empty prompt and going up and back down (or down and back
    ;; up), make it so that the prompt is empty again instead of cycling back to
    ;; the first input.
@@ -2092,9 +2093,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "o" 'counsel-org-goto)
 
 (general-define-key
-  :keymaps '(org-mode-map)
-  :states '(normal visual)
-  "gq" 'fill-paragraph)
+ :keymaps '(org-mode-map)
+ :states '(normal visual)
+ "gq" 'fill-paragraph)
 
 (general-define-key
  :keymaps '(org-mode-map)
