@@ -847,6 +847,8 @@ Sources:
 - http://daylerees.github.io/
 - http://raebear.net/comp/emacscolors.html
 
+Currently mostly using =doom-dracula= and =doom-solarized-light=.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package srcery-theme
   :ensure t
@@ -855,7 +857,7 @@ Sources:
 (use-package doom-themes
   :ensure t
   :config
-  (add-hook 'after-init-hook (lambda () (load-theme 'doom-spacegrey t)) t))
+  (add-hook 'after-init-hook (lambda () (load-theme 'doom-dracula t)) t))
 #+END_SRC
 
 * Configure Mode Line
