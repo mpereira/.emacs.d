@@ -751,8 +751,8 @@ exist in any structured movement package is mind-boggling to me."
 (setq mac-control-modifier 'control)
 (setq ns-function-modifier 'hyper)
 
-;; Start scratch buffers in text-mode.
-(setq initial-major-mode 'text-mode)
+;; Start scratch buffers in org-mode.
+(setq initial-major-mode 'org-mode)
 
 ;; Make cursor the width of the character it is under e.g. full width of a TAB.
 (setq x-stretch-cursor t)
