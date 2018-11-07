@@ -27,13 +27,14 @@
     -  [[#evil-multiedit][evil-multiedit]]
   -  [[#paradox][paradox]]
   -  [[#hideshow][hideshow]]
+  -  [[#string-inflection][string-inflection]]
   -  [[#eshell][eshell]]
   -  [[#fish-completion][fish-completion]]
   -  [[#suggest][suggest]]
   -  [[#rg][rg]]
   -  [[#ag][ag]]
   -  [[#wgrep-ag][wgrep-ag]]
-  -  [[#centered-window][centered-window]]
+  -  [[#olivetti][olivetti]]
   -  [[#minibuffer-line][minibuffer-line]]
   -  [[#beacon][beacon]]
   -  [[#undo-tree][undo-tree]]
@@ -129,6 +130,7 @@
   -  [[#dired-sidebar][dired-sidebar]]
   -  [[#diff-hl][diff-hl]]
   -  [[#dimmer][dimmer]]
+  -  [[#emojify][emojify]]
   -  [[#browse-at-remote][browse-at-remote]]
   -  [[#git-timemachine][git-timemachine]]
   -  [[#magit][magit]]
@@ -613,7 +615,7 @@ exist in any structured movement package is mind-boggling to me."
         (set-window-configuration mpereira/saved-window-configuration)
         (goto-char mpereira/saved-point)
         (when mpereira/saved-centered-p
-          (centered-window-mode-toggle))
+          (olivetti-mode -1))
         (setq mpereira/saved-window-configuration nil)
         (setq mpereira/saved-point nil)
         (setq mpereira/saved-centered-p nil))
@@ -622,7 +624,7 @@ exist in any structured movement package is mind-boggling to me."
     (setq mpereira/saved-centered-p centered-p)
     (delete-other-windows)
     (when centered-p
-      (centered-window-mode))))
+      (olivetti-mode 1))))
 
 (defun mpereira/epoch-at-point-to-timestamp ()
   "TODO: docstring"
@@ -1009,6 +1011,8 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :config
   (evil-mode t)
 
+  (setq evil-search-module 'evil-search)
+
   ;; Make it possible for other modes to use these bindings (e.g. company mode
   ;; uses it for navigating completions).
   (general-define-key
@@ -1249,6 +1253,12 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :config
   (setq hs-isearch-open t)
   (add-hook 'prog-mode-hook #'hs-minor-mode))
+#+END_SRC
+
+* string-inflection
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package string-inflection
+  :ensure t)
 #+END_SRC
 
 * eshell
@@ -1520,9 +1530,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :ensure t)
 #+END_SRC
 
-* centered-window
+* olivetti
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package centered-window
+(use-package olivetti
   :ensure t)
 #+END_SRC
 
@@ -1559,8 +1569,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                 undo-tree-visualizer-mode-hook))
   (add-hook hook 'mpereira/hide-trailing-whitespace))
 
-(setq undo-tree-visualizer-timestamps t)
-(setq undo-tree-visualizer-diff t)
+(setq undo-limit (* 10 1024 1024)) ;; 10MB.
+(setq undo-strong-limit undo-limit)
+(setq-default undo-tree-visualizer-timestamps t)
+(setq-default undo-tree-visualizer-diff t)
 #+END_SRC
 
 * Mappings
@@ -1642,6 +1654,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "vh" 'mpereira/toggle-window-split)
 
 (general-define-key
+ :states '(normal visual)
  :keymaps '(hs-minor-mode-map)
  :prefix "z"
  "0" #'hs-show-all
@@ -1707,6 +1720,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
   (setq company-tooltip-align-annotations t)
   (setq company-require-match 'never)
+  (setq company-idle-delay 1)
 
   (general-define-key
    :states '(insert)
@@ -1953,6 +1967,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
    :infix "e"
    "e" 'elpy-shell-send-statement
    "p" 'elpy-shell-send-group))
+
+(add-hook 'python-mode-hook
+          (lambda ()
+            (setq evil-shift-width python-indent)))
 #+END_SRC
 
 ** elpy
@@ -1960,6 +1978,8 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (use-package elpy
   :ensure t
   :init
+  (setq flycheck-python-flake8-executable "python3")
+  (setq flycheck-python-pylint-executable "python3")
   (setq flycheck-python-pycompile-executable "python3")
   (setq elpy-rpc-python-command "python3")
   (setq python-shell-interpreter "python3")
@@ -3226,6 +3246,14 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (setq dimmer-fraction 0.5))
 #+END_SRC
 
+* emojify
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package emojify
+  :ensure t
+  :config
+  (add-hook 'after-init-hook #'global-emojify-mode))
+#+END_SRC
+
 * browse-at-remote
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package browse-at-remote
@@ -3448,3 +3476,250 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
 # before-save-hook: org-make-toc
 # org-adapt-indentation: nil
 # End:
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package org-ql
+  :ensure nil
+  :quelpa (org-ql
+            :fetcher github
+            :repo "alphapapa/org-ql")
+  :config
+  (require 'org-habit)
+  (require 'org-ql-agenda))
+
+
+
+(timestamp (:type inactive
+                  :raw-value
+                  "[2017-11-03 Fri 15:57]"
+                  :year-start
+                  2017
+                  :month-start
+                  11
+                  :day-start
+                  3
+                  :hour-start
+                  15
+                  :minute-start
+                  57
+                  :year-end
+                  2017
+                  :month-end
+                  11
+                  :day-end
+                  3
+                  :hour-end
+                  15
+                  :minute-end
+                  57
+                  :begin
+                  15861
+                  :end
+                  15884
+                  :post-blank
+                  1))
+
+(defun timestamp->time (timestamp)
+  (let* ((year (plist-get timestamp ':year-end))
+         (month (plist-get timestamp ':month-end))
+         (day (plist-get timestamp ':day-end))
+         (hour (plist-get timestamp ':hour-end))
+         (minute (plist-get timestamp ':minute-end))
+         (second 0))
+    (encode-time second minute hour day month year)))
+
+(defun timestamp->date (timestamp)
+  (let* ((year (plist-get timestamp ':year-end))
+         (month (plist-get timestamp ':month-end))
+         (day (plist-get timestamp ':day-end)))
+    (list month day year)))
+
+(defun date->timestamp (date)
+  (let* ((year (calendar-extract-year date))
+         (month (calendar-extract-month date))
+         (day (calendar-extract-day date))
+         (hour 0)
+         (minute 0)
+         (second 0))
+    (list :year-start year
+          :year-end year
+          :month-start month
+          :month-end month
+          :day-start day
+          :day-end day
+          :hour-start hour
+          :hour-end hour
+          :minute-start minute
+          :minute-end minute
+          :second-start second
+          :second-end second)))
+
+(defun date->time (date)
+  (let* ((year (calendar-extract-year date))
+         (month (calendar-extract-month date))
+         (day (calendar-extract-day date))
+         (hour 0)
+         (minute 0)
+         (second 0))
+    (encode-time second minute hour day month year)))
+
+(defun time->timestamp (raw-time)
+  (let* ((time (decode-time raw-time))
+         (year (nth 5 time))
+         (month (nth 4 time))
+         (day (nth 3 time))
+         (hour (nth 2 time))
+         (minute (nth 1 time))
+         (second (nth 0 time)))
+    (list :year-start year
+          :year-end year
+          :month-start month
+          :month-end month
+          :day-start day
+          :day-end day
+          :hour-start hour
+          :hour-end hour
+          :minute-start minute
+          :minute-end minute
+          :second-start second
+          :second-end second)))
+
+(defun time->date (raw-time)
+  (let* ((time (decode-time raw-time))
+         (year (nth 5 time))
+         (month (nth 4 time))
+         (day (nth 3 time)))
+    (list month day year)))
+
+(time->date (time-subtract (date->time (calendar-current-date))
+                           (days-to-time 2)))
+
+(defun timestamp-in-date-interval-p (date-interval timestamp)
+  (let* ((start-date (nth 0 date-interval))
+         (end-date (nth 1 date-interval)))
+    (<= (calendar-absolute-from-gregorian start-date)
+        (calendar-absolute-from-gregorian (timestamp->date timestamp))
+        (calendar-absolute-from-gregorian end-date))))
+
+(timestamp-in-date-interval-p (list (calendar-current-date)
+                                    (calendar-current-date))
+                              (time->timestamp (current-time)))
+
+(timestamp-at-day-p (time-to-number-of-days (decode-time (current-time))) (time-to-days (decode-time (timestamp->time (time->timestamp (current-time))))))
+
+(defun timestamp-filter (path start-date end-date entries)
+  (-filter (lambda (x)
+             (let* ((timestamp (get-in path x)))
+               (when timestamp
+                 (timestamp-in-date-interval-p (list start-date end-date)
+                                               timestamp))))
+           entries))
+
+(defun day-of-week (date)
+  (let ((dow (->> date
+                  (date->time)
+                  (decode-time)
+                  (nth 6))))
+    (if (= dow 0)
+        6
+      (- dow 1))))
+
+(defun beginning-of-week (date)
+  (let ((day (day-of-week date)))
+    (if (= day 0)
+        date
+      (time->date (time-subtract (date->time date)
+                                 (days-to-time day))))))
+
+(defun beginning-of-month (date)
+  (let ((day (calendar-extract-day date)))
+    (if (= day 1)
+        date
+      (time->date (time-subtract (date->time date)
+                                 (days-to-time day))))))
+
+(defun minus-days (days date)
+  (time->date (time-subtract (date->time date) (days-to-time days))))
+
+(defun closed-today (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (calendar-current-date)
+                    (calendar-current-date)
+                    entries))
+
+(defun closed-yesterday (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (minus-days 2 (calendar-current-date))
+                    (minus-days 1 (calendar-current-date))
+                    entries))
+
+(defun closed-this-week-before-today (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-week (calendar-current-date))
+                    (minus-days 1 (calendar-current-date))
+                    entries))
+
+(defun closed-this-week-before-yesterday (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-week (calendar-current-date))
+                    (minus-days 2 (calendar-current-date))
+                    entries))
+
+(defun closed-last-week (entries)
+  (let ((last-day-of-last-week (minus-days 1 (beginning-of-week (calendar-current-date)))))
+    (timestamp-filter '(headline :closed timestamp)
+                      (beginning-of-week last-day-of-last-week)
+                      last-day-of-last-week
+                      entries)))
+
+(defun closed-this-month-before-this-week (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-month (calendar-current-date))
+                    (beginning-of-week (calendar-current-date))
+                    entries))
+
+(defun closed-this-month (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-month (calendar-current-date))
+                    (calendar-current-date)
+                    entries))
+
+(defun get-in (ks coll)
+  (if ks
+      (get-in (cdr ks) (let ((k (car ks)))
+                         (cond
+                          ((plist-member coll k) (plist-get coll k))
+                          ((integerp k) (nth k coll)))))
+    coll))
+
+(--> (org-ql (org-agenda-files)
+       (and (done))
+       :sort (date))
+     ;; (closed-today it)
+     ;; (closed-this-week-before-today it)
+     (closed-this-month-before-this-week it)
+     ;; (car it)
+     (length it)
+     ;; (cl-prettyprint it)
+     )
+
+(funcall (get-in '(0 1 1) '((nil #'closed-today))) '())
+
+(let ((inhibit-read-only t))
+  (with-current-buffer (get-buffer-create "*org-ql-complex*")
+    (erase-buffer)
+    (--each '(("Done today" #'closed-today)
+              ("Done yesterday" #'closed-yesterday)
+              ("Done this week" #'closed-this-week-before-yesterday)
+              ("Done last week" #'closed-last-week)
+              ("Done this month" #'closed-this-month))
+      (--> (list (car it) (funcall (get-in '(1 1) it)
+                                   (org-ql (org-agenda-files)
+                                     (done)
+                                     :sort (date)
+                                     :markers t)))
+           (list (car it) (--map (concat (org-ql-agenda--format-element it) "\n")
+                                 (nth 1 it)))
+           (insert (concat (car it) "\n" (apply #'concat (nth 1 it))) "\n")))
+    (pop-to-buffer (current-buffer))))
+#+END_SRC

@@ -10,6 +10,7 @@
 /configuration.el
 /custom.el
 /elpa
+/emojis
 /eshell
 /layouts
 /magithub
@@ -26,6 +27,7 @@
 /semanticdb
 /sessions
 /smex-items
+/speed-type
 /tramp
 /url
 /var
