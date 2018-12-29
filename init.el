@@ -9,6 +9,11 @@
                          ("gnu" . "http://elpa.gnu.org/packages/")
                          ("melpa" . "http://melpa.org/packages/")))
 
+;; (setq package-archives
+;;       '(("melpa" . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/melpa/")
+;;         ("org"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/org/")
+;;         ("gnu"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/")))
+
 (unless package-archive-contents
   (package-refresh-contents))
 
@@ -29,3 +34,4 @@
 
 (setq gc-cons-threshold (* 20 1024 1024))
 (setq debug-on-error nil)
+(put 'erase-buffer 'disabled nil)
