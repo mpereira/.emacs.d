@@ -847,6 +847,13 @@ exist in any structured movement package is mind-boggling to me."
                                 ("America/Los_Angeles" "San Francisco")))
 #+END_SRC
 
+* which-function-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq which-func-unknown "n/a")
+(setq mode-line-misc-info (assq-delete-all 'which-function-mode mode-line-misc-info))
+(add-hook 'prog-mode-hook #'which-function-mode)
+#+END_SRC
+
 * Color theme
 Sources:
 - https://emacsthemes.com
@@ -964,6 +971,11 @@ Source: https://git.io/vQKzv"
                                            mpereira/mode-line-buffer-position
                                            mode-line-misc-info
                                            mode-line-end-spaces)))))
+#+END_SRC
+
+* Configure Header Line
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq-default header-line-format '((which-function-mode ("" which-func-format " "))))
 #+END_SRC
 
 * general
@@ -1252,6 +1264,15 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :config
   (setq hs-isearch-open t)
+  (defun mpereira/display-code-line-counts (ov)
+    (when (eq 'code (overlay-get ov 'hs))
+      (overlay-put ov
+                   'display
+                   (format "... / %d"
+                           (count-lines (overlay-start ov)
+                                        (overlay-end ov))))))
+
+  (setq hs-set-up-overlay #'mpereira/display-code-line-counts)
   (add-hook 'prog-mode-hook #'hs-minor-mode))
 #+END_SRC
 
@@ -1509,6 +1530,20 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :ensure t)
 #+END_SRC
 
+* load-bash-alias
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package load-bash-alias
+  :ensure t
+  :config
+  (setq load-bash-alias-bashrc-file "~/.aliases"))
+#+END_SRC
+
+* ialign
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ialign
+  :ensure t)
+#+END_SRC
+
 * rg
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package rg
@@ -1523,6 +1558,25 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package ag
   :ensure t)
 #+END_SRC
+
+* html
+** auto-rename-tag
+   #+BEGIN_SRC emacs-lisp :tangle yes
+   (use-package auto-rename-tag
+     :ensure t
+     :config
+     (add-hook 'html-mode-hook #'auto-rename-tag-mode))
+   #+END_SRC
+
+* css
+** emacs-colorpicker
+   #+BEGIN_SRC emacs-lisp :tangle yes
+   ;; (use-package colorpicker
+   ;;   :ensure nil
+   ;;   :quelpa (emacs-colorpicker
+   ;;            :fetcher github
+   ;;            :repo "syohex/emacs-colorpicker"))
+   #+END_SRC
 
 * wgrep-ag
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1964,6 +2018,13 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
    :keymaps '(python-mode-map)
    :states '(normal visual)
    :prefix mpereira/leader
+   :infix "f"
+   "o" 'imenu)
+
+  (general-define-key
+   :keymaps '(python-mode-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
    :infix "e"
    "e" 'elpy-shell-send-statement
    "p" 'elpy-shell-send-group))
@@ -2179,6 +2240,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "n" 'org-add-note
  "p" 'org-set-property
  "r" 'org-refile
+ "X" (lambda ()
+       (interactive)
+       (mpereira/call-interactively-with-prefix-arg '(4) 'org-babel-remove-result-one-or-many))
  "Rd" (lambda ()
         (interactive)
         (mpereira/call-interactively-with-prefix-arg '(4) 'org-deadline))
@@ -2355,7 +2419,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                         (org-agenda-sorting-strategy '(timestamp-up))
                         (org-agenda-remove-times-when-in-prefix nil)
                         (org-agenda-overriding-header
-                         "\nNext Task Deadlines and Schedules\n")))
+                         "\nComing up\n")))
             (todo "TODO"
                   ((org-agenda-skip-function
                     '(or (org-agenda-skip-entry-if 'scheduled 'deadline)
@@ -2537,6 +2601,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ** ox-pandoc
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-pandoc
+  :ensure t)
+#+END_SRC
+** ob-async
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ob-async
   :ensure t)
 #+END_SRC
 
@@ -3342,6 +3411,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :after magit
   :config
   (magithub-feature-autoinject t))
+#+END_SRC
+** forge
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package forge
+  :ensure t
+  :after magit)
 #+END_SRC
 
 * Wolfram Alpha
