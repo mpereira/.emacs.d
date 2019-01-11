@@ -658,6 +658,41 @@ exist in any structured movement package is mind-boggling to me."
 (setq mpereira/leader ",")
 
 (setq mpereira/dropbox-directory (expand-file-name "~/Dropbox"))
+
+(defun mpereira/bm-counsel-get-list (bookmark-overlays)
+  "TODO: docstring.
+Arguments: BOOKMARK-OVERLAYS."
+  (-map (lambda (bm)
+          (with-current-buffer (overlay-buffer bm)
+            (let* ((line (replace-regexp-in-string
+                          "\n$"
+                          ""
+                          (buffer-substring (overlay-start bm)
+                                            (overlay-end bm))))
+                   ;; line numbers start on 1
+                   (line-num (+ 1 (count-lines (point-min) (overlay-start bm))))
+                   (name (format "%s:%d - %s" (buffer-name) line-num line)))
+              `(,name . ,bm))))
+        bookmark-overlays))
+
+(defun mpereira/bm-counsel-find-bookmark ()
+  "TODO: docstring.
+Arguments: none."
+  (interactive)
+  (let* ((bm-list (mpereira/bm-counsel-get-list (bm-overlays-lifo-order t)))
+         (bm-hash-table (make-hash-table :test 'equal))
+         (search-list (-map (lambda (bm) (car bm)) bm-list)))
+    (-each bm-list (lambda (bm)
+                     (puthash (car bm) (cdr bm) bm-hash-table)))
+    (ivy-read "Find bookmark: "
+              search-list
+              :require-match t
+              :keymap counsel-describe-map
+              :action (lambda (chosen)
+                        (let ((bookmark (gethash chosen bm-hash-table)))
+                          (switch-to-buffer (overlay-buffer bookmark))
+                          (bm-goto bookmark)))
+              :sort t)))
 #+END_SRC
 
 * quelpa and quelpa-use-package
@@ -975,7 +1010,10 @@ Source: https://git.io/vQKzv"
 
 * Configure Header Line
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq-default header-line-format '((which-function-mode ("" which-func-format " "))))
+(defun mpereira/set-header-line-format ()
+  (setq header-line-format '((which-function-mode ("" which-func-format " ")))))
+
+(add-hook 'prog-mode-hook #'mpereira/set-header-line-format)
 #+END_SRC
 
 * general
@@ -1020,10 +1058,20 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (setq evil-move-beyond-eol nil)
   (setq evil-want-Y-yank-to-eol t)
   (setq evil-want-C-u-scroll t)
+  ;; FIXME: Supposedly make it possible to navigate through search history with
+  ;; up/down keys. Doesn't seem to be working. Update: trying in init,
+  ;; commenting fix below.
+  (setq evil-search-module 'evil-search)
   :config
   (evil-mode t)
 
-  (setq evil-search-module 'evil-search)
+  ;; Fix for the above. Commenting out for now to try evil-search-module in init.
+  ;; (general-define-key
+  ;;  :keymaps '(isearch-mode-map evil-ex-search-keymap)
+  ;;  "C-k" #'isearch-ring-retreat
+  ;;  "<up>" #'isearch-ring-retreat
+  ;;  "C-j" #'isearch-ring-advance
+  ;;  "<down>" #'isearch-ring-advance)
 
   ;; Make it possible for other modes to use these bindings (e.g. company mode
   ;; uses it for navigating completions).
@@ -1549,6 +1597,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :ensure t
   :config
   (setq load-bash-alias-bashrc-file "~/.aliases"))
+#+END_SRC
+
+* bm
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package bm
+  :ensure t
+  :config
+  (general-define-key
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "B" 'mpereira/bm-counsel-find-bookmark
+   "T" 'bm-toggle))
 #+END_SRC
 
 * ialign
@@ -3422,6 +3482,8 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :ensure t
   :config
   (add-hook 'with-editor-mode-hook 'evil-insert-state)
+
+  (setq magit-prefer-remote-upstream t)
 
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
   ;; FIXME: not working?
