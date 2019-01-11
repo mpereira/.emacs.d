@@ -1264,15 +1264,25 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :config
   (setq hs-isearch-open t)
+
   (defun mpereira/display-code-line-counts (ov)
     (when (eq 'code (overlay-get ov 'hs))
       (overlay-put ov
                    'display
-                   (format "... / %d"
+                   (format " ... [%d]"
                            (count-lines (overlay-start ov)
                                         (overlay-end ov))))))
 
   (setq hs-set-up-overlay #'mpereira/display-code-line-counts)
+
+  (defun mpereira/hs-toggle-all ()
+    "If anything isn't hidden, run `hs-hide-all', else run `hs-show-all'."
+    (interactive)
+    (let ((starting-ov-count (length (overlays-in (point-min) (point-max)))))
+      (hs-hide-all)
+      (when (equal (length (overlays-in (point-min) (point-max))) starting-ov-count)
+        (hs-show-all))))
+
   (add-hook 'prog-mode-hook #'hs-minor-mode))
 #+END_SRC
 
@@ -1319,8 +1329,12 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 (add-hook 'eshell-preoutput-filter-functions 'ansi-color-filter-apply)
 
 (defun eshell/clear ()
-  (let ((inhibit-read-only t))
-    (erase-buffer)
+  "Clears buffer while preserving input."
+  (let* ((inhibit-read-only t)
+         (input (eshell-get-old-input)))
+    (eshell/clear-scrollback)
+    (eshell-emit-prompt)
+    (insert input)
     ;; This fixes the scenario where `ivy-completion-in-region-action' tries to
     ;; delete a region delimited by these two variables after they went out of
     ;; sync due to clearing an eshell buffer. The symptoms are broken completion
@@ -1332,8 +1346,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 
 (defun mpereira/eshell-clear ()
   (interactive)
-  (eshell/clear)
-  (eshell-send-input))
+  (eshell/clear))
 
 (defun mpereira/ivy-eshell-history ()
   "Browse Eshell history."
@@ -1363,7 +1376,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (eshell/alias "e" "find-file $1")
 
   ;; Eshell needs this variable set in addition to the PATH environment variable.
-  (setq-default eshell-path-env (getenv "PATH"))
+  (setq eshell-path-env (getenv "PATH"))
 
   (general-define-key
    :keymaps '(eshell-mode-map)
@@ -1607,6 +1620,18 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (minibuffer-line-mode t))
 #+END_SRC
 
+* buffer-move
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package buffer-move
+  :ensure t
+  :config
+  (general-define-key
+   "M-H" 'buf-move-left
+   "M-J" 'buf-move-down
+   "M-K" 'buf-move-up
+   "M-L" 'buf-move-right))
+#+END_SRC
+
 * beacon
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package beacon
@@ -1721,7 +1746,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (general-define-key
  :states '(normal visual)
  :keymaps '(hs-minor-mode-map)
- "TAB" #'hs-toggle-hiding)
+ "TAB" #'hs-toggle-hiding
+ "<S-tab>" #'mpereira/hs-toggle-all)
 
 ;; Return to original cursor position when cancelling search.
 (general-define-key
@@ -1755,6 +1781,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "l" 'counsel-find-library
    "m" 'describe-keymap
    "n" 'counsel-describe-function
+   "o" 'counsel-imenu
    "p" 'package-list-packages-no-fetch
    "v" 'counsel-describe-variable
    "y" 'counsel-yank-pop))
@@ -1985,6 +2012,16 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ob-rust
   :ensure t)
+#+END_SRC
+
+* Kotlin
+** flycheck-kotlin
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package flycheck-kotlin
+  :ensure t
+  :after kotlin-mode
+  :config
+  (add-hook 'flycheck-mode-hook #'flycheck-kotlin-setup))
 #+END_SRC
 
 * Javascript
@@ -2583,6 +2620,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :ensure t
   :after org)
 #+END_SRC
+** htmlize
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package htmlize
+  :ensure t)
+#+END_SRC
 ** ox-jira
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-jira
@@ -3099,7 +3141,38 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :ensure t
   :after counsel
   :config
-  (ivy-rich-mode 1))
+  (ivy-rich-mode 1)
+  (setq ivy-rich--display-transformers-list
+        `(ivy-switch-buffer
+          (:columns
+           ((ivy-rich-candidate (:width 100))
+            (ivy-rich-switch-buffer-size (:width 15))
+            (ivy-rich-switch-buffer-indicators
+             (:width 4 :face error :align right))
+            (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+            (ivy-rich-switch-buffer-project (:width 15 :face success))
+            (ivy-rich-switch-buffer-path
+             (:width (lambda (x)
+                       (ivy-rich-switch-buffer-shorten-path
+                        x (ivy-rich-minibuffer-width 0.3))))))
+           :predicate (lambda (cand) (get-buffer cand)))
+          counsel-M-x
+          (:columns
+           ((counsel-M-x-transformer (:width 50))
+            (ivy-rich-counsel-function-docstring
+             (:face font-lock-doc-face))))
+          counsel-describe-function
+          (:columns
+           ((counsel-describe-function-transformer (:width 40))
+            (ivy-rich-counsel-function-docstring (:face font-lock-doc-face))))
+          counsel-describe-variable
+          (:columns
+           ((counsel-describe-variable-transformer (:width 40))
+            (ivy-rich-counsel-variable-docstring (:face font-lock-doc-face))))
+          counsel-recentf
+          (:columns
+           ((ivy-rich-candidate (:width 0.8))
+            (ivy-rich-file-last-modified-time (:face font-lock-comment-face)))))))
 #+END_SRC
 
 * prescient
@@ -3553,6 +3626,24 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
 # End:
 
 #+BEGIN_SRC emacs-lisp :tangle no
+(use-package org-super-agenda
+  :ensure t)
+
+(let ((org-super-agenda-groups
+       '((:deadline (before "2018-09-01"))
+         (:discard (:anything t)))))
+  (org-todo-list))
+
+(-let* (((sec minute hour day month year dow dst utcoff) (decode-time))
+        (last-day-of-month (calendar-last-day-of-month month year))
+        (target-date
+         ;; A hack that seems to work fine.  Yay, Postel!
+         (format "%d-%02d-%02d" year month (1+ last-day-of-month)))
+        (org-super-agenda-groups
+         `((:deadline (before ,target-date))
+           (:discard (:anything t)))))
+  (org-todo-list)
+
 (use-package org-ql
   :ensure nil
   :quelpa (org-ql
@@ -3561,38 +3652,6 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
   :config
   (require 'org-habit)
   (require 'org-ql-agenda))
-
-
-
-(timestamp (:type inactive
-                  :raw-value
-                  "[2017-11-03 Fri 15:57]"
-                  :year-start
-                  2017
-                  :month-start
-                  11
-                  :day-start
-                  3
-                  :hour-start
-                  15
-                  :minute-start
-                  57
-                  :year-end
-                  2017
-                  :month-end
-                  11
-                  :day-end
-                  3
-                  :hour-end
-                  15
-                  :minute-end
-                  57
-                  :begin
-                  15861
-                  :end
-                  15884
-                  :post-blank
-                  1))
 
 (defun timestamp->time (timestamp)
   (let* ((year (plist-get timestamp ':year-end))
@@ -3767,6 +3826,36 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
                           ((integerp k) (nth k coll)))))
     coll))
 
+(timestamp->date '(:type inactive
+                         :raw-value
+                         "[2017-11-03 Fri 15:57]"
+                         :year-start
+                         2017
+                         :month-start
+                         11
+                         :day-start
+                         3
+                         :hour-start
+                         15
+                         :minute-start
+                         57
+                         :year-end
+                         2017
+                         :month-end
+                         11
+                         :day-end
+                         3
+                         :hour-end
+                         15
+                         :minute-end
+                         57
+                         :begin
+                         15861
+                         :end
+                         15884
+                         :post-blank
+                         1))
+
 (--> (org-ql (org-agenda-files)
        (and (done))
        :sort (date))
@@ -3798,3 +3887,4 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
            (insert (concat (car it) "\n" (apply #'concat (nth 1 it))) "\n")))
     (pop-to-buffer (current-buffer))))
 #+END_SRC
+** [[https://github.com/d12frosted/elpa-mirror][When melpa.org is down]]
