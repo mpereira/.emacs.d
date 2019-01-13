@@ -1239,7 +1239,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :after evil
   :config
-  (evil-collection-init '(package-menu))
+  (evil-collection-init '(package-menu magit-todos))
 
   ;; Disabling this for now because:
   ;; 1. Can't run :s/foo/bar/ commands in minibuffer
