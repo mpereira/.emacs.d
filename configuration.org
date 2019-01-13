@@ -1058,21 +1058,27 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (setq evil-move-beyond-eol nil)
   (setq evil-want-Y-yank-to-eol t)
   (setq evil-want-C-u-scroll t)
-  ;; FIXME: Supposedly make it possible to navigate through search history with
-  ;; up/down keys. Doesn't seem to be working. Update: trying in init,
-  ;; commenting fix below.
   (setq evil-search-module 'evil-search)
   :config
   (evil-mode t)
 
-  ;; Fix for the above. Commenting out for now to try evil-search-module in init.
-  ;; (general-define-key
-  ;;  :keymaps '(isearch-mode-map evil-ex-search-keymap)
-  ;;  "C-k" #'isearch-ring-retreat
-  ;;  "<up>" #'isearch-ring-retreat
-  ;;  "C-j" #'isearch-ring-advance
-  ;;  "<down>" #'isearch-ring-advance)
+  ;; FIXME: "n" and "N" still cause the highlights to persist.
+  ;; (setq evil-ex-search-persistent-highlight nil)
 
+  (general-define-key
+   :states '(normal)
+   "C-l" #'evil-ex-nohighlight)
+
+  ;; Movement bindings for evil-ex-search. Why doesn't `evil-ex-search-keymap'
+  ;; work for this?
+  (general-define-key
+   :keymaps '(minibuffer-inactive-mode-map)
+   "C-k" #'previous-line-or-history-element
+   "C-j" #'next-line-or-history-element
+   "C-?" #'previous-matching-history-element
+   "C-/" #'next-matching-history-element)
+
+  ;; FIXME: is this still needed?
   ;; Make it possible for other modes to use these bindings (e.g. company mode
   ;; uses it for navigating completions).
   (general-define-key
@@ -1304,6 +1310,14 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :config
   (paradox-enable))
+#+END_SRC
+
+* highlight-indent-guide
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package highlight-indent-guides
+  :ensure t
+  :config
+  (setq highlight-indent-guides-method 'character))
 #+END_SRC
 
 * hideshow
