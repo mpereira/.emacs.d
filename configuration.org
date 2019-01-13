@@ -1611,6 +1611,12 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "T" 'bm-toggle))
 #+END_SRC
 
+* reformatter
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package reformatter
+  :ensure t)
+#+END_SRC
+
 * ialign
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ialign
