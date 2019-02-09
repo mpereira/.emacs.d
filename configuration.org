@@ -1,3 +1,8 @@
+# Local Variables:
+# before-save-hook: org-make-toc
+# org-adapt-indentation: nil
+# End:
+
 * Table of Contents
 :PROPERTIES:
 :TOC:      this
@@ -187,6 +192,8 @@
 (defmacro comment (&rest body)
   "Comment out one or more s-expressions."
   nil)
+
+(defalias 'remove-from-list 'object-remove-from-list)
 
 (defun mpereira/shorten-directory (project-root-dir dir max-length)
   "Show up to MAX-LENGTH characters of a directory name DIR."
@@ -436,7 +443,7 @@ exist in any structured movement package is mind-boggling to me."
 
 (defun mpereira/org-agenda-format-date (date)
   "Format a DATE string for display in the daily/weekly agenda.
-    This function makes sure that dates are aligned for easy reading."
+This function makes sure that dates are aligned for easy reading."
   (let* ((dayname (calendar-day-name date))
          (day (cadr date))
          (day-of-week (calendar-day-of-week date))
@@ -520,8 +527,8 @@ exist in any structured movement package is mind-boggling to me."
 ;; https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html
 (defun mpereira/org-agenda-delete-empty-blocks ()
   "Remove empty agenda blocks.
-    A block is identified as empty if there are fewer than 2 non-empty lines in the
-    block (excluding the line with `org-agenda-block-separator' characters)."
+A block is identified as empty if there are fewer than 2 non-empty lines in the
+block (excluding the line with `org-agenda-block-separator' characters)."
   (when org-agenda-compact-blocks
     (user-error "Cannot delete empty compact blocks"))
   (setq buffer-read-only nil)
@@ -693,6 +700,29 @@ Arguments: none."
                           (switch-to-buffer (overlay-buffer bookmark))
                           (bm-goto bookmark)))
               :sort t)))
+
+(defun mpereira/narrow-or-widen-dwim (p)
+  "Widen if buffer is narrowed, narrow-dwim otherwise.
+Dwim means: region, org-src-block, org-subtree, or defun, whichever applies
+first. Narrowing to org-src-block actually calls `org-edit-src-code'.
+
+With prefix P, don't widen, just narrow even if buffer is already narrowed."
+  (interactive "P")
+  (declare (interactive-only))
+  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+        ((region-active-p)
+         (narrow-to-region (region-beginning)
+                           (region-end)))
+        ((derived-mode-p 'org-mode)
+         ;; `org-edit-src-code' is not a real narrowing command. Remove this
+         ;; first conditional if you don't want it.
+         (cond ((ignore-errors (org-edit-src-code) t)
+                (delete-other-windows))
+               ((ignore-errors (org-narrow-to-block) t))
+               (t (org-narrow-to-subtree))))
+        ((derived-mode-p 'latex-mode)
+         (LaTeX-narrow-to-environment))
+        (t (narrow-to-defun))))
 #+END_SRC
 
 * quelpa and quelpa-use-package
@@ -813,6 +843,11 @@ Arguments: none."
 (dolist (hook '(prog-mode-hook text-mode-hook))
   (add-hook hook #'mpereira/enable-line-numbers))
 
+(general-define-key
+  :keymaps '(text-mode-map)
+  :states '(normal visual)
+  "K" #'synosaurus-lookup)
+
 ;; Better unique buffer names for files with the same base name.
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
@@ -837,9 +872,12 @@ Arguments: none."
   )
 
 ;; 80 columns.
-(setq-default whitespace-line-column 80)
-(setq-default fill-column 80)
-(setq-default comment-column 80)
+(dolist (column '(whitespace-line-column
+                  fill-column
+                  comment-column))
+  (setq-default column 80))
+
+(setq emacs-lisp-docstring-fill-column 'fill-column)
 
 ;; UTF8 stuff.
 (prefer-coding-system 'utf-8)
@@ -1388,7 +1426,25 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
       '(("git" "log" "l" "diff" "show")))
 
 ;; Remove ansi color escape sequences from output.
-(add-hook 'eshell-preoutput-filter-functions 'ansi-color-filter-apply)
+;; Commented out for now.
+;; (add-hook 'eshell-preoutput-filter-functions 'ansi-color-filter-apply)
+
+;; Allow colored output.
+;; TODO: is this even needed given that `eshell-handle-ansi-color' is
+;; in `eshell-output-filter-functions'?
+(require 'ansi-color)
+(require 'eshell)
+(defun mpereira/eshell-handle-ansi-color ()
+  "TODO: docstring."
+  ;; (ansi-color-apply-on-region eshell-last-output-start
+  ;;                             eshell-last-output-end)
+  )
+(add-to-list 'eshell-output-filter-functions #'mpereira/eshell-handle-ansi-color)
+
+(comment
+ (setq eshell-output-filter-functions
+       (delete #'mpereira/eshell-handle-ansi-color eshell-output-filter-functions))
+ (remove-from-list 'eshell-output-filter-functions #'mpereira/eshell-handle-ansi-color))
 
 (defun eshell/clear ()
   "Clears buffer while preserving input."
@@ -1803,10 +1859,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  :states '(normal visual)
  :prefix mpereira/leader
  "," 'evil-switch-to-windows-last-buffer
- "u" 'undo-tree-visualize
+ "=" 'quick-calc
  "b" 'switch-to-buffer
- "w" 'save-buffer
  "q" 'evil-quit
+ "u" 'undo-tree-visualize
+ "w" 'save-buffer
  "hs" 'mpereira/split-window-below-and-switch
  "vs" 'mpereira/split-window-right-and-switch
  "hv" 'mpereira/toggle-window-split
@@ -1829,6 +1886,20 @@ length of PATH (sans directory slashes) down to MAX-LEN."
  "TAB" #'hs-toggle-hiding
  "<S-tab>" #'mpereira/hs-toggle-all)
 
+(general-define-key
+ :states '(normal visual)
+ :prefix mpereira/leader
+ :infix "t"
+ "d" #'toggle-debug-on-error
+ "e" #'toggle-debug-on-error
+ "l" #'toggle-truncate-lines
+ "n" #'mpereira/narrow-or-widen-dwim
+ "o" #'mpereira/hs-toggle-all
+ "q" #'toggle-debug-on-quit
+ "r" #'dired-toggle-read-only
+ "t" #'mpereira/narrow-or-widen-dwim
+ "w" #'mpereira/narrow-or-widen-dwim)
+
 ;; Return to original cursor position when cancelling search.
 (general-define-key
  :keymaps '(isearch-mode-map)
@@ -1845,7 +1916,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (general-define-key
  :keymaps '(helpful-mode-map deadgrep-mode-map)
  :states '(normal visual)
- "q" 'kill-buffer-and-window)
+ "q" 'kill-current-buffer)
 
 (with-eval-after-load "counsel"
   (general-define-key
@@ -2076,7 +2147,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (general-define-key
    :states '(normal)
    :keymaps '(racer-help-mode-map)
-   "q" 'kill-buffer-and-window)
+   "q" 'kill-current-buffer)
 
   (add-hook 'rust-mode-hook #'racer-mode))
 #+END_SRC
@@ -2161,6 +2232,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (setq flycheck-python-pycompile-executable "python3")
   (setq elpy-rpc-python-command "python3")
   (setq python-shell-interpreter "python3")
+  (setq company-idle-delay-before-elpy-fucks-it-up company-idle-delay)
+  (remove-hook 'elpy-modules 'elpy-module-eldoc)
+  (remove-hook 'elpy-modules 'elpy-module-django)
+  (add-hook 'elpy-mode-hook
+            (lambda ()
+              (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up)))
   :config
   (elpy-enable))
 #+END_SRC
@@ -2193,7 +2270,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq org-directory (expand-file-name "org" mpereira/dropbox-directory))
 
-(setq org-modules '(org-habit org-info))
+(setq org-modules '(org-habit
+                    org-info
+                    org-tempo))
 
 (setq org-return-follows-link t)
 
@@ -2219,7 +2298,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (setq org-edit-src-content-indentation 0)
 
 ;; Don't close all other windows when exiting the src buffer.
-(setq org-src-window-setup 'other-window)
+(setq org-src-window-setup 'current-window)
 
 ;; Fontify code in code blocks.
 (setq org-src-fontify-natively t)
@@ -2253,11 +2332,16 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                               ("a" "Appointment" entry
                                (file "appointments.org")
                                "* %i%?\n  %^{When?}t")
-                              ("j" "Journal" entry
+                              ("j" "Journal for today" entry
                                (file+olp+datetree "journal.org" "Journal")
                                "* %U %^{Title}\n  %?"
                                :tree-type week
-                               :empty-lines-after 1)))
+                               :empty-lines-after 1)
+                              ("J" "Journal for some other day" entry
+                               (file+olp+datetree "journal.org" "Journal")
+                               "* %U %^{Title}\n  %?"
+                               :tree-type week
+                               :time-prompt t)))
 
 (add-hook 'org-capture-mode-hook #'evil-insert-state)
 
@@ -2368,7 +2452,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
         (mpereira/call-interactively-with-prefix-arg '(4) 'org-schedule))
  "s" 'org-schedule
  "S" 'org-sort-entries
- "t" 'org-set-tags
+ "t" 'org-set-tags-command
  "u" 'org-toggle-link-display
  "x" 'org-export-dispatch
  "y" 'org-copy-subtree)
@@ -2511,7 +2595,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                      (org-agenda-prefix-format " %i %-18c%?-12t% s")
                      (org-habit-show-habits nil)
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
+                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))
                      (org-agenda-overriding-header
                       (concat
                        "\nToday "
@@ -3701,11 +3785,6 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
   (goto-char (point-max)))
 #+END_SRC
 ** Change font: =M-x x-select-font=
-
-# Local Variables:
-# before-save-hook: org-make-toc
-# org-adapt-indentation: nil
-# End:
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package org-super-agenda
