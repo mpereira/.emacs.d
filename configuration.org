@@ -1081,7 +1081,6 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :config
   (evil-mode t)
 
-<<<<<<< Updated upstream
   ;; Fix for the above. Commenting out for now to try evil-search-module in init.
   ;; (general-define-key
   ;;  :keymaps '(isearch-mode-map evil-ex-search-keymap)
@@ -1089,7 +1088,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   ;;  "<up>" #'isearch-ring-retreat
   ;;  "C-j" #'isearch-ring-advance
   ;;  "<down>" #'isearch-ring-advance)
-=======
+
   ;; FIXME: "n" and "N" still cause the highlights to persist.
   ;; Maybe it's related to the difference between `evil-ex-search-forward' and
   ;; `evil-search-forward'.
@@ -1108,7 +1107,6 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
    "C-j" #'next-line-or-history-element
    "C-?" #'previous-matching-history-element
    "C-/" #'next-matching-history-element)
->>>>>>> Stashed changes
 
   ;; Make it possible for other modes to use these bindings (e.g. company mode
   ;; uses it for navigating completions).
