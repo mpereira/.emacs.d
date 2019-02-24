@@ -933,7 +933,13 @@ Sources:
 - http://daylerees.github.io/
 - http://raebear.net/comp/emacscolors.html
 
-Currently mostly using =doom-dracula= and =doom-solarized-light=.
+Dark themes I use the most:
+1. =doom-dracula=
+1. =doom-Ioskvem=
+
+Light themes I use the most:
+1. =twilight-bright=
+2. =espresso=
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package srcery-theme
@@ -2300,6 +2306,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ;; Don't close all other windows when exiting the src buffer.
 (setq org-src-window-setup 'current-window)
 
+;; Open indirect buffer in the same window as the src buffer.
+(setq org-indirect-buffer-display 'current-window)
+
 ;; Fontify code in code blocks.
 (setq org-src-fontify-natively t)
 
@@ -2433,7 +2442,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "Co" 'org-clock-out
  "d" 'org-deadline
  "D" 'org-archive-subtree
- "b" 'org-tree-to-indirect-buffer
+ "b" (lambda ()
+       (interactive)
+       (mpereira/call-interactively-with-prefix-arg
+        '(4)
+        'org-tree-to-indirect-buffer))
  "B" 'outline-show-branches
  "f" 'org-attach
  "i" 'org-insert-link
@@ -2443,13 +2456,16 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "r" 'org-refile
  "X" (lambda ()
        (interactive)
-       (mpereira/call-interactively-with-prefix-arg '(4) 'org-babel-remove-result-one-or-many))
+       (mpereira/call-interactively-with-prefix-arg
+        '(4) 'org-babel-remove-result-one-or-many))
  "Rd" (lambda ()
         (interactive)
-        (mpereira/call-interactively-with-prefix-arg '(4) 'org-deadline))
+        (mpereira/call-interactively-with-prefix-arg
+         '(4) 'org-deadline))
  "Rs" (lambda ()
         (interactive)
-        (mpereira/call-interactively-with-prefix-arg '(4) 'org-schedule))
+        (mpereira/call-interactively-with-prefix-arg
+         '(4) 'org-schedule))
  "s" 'org-schedule
  "S" 'org-sort-entries
  "t" 'org-set-tags-command
@@ -2963,10 +2979,25 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :ensure t)
 #+END_SRC
 
+* transpose-frame
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package transpose-frame
+  :ensure t)
+#+END_SRC
+
 * move-text
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package move-text
   :ensure t)
+#+END_SRC
+
+* atomic-chrome
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package atomic-chrome
+  :ensure t
+  :config
+  (setq atomic-chrome-default-major-mode 'org-mode)
+  (atomic-chrome-start-server))
 #+END_SRC
 
 * expand-region
@@ -3482,7 +3513,8 @@ Disabled for now. Using [[flycheck-inline]] instead.
    :states '(normal visual)
    :prefix mpereira/leader
    :infix "p"
-   "t" 'neotree-project-dir)
+   ;; "t" 'neotree-project-dir
+   "t" 'dired-sidebar-toggle-sidebar)
 
   (general-define-key
    :keymaps 'neotree-mode-map
