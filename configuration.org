@@ -615,23 +615,32 @@ block (excluding the line with `org-agenda-block-separator' characters)."
     (shell-command command)))
 
 (defun mpereira/toggle-maximize-buffer (&optional centered-p)
-  "Toggle maximize buffer."
+  "Toggle maximize buffer. TODO: document CENTERED-P."
   (interactive)
-  (if (= 1 (length (window-list)))
+  (let ((return-to-window-configuration
+         (lambda ()
+           (when (boundp 'window-configuration-p)
+             (set-window-configuration mpereira/saved-window-configuration)
+             (goto-char mpereira/saved-point)
+             (setq mpereira/saved-window-configuration nil))
+           (when centered-p
+             (olivetti-mode -1)
+             (setq mpereira/saved-point nil))
+           (setq mpereira/saved-centered-p nil))))
+    (if (= 1 (length (window-list)))
+        (progn
+          ;; Centering single buffer.
+          (if olivetti-mode
+              (funcall return-to-window-configuration)
+            (olivetti-mode 1)))
+      ;; Maximizing selected buffer.
       (progn
-        (set-window-configuration mpereira/saved-window-configuration)
-        (goto-char mpereira/saved-point)
-        (when mpereira/saved-centered-p
-          (olivetti-mode -1))
-        (setq mpereira/saved-window-configuration nil)
-        (setq mpereira/saved-point nil)
-        (setq mpereira/saved-centered-p nil))
-    (setq mpereira/saved-window-configuration (current-window-configuration))
-    (setq mpereira/saved-point (point))
-    (setq mpereira/saved-centered-p centered-p)
-    (delete-other-windows)
-    (when centered-p
-      (olivetti-mode 1))))
+        (setq mpereira/saved-window-configuration (current-window-configuration))
+        (setq mpereira/saved-point (point))
+        (setq mpereira/saved-centered-p centered-p)
+        (delete-other-windows)
+        (when centered-p
+          (olivetti-mode 1))))))
 
 (defun mpereira/epoch-at-point-to-timestamp ()
   "TODO: docstring"
@@ -723,6 +732,27 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
         ((derived-mode-p 'latex-mode)
          (LaTeX-narrow-to-environment))
         (t (narrow-to-defun))))
+
+(defun mpereira/uuid ()
+  "Return a UUID."
+  (interactive)
+  (kill-new (format "%04x%04x-%04x-%04x-%04x-%06x%06x"
+                    (random (expt 16 4))
+                    (random (expt 16 4))
+                    (random (expt 16 4))
+                    (random (expt 16 4))
+                    (random (expt 16 4))
+                    (random (expt 16 6))
+                    (random (expt 16 6)))))
+
+;; TODO: make this better.
+(defun mpereira/kill-last-kbd-macro ()
+  "Save last executed macro definition in the kill ring."
+  (let ((name (gensym "kill-last-kbd-macro-")))
+    (name-last-kbd-macro name)
+    (with-temp-buffer
+      (insert-kbd-macro name)
+      (kill-new (buffer-substring-no-properties (point-min) (point-max))))))
 #+END_SRC
 
 * quelpa and quelpa-use-package
@@ -1742,7 +1772,9 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 * olivetti
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package olivetti
-  :ensure t)
+  :ensure t
+  :config
+  (setq-default olivetti-body-width 0.5))
 #+END_SRC
 
 * minibuffer-line
@@ -2320,6 +2352,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                                (emacs-lisp . t)))
 
 (setq org-confirm-babel-evaluate nil)
+
+;; By default, don't evaluate src blocks when exporting.
+(setq org-export-use-babel nil)
 
 (setq org-todo-keywords '((sequence "TODO(t!)"
                                     "DOING(d!)"
@@ -2923,7 +2958,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 * ansi-term
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq explicit-shell-file-name "/usr/local/bin/fish")
+;; 2018-03-01: setting this to nil. Otherwise, org babel shell
+;; sessions are forced to run fish.
+;; (setq explicit-shell-file-name "/usr/local/bin/fish")
+(setq explicit-shell-file-name nil)
 
 ;; Infinite buffer.
 (setq term-buffer-maximum-size 0)
@@ -2965,9 +3003,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 (add-hook 'term-mode-hook #'mpereira/hide-trailing-whitespace)
 
+;; TODO: why is this needed?
 (defun mpereira/initialize-term ()
   (setq-local term-prompt-regexp "^\$ +")
-  ;; TODO: why is this needed?
   (setq-local term-eol-on-send nil))
 
 (add-hook 'term-mode-hook #'mpereira/initialize-term)
@@ -3654,6 +3692,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
 #+END_SRC
 
+** forge
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package forge
+  :ensure t
+  :after magit)
+#+END_SRC
 ** magit-todos
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package magit-todos
@@ -3664,30 +3708,6 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :after magit
   :config
   (add-hook 'magit-mode-hook 'magit-todos-mode))
-#+END_SRC
-** magit-gh-pulls
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package magit-gh-pulls
-  :ensure t
-  :after magit
-  :config
-  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
-#+END_SRC
-** magithub
-#+BEGIN_SRC emacs-lisp :tangle yes
-;; TODO: magithub doesn't seem to be able to fetch data from repositories under
-;; 2-factor authentication.
-(use-package magithub
-  :ensure t
-  :after magit
-  :config
-  (magithub-feature-autoinject t))
-#+END_SRC
-** forge
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package forge
-  :ensure t
-  :after magit)
 #+END_SRC
 
 * Wolfram Alpha
