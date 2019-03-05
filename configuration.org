@@ -520,6 +520,8 @@ This function makes sure that dates are aligned for easy reading."
           "&"
           "TIMESTAMP_IA<=\"<" end ">\""
           "|"
+          "TODO=\"DONE\""
+          "&"
           "TIMESTAMP>=\"<" start ">\""
           "&"
           "TIMESTAMP<=\"<" end ">\""))
@@ -527,8 +529,9 @@ This function makes sure that dates are aligned for easy reading."
 ;; https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html
 (defun mpereira/org-agenda-delete-empty-blocks ()
   "Remove empty agenda blocks.
-A block is identified as empty if there are fewer than 2 non-empty lines in the
-block (excluding the line with `org-agenda-block-separator' characters)."
+A block is identified as empty if there are fewer than 2 non-empty
+lines in the block (excluding the line with
+`org-agenda-block-separator' characters)."
   (when org-agenda-compact-blocks
     (user-error "Cannot delete empty compact blocks"))
   (setq buffer-read-only nil)
@@ -1457,9 +1460,8 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 ;; Visual commands are commands which require a proper terminal. eshell will run
 ;; them in a term buffer when you invoke them.
 (setq eshell-visual-commands
-      '("less" "htop" "top" "bash" "zsh" "fish" "glances" "watch"))
-(setq eshell-visual-subcommands
-      '(("git" "log" "l" "diff" "show")))
+      '("htop" "top" "bash" "zsh" "fish" "glances" "watch"))
+(setq eshell-visual-subcommands '())
 
 ;; Remove ansi color escape sequences from output.
 ;; Commented out for now.
@@ -1735,6 +1737,38 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :after wgrep-ag
   :ensure t
   :config
+  ;; Original mappings at:
+  ;; https://github.com/dajva/rg.el/blob/77670a4bcdba138a0cef3fb12a20b1492dca902a/rg-result.el#L203-L221
+  ;;
+  ;; I'm overring `rg-mode-map' here, but it might make sense
+  ;; overriding "parent" keymaps like `grep-mode-map' or
+  ;; `compilation-mode-map'.
+  ;;
+  ;; TODO: figure out how to make "," resolve to the leader instead of
+  ;; `evil-repeat-find-char-reverse'.
+  (general-define-key
+   :keymaps '(rg-mode-map)
+   "C-f" 'scroll-up
+   "C-b" 'scroll-down
+   "C-j" 'rg-next-file
+   "C-k" 'rg-prev-file
+   "<" 'rg-back-history
+   ">" 'rg-forward-history
+   ;; "n" is `next-error-no-select' by default.
+   "n" nil
+   ;; digit-argument
+   "0" nil
+   ;; "h" is `describe-mode' by default.
+   "h" 'evil-backward-char
+   ;; "g" is `recompile' by default.
+   "g" nil
+   ;; "w" is `wgrep-change-to-wgrep-mode' by default.
+   "w" nil
+   ;; "l" is `rg-list-searches' by default.
+   "l" nil)
+
+  (setq rg-group-result t)
+
   (add-hook 'rg-mode-hook 'wgrep-ag-setup))
 #+END_SRC
 
@@ -2595,12 +2629,8 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (setq org-gcal-client-id mpereira/secret-org-gcal-client-id)
   (setq org-gcal-client-secret mpereira/secret-org-gcal-client-secret)
   (setq org-gcal-file-alist mpereira/secret-org-gcal-file-alist)
-
-  ;; https://github.com/myuhe/org-gcal.el/issues/50#issuecomment-231525887
-  (defun mpereira/org-gcal--notify (title mes)
-    (message "org-gcal::%s - %s" title mes))
-
-  (fset 'org-gcal--notify 'mpereira/org-gcal--notify))
+  (setq org-gcal-auto-archive nil)
+  (setq org-gcal-notify-p nil))
 #+END_SRC
 ** Org Agenda
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2623,6 +2653,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (setq org-agenda-format-date 'mpereira/org-agenda-format-date)
 
 (defun mpereira/custom-agenda ()
+  "TODO: docstring."
   (interactive)
   (let* ((settings
           '((todo "DOING"
@@ -2639,55 +2670,59 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                   ((org-agenda-overriding-header "\nWaiting\n")
                    (org-agenda-prefix-format " %i %-18c%?-12t% s")))
             (agenda ""
-                    ((org-deadline-warning-days 0)
+                    ((org-agenda-overriding-header
+                      (concat
+                       "\nToday "
+                       "(" (format-time-string "%A, %B %d" (current-time)) ")"))
+                     (org-deadline-warning-days 0)
                      (org-agenda-span 'day)
                      (org-agenda-use-time-grid t)
                      (org-agenda-format-date "")
                      (org-agenda-prefix-format " %i %-18c%?-12t% s")
                      (org-habit-show-habits nil)
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))
-                     (org-agenda-overriding-header
-                      (concat
-                       "\nToday "
-                       "(" (format-time-string "%A, %B %d" (current-time)) ")"))))
+                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))))
             (agenda ""
-                    ((org-agenda-start-day "+1d")
+                    ((org-agenda-overriding-header "\nNext 7 Days")
+                     (org-agenda-start-day "+1d")
                      (org-agenda-span 'week)
                      (org-agenda-start-on-weekday nil)
                      (org-agenda-prefix-format " %i %-18c%?-12t% s")
-                     (org-agenda-overriding-header "\nNext 7 Days")
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))))
+                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))))
             (tags-todo (concat "SCHEDULED>\"<+8d>\"&SCHEDULED<=\"<+120d>\""
                                "|"
                                "DEADLINE>\"<+8d>\"&DEADLINE<=\"<+120d>\"/!")
-                       ((org-agenda-skip-function
+                       ((org-agenda-overriding-header
+                         "\nComing up\n")
+                        (org-agenda-skip-function
                          '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
                         ;; FIXME: line below probably unneeded.
                         (org-tags-match-list-sublevels t)
                         (org-agenda-prefix-format
                          " %-18c %(mpereira/org-agenda-tags-suffix)  ")
                         (org-agenda-sorting-strategy '(timestamp-up))
-                        (org-agenda-remove-times-when-in-prefix nil)
-                        (org-agenda-overriding-header
-                         "\nComing up\n")))
-            (todo "TODO"
-                  ((org-agenda-skip-function
-                    '(or (org-agenda-skip-entry-if 'scheduled 'deadline)
-                         (mpereira/org-skip-inbox)
-                         (mpereira/org-skip-subtree-if-habit)
-                         (mpereira/org-skip-all-but-first)
-                         (mpereira/org-skip-someday-projects-subheadings)))
-                   (org-agenda-sorting-strategy '(deadline-up
-                                                  scheduled-up
-                                                  time-up
-                                                  timestamp-up
-                                                  todo-state-up
-                                                  alpha-up))
-                   (org-agenda-prefix-format
-                    " %-18c %-22(mpereira/org-agenda-project-name-prefix-format)")
-                   (org-agenda-overriding-header "\nNext Tasks\n")))))
+                        (org-agenda-remove-times-when-in-prefix nil)))
+            ;; Note: the section below was causing the agenda to
+            ;; freeze some times. And I wasn't really using it anyway.
+            ;;
+            ;; (todo "TODO"
+            ;;       ((org-agenda-overriding-header "\nNext Tasks\n")
+            ;;        (org-agenda-skip-function
+            ;;         '(or (org-agenda-skip-entry-if 'scheduled 'deadline)
+            ;;              (mpereira/org-skip-inbox)
+            ;;              (mpereira/org-skip-subtree-if-habit)
+            ;;              (mpereira/org-skip-all-but-first)
+            ;;              (mpereira/org-skip-someday-projects-subheadings)))
+            ;;        (org-agenda-sorting-strategy '(deadline-up
+            ;;                                       scheduled-up
+            ;;                                       time-up
+            ;;                                       timestamp-up
+            ;;                                       todo-state-up
+            ;;                                       alpha-up))
+            ;;        (org-agenda-prefix-format
+            ;;         " %-18c %-22(mpereira/org-agenda-project-name-prefix-format)")))
+            ))
          (inbox-file (expand-file-name "inbox.org" org-directory))
          (inbox-buffer (find-file-noselect inbox-file))
          (inbox (with-current-buffer inbox-buffer
@@ -2705,34 +2740,33 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                                        '((org-agenda-block-separator ?\-))))))
     (org-agenda nil "c")))
 
-;; TODO: any reason this is a custom agenda command and not just a function like
-;; `mpereira/custom-agenda'?
+;; TODO: any reason this is a custom agenda command and not just a
+;; function like `mpereira/custom-agenda'?
 (setq org-agenda-custom-commands
       `(("r" "Review"
          ((tags ,(mpereira/org-agenda-review-search "today" "+1d")
-                ((org-agenda-prefix-format " %i %-18c%?-12t% s")
-                 (org-agenda-overriding-header
+                ((org-agenda-overriding-header
                   (concat
                    "\nDone today "
-                   "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))))
+                   "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))
+                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
           (tags ,(mpereira/org-agenda-review-search "-1d" "today")
-                ((org-agenda-prefix-format " %i %-18c%?-12t% s")
-                 (org-agenda-overriding-header
+                ((org-agenda-overriding-header
                   (concat
                    "\nDone yesterday "
-                   "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))))
+                   "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))
+                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
           (tags ,(mpereira/org-agenda-review-search
                   (mpereira/org-agenda-date-week-start
                    (mpereira/format-calendar-date-Y-m-d
                     (mpereira/calendar-read-date "today")))
-                  (mpereira/org-agenda-date-week-end
-                   (mpereira/format-calendar-date-Y-m-d
-                    (mpereira/calendar-read-date "today"))))
-                ((org-agenda-prefix-format
+                  (mpereira/format-calendar-date-Y-m-d
+                   (mpereira/calendar-read-date "today")))
+                ((org-agenda-overriding-header "\nDone this week\n")
+                 (org-agenda-prefix-format
                   " %-18c %(mpereira/org-agenda-review-suffix-format) ")
                  (org-agenda-show-all-dates t)
-                 (org-agenda-sorting-strategy '(timestamp-down))
-                 (org-agenda-overriding-header "\nDone this week\n")))
+                 (org-agenda-sorting-strategy '(timestamp-down))))
           (tags ,(mpereira/org-agenda-review-search
                   (mpereira/org-agenda-date-week-start
                    (mpereira/format-calendar-date-Y-m-d
@@ -2740,16 +2774,17 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                   (mpereira/org-agenda-date-week-end
                    (mpereira/format-calendar-date-Y-m-d
                     (mpereira/calendar-read-date "-1w"))))
-                ((org-agenda-prefix-format
+                ((org-agenda-overriding-header "\nDone last week\n")
+                 (org-agenda-prefix-format
                   " %-18c %(mpereira/org-agenda-review-suffix-format) ")
                  (org-agenda-show-all-dates t)
-                 (org-agenda-sorting-strategy '(timestamp-down))
-                 (org-agenda-overriding-header "\nDone last week\n"))))
+                 (org-agenda-sorting-strategy '(timestamp-down)))))
          ((org-agenda-block-separator ?\-)))))
 
 ;; Redo agenda after capturing.
 (add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
 
+;; Don't show empty agenda sections.
 (add-hook 'org-agenda-finalize-hook #'mpereira/org-agenda-delete-empty-blocks)
 
 (defun mpereira/org-gcal-entry-at-point-p ()
@@ -2973,7 +3008,8 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (general-define-key
  :keymaps '(term-raw-map)
  :states '(normal)
- "p" 'term-paste)
+ "p" 'term-paste
+ "M-x" 'counsel-M-x)
 
 (general-define-key
  :keymaps '(term-raw-map)
@@ -3004,11 +3040,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (add-hook 'term-mode-hook #'mpereira/hide-trailing-whitespace)
 
 ;; TODO: why is this needed?
-(defun mpereira/initialize-term ()
-  (setq-local term-prompt-regexp "^\$ +")
-  (setq-local term-eol-on-send nil))
-
-(add-hook 'term-mode-hook #'mpereira/initialize-term)
+;; Commented out: 2019-03-04.
+;; (defun mpereira/initialize-term ()
+;;   (setq-local term-prompt-regexp "^\$ +")
+;;   (setq-local term-eol-on-send nil))
+;; (add-hook 'term-mode-hook #'mpereira/initialize-term)
 #+END_SRC
 
 * default-text-scale
