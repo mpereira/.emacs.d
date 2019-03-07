@@ -187,6 +187,12 @@
   :ensure t)
 #+END_SRC
 
+* Configuration
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq mpereira/light-theme 'twilight-bright)
+(setq mpereira/dark-theme 'doom-Iosvkem)
+#+END_SRC
+
 * Helper functions
 #+BEGIN_SRC emacs-lisp :tangle yes
 (defmacro comment (&rest body)
@@ -756,6 +762,24 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
     (with-temp-buffer
       (insert-kbd-macro name)
       (kill-new (buffer-substring-no-properties (point-min) (point-max))))))
+
+(defun mpereira/load-theme (theme)
+  "TODO: docstring. THEME."
+  (interactive)
+  (counsel-load-theme-action (symbol-name theme))
+  (when org-bullets-mode
+    (org-bullets-mode -1)
+    (org-bullets-mode 1)))
+
+(defun mpereira/load-light-theme ()
+  "TODO: docstring."
+  (interactive)
+  (mpereira/load-theme mpereira/light-theme))
+
+(defun mpereira/load-dark-theme ()
+  "TODO: docstring."
+  (interactive)
+  (mpereira/load-theme mpereira/dark-theme))
 #+END_SRC
 
 * quelpa and quelpa-use-package
@@ -800,8 +824,8 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
 (tool-bar-mode -1)
 (blink-cursor-mode -1)
 
-;; Set default font size to 15.
-(set-face-attribute 'default nil :family "Consolas" :height 160)
+;; Set default font size to 18.
+(set-face-attribute 'default nil :family "Consolas" :height 180)
 
 ;; Enable narrowing commands.
 (put 'narrow-to-region 'disabled nil)
@@ -953,13 +977,6 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
                                 ("America/Los_Angeles" "San Francisco")))
 #+END_SRC
 
-* which-function-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
-(setq which-func-unknown "n/a")
-(setq mode-line-misc-info (assq-delete-all 'which-function-mode mode-line-misc-info))
-(add-hook 'prog-mode-hook #'which-function-mode)
-#+END_SRC
-
 * Color theme
 Sources:
 - https://emacsthemes.com
@@ -967,8 +984,8 @@ Sources:
 - http://raebear.net/comp/emacscolors.html
 
 Dark themes I use the most:
-1. =doom-dracula=
 1. =doom-Ioskvem=
+2. =doom-dracula=
 
 Light themes I use the most:
 1. =twilight-bright=
@@ -976,13 +993,15 @@ Light themes I use the most:
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package srcery-theme
-  :ensure t
-  :defer t)
+  :ensure t)
 
 (use-package doom-themes
-  :ensure t
-  :config
-  (add-hook 'after-init-hook (lambda () (load-theme 'doom-dracula t)) t))
+  :ensure t)
+
+(use-package twilight-bright-theme
+  :ensure t)
+
+(add-hook 'after-init-hook #'mpereira/load-light-theme t)
 #+END_SRC
 
 * Configure Mode Line
@@ -1091,6 +1110,13 @@ Source: https://git.io/vQKzv"
   (setq header-line-format '((which-function-mode ("" which-func-format " ")))))
 
 (add-hook 'prog-mode-hook #'mpereira/set-header-line-format)
+#+END_SRC
+
+* which-function-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq which-func-unknown "n/a")
+(setq mode-line-misc-info (assq-delete-all 'which-function-mode mode-line-misc-info))
+(add-hook 'prog-mode-hook #'which-function-mode)
 #+END_SRC
 
 * general
@@ -2480,8 +2506,16 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "C-S-j" 'org-metadown
  "C-S-k" 'org-metaup
  "C-S-l" 'org-metaright
+ ;; TODO: make this call `org-babel-next-src-block' if there are no
+ ;; sibling headings.
  "C-j" 'org-forward-heading-same-level
- "C-k" 'org-backward-heading-same-level)
+ ;; TODO: make this call `org-babel-previous-src-block' if there are
+ ;; no sibling headings.
+ "C-k" 'org-backward-heading-same-level
+ ;; TODO: remove temporary keybinding.
+ "C-n" 'org-babel-next-src-block
+ ;; TODO: remove temporary keybinding.
+ "C-p" 'org-babel-previous-src-block)
 
 (general-define-key
  :keymaps '(org-mode-map)
@@ -2489,6 +2523,13 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  :prefix mpereira/leader
  :infix "f"
  "o" 'counsel-org-goto)
+
+(general-define-key
+ :keymaps '(org-mode-map)
+ :states '(normal visual)
+ :prefix mpereira/leader
+ :infix "e"
+ "e" 'org-babel-execute-src-block)
 
 (general-define-key
  :keymaps '(org-mode-map)
@@ -3090,6 +3131,83 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :ensure t
   :config
   (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode))
+#+END_SRC
+
+* org-autonum
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package org-autonum
+  :ensure nil
+  :quelpa (org-autonum
+           :fetcher github
+           :repo "nma83/org-autonum"))
+
+(defun re-seq (regexp string)
+  "Get a list of all regexp matches in a string."
+  (save-match-data
+    (let ((pos 0)
+          matches)
+      (while (string-match regexp string pos)
+        (push (match-string 0 string) matches)
+        (setq pos (match-end 0)))
+      matches)))
+
+;; FIXME: the `'tree' scope doesn't seem to be working. Calling this
+;; function on a heading with subsequent siblings will consider the
+;; first heading the root of all the other ones.
+;; This is because of the promote/demote hack.
+(defun mpereira/org-enumerate-headings ()
+  "TODO: docstring."
+  (interactive)
+  (save-excursion
+    (let ((spacing nil)
+          (current-level (org-current-level))
+          (enumeration '()))
+      (org-back-to-heading)
+      (dotimes (i (- current-level 1))
+        (org-promote-subtree))
+      (org-map-entries
+       (lambda ()
+         ;; We subtract 1 because we want the relevant outlines being
+         ;; considered to have level 1.
+         (setq level (- (org-outline-level) 1))
+         (print (list (list 'level level) (list 'enumeration enumeration)))
+         ;; Skip the tree root entry.
+         (when (> level 0)
+           ;; Move to start of heading text.
+           (re-search-forward "\\* " (line-end-position) t)
+           (if (< (length enumeration) level)
+               ;; Expand enumeration to next level.
+               (setq enumeration (append enumeration '(0)))
+             (if (not (= (length enumeration) level))
+                 ;; Prune enumeration to current level.
+                 (setq enumeration (butlast enumeration
+                                            (- (length enumeration)
+                                               level)))))
+           ;; Increment last enumeration number.
+           (setq enumeration (append (butlast enumeration 1)
+                                     (list (1+ (car (last enumeration 1))))))
+           (setq enumeration-string (concat
+                                     (mapconcat
+                                      'number-to-string enumeration ".")
+                                     ". "))
+           ;; FIXME: this isn't working.
+           (if (re-search-forward (concat "* "
+                                          "\\("
+                                          "[[:digit:]]+\."
+                                          "\\([[:digit:]]+\.\\)*"
+                                          "\\)"
+                                          " ")
+                                  (line-end-position)
+                                  t)
+               ;; Replace existing enumeration if it's different.
+               (unless (string= (match-string 0) enumeration-string)
+                 (replace-match enumeration-string nil nil))
+             ;; Insert new enumeration.
+             (insert enumeration-string))))
+       t
+       'tree)
+      (dotimes (i (- current-level 1))
+        (org-demote-subtree)))))
 #+END_SRC
 
 * osascripts
@@ -3694,11 +3812,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (add-hook 'with-editor-mode-hook 'evil-insert-state)
 
   (setq magit-prefer-remote-upstream t)
-
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
   ;; FIXME: not working?
   ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
   (setq magit-list-refs-sortby "-creatordate")
+
+  (transient-bind-q-to-quit)
 
   (general-define-key
    :states '(normal)
