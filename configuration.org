@@ -1348,7 +1348,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :after evil
   :config
-  (evil-collection-init '(package-menu magit-todos))
+  (evil-collection-init '(package-menu magit-todos dired))
 
   ;; Disabling this for now because:
   ;; 1. Can't run :s/foo/bar/ commands in minibuffer
@@ -2025,6 +2025,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    ":" 'counsel-expression-history
    "b" 'ivy-switch-buffer
    "c" 'counsel-org-clock-history
+   ;; Didn't like `counsel-explorer' too much...
+   ;; "f" 'counsel-explorer
    "f" 'counsel-find-file
    "k" 'counsel-descbinds
    "l" 'counsel-find-library
@@ -2731,19 +2733,23 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                      (org-agenda-prefix-format " %i %-18c%?-12t% s")
                      (org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))))
-            (tags-todo (concat "SCHEDULED>\"<+8d>\"&SCHEDULED<=\"<+120d>\""
-                               "|"
-                               "DEADLINE>\"<+8d>\"&DEADLINE<=\"<+120d>\"/!")
-                       ((org-agenda-overriding-header
-                         "\nComing up\n")
-                        (org-agenda-skip-function
-                         '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
-                        ;; FIXME: line below probably unneeded.
-                        (org-tags-match-list-sublevels t)
-                        (org-agenda-prefix-format
-                         " %-18c %(mpereira/org-agenda-tags-suffix)  ")
-                        (org-agenda-sorting-strategy '(timestamp-up))
-                        (org-agenda-remove-times-when-in-prefix nil)))
+            ;; FIXME: not showing non-TODO entries (TIMESTAMP, TIMESTAMP_IA).
+            (tags (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+120d>\""
+                          "|"
+                          "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+120d>\""
+                          "|"
+                          "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+120d>\""
+                          "|"
+                          "TIMESTAMP>=\"<+8d>\"&TIMESTAMP<=\"<+120d>\""
+                          "/!")
+                  ((org-agenda-overriding-header
+                    "\nComing up\n")
+                   (org-agenda-skip-function
+                    '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
+                   (org-agenda-prefix-format
+                    " %-18c %(mpereira/org-agenda-tags-suffix)  ")
+                   (org-agenda-sorting-strategy '(timestamp-up))
+                   (org-agenda-remove-times-when-in-prefix nil)))
             ;; Note: the section below was causing the agenda to
             ;; freeze some times. And I wasn't really using it anyway.
             ;;
@@ -2808,13 +2814,13 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                   " %-18c %(mpereira/org-agenda-review-suffix-format) ")
                  (org-agenda-show-all-dates t)
                  (org-agenda-sorting-strategy '(timestamp-down))))
-          (tags ,(mpereira/org-agenda-review-search
-                  (mpereira/org-agenda-date-week-start
-                   (mpereira/format-calendar-date-Y-m-d
-                    (mpereira/calendar-read-date "-1w")))
-                  (mpereira/org-agenda-date-week-end
-                   (mpereira/format-calendar-date-Y-m-d
-                    (mpereira/calendar-read-date "-1w"))))
+          (tags (mpereira/org-agenda-review-search
+                 (mpereira/org-agenda-date-week-start
+                  (mpereira/format-calendar-date-Y-m-d
+                   (mpereira/calendar-read-date "-1w")))
+                 (mpereira/org-agenda-date-week-end
+                  (mpereira/format-calendar-date-Y-m-d
+                   (mpereira/calendar-read-date "-1w"))))
                 ((org-agenda-overriding-header "\nDone last week\n")
                  (org-agenda-prefix-format
                   " %-18c %(mpereira/org-agenda-review-suffix-format) ")
@@ -3892,8 +3898,8 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (load-file (expand-file-name "circe-secrets.el" user-emacs-directory))
 
   ;; Logging.
-  (setq lui-logging-directory (expand-file-name "emacs-logs"
-                                                mpereira/dropbox-directory))
+  (setq lui-logging-directory (expand-file-name
+                               "irc" mpereira/dropbox-directory))
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
 
