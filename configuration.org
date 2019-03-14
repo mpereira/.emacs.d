@@ -1031,6 +1031,20 @@ Source: https://git.io/vQKzv"
 (add-hook 'prog-mode-hook #'goto-address-prog-mode)
 #+end_src
 
+* persistent-scratch
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package persistent-scratch
+  :ensure t
+  :config
+  (persistent-scratch-autosave-mode))
+#+END_SRC
+
+* disk-usage
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package disk-usage
+  :ensure t)
+#+END_SRC
+
 * general
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package general
@@ -1274,7 +1288,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :after evil
   :config
-  (evil-collection-init '(package-menu))
+  (evil-collection-init '(package-menu disk-usage))
 
   ;; Disabling this for now because:
   ;; 1. Can't run :s/foo/bar/ commands in minibuffer
@@ -2747,6 +2761,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (use-package ob-async
   :ensure t)
 #+END_SRC
+** org-tree-slide
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package org-tree-slide
+  :ensure t)
+#+END_SRC
 
 * Scala
 ** scala-mode
@@ -2918,6 +2937,17 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :ensure t
   :config
   (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode))
+#+END_SRC
+
+* json-snatcher
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package json-snatcher
+  :ensure nil
+  :quelpa (json-snatcher
+           :fetcher github
+           :repo "Sterlingg/json-snatcher")
+  :config
+  (setq jsons-path-printer #'jsons-print-path-jq))
 #+END_SRC
 
 * osascripts
