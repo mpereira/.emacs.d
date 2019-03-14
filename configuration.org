@@ -3850,8 +3850,10 @@ Disabled for now. Using [[flycheck-inline]] instead.
    :states '(normal visual)
    :prefix mpereira/leader
    :infix "p"
-   ;; "t" 'neotree-project-dir
-   "t" 'dired-sidebar-toggle-sidebar)
+   ;; dired-sidebar still a bit quirky. Let's keep using neotree for now.
+   "t" 'neotree-project-dir
+   ;; "t" 'dired-sidebar-toggle-sidebar
+   )
 
   (general-define-key
    :keymaps 'neotree-mode-map
