@@ -1146,11 +1146,27 @@ Source: https://git.io/vQKzv"
 (add-hook 'prog-mode-hook #'mpereira/set-header-line-format)
 #+END_SRC
 
-* which-function-mode
+* goto-address-mode
+#+begin_src emacs-lisp :tangle yes
+(general-define-key
+ :keymaps '(goto-address-highlight-keymap)
+ "C-c C-o" #'goto-address-at-point)
+
+(add-hook 'prog-mode-hook #'goto-address-prog-mode)
+#+end_src
+
+* persistent-scratch
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq which-func-unknown "n/a")
-(setq mode-line-misc-info (assq-delete-all 'which-function-mode mode-line-misc-info))
-(add-hook 'prog-mode-hook #'which-function-mode)
+(use-package persistent-scratch
+  :ensure t
+  :config
+  (persistent-scratch-autosave-mode))
+#+END_SRC
+
+* disk-usage
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package disk-usage
+  :ensure t)
 #+END_SRC
 
 * general
@@ -1191,6 +1207,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :init
   (setq-default evil-symbol-word-search t)
   (setq-default evil-shift-width 2)
+  (setq evil-jumps-cross-buffers nil)
   (setq evil-move-cursor-back t)
   (setq evil-move-beyond-eol nil)
   (setq evil-want-Y-yank-to-eol t)
@@ -1199,13 +1216,23 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :config
   (evil-mode t)
 
-  ;; FIXME: "n" and "N" still cause the highlights to persist.
-  ;; (setq evil-ex-search-persistent-highlight nil)
+  ;; `evil-search' as the `evil-search-module', but I still want to navigate
+  ;; history with C-j and C-k.
+  ;; (general-define-key
+  ;;  :keymaps '(isearch-mode-map evil-ex-search-keymap)
+  ;;  "C-k" #'isearch-ring-retreat
+  ;;  "C-j" #'isearch-ring-advance)
+
+  ;; FIXME: "n" and "N" still cause the highlights to persist. Maybe it's
+  ;; related to the difference between `evil-ex-search-forward' and
+  ;; `evil-search-forward'.
+  (setq evil-ex-search-persistent-highlight nil)
 
   (general-define-key
    :states '(normal)
    "C-l" #'evil-ex-nohighlight)
 
+  ;; FIXME: this doesn't work.
   ;; Movement bindings for evil-ex-search. Why doesn't `evil-ex-search-keymap'
   ;; work for this?
   (general-define-key
@@ -1382,7 +1409,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   :ensure t
   :after evil
   :config
-  (evil-collection-init '(package-menu magit-todos dired))
+  (evil-collection-init '(package-menu dired disk-usage magit-todos))
 
   ;; Disabling this for now because:
   ;; 1. Can't run :s/foo/bar/ commands in minibuffer
@@ -1564,6 +1591,8 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (interactive)
   (eshell/clear))
 
+;; I don't use `counsel-esh-history' because it doesn't take into consideration
+;; the current input.
 (defun mpereira/ivy-eshell-history ()
   "Browse Eshell history."
   (interactive)
@@ -1966,8 +1995,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (setq undo-limit (* 10 1024 1024)) ;; 10MB.
 (setq undo-strong-limit undo-limit)
-(setq-default undo-tree-visualizer-timestamps t)
-(setq-default undo-tree-visualizer-diff t)
+(setq undo-tree-visualizer-timestamps t)
+(setq undo-tree-visualizer-diff t)
 #+END_SRC
 
 * Mappings
@@ -3029,6 +3058,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (use-package ob-async
   :ensure t)
 #+END_SRC
+** org-tree-slide
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package org-tree-slide
+  :ensure t)
+#+END_SRC
 
 * Scala
 ** scala-mode
@@ -3302,6 +3336,17 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
        'tree)
       (dotimes (i (- current-level 1))
         (org-demote-subtree)))))
+#+END_SRC
+
+* json-snatcher
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package json-snatcher
+  :ensure nil
+  :quelpa (json-snatcher
+           :fetcher github
+           :repo "Sterlingg/json-snatcher")
+  :config
+  (setq jsons-path-printer #'jsons-print-path-jq))
 #+END_SRC
 
 * osascripts
@@ -3626,12 +3671,11 @@ Disabled for now. Using [[flycheck-inline]] instead.
 (use-package ivy-rich
   :ensure t
   :after counsel
-  :config
-  (ivy-rich-mode 1)
+  :init
   (setq ivy-rich--display-transformers-list
         `(ivy-switch-buffer
           (:columns
-           ((ivy-rich-candidate (:width 100))
+           ((ivy-rich-candidate (:width 0.3))
             (ivy-rich-switch-buffer-size (:width 15))
             (ivy-rich-switch-buffer-indicators
              (:width 4 :face error :align right))
@@ -3644,21 +3688,23 @@ Disabled for now. Using [[flycheck-inline]] instead.
            :predicate (lambda (cand) (get-buffer cand)))
           counsel-M-x
           (:columns
-           ((counsel-M-x-transformer (:width 50))
+           ((counsel-M-x-transformer (:width 0.3))
             (ivy-rich-counsel-function-docstring
              (:face font-lock-doc-face))))
           counsel-describe-function
           (:columns
-           ((counsel-describe-function-transformer (:width 40))
+           ((counsel-describe-function-transformer (:width 0.3))
             (ivy-rich-counsel-function-docstring (:face font-lock-doc-face))))
           counsel-describe-variable
           (:columns
-           ((counsel-describe-variable-transformer (:width 40))
+           ((counsel-describe-variable-transformer (:width 0.3))
             (ivy-rich-counsel-variable-docstring (:face font-lock-doc-face))))
           counsel-recentf
           (:columns
-           ((ivy-rich-candidate (:width 0.8))
-            (ivy-rich-file-last-modified-time (:face font-lock-comment-face)))))))
+           ((ivy-rich-candidate (:width 0.5))
+            (ivy-rich-file-last-modified-time (:face font-lock-comment-face))))))
+  :config
+  (ivy-rich-mode 1))
 #+END_SRC
 
 * prescient
