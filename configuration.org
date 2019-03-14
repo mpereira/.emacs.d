@@ -187,7 +187,7 @@
   :ensure t)
 #+END_SRC
 
-* Configuration
+* Variables
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq mpereira/light-theme 'twilight-bright)
 (setq mpereira/dark-theme 'doom-Iosvkem)
@@ -782,6 +782,37 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
   (mpereira/load-theme mpereira/dark-theme))
 #+END_SRC
 
+* Reload directory local variables when saving .dir-locals.el files
+
+Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun mpereira/reload-dir-locals-for-current-buffer ()
+  "Reload directory local variables on the current buffer."
+  (interactive)
+  (let ((enable-local-variables :all))
+    (hack-dir-local-variables-non-file-buffer)))
+
+(defun mpereira/reload-dir-locals-for-all-buffer-in-this-directory ()
+  "Reload directory local variables on every buffer with the same
+`default-directory' as the current buffer."
+  (interactive)
+  (let ((dir default-directory))
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (when (equal default-directory dir))
+        (mpereira/reload-dir-locals-for-current-buffer)))))
+
+(defun mpereira/enable-autoreload-for-dir-locals ()
+  (when (and (buffer-file-name)
+             (equal dir-locals-file
+                    (file-name-nondirectory (buffer-file-name))))
+    (add-hook (make-variable-buffer-local 'after-save-hook)
+              'mpereira/reload-dir-locals-for-all-buffer-in-this-directory)))
+
+(add-hook 'emacs-lisp-mode-hook #'mpereira/enable-autoreload-for-dir-locals)
+#+END_SRC
+
 * quelpa and quelpa-use-package
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package quelpa
@@ -965,6 +996,9 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
 
+;; Keep cursor position when scrolling.
+(setq scroll-preserve-screen-position 1)
+
 ;; Make cursor movement an order of magnitude faster.
 ;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 (setq auto-window-vscroll nil)
@@ -992,8 +1026,8 @@ Light themes I use the most:
 2. =espresso=
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package srcery-theme
-  :ensure t)
+;; (use-package srcery-theme
+;;   :ensure nil)
 
 (use-package doom-themes
   :ensure t)
@@ -1804,6 +1838,20 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   :ensure t)
 #+END_SRC
 
+* web-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package web-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+  (setq web-mode-engines-alist '())
+
+  (setq web-mode-markup-indent-offset 2))
+#+END_SRC
+
 * html
 ** auto-rename-tag
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1854,6 +1902,27 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (minibuffer-line-mode t))
 #+END_SRC
 
+* buffer-expose
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package buffer-expose
+  :ensure t
+  :config
+  (general-define-key
+   :keymaps '(buffer-expose-grid-map)
+   "h" 'buffer-expose-left-window
+   "l" 'buffer-expose-right-window
+   "k" 'buffer-expose-up-window
+   "j" 'buffer-expose-down-window
+   "0" 'buffer-expose-first-window-in-row
+   "$" 'buffer-expose-last-window-in-row
+   "g" 'buffer-expose-first-window
+   "G" 'buffer-expose-last-window
+   "SPC" 'buffer-expose-ace-window
+   "]" 'buffer-expose-next-page
+   "[" 'buffer-expose-prev-page
+   "d" 'buffer-expose-kill-buffer))
+#+END_SRC
+
 * buffer-move
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package buffer-move
@@ -1864,6 +1933,19 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "M-J" 'buf-move-down
    "M-K" 'buf-move-up
    "M-L" 'buf-move-right))
+#+END_SRC
+
+* dumb-jump
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package dumb-jump
+  :ensure t
+  :config
+  (setq dumb-jump-selector 'ivy)
+
+  (general-define-key
+   :states '(normal visual)
+   "C-]" 'dumb-jump-go
+   "C-}" 'dumb-jump-quick-look))
 #+END_SRC
 
 * beacon
@@ -2978,6 +3060,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (general-define-key
    :keymaps 'markdown-mode-map
    :states '(normal visual)
+   :prefix mpereira/leader
+   "oi" 'markdown-insert-link)
+
+  (general-define-key
+   :keymaps 'markdown-mode-map
+   :states '(normal visual)
    "TAB" 'markdown-cycle
    "(" 'markdown-up-heading
    "k" 'evil-previous-visual-line
@@ -3239,7 +3327,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (use-package helpful
   :ensure t
   :config
-  (setq-default helpful--view-literal t))
+  (setq-default helpful--view-literal t)
+
+  (general-define-key
+   :states '(normal visual)
+   :keymaps '(helpful-mode-map)
+   "q" 'kill-buffer-and-window))
 #+END_SRC
 
 * LSP
@@ -3262,11 +3355,11 @@ install instructions]] for more details.
 
 Disabled for now. Using [[flycheck-inline]] instead.
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package lsp-rust
-  :ensure t
-  :after lsp-mode
-  :init
-  (setq lsp-rust-rls-command '("rustup" "run" "nightly" "rls" "--cli")))
+;; (use-package lsp-rust
+;;   :ensure t
+;;   :after lsp-mode
+;;   :init
+;;   (setq lsp-rust-rls-command '("rustup" "run" "nightly" "rls" "--cli")))
 #+END_SRC
 
 * eglot
