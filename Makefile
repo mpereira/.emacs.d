@@ -18,6 +18,7 @@ recompile:
 	@find . -name "*.elc" -type f | xargs rm -f
 	@rm -f $(CUSTOM_EL)
 	@$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0)'
+	@touch $(CUSTOM_EL)
 
 test-quick:
 	@$(EMACS) --debug-init 2>/dev/null

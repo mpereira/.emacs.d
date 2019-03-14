@@ -1,9 +1,11 @@
+/**/*.elc
 /*-secrets.el
 /*TAGS*
 /.cache
 /.dir-locals.el
 /.org-id-locations
 /ac-comphist.dat
+/amx-items
 /auto-save-list
 /backups
 /bookmarks
@@ -14,7 +16,6 @@
 /eshell
 /forge-database.sqlite
 /layouts
-/magithub
 /meghanada
 /network-security.data
 /org-clock-save.el

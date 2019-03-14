@@ -623,6 +623,7 @@ lines in the block (excluding the line with
                          "-suspend")))
     (shell-command command)))
 
+;; FIXME: this is broken.
 (defun mpereira/toggle-maximize-buffer (&optional centered-p)
   "Toggle maximize buffer. TODO: document CENTERED-P."
   (interactive)
