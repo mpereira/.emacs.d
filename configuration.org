@@ -189,8 +189,16 @@
 
 * Variables
 #+BEGIN_SRC emacs-lisp :tangle yes
+(setq mpereira/leader ",")
 (setq mpereira/light-theme 'twilight-bright)
 (setq mpereira/dark-theme 'doom-Iosvkem)
+(setq mpereira/dropbox-directory (file-name-as-directory
+                                  (expand-file-name "~/Dropbox")))
+(setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
+(setq mpereira/org-calendar-file (expand-file-name "gcal/calendar.org"
+                                                   mpereira/org-directory))
+(setq mpereira/org-calendar-buffer-name (file-name-nondirectory
+                                         mpereira/org-calendar-file))
 #+END_SRC
 
 * Helper functions
@@ -680,10 +688,6 @@ lines in the block (excluding the line with
         (save-excursion
           (goto-char (point-min))
           (hs-hide-level n)))))
-
-(setq mpereira/leader ",")
-
-(setq mpereira/dropbox-directory (expand-file-name "~/Dropbox"))
 
 (defun mpereira/bm-counsel-get-list (bookmark-overlays)
   "TODO: docstring.
@@ -2545,7 +2549,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                                (file "inbox.org")
                                "* TODO %i%?")
                               ("c" "Calendar" entry
-                               (file "gcal/calendar.org")
+                               (file mpereira/org-calendar-file)
                                "* %i%?\n  %^{When?}t")
                               ("a" "Appointment" entry
                                (file "appointments.org")

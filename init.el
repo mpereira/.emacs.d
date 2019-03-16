@@ -25,7 +25,8 @@
   (require 'use-package))
 
 (use-package org
-  :ensure org-plus-contrib)
+  :ensure org-plus-contrib
+  :mode (("\\.\\(org\\|org_archive\\)$" . org-mode)))
 
 ;; Prevent annoying local variable prompts.
 (setq enable-local-variables :all)

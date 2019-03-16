@@ -11,12 +11,15 @@ OLD_ELPA := $(PROJECT_ROOT)/$(shell date +%Y%m%d%H%M%S)
 
 .DEFAULT_GOAL := test
 
-.PHONY: \
-	test
+.PHONY:        \
+	clean        \
+	recompile    \
+	rm-custom.el \
+	test-clean   \
+	test-quick
 
-recompile:
+recompile: clean
 	@find . -name "*.elc" -type f | xargs rm -f
-	@rm -f $(CUSTOM_EL)
 	@$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0)'
 	@touch $(CUSTOM_EL)
 
@@ -38,5 +41,14 @@ test:
 	@tree -a $(TEST_HOME_EMACSD)
 	@HOME="$(TEST_HOME)" $(EMACS) --debug-init 2>/dev/null
 
-clean:
+rm-custom.el:
+	@rm -f $(CUSTOM_EL)
+
+custom.el:
+	@touch $(CUSTOM_EL)
+
+test-clean:
+	@rm -rf $(TEST_RUNS_DIRECTORY)/*
+
+clean: test-clean rm-custom.el custom.el
 	@rm -rf $(TEST_RUNS_DIRECTORY)/*
