@@ -9,6 +9,7 @@
                          ("gnu" . "http://elpa.gnu.org/packages/")
                          ("melpa" . "http://melpa.org/packages/")))
 
+;; TODO: move this to `mpereira/activate-backup-archives'.
 ;; (setq package-archives
 ;;       '(("melpa" . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/melpa/")
 ;;         ("org"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/org/")
@@ -23,6 +24,9 @@
 
 (eval-when-compile
   (require 'use-package))
+
+(setq use-package-always-ensure t)
+(setq use-package-always-demand t)
 
 (use-package org
   :ensure org-plus-contrib

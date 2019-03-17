@@ -4,6 +4,7 @@
 /.cache
 /.dir-locals.el
 /.org-id-locations
+/.persistent-scratch
 /ac-comphist.dat
 /amx-items
 /auto-save-list
