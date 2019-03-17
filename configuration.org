@@ -2961,23 +2961,23 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                  nil
                  t)
        (org-agenda-capture))
- "d" 'org-agenda-deadline
- "f" 'org-attach
- "F" 'org-gcal-sync
+ "d" #'org-agenda-deadline
+ "f" #'org-attach
+ "F" #'org-gcal-sync
  "g" (lambda ()
        (interactive)
        (org-agenda-filter-remove-all)
        (org-save-all-org-buffers)
        (org-agenda-maybe-redo))
  "h" nil
- "j" 'org-agenda-next-item
- "k" 'org-agenda-previous-item
+ "j" #'org-agenda-next-item
+ "k" #'org-agenda-previous-item
  "l" nil
- "n" 'org-agenda-add-note
- "r" 'org-agenda-refile
- "s" 'org-agenda-schedule
- "T" 'org-agenda-set-tags
- "u" 'org-agenda-undo
+ "n" #'org-agenda-add-note
+ "r" #'org-agenda-refile
+ "s" #'org-agenda-schedule
+ "T" #'org-agenda-set-tags
+ "u" #'org-agenda-undo
  "w" nil
  "x" (lambda ()
        (interactive)
@@ -2990,12 +2990,37 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                  ;; org-gcal only removes the calendar headings after the
                  ;; network request finishes.
                  (run-at-time mpereira/org-gcal-request-timeout
-                              nil #'org-agenda-maybe-redo))
+                              nil
+                              #'org-agenda-maybe-redo))
              (progn
                (quit-window)
                (org-agenda-kill))))))
- "C-j" 'org-agenda-next-item
- "C-k" 'org-agenda-previous-item)
+ "C-j" #'org-agenda-next-item
+ "C-k" #'org-agenda-previous-item
+ "C-f" #'scroll-up-command
+ "C-b" #'scroll-down-command)
+
+(defmacro calendar-action (func)
+  `(lambda ()
+     "TODO: docstring."
+     (interactive)
+     (org-eval-in-calendar #'(,func 1))))
+
+(general-define-key
+ :keymaps '(org-read-date-minibuffer-local-map)
+ "q" 'minibuffer-keyboard-quit
+ "h" (calendar-action calendar-backward-day)
+ "l" (calendar-action calendar-forward-day)
+ "k" (calendar-action calendar-backward-week)
+ "j" (calendar-action calendar-forward-week)
+ "{" (calendar-action calendar-backward-month)
+ "}" (calendar-action calendar-forward-month)
+ "[" (calendar-action calendar-backward-year)
+ "]" (calendar-action calendar-forward-year)
+ "(" (calendar-action calendar-beginning-of-month)
+ ")" (calendar-action calendar-end-of-month)
+ "0" (calendar-action calendar-beginning-of-week)
+ "$" (calendar-action calendar-end-of-week))
 #+END_SRC
 ** counsel-org-clock
 #+BEGIN_SRC emacs-lisp :tangle yes
