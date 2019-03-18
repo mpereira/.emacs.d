@@ -2475,6 +2475,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (setq org-modules '(org-habit
                     org-info
                     org-tempo))
+;; Requiring these modules because org mode only does that for `org-modules'
+;; when it's defined prior to loading it.
+(require 'org-habit)
+(require 'org-info)
+(require 'org-tempo)
 
 (setq org-return-follows-link t)
 
@@ -3879,9 +3884,22 @@ Run =M-x all-the-icons-install-fonts= after installing.
 #+END_SRC
 
 ** forge
+Sometimes I have trouble pulling topics/notifications through forge. I just
+([2019-03-18 Mon]) did something that fixed it:
+1. Removed related forge GitHub [[https://github.com/settings/tokens][personal access token]]
+2. Disabled =ghub-use-workaround-for-emacs-bug=
+3. Tried again
+
+Step #2 seems to have caused that GitHub authentication is done through 2-factor
+instead of credentials.
+
+I still sometimes see "502 Bad gateway /graphql" errors when trying to pull
+repositories, but it seems like just trying again a few times gets it done.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package forge
-  :after magit)
+  :after magit
+  (setq ghub-use-workaround-for-emacs-bug nil))
 #+END_SRC
 ** magit-todos
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -3959,9 +3977,9 @@ Run =M-x all-the-icons-install-fonts= after installing.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package mingus
   :config
-  (evil-set-initial-state mingus-help-mode 'emacs)
-  (evil-set-initial-state mingus-playlist-mode 'emacs)
-  (evil-set-initial-state mingus-browse-mode 'emacs)
+  (evil-set-initial-state 'mingus-help-mode 'emacs)
+  (evil-set-initial-state 'mingus-playlist-mode 'emacs)
+  (evil-set-initial-state 'mingus-browse-mode 'emacs)
 
   (dolist (hook '(mingus-browse-hook
                   mingus-playlist-hooks))
