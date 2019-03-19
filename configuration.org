@@ -215,27 +215,24 @@ Evil emacs configuration.
 
 * s
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package s
-  :ensure t)
+(use-package s)
 #+END_SRC
 
 * dash
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package dash
-  :ensure t)
+(use-package dash)
 #+END_SRC
 
 * general
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package general
-  :ensure t)
+(use-package general)
 #+END_SRC
 
 * Variables
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq mpereira/leader ",")
 (setq mpereira/light-theme 'twilight-bright)
-(setq mpereira/dark-theme 'doom-Iosvkem)
+(setq mpereira/dark-theme 'nimbus)
 (setq mpereira/dropbox-directory (file-name-as-directory
                                   (expand-file-name "~/Dropbox")))
 (setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
@@ -1263,8 +1260,8 @@ Sources:
 - http://raebear.net/comp/emacscolors.html
 
 Dark themes I use the most:
-1. =doom-Ioskvem=
-2. =nimbus=
+1. =nimbus=
+2. =doom-Ioskvem=
 3. =doom-dracula=
 4. =srcery=
 
@@ -1422,8 +1419,7 @@ Source: https://git.io/vQKzv"
 
 * disk-usage
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package disk-usage
-  :ensure t)
+(use-package disk-usage)
 #+END_SRC
 
 * exec-path-from-shell
@@ -1656,8 +1652,7 @@ modifications, e.g. ~executable-find~.
 
 * string-inflection
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package string-inflection
-  :ensure t)
+(use-package string-inflection)
 #+END_SRC
 
 * eshell
@@ -1932,8 +1927,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * suggest
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package suggest
-  :ensure t)
+(use-package suggest)
 #+END_SRC
 
 * load-bash-alias
@@ -1945,14 +1939,12 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * bm
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package bm
-  :ensure t)
+(use-package bm)
 #+END_SRC
 
 * yasnippet
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package yasnippet
-  :ensure t)
+(use-package yasnippet)
 #+END_SRC
 ** yasnippet-snippets
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1972,14 +1964,12 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * reformatter
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package reformatter
-  :ensure t)
+(use-package reformatter)
 #+END_SRC
 
 * ialign
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ialign
-  :ensure t)
+(use-package ialign)
 #+END_SRC
 
 * rg
@@ -2024,8 +2014,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * ag
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ag
-  :ensure t)
+(use-package ag)
 #+END_SRC
 
 * web-mode
@@ -2061,8 +2050,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * wgrep-ag
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package wgrep-ag
-  :ensure t)
+(use-package wgrep-ag)
 #+END_SRC
 
 * olivetti
@@ -2276,13 +2264,11 @@ context for the thing currently being hovered.
 * Clojure
 ** clojure-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package clojure-mode
-  :ensure t)
+(use-package clojure-mode)
 #+END_SRC
 ** inf-clojure
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package inf-clojure
-  :ensure t)
+(use-package inf-clojure)
 #+END_SRC
 ** cider
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -2319,10 +2305,10 @@ context for the thing currently being hovered.
 #+END_SRC
 ** slamhound
 Currently disabled because it's only available via Marmalade.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
 ;; (use-package slamhound
-;;   :after cider
-;;   :ensure t)
+;;   :after cider)
 #+END_SRC
 
 * Rust
@@ -2366,8 +2352,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+END_SRC
 ** ob-rust
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ob-rust
-  :ensure t)
+(use-package ob-rust)
 #+END_SRC
 
 * Kotlin
@@ -2459,13 +2444,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 * JSON
 ** json-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package json-mode
-  :ensure t)
+(use-package json-mode)
 #+END_SRC
 ** json-navigator
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package json-navigator
-  :ensure t)
+(use-package json-navigator)
 #+END_SRC
 
 * Org mode
@@ -3047,52 +3030,43 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+END_SRC
 ** htmlize
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package htmlize
-  :ensure t)
+(use-package htmlize)
 #+END_SRC
 ** ox-jira
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ox-jira
-  :ensure t)
+(use-package ox-jira)
 #+END_SRC
 ** ox-gfm
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ox-gfm
-  :ensure t)
+(use-package ox-gfm)
 #+END_SRC
 ** ox-hugo
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ox-hugo
-  :ensure t)
+(use-package ox-hugo)
 #+END_SRC
 ** ox-pandoc
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ox-pandoc
-  :ensure t)
+(use-package ox-pandoc)
 #+END_SRC
 ** ob-async
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package ob-async
-  :ensure t)
+(use-package ob-async)
 #+END_SRC
 ** org-tree-slide
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package org-tree-slide
-  :ensure t)
+(use-package org-tree-slide)
 #+END_SRC
 
 * Scala
 ** scala-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package scala-mode
-  :ensure t)
+(use-package scala-mode)
 #+END_SRC
 
 * Go
 ** go-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package go-mode
-  :ensure t)
+(use-package go-mode)
 #+END_SRC
 
 * SQL
@@ -3127,8 +3101,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 * TOML
 ** toml-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package toml-mode
-  :ensure t)
+(use-package toml-mode)
 #+END_SRC
 
 * YAML
@@ -3147,8 +3120,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 * Docker
 ** docker
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package docker
-  :ensure t)
+(use-package docker)
 #+END_SRC
 ** dockerfile-mode
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -3231,20 +3203,17 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 * default-text-scale
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package default-text-scale
-  :ensure t)
+(use-package default-text-scale)
 #+END_SRC
 
 * transpose-frame
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package transpose-frame
-  :ensure t)
+(use-package transpose-frame)
 #+END_SRC
 
 * move-text
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package move-text
-  :ensure t)
+(use-package move-text)
 #+END_SRC
 
 * atomic-chrome
@@ -3396,8 +3365,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+END_SRC
 ** lsp-ui
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package lsp-ui
-  :ensure t)
+(use-package lsp-ui)
 #+END_SRC
 ** lsp-rust
 Depends on =rls-preview=, =rust-analysis= and =rust-src=. Please check the [[https://github.com/rust-lang-nursery/rls#setup][RLS
@@ -3413,8 +3381,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 
 * eglot
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package eglot
-  :ensure t)
+(use-package eglot)
 #+END_SRC
 
 * es-mode
@@ -3738,8 +3705,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 
 * swiper
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package swiper
-  :ensure t)
+(use-package swiper)
 #+END_SRC
 
 * counsel
@@ -3798,8 +3764,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 
 * all-the-icons
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package all-the-icons
-  :ensure t)
+(use-package all-the-icons)
 #+END_SRC
 
 * dired-sidebar
@@ -3844,10 +3809,10 @@ Run =M-x all-the-icons-install-fonts= after installing.
 #+END_SRC
 
 * emojify
+Not enabled globally by default for now.
+
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package emojify
-  :config
-  (add-hook 'after-init-hook #'global-emojify-mode))
+(use-package emojify)
 #+END_SRC
 
 * browse-at-remote
@@ -3860,8 +3825,7 @@ Run =M-x all-the-icons-install-fonts= after installing.
 
 * git-timemachine
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package git-timemachine
-  :ensure t)
+(use-package git-timemachine)
 #+END_SRC
 
 * magit
@@ -3898,7 +3862,8 @@ repositories, but it seems like just trying again a few times gets it done.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package forge
-  :after magit
+  :after (ghub magit)
+  :init
   (setq ghub-use-workaround-for-emacs-bug nil))
 #+END_SRC
 ** magit-todos
@@ -3989,8 +3954,7 @@ repositories, but it seems like just trying again a few times gets it done.
 * synosaurus
 Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package synosaurus
-  :ensure t)
+(use-package synosaurus)
 #+END_SRC
 
 * unfill
@@ -4303,8 +4267,7 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
 ** Change font: =M-x x-select-font=
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package org-super-agenda
-  :ensure t)
+(use-package org-super-agenda)
 
 (let ((org-super-agenda-groups
        '((:deadline (before "2018-09-01"))
