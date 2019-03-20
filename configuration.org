@@ -1448,14 +1448,13 @@ modifications, e.g. ~executable-find~.
 * evil
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package evil
-  :demand t
   :general
   (:keymaps '(evil-motion-state-map)
    ";" 'evil-ex
-   ;; TODO: do I even use this?
    ":" 'evil-repeat-find-char)
-  ;; `evil-search' as the `evil-search-module', but I still want to navigate
-  ;; history with C-j and C-k.
+  ;; `evil-search' as the `evil-search-module' is nice, but I still want to
+  ;; navigate history with C-j and C-k.
+  ;; FIXME: this isn't working for some reason?
   ;; (:keymaps '(evil-ex-search-keymap isearch-mode-map)
   ;;  "C-k" #'isearch-ring-retreat
   ;;  "C-j" #'isearch-ring-advance)
@@ -1508,6 +1507,8 @@ modifications, e.g. ~executable-find~.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package evil-magit
   :after evil magit
+  :init
+  (setq evil-magit-use-z-for-folds t)
   :config
   (general-define-key
    :keymaps 'magit-mode-map
@@ -2511,9 +2512,6 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (setq org-todo-keywords '((sequence "TODO(t!)"
                                     "DOING(d!)"
                                     "WAITING(w@/!)"
-                                    "BLOCKED(b@/!)"
-                                    "REVIEW(r@/!)"
-                                    "FEEDBACK(f!)"
                                     "|"
                                     "SOMEDAY(s@/!)"
                                     "CANCELLED(c@/!)"
@@ -3521,7 +3519,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (general-define-key
    :states '(normal visual)
    :prefix mpereira/leader
-   "<tab>" 'which-key-show-top-level))
+   "<tab>" 'which-key-show-major-mode))
 #+END_SRC
 
 * projectile
@@ -3842,6 +3840,13 @@ Not enabled globally by default for now.
 
   (transient-bind-q-to-quit)
 
+  ;; "q" is being bound to `quit-window' on the magit status buffer, for some
+  ;; reason. It doesn't seem to be coming from transient.
+  (general-define-key
+   :keymaps '(magit-status-mode-map)
+   :states '(normal visual)
+   "q" #'magit-mode-bury-buffer)
+
   ;; This makes magit slow when there are a lot of buffers. See:
   ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
@@ -3901,6 +3906,10 @@ repositories, but it seems like just trying again a few times gets it done.
   (enable-circe-color-nicks)
 
   (load-file (expand-file-name "circe-secrets.el" user-emacs-directory))
+
+  ;; Disable name listing when joining channels.
+  (circe-set-display-handler "353" 'circe-display-ignore)
+  (circe-set-display-handler "366" 'circe-display-ignore)
 
   ;; Logging.
   (setq lui-logging-directory (expand-file-name
