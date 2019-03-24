@@ -28,6 +28,7 @@ Evil emacs configuration.
   -  [[#text-mode][text-mode]]
   -  [[#persistent-scratch][persistent-scratch]]
   -  [[#disk-usage][disk-usage]]
+  -  [[#rotate][rotate]]
   -  [[#exec-path-from-shell][exec-path-from-shell]]
   -  [[#with-editor][with-editor]]
   -  [[#evil][evil]]
@@ -1186,6 +1187,11 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (require 'saveplace)
 (save-place-mode t)
 
+;; Remove `erase-buffer' from the disabled command list.
+;; I had this set to `nil' for some reason. Why was it? Maybe I can just remove
+;; this?
+;; (put 'erase-buffer 'disabled nil)
+
 ;; Save a bunch of session state stuff.
 (require 'savehist)
 (setq savehist-additional-variables '(regexp-search-ring)
@@ -1420,6 +1426,11 @@ Source: https://git.io/vQKzv"
 * disk-usage
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package disk-usage)
+#+END_SRC
+
+* rotate
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package rotate)
 #+END_SRC
 
 * exec-path-from-shell
@@ -2099,13 +2110,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * buffer-move
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package buffer-move
-  :config
-  (general-define-key
-   "M-H" 'buf-move-left
-   "M-J" 'buf-move-down
-   "M-K" 'buf-move-up
-   "M-L" 'buf-move-right))
+(use-package buffer-move)
 #+END_SRC
 
 * dumb-jump
@@ -3987,10 +3992,20 @@ Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
 
 * Mappings
 #+BEGIN_SRC emacs-lisp :tangle yes
-;; Check out `general-override-mode-map'.
 (general-define-key
- :keymaps '(override)
+ :keymaps '(override) ;; Check out `general-override-mode-map'.
  :states '(normal visual insert)
+ "M-+" #'default-text-scale-increase
+ "M--" #'default-text-scale-decrease
+ "M-=" #'default-text-scale-reset
+ "M-F" #'toggle-frame-fullscreen
+ "M-H" 'buf-move-left
+ "M-J" 'buf-move-down
+ "M-K" 'buf-move-up
+ "M-L" 'buf-move-right
+ "M-M" #'mpereira/toggle-maximize-buffer
+ "M-N" (lambda () (interactive) (mpereira/toggle-maximize-buffer t))
+ "M-O" #'transpose-frame
  "M-h" #'evil-window-left
  "M-j" #'evil-window-down
  "M-k" #'evil-window-up
@@ -4064,17 +4079,6 @@ Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
 ;;  :prefix "C-c"
 ;;  "C-o" 'browse-url)
 
-(general-define-key
- :keymaps '(global-map)
- "M-b" (lambda ()
-         (interactive)
-         (mpereira/toggle-maximize-buffer t))
- "M-m" #'mpereira/toggle-maximize-buffer
- "M-F" #'toggle-frame-fullscreen
- "M-=" #'default-text-scale-reset
- "M-+" #'default-text-scale-increase
- "M--" #'default-text-scale-decrease)
-
 (eval-after-load 'evil-ex
   '(evil-ex-define-cmd "bD" #'mpereira/delete-file-and-buffer))
 
@@ -4090,8 +4094,9 @@ Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
 
 ;; "Master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; This seems to be working for now. `general-override-mode-map' might be of use
+;; in the future.
 (general-define-key
- :keymaps '(global-map)
  :states '(normal visual)
  :prefix mpereira/leader
  "," #'evil-switch-to-windows-last-buffer
@@ -4100,14 +4105,13 @@ Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
  "=" #'quick-calc
  "B" #'mpereira/bm-counsel-find-bookmark
  "b" #'switch-to-buffer
- "go" 'browse-at-remote
- "gr" 'diff-hl-revert-hunk
  "hs" #'mpereira/split-window-below-and-switch
  "hv" #'mpereira/toggle-window-split
  "q" #'evil-quit
  "T" #'bm-toggle
- "u" #'undo-tree-visualize
- "vh" #'mpereira/toggle-window-split
+ "go" 'browse-at-remote
+ "gr" 'diff-hl-revert-hunk
+ "hs" #'mpereira/split-window-below-and-switch
  "vs" #'mpereira/split-window-right-and-switch
  "w" #'save-buffer)
 

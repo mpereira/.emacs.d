@@ -30,6 +30,7 @@
 
 (use-package org
   :ensure org-plus-contrib
+  :pin org
   :mode (("\\.\\(org\\|org_archive\\)$" . org-mode)))
 
 ;; Prevent annoying local variable prompts.
@@ -39,4 +40,3 @@
 
 (setq gc-cons-threshold (* 20 1024 1024))
 (setq debug-on-error nil)
-(put 'erase-buffer 'disabled nil)
