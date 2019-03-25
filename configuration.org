@@ -1354,9 +1354,6 @@ Light themes I use the most:
           (unless eshell-mode
             (propertize " %p %l,%c " 'face 'org-todo))))
 
-      ;; Don't show perspective list.
-      (delete '(:eval (persp-mode-line)) global-mode-string)
-
       (defun mpereira/flycheck-lighter (state)
         "Return flycheck information for the given error type STATE.
 
@@ -3588,6 +3585,8 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :quelpa (perspective
            :fetcher github
            :repo "nex3/perspective-el")
+  :init
+  (setq persp-show-modestring nil)
   :config
   (persp-mode t))
 #+END_SRC
