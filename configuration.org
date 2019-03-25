@@ -27,6 +27,7 @@ Evil emacs configuration.
   -  [[#goto-address-mode][goto-address-mode]]
   -  [[#text-mode][text-mode]]
   -  [[#persistent-scratch][persistent-scratch]]
+  -  [[#too-long-lines-mode][too-long-lines-mode]]
   -  [[#disk-usage][disk-usage]]
   -  [[#rotate][rotate]]
   -  [[#exec-path-from-shell][exec-path-from-shell]]
@@ -1423,6 +1424,17 @@ Source: https://git.io/vQKzv"
   (persistent-scratch-autosave-mode))
 #+END_SRC
 
+* too-long-lines-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package too-long-lines-mode
+  :ensure nil
+  :quelpa (too-long-lines-mode
+           :fetcher github
+           :repo "rakete/too-long-lines-mode")
+  :config
+  (too-long-lines-mode))
+#+END_SRC
+
 * disk-usage
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package disk-usage)
@@ -2522,25 +2534,26 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                                     "CANCELLED(c@/!)"
                                     "DONE(D!)")))
 
-(setq org-capture-templates '(("t" "Inbox" entry
-                               (file "inbox.org")
-                               "* TODO %i%?")
-                              ("c" "Calendar" entry
-                               (file mpereira/org-calendar-file)
-                               "* %i%?\n  %^{When?}t")
-                              ("a" "Appointment" entry
-                               (file "appointments.org")
-                               "* %i%?\n  %^{When?}t")
-                              ("j" "Journal for today" entry
-                               (file+olp+datetree "journal.org" "Journal")
-                               "* %U %^{Title}\n  %?"
-                               :tree-type week
-                               :empty-lines-after 1)
-                              ("J" "Journal for some other day" entry
-                               (file+olp+datetree "journal.org" "Journal")
-                               "* %U %^{Title}\n  %?"
-                               :tree-type week
-                               :time-prompt t)))
+(setq org-capture-templates
+      '(("t" "Inbox" entry
+         (file "inbox.org")
+         "* TODO %i%?")
+        ("c" "Calendar" entry
+         (file mpereira/org-calendar-file)
+         "* %i%?\n  %^{When?}t")
+        ("a" "Appointment" entry
+         (file "appointments.org")
+         "* %i%?\n  %^{When?}t")
+        ("j" "Journal for today" entry
+         (file+olp+datetree "journal.org" "Journal")
+         "* %U %^{Title}\n  %?"
+         :tree-type week
+         :empty-lines-after 1)
+        ("J" "Journal for some other day" entry
+         (file+olp+datetree "journal.org" "Journal")
+         "* %(format-time-string \"[%Y-%m-%d \\%a %H:%M]\") %^{Title}\n  %?"
+         :tree-type week
+         :time-prompt t)))
 
 (add-hook 'org-capture-mode-hook #'evil-insert-state)
 
