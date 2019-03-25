@@ -1104,6 +1104,10 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (tool-bar-mode -1)
 (blink-cursor-mode -1)
 
+;; Show CRLF characters.
+;; http://pragmaticemacs.com/emacs/dealing-with-dos-line-endings/
+(setq inhibit-eol-conversion t)
+
 ;; Set default font size to 18.
 (set-face-attribute 'default nil :family "Consolas" :height 180)
 
