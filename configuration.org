@@ -2064,6 +2064,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+END_SRC
 
 * css
+#+begin_src emacs-lisp :tangle yes
+(setq css-indent-offset 2)
+#+end_src
+
 ** emacs-colorpicker
 #+BEGIN_SRC emacs-lisp :tangle yes
 ;; (use-package colorpicker
@@ -2385,7 +2389,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 * Javascript
 #+BEGIN_SRC emacs-lisp :tangle yes
-(setq-default js-indent-level 2)
+(setq js-indent-level 2)
 #+END_SRC
 
 * Shell script
