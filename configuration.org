@@ -54,6 +54,7 @@ Evil emacs configuration.
   -  [[#yasnippet][yasnippet]]
     -  [[#yasnippet-snippets][yasnippet-snippets]]
     -  [[#auto-yasnippet][auto-yasnippet]]
+  -  [[#open-junk-file][open-junk-file]]
   -  [[#reformatter][reformatter]]
   -  [[#ialign][ialign]]
   -  [[#rg][rg]]
@@ -1985,6 +1986,14 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+BEGIN_SRC emacs-lisp :tangle yes
 (yas-reload-all)
 (add-hook 'prog-mode-hook #'yas-minor-mode)
+#+END_SRC
+
+* open-junk-file
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package open-junk-file
+  :config
+  (setq open-junk-file-directory (concat user-emacs-directory
+                                         "junk/%Y/%m/%d/%H%M%S.")))
 #+END_SRC
 
 * reformatter
