@@ -3772,8 +3772,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
 (use-package counsel
   :after (ivy swiper)
   :config
-  (counsel-mode)
-  (setq counsel-find-file-ignore-regexp "/vendor/"))
+  (counsel-mode 1)
+
+  (setq counsel-find-file-ignore-regexp "/vendor/")
+
+  (setq counsel-describe-function-function #'helpful-callable
+        counsel-describe-variable-function #'helpful-variable))
 #+END_SRC
 
 * wgrep
