@@ -39,6 +39,7 @@ Evil emacs configuration.
     -  [[#evil-exchange][evil-exchange]]
     -  [[#evil-nerd-commenter][evil-nerd-commenter]]
     -  [[#evil-surround][evil-surround]]
+    -  [[#evil-matchit][evil-matchit]]
     -  [[#evil-goggles][evil-goggles]]
     -  [[#evil-multiedit][evil-multiedit]]
     -  [[#evil-collection][evil-collection]]
@@ -1583,6 +1584,13 @@ modifications, e.g. ~executable-find~.
   :after evil
   :config
   (global-evil-surround-mode t))
+#+END_SRC
+** evil-matchit
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-matchit
+  :after evil
+  :config
+  (global-evil-matchit-mode 1))
 #+END_SRC
 ** evil-goggles
 #+BEGIN_SRC emacs-lisp :tangle yes
