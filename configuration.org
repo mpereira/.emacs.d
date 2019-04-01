@@ -46,7 +46,9 @@ Evil emacs configuration.
   -  [[#highlight-indent-guide][highlight-indent-guide]]
   -  [[#hideshow][hideshow]]
   -  [[#string-inflection][string-inflection]]
+  -  [[#xterm-color][xterm-color]]
   -  [[#eshell][eshell]]
+    -  [[#configure-xterm-color][Configure xterm-color]]
   -  [[#fish-completion][fish-completion]]
   -  [[#suggest][suggest]]
   -  [[#load-bash-alias][load-bash-alias]]
@@ -1681,6 +1683,23 @@ modifications, e.g. ~executable-find~.
 (use-package string-inflection)
 #+END_SRC
 
+* xterm-color
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package xterm-color
+  :config
+  (setenv "TERM" "xterm-256color")
+
+  (setq comint-output-filter-functions (remove 'ansi-color-process-output
+                                               comint-output-filter-functions))
+
+  (add-hook 'shell-mode-hook
+            (lambda ()
+              (add-hook 'comint-preoutput-filter-functions
+                        'xterm-color-filter
+                        nil
+                        t))))
+#+END_SRC
+
 * eshell
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'eshell)
@@ -1718,21 +1737,7 @@ modifications, e.g. ~executable-find~.
 ;; (add-hook 'eshell-preoutput-filter-functions 'ansi-color-filter-apply)
 
 ;; Allow colored output.
-;; TODO: is this even needed given that `eshell-handle-ansi-color' is
-;; in `eshell-output-filter-functions'?
 (require 'ansi-color)
-(require 'eshell)
-(defun mpereira/eshell-handle-ansi-color ()
-  "TODO: docstring."
-  ;; (ansi-color-apply-on-region eshell-last-output-start
-  ;;                             eshell-last-output-end)
-  )
-(add-to-list 'eshell-output-filter-functions #'mpereira/eshell-handle-ansi-color)
-
-(comment
- (setq eshell-output-filter-functions
-       (delete #'mpereira/eshell-handle-ansi-color eshell-output-filter-functions))
- (remove-from-list 'eshell-output-filter-functions #'mpereira/eshell-handle-ansi-color))
 
 (defun eshell/clear ()
   "Clears buffer while preserving input."
@@ -1940,6 +1945,20 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 (add-hook 'eshell-mode-hook 'eshell-hist-use-global-history)
 #+END_SRC
+
+** Configure xterm-color
+#+begin_src emacs-lisp :tangle yes
+;; Also set TERM accordingly (xterm-256color)
+;; You can also use it with eshell (and thus get color output from system ls):
+(add-hook 'eshell-before-prompt-hook
+          (lambda ()
+            (setq xterm-color-preserve-properties t)))
+
+(add-to-list 'eshell-preoutput-filter-functions 'xterm-color-filter)
+
+(setq eshell-output-filter-functions (remove 'eshell-handle-ansi-color
+                                             eshell-output-filter-functions))
+#+end_src
 
 * fish-completion
 #+BEGIN_SRC emacs-lisp :tangle yes
