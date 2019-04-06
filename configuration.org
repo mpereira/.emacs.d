@@ -67,7 +67,6 @@ Evil emacs configuration.
     -  [[#auto-rename-tag][auto-rename-tag]]
   -  [[#css][css]]
     -  [[#emacs-colorpicker][emacs-colorpicker]]
-  -  [[#wgrep-ag][wgrep-ag]]
   -  [[#olivetti][olivetti]]
   -  [[#minibuffer-line][minibuffer-line]]
   -  [[#buffer-expose][buffer-expose]]
@@ -2036,7 +2035,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 * rg
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package rg
-  :after wgrep-ag
   :config
   ;; Original mappings at:
   ;; https://github.com/dajva/rg.el/blob/77670a4bcdba138a0cef3fb12a20b1492dca902a/rg-result.el#L203-L221
@@ -2068,9 +2066,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    ;; "l" is `rg-list-searches' by default.
    "l" nil)
 
-  (setq rg-group-result t)
-
-  (add-hook 'rg-mode-hook 'wgrep-ag-setup))
+  (setq rg-group-result t))
 #+END_SRC
 
 * ag
@@ -2111,11 +2107,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 ;;   :quelpa (emacs-colorpicker
 ;;            :fetcher github
 ;;            :repo "syohex/emacs-colorpicker"))
-#+END_SRC
-
-* wgrep-ag
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package wgrep-ag)
 #+END_SRC
 
 * olivetti
