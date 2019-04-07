@@ -185,6 +185,7 @@ Evil emacs configuration.
   -  [[#wolfram-alpha][Wolfram Alpha]]
   -  [[#circe][circe]]
   -  [[#mingus][mingus]]
+  -  [[#reveal-in-osx-finder][reveal-in-osx-finder]]
   -  [[#synosaurus][synosaurus]]
   -  [[#unfill][unfill]]
   -  [[#smex][smex]]
@@ -4015,6 +4016,11 @@ repositories, but it seems like just trying again a few times gets it done.
   (dolist (hook '(mingus-browse-hook
                   mingus-playlist-hooks))
     (add-hook hook 'mpereira/hide-trailing-whitespace)))
+#+END_SRC
+
+* reveal-in-osx-finder
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package reveal-in-osx-finder)
 #+END_SRC
 
 * synosaurus
