@@ -3567,11 +3567,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package which-key
   :config
-  (which-key-mode)
-  (general-define-key
-   :states '(normal visual)
-   :prefix mpereira/leader
-   "<tab>" 'which-key-show-major-mode))
+  (which-key-mode))
 #+END_SRC
 
 * projectile
@@ -4160,6 +4156,7 @@ Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
  "," #'evil-switch-to-windows-last-buffer
  "." #'ivy-resume
  "/" #'swiper
+ "<tab>" #'which-key-show-major-mode
  "=" #'quick-calc
  "B" #'mpereira/bm-counsel-find-bookmark
  "b" #'switch-to-buffer
