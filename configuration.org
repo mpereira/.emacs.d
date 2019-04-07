@@ -235,6 +235,7 @@ Evil emacs configuration.
 
 * Variables
 #+BEGIN_SRC emacs-lisp :tangle yes
+(setq mpereira/custom-file (expand-file-name "custom.el" user-emacs-directory))
 (setq mpereira/leader ",")
 (setq mpereira/light-theme 'twilight-bright)
 (setq mpereira/dark-theme 'nimbus)
@@ -1099,8 +1100,8 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 * Options
 #+BEGIN_SRC emacs-lisp :tangle yes
 ;; Don't append customizations to init.el.
-(setq custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file)
+(setq custom-file mpereira/custom-file)
+(load custom-file 'noerror)
 
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
