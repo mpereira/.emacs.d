@@ -1,5 +1,11 @@
 (setq debug-on-error t)
-(setq gc-cons-threshold (* 128 1024 1024))
+(setq gc-cons-threshold most-positive-fixnum)
+(add-hook 'after-init-hook
+          (lambda ()
+            (garbage-collect)
+            (setq debug-on-error nil)
+            (setq gc-cons-threshold
+                  (car (get 'gc-cons-threshold 'standard-value)))))
 
 (require 'package)
 
@@ -37,6 +43,3 @@
 (setq enable-local-variables :all)
 (org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory))
 (setq enable-local-variables t)
-
-(setq gc-cons-threshold (* 20 1024 1024))
-(setq debug-on-error nil)
