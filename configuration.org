@@ -1130,8 +1130,8 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 ;; Disable eldoc.
 (global-eldoc-mode -1)
 
-;; Break lines automatically when typing.
-(auto-fill-mode t)
+;; Break lines automatically in "text" buffers.
+(add-hook 'text-mode-hook 'auto-fill-mode)
 
 ;; Highlight current line.
 (global-hl-line-mode t)
