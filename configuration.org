@@ -4156,17 +4156,18 @@ Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
  "," #'evil-switch-to-windows-last-buffer
  "." #'ivy-resume
  "/" #'swiper
+ "<backtab>" #'counsel-descbinds
  "<tab>" #'which-key-show-major-mode
  "=" #'quick-calc
  "B" #'mpereira/bm-counsel-find-bookmark
  "b" #'switch-to-buffer
+ "go" 'browse-at-remote
+ "gr" 'diff-hl-revert-hunk
+ "hs" #'mpereira/split-window-below-and-switch
  "hs" #'mpereira/split-window-below-and-switch
  "hv" #'mpereira/toggle-window-split
  "q" #'evil-quit
  "T" #'bm-toggle
- "go" 'browse-at-remote
- "gr" 'diff-hl-revert-hunk
- "hs" #'mpereira/split-window-below-and-switch
  "vs" #'mpereira/split-window-right-and-switch
  "w" #'save-buffer)
 
