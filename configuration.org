@@ -131,7 +131,8 @@ Evil emacs configuration.
     -  [[#docker][docker]]
     -  [[#dockerfile-mode][dockerfile-mode]]
   -  [[#google-this][google-this]]
-  -  [[#ansi-term][ansi-term]]
+  -  [[#term][term]]
+    -  [[#eterm-256color][eterm-256color]]
   -  [[#default-text-scale][default-text-scale]]
   -  [[#transpose-frame][transpose-frame]]
   -  [[#move-text][move-text]]
@@ -1696,8 +1697,6 @@ modifications, e.g. ~executable-find~.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package xterm-color
   :config
-  (setenv "TERM" "xterm-256color")
-
   (setq comint-output-filter-functions (remove 'ansi-color-process-output
                                                comint-output-filter-functions))
 
@@ -1740,13 +1739,6 @@ modifications, e.g. ~executable-find~.
 (setq eshell-visual-commands
       '("htop" "top" "bash" "zsh" "fish" "glances" "watch"))
 (setq eshell-visual-subcommands '())
-
-;; Remove ansi color escape sequences from output.
-;; Commented out for now.
-;; (add-hook 'eshell-preoutput-filter-functions 'ansi-color-filter-apply)
-
-;; Allow colored output.
-(require 'ansi-color)
 
 (defun eshell/clear ()
   "Clears buffer while preserving input."
@@ -1957,8 +1949,8 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 ** Configure xterm-color
 #+begin_src emacs-lisp :tangle yes
-;; Also set TERM accordingly (xterm-256color)
-;; You can also use it with eshell (and thus get color output from system ls):
+(setenv "TERM" "xterm-256color")
+
 (add-hook 'eshell-before-prompt-hook
           (lambda ()
             (setq xterm-color-preserve-properties t)))
@@ -3195,7 +3187,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
    "fg" 'google-this-region))
 #+END_SRC
 
-* ansi-term
+* term
 #+BEGIN_SRC emacs-lisp :tangle yes
 ;; 2019-03-01: setting this to bash. Otherwise, org babel shell sessions are
 ;; forced to run fish.
@@ -3242,13 +3234,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ;; (ad-activate 'term-sentinel)
 
 (add-hook 'term-mode-hook #'mpereira/hide-trailing-whitespace)
-
-;; TODO: why is this needed?
-;; Commented out: 2019-03-04.
-;; (defun mpereira/initialize-term ()
-;;   (setq-local term-prompt-regexp "^\$ +")
-;;   (setq-local term-eol-on-send nil))
-;; (add-hook 'term-mode-hook #'mpereira/initialize-term)
+#+END_SRC
+** eterm-256color
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package eterm-256color
+  :config
+  (add-hook 'term-mode-hook #'eterm-256color-mode))
 #+END_SRC
 
 * default-text-scale
