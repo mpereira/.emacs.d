@@ -3197,10 +3197,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 * ansi-term
 #+BEGIN_SRC emacs-lisp :tangle yes
-;; 2018-03-01: setting this to nil. Otherwise, org babel shell
-;; sessions are forced to run fish.
+;; 2019-03-01: setting this to bash. Otherwise, org babel shell sessions are
+;; forced to run fish.
 ;; (setq explicit-shell-file-name "/usr/local/bin/fish")
-(setq explicit-shell-file-name nil)
+(setq explicit-shell-file-name "/usr/local/bin/bash")
 
 ;; Infinite buffer.
 (setq term-buffer-maximum-size 0)
