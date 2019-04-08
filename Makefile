@@ -19,36 +19,34 @@ OLD_ELPA := $(PROJECT_ROOT)/$(shell date +%Y%m%d%H%M%S)
 	test-quick
 
 recompile: clean
-	@find . -name "*.elc" -type f | xargs rm -f
-	@$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0)'
-	@touch $(CUSTOM_EL)
+	find . -name "*.elc" -type f | xargs rm -f
+	$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0)'
 
 test-quick:
 	@$(EMACS) --debug-init 2>/dev/null
 
 test:
-	@mkdir -p $(TEST_HOME_EMACSD)
-	@cp init.el $(TEST_HOME_EMACSD)
-	@cp configuration.org $(TEST_HOME_EMACSD)
-	@touch $(TEST_HOME_EMACSD)/custom.el
-	@cp org-gcal-secrets.el $(TEST_HOME_EMACSD)
-	@cp wolfram-secrets.el $(TEST_HOME_EMACSD)
-	@cp circe-secrets.el $(TEST_HOME_EMACSD)
+	mkdir -p $(TEST_HOME_EMACSD)
+	cp init.el $(TEST_HOME_EMACSD)
+	cp configuration.org $(TEST_HOME_EMACSD)
+	touch $(TEST_HOME_EMACSD)/custom.el
+	cp org-gcal-secrets.el $(TEST_HOME_EMACSD)
+	cp wolfram-secrets.el $(TEST_HOME_EMACSD)
+	cp circe-secrets.el $(TEST_HOME_EMACSD)
 	@echo "git diff:"
-	@git diff
+	git diff
 	@echo
 	@echo "Opening Emacs with \$$HOME:"
-	@tree -a $(TEST_HOME_EMACSD)
-	@HOME="$(TEST_HOME)" $(EMACS) --debug-init 2>/dev/null
+	tree -a $(TEST_HOME_EMACSD)
+	HOME="$(TEST_HOME)" $(EMACS) --debug-init 2>/dev/null
 
 rm-custom.el:
-	@rm -f $(CUSTOM_EL)
+	rm -f $(CUSTOM_EL)
 
 custom.el:
-	@touch $(CUSTOM_EL)
+	touch $(CUSTOM_EL)
 
 test-clean:
-	@rm -rf $(TEST_RUNS_DIRECTORY)/*
+	rm -rf $(TEST_RUNS_DIRECTORY)/*
 
 clean: test-clean rm-custom.el custom.el
-	@rm -rf $(TEST_RUNS_DIRECTORY)/*
