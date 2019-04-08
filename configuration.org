@@ -3876,6 +3876,7 @@ Not enabled globally by default for now.
   :config
   (add-hook 'with-editor-mode-hook 'evil-insert-state)
 
+  (setq magit-diff-refine-hunk t)
   (setq magit-prefer-remote-upstream t)
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
   ;; FIXME: not working?
