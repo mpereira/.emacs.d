@@ -1929,22 +1929,21 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 ;; (add-hook 'eshell-pre-command-hook #'eshell-append-history)
 
 ;; Shared history.
-;; https://www.reddit.com/r/emacs/comments/6y3q4k/yes_eshell_is_my_main_shell/dorfje0
+;; https://github.com/Ambrevar/dotfiles/blob/25e2ed350b898c3fc2df3148630b5778a3db4ee7/.emacs.d/lisp/init-eshell.el#L205
 ;; TODO: make this per project.
-(defvar eshell-history-global-ring nil
+(defvar mpereira/eshell-history-global-ring nil
   "The history ring shared across Eshell sessions.")
 
-(defun eshell-hist-use-global-history ()
+(defun mpereira/eshell-hist-use-global-history ()
   "Make Eshell history shared across different sessions."
-  (unless eshell-history-global-ring
-    (let (eshell-history-ring)
-      (when eshell-history-file-name
-        (eshell-read-history nil t))
-      (setq eshell-history-global-ring eshell-history-ring))
-    (unless eshell-history-ring (setq eshell-history-global-ring (make-ring eshell-history-size))))
-  (setq eshell-history-ring eshell-history-global-ring))
+  (unless mpereira/eshell-history-global-ring
+    (when eshell-history-file-name
+      (eshell-read-history nil t))
+    (setq mpereira/eshell-history-global-ring
+          (or eshell-history-ring (make-ring eshell-history-size))))
+  (setq eshell-history-ring mpereira/eshell-history-global-ring))
 
-(add-hook 'eshell-mode-hook 'eshell-hist-use-global-history)
+(add-hook 'eshell-mode-hook #'mpereira/eshell-hist-use-global-history)
 #+END_SRC
 
 ** Configure xterm-color
