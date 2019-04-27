@@ -26,7 +26,7 @@ Evil emacs configuration.
   -  [[#configure-mode-line][Configure Mode Line]]
   -  [[#configure-header-line][Configure Header Line]]
   -  [[#goto-address-mode][goto-address-mode]]
-  -  [[#text-mode][text-mode]]
+  -  [[#mw-thesaurus][mw-thesaurus]]
   -  [[#persistent-scratch][persistent-scratch]]
   -  [[#too-long-lines-mode][too-long-lines-mode]]
   -  [[#disk-usage][disk-usage]]
@@ -189,7 +189,6 @@ Evil emacs configuration.
   -  [[#circe][circe]]
   -  [[#mingus][mingus]]
   -  [[#reveal-in-osx-finder][reveal-in-osx-finder]]
-  -  [[#synosaurus][synosaurus]]
   -  [[#unfill][unfill]]
   -  [[#smex][smex]]
   -  [[#mappings][Mappings]]
@@ -1418,13 +1417,15 @@ Source: https://git.io/vQKzv"
 (add-hook 'prog-mode-hook #'goto-address-prog-mode)
 #+end_src
 
-* text-mode
-#+begin_src emacs-lisp :tangle yes
-(general-define-key
- :keymaps '(text-mode-map)
- :states '(normal visual)
- "K" #'synosaurus-lookup)
-#+end_src
+* mw-thesaurus
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package mw-thesaurus
+  :general (:keymaps '(text-mode-map)
+            :states '(normal visual)
+            "K" #'mw-thesaurus--lookup-at-point)
+  :config
+  (mw-thesaurus-mode))
+#+END_SRC
 
 * persistent-scratch
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -4015,12 +4016,6 @@ repositories, but it seems like just trying again a few times gets it done.
 * reveal-in-osx-finder
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package reveal-in-osx-finder)
-#+END_SRC
-
-* synosaurus
-Depends on [[https://wordnet.princeton.edu/documentation/wnpkgs7wn][WordNet]].
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package synosaurus)
 #+END_SRC
 
 * unfill
