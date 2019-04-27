@@ -60,7 +60,8 @@ Evil emacs configuration.
   -  [[#open-junk-file][open-junk-file]]
   -  [[#reformatter][reformatter]]
   -  [[#ialign][ialign]]
-  -  [[#rg][rg]]
+  -  [[#double-saber][double-saber]]
+  -  [[#ripgrep][ripgrep]]
   -  [[#ag][ag]]
   -  [[#web-mode][web-mode]]
   -  [[#html][html]]
@@ -2025,40 +2026,45 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (use-package ialign)
 #+END_SRC
 
-* rg
+* double-saber
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package double-saber)
+#+END_SRC
+
+* ripgrep
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package rg
-  :config
+  :after double-saber
   ;; Original mappings at:
   ;; https://github.com/dajva/rg.el/blob/77670a4bcdba138a0cef3fb12a20b1492dca902a/rg-result.el#L203-L221
   ;;
   ;; I'm overring `rg-mode-map' here, but it might make sense
   ;; overriding "parent" keymaps like `grep-mode-map' or
   ;; `compilation-mode-map'.
-  ;;
-  ;; TODO: figure out how to make "," resolve to the leader instead of
-  ;; `evil-repeat-find-char-reverse'.
-  (general-define-key
-   :keymaps '(rg-mode-map)
-   "C-f" 'scroll-up
-   "C-b" 'scroll-down
-   "C-j" 'rg-next-file
-   "C-k" 'rg-prev-file
-   "<" 'rg-back-history
-   ">" 'rg-forward-history
-   ;; "n" is `next-error-no-select' by default.
-   "n" nil
-   ;; digit-argument
-   "0" nil
-   ;; "h" is `describe-mode' by default.
-   "h" 'evil-backward-char
-   ;; "g" is `recompile' by default.
-   "g" nil
-   ;; "w" is `wgrep-change-to-wgrep-mode' by default.
-   "w" nil
-   ;; "l" is `rg-list-searches' by default.
-   "l" nil)
-
+  :general (:keymaps 'rg-mode-map
+            :states '(normal visual)
+            "C-f" 'scroll-up
+            "C-b" 'scroll-down
+            "C-j" 'rg-next-file
+            "C-k" 'rg-prev-file
+            "<" 'rg-back-history
+            ">" 'rg-forward-history
+            "x" 'double-saber-delete
+            "X" 'double-saber-narrow
+            "u" 'double-saber-undo
+            ;; "n" is `next-error-no-select' by default.
+            "n" nil
+            ;; digit-argument
+            "0" nil
+            ;; "h" is `describe-mode' by default.
+            "h" 'evil-backward-char
+            ;; "g" is `recompile' by default.
+            "g" nil
+            ;; "w" is `wgrep-change-to-wgrep-mode' by default.
+            "w" nil
+            ;; "l" is `rg-list-searches' by default.
+            "l" nil)
+  :config
   (setq rg-group-result t))
 #+END_SRC
 
