@@ -2979,8 +2979,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ;; Empirically, 2 seconds seems to be good enough.
 (setq mpereira/org-gcal-request-timeout 2)
 
+(evil-set-initial-state 'org-agenda-mode 'normal)
+
 (general-define-key
  :keymaps '(org-agenda-mode-map)
+ :states  '(normal emacs)
  "/" 'org-agenda-filter-by-regexp
  "c" (lambda ()
        (interactive)
@@ -3011,8 +3014,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "k" #'org-agenda-previous-item
  "l" nil
  "n" #'org-agenda-add-note
+ "q" #'org-agenda-quit
  "r" #'org-agenda-refile
  "s" #'org-agenda-schedule
+ "t" #'org-agenda-todo
  "T" #'org-agenda-set-tags
  "u" #'org-agenda-undo
  "w" nil
