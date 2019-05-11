@@ -86,6 +86,7 @@ Evil emacs configuration.
     -  [[#meghanada][meghanada]]
   -  [[#clojure][Clojure]]
     -  [[#clojure-mode][clojure-mode]]
+    -  [[#clj-refactor][clj-refactor]]
     -  [[#inf-clojure][inf-clojure]]
     -  [[#cider][cider]]
     -  [[#slamhound][slamhound]]
@@ -2317,6 +2318,12 @@ context for the thing currently being hovered.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package clojure-mode)
 #+END_SRC
+** clj-refactor
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package clj-refactor
+  :config
+  (setq cljr-hotload-dependencies t))
+#+END_SRC
 ** inf-clojure
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package inf-clojure)
@@ -2334,19 +2341,28 @@ context for the thing currently being hovered.
    "K" 'cider-doc
    "gf" 'cider-find-var)
 
+  (defun mpereira/cider-eval-sexp-at-point (&optional output-to-current-buffer)
+    "Evaluate the expression around point.
+If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
+    (interactive "P")
+    (save-excursion
+      (goto-char (- (cadr (cider-sexp-at-point 'bounds))
+                    1))
+      (cider-eval-last-sexp output-to-current-buffer)))
+
   (general-define-key
    :keymaps 'cider-mode-map
    :states '(normal)
    :prefix mpereira/leader
-   "ee" 'cider-eval-sexp-at-point
-   "e(" 'cider-eval-defun-at-point
-   "eE" 'cider-eval-buffer
-   "dd" 'cider-debug-defun-at-point
-   "tt" 'cider-test-run-test
-   "tr" 'cider-test-rerun-test
-   "tT" 'cider-test-run-ns-tests
-   "tR" 'cider-test-rerun-failed-tests
-   "pt" 'cider-test-run-project-tests)
+   "ee" #'mpereira/cider-eval-sexp-at-point
+   "e(" #'cider-eval-defun-at-point
+   "eE" #'cider-eval-buffer
+   "dd" #'cider-debug-defun-at-point
+   "tt" #'cider-test-run-test
+   "tr" #'cider-test-rerun-test
+   "tT" #'cider-test-run-ns-tests
+   "tR" #'cider-test-rerun-failed-tests
+   "pt" #'cider-test-run-project-tests)
 
   (general-define-key
    :keymaps 'cider-mode-map
