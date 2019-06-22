@@ -27,6 +27,8 @@ Evil emacs configuration.
   -  [[#configure-mode-line][Configure Mode Line]]
   -  [[#configure-header-line][Configure Header Line]]
   -  [[#goto-address-mode][goto-address-mode]]
+  -  [[#flyspell][flyspell]]
+    -  [[#flyspell-correct-ivy][flyspell-correct-ivy]]
   -  [[#mw-thesaurus][mw-thesaurus]]
   -  [[#persistent-scratch][persistent-scratch]]
   -  [[#too-long-lines-mode][too-long-lines-mode]]
@@ -1427,6 +1429,30 @@ Source: https://git.io/vQKzv"
  "C-c C-o" #'goto-address-at-point)
 
 (add-hook 'prog-mode-hook #'goto-address-prog-mode)
+#+end_src
+
+* flyspell
+#+begin_src emacs-lisp :tangle yes
+(use-package flyspell
+  :defer 1
+  :custom
+  ;; TODO: Do I want this?
+  ;; (flyspell-abbrev-p t)
+  (flyspell-issue-message-flag nil)
+  (flyspell-issue-welcome-flag nil)
+  (flyspell-mode 1))
+#+end_src
+
+** flyspell-correct-ivy
+#+begin_src emacs-lisp :tangle yes
+(use-package flyspell-correct-ivy
+  :after flyspell
+  :bind (:map flyspell-mode-map
+         ;; TODO: This mapping is too good... should I use it for something
+         ;; else?
+         ("C-;" . flyspell-correct-word-generic))
+  :custom
+  (flyspell-correct-interface 'flyspell-correct-ivy))
 #+end_src
 
 * mw-thesaurus
