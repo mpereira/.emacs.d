@@ -1462,9 +1462,15 @@ Source: https://git.io/vQKzv"
 (use-package mw-thesaurus
   :general (:keymaps '(text-mode-map)
             :states '(normal visual)
-            "K" #'mw-thesaurus--lookup-at-point)
+            "K" #'mw-thesaurus-lookup-at-point
+            :keymaps '(mw-thesaurus-mode-map)
+            :states '(normal visual)
+            "q" #'mw-thesaurus--quit)
   :config
-  (mw-thesaurus-mode))
+  (mw-thesaurus-mode)
+
+  (add-to-list 'display-buffer-alist
+               '("* Merriam-Webster Thesaurus *" display-buffer-below-selected)))
 #+END_SRC
 
 * persistent-scratch
