@@ -115,6 +115,7 @@ Evil emacs configuration.
     -  [[#htmlize][htmlize]]
     -  [[#ox-jira][ox-jira]]
     -  [[#ox-gfm][ox-gfm]]
+    -  [[#ox-slimhtml][ox-slimhtml]]
     -  [[#ox-hugo][ox-hugo]]
     -  [[#ox-pandoc][ox-pandoc]]
     -  [[#ob-async][ob-async]]
@@ -3109,6 +3110,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ** ox-gfm
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-gfm)
+#+END_SRC
+** ox-slimhtml
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package ox-slimhtml)
 #+END_SRC
 ** ox-hugo
 #+BEGIN_SRC emacs-lisp :tangle yes
