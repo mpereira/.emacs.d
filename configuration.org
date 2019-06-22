@@ -3854,11 +3854,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
   ;;         (counsel-projectile-find-file . ivy-display-function-fallback)
   ;;         (swiper . ivy-display-function-fallback)
   ;;         (t . ivy-posframe-display-at-point)))
+  ;; (setq ivy-display-functions-alist
+  ;;       '((t . ivy-display-function-fallback)))
 
-  ;; Disable for now. Width-changing at-point frames are annoying.
-  (setq ivy-display-functions-alist
-        '((t . ivy-display-function-fallback)))
-  (ivy-posframe-enable))
+  ;; TODO: Disable for now. Width-changing at-point frames are annoying. Has
+  ;; some bugs with fullscreen.
+  (ivy-posframe-mode -1))
 #+END_SRC
 
 * prescient
