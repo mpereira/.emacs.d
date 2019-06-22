@@ -3533,7 +3533,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   ;; (setq-default helpful--view-literal t)
 
   (add-to-list 'display-buffer-alist
-               '("*helpful" display-buffer-below-selected)))
+               '("*helpful" display-buffer-below-selected))
+  (add-to-list 'display-buffer-alist
+               '("*Help*" display-buffer-below-selected)))
 #+END_SRC
 
 * LSP
