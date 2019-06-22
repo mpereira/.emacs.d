@@ -4035,7 +4035,10 @@ Not enabled globally by default for now.
   (general-define-key
    :keymaps '(magit-status-mode-map)
    :states '(normal visual)
-   "q" #'magit-mode-bury-buffer)
+   "q" #'magit-mode-bury-buffer
+   "zb" #'evil-scroll-line-to-bottom
+   "zt" #'evil-scroll-line-to-top
+   "zz" #'evil-scroll-line-to-center)
 
   ;; This makes magit slow when there are a lot of buffers. See:
   ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
