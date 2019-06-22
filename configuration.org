@@ -151,6 +151,7 @@ Evil emacs configuration.
   -  [[#json-snatcher][json-snatcher]]
   -  [[#osascripts][osascripts]]
   -  [[#help-fns][help-fns+]]
+  -  [[#hackernews][hackernews]]
   -  [[#helpful][helpful]]
   -  [[#lsp][LSP]]
     -  [[#lsp-mode][lsp-mode]]
@@ -3465,6 +3466,14 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :quelpa (help-fns+
            :fetcher github
            :repo "emacsmirror/help-fns-plus"))
+#+END_SRC
+
+* hackernews
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package hackernews
+  :config
+  (add-to-list 'display-buffer-alist
+               '("*hackernews top stories*" display-buffer-below-selected)))
 #+END_SRC
 
 * helpful
