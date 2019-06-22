@@ -3046,6 +3046,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  :keymaps '(org-agenda-mode-map)
  :states  '(normal emacs)
  "/" 'org-agenda-filter-by-regexp
+ "<" #'org-agenda-filter-by-category
  "c" (lambda ()
        (interactive)
        ;; When capturing to a calendar org-gcal sends a network request that
