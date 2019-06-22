@@ -11,14 +11,15 @@ Evil emacs configuration.
 :TOC:      this
 :END:
   -  [[#dependencies][Dependencies]]
+  -  [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
   -  [[#s][s]]
   -  [[#dash][dash]]
   -  [[#general][general]]
+  -  [[#thingatpt][thingatpt+]]
   -  [[#variables][Variables]]
   -  [[#redefinitions][Redefinitions]]
   -  [[#helper-functions][Helper functions]]
   -  [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
-  -  [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
   -  [[#tramp][Tramp]]
   -  [[#server][Server]]
   -  [[#options][Options]]
@@ -223,6 +224,17 @@ Evil emacs configuration.
 - =~/.emacs.d/wolfram-secrets.el=
   - =mpereira/secret-wolfram-alpha-app-id=
 
+* quelpa and quelpa-use-package
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package quelpa
+  :config
+  (quelpa
+   '(quelpa-use-package
+     :fetcher github
+     :repo "quelpa/quelpa-use-package"))
+  (require 'quelpa-use-package))
+#+END_SRC
+
 * s
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package s)
@@ -236,6 +248,15 @@ Evil emacs configuration.
 * general
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package general)
+#+END_SRC
+
+* thingatpt+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package thingatpt+
+  :ensure nil
+  :quelpa (thingatpt+
+           :url "https://raw.githubusercontent.com/emacsmirror/emacswiki.org/master/thingatpt+.el"
+           :fetcher url))
 #+END_SRC
 
 * Variables
@@ -1070,17 +1091,6 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
               'mpereira/reload-dir-locals-for-all-buffer-in-this-directory)))
 
 (add-hook 'emacs-lisp-mode-hook #'mpereira/enable-autoreload-for-dir-locals)
-#+END_SRC
-
-* quelpa and quelpa-use-package
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package quelpa
-  :config
-  (quelpa
-   '(quelpa-use-package
-     :fetcher github
-     :repo "quelpa/quelpa-use-package"))
-  (require 'quelpa-use-package))
 #+END_SRC
 
 * Tramp
