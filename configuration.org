@@ -1090,6 +1090,17 @@ Copies the selected process's PID to the clipboard."
               ps
               :action (lambda (x)
                         (kill-new (cadr (split-string x " " t)))))))
+
+(defun mpereira/kill-buffer-and-maybe-window ()
+  "Kill current buffer. Kill window unless it had any previous buffers.
+Useful when killing help buffers that were opened on top of other buffers on
+existing windows. Also restores cursor position on previous window."
+  (interactive)
+  (if (window-prev-buffers)
+      (progn
+        (kill-buffer (current-buffer))
+        (evil-window-prev 1))
+    (kill-buffer-and-window)))
 #+END_SRC
 
 * Reload directory local variables when saving .dir-locals.el files
@@ -3520,7 +3531,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :config
   ;; I had this set to `t' for some reason. What was it?
   ;; (setq-default helpful--view-literal t)
-  )
+
+  (add-to-list 'display-buffer-alist
+               '("*helpful" display-buffer-below-selected)))
 #+END_SRC
 
 * LSP
@@ -4421,7 +4434,7 @@ repositories, but it seems like just trying again a few times gets it done.
 (general-define-key
  :states '(normal visual)
  :keymaps '(helpful-mode-map deadgrep-mode-map)
- "q" #'kill-buffer-and-window)
+ "q" #'mpereira/kill-buffer-and-maybe-window)
 #+END_SRC
 
 * Stuff I keep forgetting
