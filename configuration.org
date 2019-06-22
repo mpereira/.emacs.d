@@ -117,6 +117,7 @@ Evil emacs configuration.
     -  [[#org-make-toc][org-make-toc]]
     -  [[#htmlize][htmlize]]
     -  [[#ox-jira][ox-jira]]
+    -  [[#ox-confluence][ox-confluence]]
     -  [[#ox-gfm][ox-gfm]]
     -  [[#ox-slimhtml][ox-slimhtml]]
     -  [[#ox-hugo][ox-hugo]]
@@ -3142,6 +3143,16 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ** ox-jira
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-jira)
+#+END_SRC
+** ox-confluence
+#+BEGIN_SRC emacs-lisp :tangle yes
+;; Package lacks a file header, can't be installed by Quelpa.
+;; (use-package ox-confluence
+;;   :ensure nil
+;;   :quelpa (ox-confluence
+;;            :url "https://raw.githubusercontent.com/emacsmirror/org/master/contrib/lisp/ox-confluence.el"
+;;            :fetcher url))
+;; 
 #+END_SRC
 ** ox-gfm
 #+BEGIN_SRC emacs-lisp :tangle yes
