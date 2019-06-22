@@ -516,15 +516,41 @@ fish."
           (set-visited-file-name new-name t t)))))))
 
 (require 'thingatpt)
-
-;; Depends on 'thingatpt' for `thing-at-point'.
-(defun mpereira/eval-sexp-at-or-surrounding-pt ()
-  "Evaluate the sexp following the point, or surrounding the point"
+(require 'thingatpt+)
+(defun mpereira/eval-thing-at-or-around-point ()
+  "Evaluate thing at or surrounding the point."
   (interactive)
   (save-excursion
-    (forward-char 1)
-    (if (search-backward "(" nil t)
-        (message "%s" (eval (read-from-whole-string (thing-at-point 'sexp)))))))
+    (let* ((string-thing (tap-string-at-point))
+           (symbol-thing (tap-symbol-at-point))
+           (sexp-thing (sexp-at-point)))
+      (cond
+       (string-thing
+        (let* ((_ (message "string"))
+               (bounds (tap-bounds-of-string-at-point))
+               (string-form (substring-no-properties string-thing))
+               (string-value (substring-no-properties
+                              (tap-string-contents-at-point))))
+          (message "%s → %s" string-form string-form)
+          (eros--eval-overlay string-value (cdr bounds))))
+       (symbol-thing
+        (let* ((_ (message "symbol"))
+               (bounds (tap-bounds-of-symbol-at-point))
+               (symbol-name (substring-no-properties
+                             (tap-symbol-name-at-point)))
+               (symbol-value (eval symbol-thing)))
+          (message "%s" symbol-name)
+          (message "↓")
+          (message "%s" symbol-value)
+          (eros--eval-overlay symbol-value (cdr bounds))))
+       (sexp-thing
+        (let* ((_ (message "sexp"))
+               (bounds (tap-bounds-of-sexp-at-point))
+               (value (eval sexp-thing)))
+          (message "%s" sexp-thing)
+          (message "↓")
+          (message "%s" value)
+          (eros--eval-overlay value (cdr bounds))))))))
 
 (defun mpereira/split-window-below-and-switch ()
   "Split the window horizontally then switch to the new window."
@@ -2324,9 +2350,10 @@ context for the thing currently being hovered.
  :states '(normal)
  :prefix mpereira/leader
  :infix "e"
- "e" 'mpereira/eval-sexp-at-or-surrounding-pt
- "(" 'eval-defun
- "E" 'eval-buffer)
+ "d" #'edebug-defun
+ "e" #'mpereira/eval-sexp-at-or-surrounding-point
+ "(" #'eval-defun
+ "E" #'eval-buffer)
 
 (general-define-key
  :keymaps '(emacs-lisp-mode-map)
