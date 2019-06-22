@@ -2315,6 +2315,10 @@ context for the thing currently being hovered.
 
 * Emacs Lisp
 #+BEGIN_SRC emacs-lisp :tangle yes
+(use-package eros
+  :config
+  (eros-mode 1))
+
 (general-define-key
  :keymaps '(emacs-lisp-mode-map)
  :states '(normal)
