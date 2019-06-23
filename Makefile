@@ -1,4 +1,4 @@
-EMACS_VERSION := 26.1
+EMACS_VERSION := 26.2
 EMACS := /Applications/Emacs-$(EMACS_VERSION).app/Contents/MacOS/Emacs
 
 PROJECT_ROOT := $(shell pwd)
@@ -18,9 +18,11 @@ OLD_ELPA := $(PROJECT_ROOT)/$(shell date +%Y%m%d%H%M%S)
 	test-clean   \
 	test-quick
 
-recompile: clean
+clean-elc:
 	find . -name "*.elc" -type f | xargs rm -f
-	$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0)'
+
+recompile: clean
+	$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0 t)'
 
 test-quick:
 	@$(EMACS) --debug-init 2>/dev/null
@@ -49,4 +51,4 @@ custom.el:
 test-clean:
 	rm -rf $(TEST_RUNS_DIRECTORY)/*
 
-clean: test-clean rm-custom.el custom.el
+clean: test-clean rm-custom.el custom.el clean-elc
