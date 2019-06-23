@@ -2265,7 +2265,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                 undo-tree-visualizer-mode-hook))
   (add-hook hook 'mpereira/hide-trailing-whitespace))
 
-(setq undo-limit (* 10 1024 1024)) ;; 10MB.
+(setq undo-limit (* 100 1024 1024)) ;; 100MB.
 (setq undo-strong-limit undo-limit)
 (setq undo-tree-visualizer-timestamps t)
 (setq undo-tree-visualizer-diff t)
@@ -4356,6 +4356,7 @@ repositories, but it seems like just trying again a few times gets it done.
  "hv" #'mpereira/toggle-window-split
  "q" #'evil-quit
  "T" #'bm-toggle
+ "u" #'undo-tree-visualize
  "vs" #'mpereira/split-window-right-and-switch
  "w" #'save-buffer)
 
