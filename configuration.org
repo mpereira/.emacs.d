@@ -62,7 +62,6 @@ Evil emacs configuration.
     -  [[#yasnippet-snippets][yasnippet-snippets]]
     -  [[#auto-yasnippet][auto-yasnippet]]
   -  [[#open-junk-file][open-junk-file]]
-  -  [[#reformatter][reformatter]]
   -  [[#ialign][ialign]]
   -  [[#double-saber][double-saber]]
   -  [[#ripgrep][ripgrep]]
@@ -84,6 +83,7 @@ Evil emacs configuration.
     -  [[#flycheck][flycheck]]
     -  [[#flycheck-inline][flycheck-inline]]
     -  [[#flycheck-posframe][flycheck-posframe]]
+  -  [[#format-all][format-all]]
   -  [[#emacs-lisp][Emacs Lisp]]
   -  [[#java][Java]]
     -  [[#meghanada][meghanada]]
@@ -2102,11 +2102,6 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                                          "junk/%Y/%m/%d/%H%M%S.")))
 #+END_SRC
 
-* reformatter
-#+BEGIN_SRC emacs-lisp :tangle yes
-(use-package reformatter)
-#+END_SRC
-
 * ialign
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ialign)
@@ -2349,6 +2344,30 @@ context for the thing currently being hovered.
   (flycheck-posframe-configure-pretty-defaults)
   ;; (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
   )
+#+END_SRC
+
+* format-all
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package format-all
+  :config
+  (define-format-all-formatter shfmt
+    (:executable "shfmt")
+    (:install (macos ""))
+    (:modes sh-mode)
+    (:format (format-all--buffer-easy
+              executable
+              "-sr"
+              "-i" "2"
+              "-ln" (cl-case (and (boundp 'sh-shell) (symbol-value 'sh-shell))
+                      (bash "bash")
+                      (mksh "mksh")
+                      (t "posix")))))
+
+  (define-format-all-formatter prettier-yaml
+    (:executable "prettier")
+    (:install (macos ""))
+    (:modes yaml-mode)
+    (:format (format-all--buffer-easy executable "--parser" "yaml"))))
 #+END_SRC
 
 * Emacs Lisp
