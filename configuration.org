@@ -2383,7 +2383,7 @@ context for the thing currently being hovered.
  :prefix mpereira/leader
  :infix "e"
  "d" #'edebug-defun
- "e" #'mpereira/eval-sexp-at-or-surrounding-point
+ "e" #'mpereira/eval-thing-at-or-around-point
  "(" #'eval-defun
  "E" #'eval-buffer)
 
