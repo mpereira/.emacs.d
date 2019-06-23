@@ -2645,6 +2645,13 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 (setq org-log-done 'time)
 
+;; Force newline between headings.
+(setq org-blank-before-new-entry '((heading . t)
+                                   (plain-list-item . auto)))
+
+;; New headings are inserted after the current subtree contents.
+(setq org-insert-heading-respect-content t)
+
 ;; TODO: is this needed?
 (setq org-catch-invisible-edits 'show)
 
