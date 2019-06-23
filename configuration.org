@@ -2639,8 +2639,6 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (require 'org-info)
 (require 'org-tempo)
 
-(setq org-return-follows-link t)
-
 (setq org-log-done 'time)
 
 ;; TODO: is this needed?
