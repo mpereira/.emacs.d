@@ -1333,27 +1333,23 @@ Sources:
 - http://raebear.net/comp/emacscolors.html
 
 Dark themes I use the most:
-1. =nimbus=
-2. =doom-Ioskvem=
-3. =doom-dracula=
-4. =srcery=
+1. =material=
+2. =nimbus=
+3. =doom-Ioskvem=
+4. =doom-dracula=
+5. =srcery=
 
 Light themes I use the most:
 1. =twilight-bright=
-2. =espresso=
+2. =material-light=
+3. =espresso=
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-(use-package srcery-theme
-  :defer t)
-
-(use-package nimbus-theme
-  :defer t)
-
-(use-package doom-themes
-  :defer t)
-
-(use-package twilight-bright-theme
-  :defer t)
+(use-package material-theme :defer t)
+(use-package srcery-theme :defer t)
+(use-package nimbus-theme :defer t)
+(use-package doom-themes :defer t)
+(use-package twilight-bright-theme :defer t)
 
 (add-hook 'after-init-hook #'mpereira/load-light-theme t)
 #+END_SRC
