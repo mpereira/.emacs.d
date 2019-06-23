@@ -113,6 +113,7 @@ Evil emacs configuration.
     -  [[#org-gcal][org-gcal]]
     -  [[#org-agenda][Org Agenda]]
     -  [[#counsel-org-clock][counsel-org-clock]]
+    -  [[#org-expiry][org-expiry]]
     -  [[#org-bullets][org-bullets]]
     -  [[#org-make-toc][org-make-toc]]
     -  [[#htmlize][htmlize]]
@@ -2922,6 +2923,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ;; Use pretty things for the clocktable.
 (setq org-pretty-entities nil)
 #+END_SRC
+
 ** org-gcal
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package org-gcal
@@ -2936,6 +2938,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (setq org-gcal-auto-archive nil)
   (setq org-gcal-notify-p nil))
 #+END_SRC
+
 ** Org Agenda
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'org-agenda)
@@ -3188,12 +3191,27 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "0" (calendar-action calendar-beginning-of-week)
  "$" (calendar-action calendar-end-of-week))
 #+END_SRC
+
 ** counsel-org-clock
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package counsel-org-clock
   :config
   (setq counsel-org-clock-default-action 'clock-in))
 #+END_SRC
+
+** org-expiry
+#+BEGIN_SRC emacs-lisp :tangle yes
+(add-to-list 'org-modules 'org-expiry)
+
+(require 'org-expiry)
+
+(setq org-expiry-inactive-timestamps t)
+
+(org-expiry-insinuate)
+
+(add-hook 'org-capture-before-finalize-hook 'org-expiry-insert-created)
+#+END_SRC
+
 ** org-bullets
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package org-bullets
@@ -3201,22 +3219,27 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :config
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
+
 ** org-make-toc
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package org-make-toc
   :after org)
 #+END_SRC
+
 ** htmlize
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package htmlize)
 #+END_SRC
+
 ** ox-jira
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-jira)
 #+END_SRC
+
 ** ox-confluence
+This package lacks a file header as of [2019-06-23 Sun] and can't be installed
+by Quelpa.
 #+BEGIN_SRC emacs-lisp :tangle yes
-;; Package lacks a file header, can't be installed by Quelpa.
 ;; (use-package ox-confluence
 ;;   :ensure nil
 ;;   :quelpa (ox-confluence
@@ -3224,26 +3247,32 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 ;;            :fetcher url))
 ;; 
 #+END_SRC
+
 ** ox-gfm
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-gfm)
 #+END_SRC
+
 ** ox-slimhtml
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-slimhtml)
 #+END_SRC
+
 ** ox-hugo
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-hugo)
 #+END_SRC
+
 ** ox-pandoc
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ox-pandoc)
 #+END_SRC
+
 ** ob-async
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package ob-async)
 #+END_SRC
+
 ** org-tree-slide
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package org-tree-slide)
