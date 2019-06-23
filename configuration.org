@@ -2265,10 +2265,14 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                 undo-tree-visualizer-mode-hook))
   (add-hook hook 'mpereira/hide-trailing-whitespace))
 
+(setq undo-tree-auto-save-history t)
+(setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
 (setq undo-limit (* 100 1024 1024)) ;; 100MB.
 (setq undo-strong-limit undo-limit)
 (setq undo-tree-visualizer-timestamps t)
 (setq undo-tree-visualizer-diff t)
+
+(global-undo-tree-mode 1)
 #+END_SRC
 
 * company-mode
