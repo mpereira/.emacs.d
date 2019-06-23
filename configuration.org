@@ -2351,7 +2351,7 @@ context for the thing currently being hovered.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package format-all
   :config
-  (define-format-all-formatter shfmt
+  (define-format-all-formatter mpereira/sh-formatter
     (:executable "shfmt")
     (:install (macos ""))
     (:modes sh-mode)
@@ -2364,7 +2364,7 @@ context for the thing currently being hovered.
                       (mksh "mksh")
                       (t "posix")))))
 
-  (define-format-all-formatter prettier-yaml
+  (define-format-all-formatter mpereira/yaml-formatter
     (:executable "prettier")
     (:install (macos ""))
     (:modes yaml-mode)
