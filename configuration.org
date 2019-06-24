@@ -1598,8 +1598,8 @@ modifications, e.g. ~executable-find~.
 (use-package evil
   :general
   (:keymaps '(evil-motion-state-map)
-   ";" 'evil-ex
-   ":" 'evil-repeat-find-char)
+   ";" #'evil-ex
+   ":" #'evil-command-window-ex)
   ;; `evil-search' as the `evil-search-module' is nice, but I still want to
   ;; navigate history with C-j and C-k.
   ;; FIXME: this isn't working for some reason?
