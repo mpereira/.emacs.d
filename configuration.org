@@ -2564,6 +2564,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+END_SRC
 
 * Kotlin
+#+begin_src emacs-lisp :tangle yes
+(use-package kotlin-mode)
+#+end_src
+
 ** flycheck-kotlin
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package flycheck-kotlin
