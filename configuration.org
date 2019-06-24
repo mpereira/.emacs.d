@@ -607,7 +607,11 @@ fish."
         (and (not (= p (car bounds)))
              (not (= p (cdr bounds)))))))
 
-  (defun mpereira/backward-sexp (arg)
+  (defun mpereira/maybe-move-to-after-string ()
+    (when-let (bounds (lispyville--in-string-p))
+      (goto-char (car bounds))))
+
+  (defun mpereira/backward-sexp-begin (arg)
     "Moves to the beginning of the previous ARG nth sexp."
     (interactive "p")
     (if (mpereira/inside-or-at-the-end-of-string)
@@ -616,20 +620,39 @@ fish."
           (backward-sexp (- arg 1)))
       (backward-sexp arg)))
 
-  (defun mpereira/forward-sexp (arg)
+  (defun mpereira/forward-sexp-begin (arg)
     "Moves to the beginning of the next ARG nth sexp. The fact that this doesn't
 exist in any structured movement package is mind-boggling to me."
     (interactive "p")
-    (when (mpereira/inside-or-at-the-end-of-string)
-      (let ((bounds (lispy--bounds-string)))
-        (goto-char (- (car bounds) 1))))
-    (dotimes (i arg)
+    (when-let (bounds (lispyville--in-string-p))
+      (goto-char (car bounds)))
+    (dotimes (_ arg)
       (forward-sexp 1)
       (if (looking-at lispy-right)
+          ;; Prevent moving forward from last element in current level.
           (backward-sexp 1)
         (progn
           (forward-sexp 1)
-          (backward-sexp 1))))))
+          (backward-sexp 1)))))
+
+  (defun mpereira/forward-sexp-end (arg)
+    "Moves to the end of the next ARG nth sexp. The fact that this doesn't exist
+in any structured movement package is mind-boggling to me."
+    (interactive "p")
+    ;; Prevent moving past the end of a list.
+    (unless (looking-at (concat "." lispy-right))
+      (progn
+        (if-let (bounds (lispyville--in-string-p))
+            ;; Move to point right after string end.
+            (progn
+              (goto-char (cdr bounds))
+              (forward-char 1))
+          (when-let (bounds (lispy--bounds-dwim))
+            ;; Move to point right after symbol or list end.
+            (goto-char (cdr bounds))
+            (forward-char 1)))
+        (forward-sexp 1)
+        (backward-char 1)))))
 
 ;; https://github.com/syl20bnr/spacemacs/blob/
 ;; b7e51d70aa3fb81df2da6dc16d9652a002ba5e6b/layers/%2Bspacemacs/
@@ -1100,9 +1123,19 @@ existing windows. Also restores cursor position on previous window."
   (interactive)
   (if (window-prev-buffers)
       (progn
-        (kill-buffer (current-buffer))
-        (evil-window-prev 1))
+        (evil-window-prev 1)
+        (kill-buffer (current-buffer)))
     (kill-buffer-and-window)))
+
+(with-eval-after-load "counsel"
+  (with-eval-after-load "lispy"
+    ;; `lispy-goto-local' doesn't work in org babel indirect src block buffers.
+    (defun mpereira/lispy-goto-local (&optional args)
+      "lispy-goto-local with fallback to counsel-imenu."
+      (interactive)
+      (if (lispy--file-list)
+          (funcall 'lispy-goto-local args)
+        (funcall 'counsel-imenu)))))
 #+END_SRC
 
 * Reload directory local variables when saving .dir-locals.el files
@@ -3702,6 +3735,8 @@ Disabled for now. Using [[flycheck-inline]] instead.
    :keymaps 'lispy-mode-map
    :states '(normal)
    :prefix mpereira/leader
+   "fo" 'mpereira/lispy-goto-local
+   "fO" 'lispy-goto-projectile
    "r" 'lispy-raise-sexp
    "R" 'lispy-raise-some
    "(" 'lispy-wrap-round
@@ -3728,16 +3763,22 @@ Disabled for now. Using [[flycheck-inline]] instead.
    :keymaps '(lispyville-mode-map)
    :states '(normal)
    "S" 'lispyville-change-whole-line
-   "B" 'mpereira/backward-sexp
-   "gA" 'mpereira/append-to-end-of-list
-   "gI" 'mpereira/insert-to-beginning-of-list
-   "W" 'mpereira/forward-sexp
+   "W" 'mpereira/forward-sexp-begin
+   "B" 'mpereira/backward-sexp-begin
+   "E" 'mpereira/forward-sexp-end
    "(" 'lispyville-backward-up-list
    ")" 'lispyville-up-list
    "C-(" 'lispyville-beginning-of-defun
    "C-)" 'lispyville-end-of-defun
-   "{" 'lispyville-previous-opening
-   "}" 'lispyville-next-opening
+   "{" 'lispy-knight-up
+   "}" 'lispy-knight-down
+   "gA" 'mpereira/append-to-end-of-list
+   "gI" 'mpereira/insert-to-beginning-of-list
+   "go" 'lispy-oneline
+   "gm" 'lispy-multiline
+   "gs" 'lispy-stringify
+   "gS" 'lispy-unstringify
+   "gt" 'lispy-teleport
    ">)" 'lispy-forward-slurp-sexp
    "<)" 'lispy-forward-barf-sexp
    "<(" 'lispy-backward-slurp-sexp
