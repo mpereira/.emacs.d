@@ -136,6 +136,7 @@ Evil emacs configuration.
     -  [[#toml-mode][toml-mode]]
   -  [[#yaml][YAML]]
     -  [[#yaml-mode][yaml-mode]]
+  -  [[#terraform-mode][terraform-mode]]
   -  [[#docker][Docker]]
     -  [[#docker][docker]]
     -  [[#dockerfile-mode][dockerfile-mode]]
@@ -3378,6 +3379,11 @@ by Quelpa.
    :keymaps '(yaml-mode-map)
    :states '(insert)
    "RET" 'newline-and-indent))
+#+END_SRC
+
+* terraform-mode
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package terraform-mode)
 #+END_SRC
 
 * Docker
