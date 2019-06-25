@@ -3724,6 +3724,17 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
   (add-hook 'clojure-mode-hook 'lispy-mode)
 
+  ;; semantic-mode is disabled by lispy for $reasons. Sometimes it fails to also
+  ;; disable this timer, which keeps printing the following error message in the
+  ;; echo area:
+  ;;
+  ;; Error running timer `semantic-idle-scheduler-function'
+  ;; (error "Unmatched Text during Lexical Analysis")
+  ;;
+  ;; So here we disable the timer manually. Check
+  ;; https://github.com/abo-abo/lispy/issues/473 for more context.
+  (advice-add 'semantic-idle-scheduler-function :around #'ignore)
+
   ;; Disable most lispy mappings.
   (setq lispy-mode-map lispy-mode-map-base)
   (setcdr (assq 'lispy-mode minor-mode-map-alist)
