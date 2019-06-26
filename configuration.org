@@ -270,8 +270,8 @@ Evil emacs configuration.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (setq mpereira/custom-file (expand-file-name "custom.el" user-emacs-directory))
 (setq mpereira/leader ",")
-(setq mpereira/light-theme 'twilight-bright)
-(setq mpereira/dark-theme 'nimbus)
+(setq mpereira/light-theme 'material-light)
+(setq mpereira/dark-theme 'material)
 (setq mpereira/dropbox-directory (file-name-as-directory
                                   (expand-file-name "~/Dropbox")))
 (setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
@@ -1374,8 +1374,8 @@ Dark themes I use the most:
 5. =srcery=
 
 Light themes I use the most:
-1. =twilight-bright=
-2. =material-light=
+1. =material-light=
+2. =twilight-bright=
 3. =espresso=
 
 #+BEGIN_SRC emacs-lisp :tangle yes
