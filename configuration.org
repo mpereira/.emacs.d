@@ -1386,6 +1386,7 @@ Light themes I use the most:
 (use-package twilight-bright-theme :defer t)
 (use-package chocolate-theme
   :ensure nil
+  :defer t
   :quelpa (chocolate-theme
            :fetcher github
            :repo "SavchenkoValeriy/emacs-chocolate-theme"))
@@ -1534,12 +1535,17 @@ Source: https://git.io/vQKzv"
 * mw-thesaurus
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package mw-thesaurus
-  :general (:keymaps '(text-mode-map)
-            :states '(normal visual)
-            "K" #'mw-thesaurus-lookup-at-point
-            :keymaps '(mw-thesaurus-mode-map)
-            :states '(normal visual)
-            "q" #'mw-thesaurus--quit)
+  :general
+  (:keymaps '(text-mode-map)
+   :states '(normal visual)
+   "K" #'mw-thesaurus-lookup-at-point)
+  (:keymaps '(org-mode-map)
+   :states '(normal visual)
+   "q" nil
+   "K" nil)
+  (:keymaps '(mw-thesaurus-mode-map)
+   :states '(normal visual)
+   "q" #'mw-thesaurus--quit)
   :config
   (mw-thesaurus-mode)
 
@@ -2390,24 +2396,25 @@ context for the thing currently being hovered.
 #+BEGIN_SRC emacs-lisp :tangle yes
 (use-package format-all
   :config
-  (define-format-all-formatter mpereira/sh-formatter
-    (:executable "shfmt")
-    (:install (macos ""))
-    (:modes sh-mode)
-    (:format (format-all--buffer-easy
-              executable
-              "-sr"
-              "-i" "2"
-              "-ln" (cl-case (and (boundp 'sh-shell) (symbol-value 'sh-shell))
-                      (bash "bash")
-                      (mksh "mksh")
-                      (t "posix")))))
+  ;; (define-format-all-formatter mpereira/sh-formatter
+  ;;   (:executable "shfmt")
+  ;;   (:install (macos ""))
+  ;;   (:modes sh-mode)
+  ;;   (:format (format-all--buffer-easy
+  ;;             executable
+  ;;             "-sr"
+  ;;             "-i" "2"
+  ;;             "-ln" (cl-case (and (boundp 'sh-shell) (symbol-value 'sh-shell))
+  ;;                     (bash "bash")
+  ;;                     (mksh "mksh")
+  ;;                     (t "posix")))))
 
-  (define-format-all-formatter mpereira/yaml-formatter
-    (:executable "prettier")
-    (:install (macos ""))
-    (:modes yaml-mode)
-    (:format (format-all--buffer-easy executable "--parser" "yaml"))))
+  ;; (define-format-all-formatter mpereira/yaml-formatter
+  ;;   (:executable "prettier")
+  ;;   (:install (macos ""))
+  ;;   (:modes yaml-mode)
+  ;;   (:format (format-all--buffer-easy executable "--parser" "yaml")))
+  )
 #+END_SRC
 
 * Emacs Lisp
@@ -2844,10 +2851,27 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  :infix "e"
  "e" 'org-babel-execute-src-block)
 
+(defun mpereira/org-unfill-toggle ()
+  "Toggle filling/unfilling of the current region, or current paragraph if no
+region active."
+  (interactive)
+  (let (deactivate-mark
+        (fill-column
+         (if (eq last-command this-command)
+             (progn (setq this-command nil)
+                    most-positive-fixnum)
+           fill-column)))
+    (call-interactively 'org-fill-paragraph)))
+
 (general-define-key
  :keymaps '(org-mode-map)
  :states '(normal visual)
- "gq" 'fill-paragraph)
+ "gq" 'mpereira/org-unfill-toggle)
+
+(general-define-key
+ :keymaps '(org-mode-map text-mode-map)
+ :states '(normal visual insert)
+ "M-q" 'mpereira/org-unfill-toggle)
 
 (general-define-key
  :keymaps '(org-mode-map)
