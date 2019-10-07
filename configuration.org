@@ -1384,6 +1384,11 @@ Light themes I use the most:
 (use-package nimbus-theme :defer t)
 (use-package doom-themes :defer t)
 (use-package twilight-bright-theme :defer t)
+(use-package chocolate-theme
+  :ensure nil
+  :quelpa (chocolate-theme
+           :fetcher github
+           :repo "SavchenkoValeriy/emacs-chocolate-theme"))
 
 (add-hook 'after-init-hook #'mpereira/load-light-theme t)
 #+END_SRC
