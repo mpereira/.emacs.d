@@ -283,7 +283,7 @@ Evil emacs configuration.
 (setq mpereira/custom-file (expand-file-name "custom.el" user-emacs-directory))
 (setq mpereira/leader ",")
 (setq mpereira/light-theme 'github)
-(setq mpereira/dark-theme 'chocolate)
+(setq mpereira/dark-theme 'modus-vivendi)
 (setq mpereira/dropbox-directory (file-name-as-directory
                                   (expand-file-name "~/Dropbox")))
 (setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
