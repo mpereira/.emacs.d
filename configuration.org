@@ -55,6 +55,7 @@ Evil emacs configuration.
   -  [[#hideshow][hideshow]]
   -  [[#string-inflection][string-inflection]]
   -  [[#dired][dired]]
+    -  [[#dired-subtree][dired-subtree]]
   -  [[#xterm-color][xterm-color]]
   -  [[#shell][shell]]
   -  [[#eshell][eshell]]
@@ -2050,6 +2051,15 @@ modifications, e.g. ~executable-find~.
 
 (require 'wdired)
 (setq wdired-allow-to-change-permissions t)
+#+end_src
+
+** dired-subtree
+#+begin_src emacs-lisp :tangle yes
+(use-package dired-subtree
+  :after dired
+  :bind (:map dired-mode-map
+         ("<tab>" . dired-subtree-toggle)
+         ("<S-tab>" . dired-subtree-cycle)))
 #+end_src
 
 * xterm-color
