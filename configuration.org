@@ -1152,6 +1152,11 @@ Mode:     %s"
       (insert (shell-command-to-string cmd)))
     (pop-to-buffer buf)
     (goto-char (point-min))))
+
+(defun mpereira/unadvice (sym)
+  "Remove all advices from symbol SYM."
+  (interactive "aFunction symbol: ")
+  (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
 #+end_src
 
 * Reload directory local variables when saving .dir-locals.el files
