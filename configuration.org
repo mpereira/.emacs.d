@@ -1,7 +1,7 @@
 * mpereira's emacs configuration
 :PROPERTIES:
 :TOC:      ignore
-:header-args:bash: :results none :exports both
+:header-args:emacs-lisp: :results silent :exports both
 :END:
 
 Evil emacs configuration.
