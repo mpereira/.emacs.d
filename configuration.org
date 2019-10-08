@@ -1469,7 +1469,7 @@ My favorite light themes:
         '(:eval
           (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
             (let ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
-                  (face 'magit-branch-current))
+                  (face 'magit-mode-line-process))
               (concat
                (propertize " " 'face face)
                (propertize (format "%s" branch) 'face face)
@@ -1486,9 +1486,9 @@ My favorite light themes:
                 ;; Not using %b because it sometimes prepends the directory
                 ;; name.
                 (buffer-name* (file-name-nondirectory (buffer-name)))
-                (buffer-name-face 'mode-line-buffer-id)
-                (directory-face 'mode-line-inactive)
-                (modified-or-ro-symbol-face 'magit-refname-wip)
+                (directory-face 'italic)
+                (buffer-name-face 'bold)
+                (modified-or-ro-symbol-face 'font-lock-comment-face)
                 (directory (if (projectile-project-p)
                                (mpereira/shorten-directory
                                 (projectile-project-root)
@@ -1509,7 +1509,7 @@ My favorite light themes:
       (defconst mpereira/mode-line-buffer-position
         '(:eval
           (unless eshell-mode
-            (propertize " %p %l,%c " 'face 'org-todo))))
+            (propertize " %p %l,%c " 'face 'font-lock-comment-face))))
 
       (defun mpereira/flycheck-lighter (state)
         "Return flycheck information for the given error type STATE.
@@ -1536,6 +1536,7 @@ Source: https://git.io/vQKzv"
                               lighter
                               'face `(:foreground ,(cdr state))))
              " "))))
+
       (setq-default mode-line-format (list mpereira/mode-line-projectile
                                            mpereira/mode-line-vc
                                            mpereira/mode-line-buffer
@@ -1543,7 +1544,21 @@ Source: https://git.io/vQKzv"
                                            mpereira/mode-line-major-mode
                                            mpereira/mode-line-buffer-position
                                            mode-line-misc-info
-                                           mode-line-end-spaces)))))
+                                           mode-line-end-spaces))
+
+      (defun mpereira/set-mode-line-padding ()
+        (dolist (face '(mode-line mode-line-inactive))
+          (let ((background (face-attribute face :background)))
+            (set-face-attribute face nil :box `(:line-width 5
+                                                :color ,background)))))
+
+      (mpereira/set-mode-line-padding)
+
+      ;; Set modeline padding after running `counsel-load-theme'.
+      (advice-add 'counsel-load-theme-action
+                  :after
+                  (lambda (&rest _)
+                    (mpereira/set-mode-line-padding))))))
 #+end_src
 
 * Configure Header Line
@@ -3095,6 +3110,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   :config
   (elpy-enable))
 #+end_src
+
 ** blacken
 #+begin_src emacs-lisp :tangle yes
 (use-package blacken
