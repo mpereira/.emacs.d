@@ -372,89 +372,6 @@ Lisp function does not specify a special indentation."
                                         indent-point normal-indent))
                  (method
                   (funcall method indent-point state)))))))))
-
-;; Adds support for showing completion descriptions.
-(with-eval-after-load "fish-completion"
-  (defun fish-completion-complete (raw-prompt)
-    "Complete RAW-PROMPT (any string) using the fish shell.
-
-If `fish-completion-fallback-on-bash-p' is non-nil and if the `bash-completion'
-package is available, fall back on bash in case no completion was found with
-fish."
-    (while
-        (pcomplete-here
-         (let ((completions
-                (let* (;; Keep spaces at the end with OMIT-NULLS=nil in
-                       ;; `split-string'.
-                       (tokens* (split-string raw-prompt
-                                              split-string-default-separators
-                                              nil))
-                       ;; The first non-empty `car' is the command. Discard
-                       ;; leading empty strings.
-                       (tokens (progn (while (string= (car tokens*) "")
-                                        (setq tokens* (cdr tokens*)))
-                                      tokens*))
-                       ;; Fish does not support subcommand completion. We make a
-                       ;; special case of 'sudo' and 'env' since they are the most
-                       ;; common cases involving subcommands. See
-                       ;; https://github.com/fish-shell/fish-shell/issues/4093.
-                       (prompt (if (not (member (car tokens) '("sudo" "env")))
-                                   raw-prompt
-                                 (setq tokens (cdr tokens))
-                                 (while (and tokens
-                                             (or (string-match "^-.*" (car tokens))
-                                                 (string-match "=" (car tokens))))
-                                   ;; Skip env/sudo parameters, like LC_ALL=C.
-                                   (setq tokens (cdr tokens)))
-                                 (mapconcat 'identity tokens " "))))
-                  ;; Completion result can be a filename. pcomplete expects
-                  ;; cannonical file names (i.e. without '~') while fish preserves
-                  ;; non-cannonical results. If the result contains a directory,
-                  ;; expand it.
-                  (split-string
-                   (with-output-to-string
-                     (with-current-buffer standard-output
-                       (call-process fish-completion-command
-                                     nil
-                                     t
-                                     nil
-                                     "-c"
-                                     (format "complete -C%s"
-                                             (shell-quote-argument prompt)))))
-                   "\n"
-                   t))))
-           (if (and fish-completion-fallback-on-bash-p
-                    (or (not completions)
-                        (file-exists-p (car completions)))
-                    (require 'bash-completion nil t))
-               ;; Remove trailing spaces of bash completion entries. (Does this
-               ;; only occurs when there is 1 completion item?)
-               ;; TODO: Maybe this should be fixed in bash-completion instead.
-               (mapcar 'string-trim-right
-                       (mapcar (lambda (s)
-                                 ;; bash-completion inserts "\" to escape white
-                                 ;; spaces, we need to remove them since pcomplete
-                                 ;; does that too.
-                                 (replace-regexp-in-string (regexp-quote "\\") "" s))
-                               (nth 2 (bash-completion-dynamic-complete-nocomint
-                                       (save-excursion (eshell-bol) (point)) (point)))))
-             (if (and completions (file-exists-p (car completions)))
-                 (pcomplete-dirs-or-entries)
-               (let ((formatted-completions
-                      (mapcar
-                       (lambda (e)
-                         (multiple-value-bind (flag description) (split-string e "\t")
-                           ;; Remove trailing spaces to avoid it being converted
-                           ;; into "\ ".
-                           (string-trim-right
-                            (if description
-                                (replace-regexp-in-string
-                                 (regexp-quote " ")
-                                 " "
-                                 (format "%-50s %s" flag description))
-                              flag))))
-                       completions)))
-                 formatted-completions))))))))
 #+end_src
 
 * Helper functions
@@ -2435,12 +2352,107 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
 * fish-completion
 #+begin_src emacs-lisp :tangle yes
+;; Doesn't work in eshell buffers.
+;; https://github.com/szermatt/emacs-bash-completion/issues/24
+(use-package bash-completion
+  :config
+  (bash-completion-setup))
+
 (use-package fish-completion
+  ;; Disabling this for now because it breaks path completion.
+  ;; The issue below says that the issue is fixed on recent versions of
+  ;; emacs-fish-completion, but it doesn't really seem to be.
+  ;; https://gitlab.com/ambrevar/emacs-fish-completion/issues/3.
+  :disabled
   :after exec-path-from-shell
   :config
   (if (executable-find "fish")
       (global-fish-completion-mode)
-    (message "fish executable not found, not enabling fish-completion-mode")))
+    (message "fish executable not found, not enabling fish-completion-mode"))
+
+  (setq fish-completion-fallback-on-bash-p t)
+
+  ;; WIP: Adds support for showing completion descriptions.
+  (defun mpereira/fish-completion-complete (raw-prompt)
+    "Complete RAW-PROMPT (any string) using the fish shell.
+
+If `fish-completion-fallback-on-bash-p' is non-nil and if the `bash-completion'
+package is available, fall back on bash in case no completion was found with
+fish."
+    (while
+        (pcomplete-here
+         (let ((completions
+                (let* (;; Keep spaces at the end with OMIT-NULLS=nil in
+                       ;; `split-string'.
+                       (tokens* (split-string raw-prompt
+                                              split-string-default-separators
+                                              nil))
+                       ;; The first non-empty `car' is the command. Discard
+                       ;; leading empty strings.
+                       (tokens (progn (while (string= (car tokens*) "")
+                                        (setq tokens* (cdr tokens*)))
+                                      tokens*))
+                       ;; Fish does not support subcommand completion. We make a
+                       ;; special case of 'sudo' and 'env' since they are the most
+                       ;; common cases involving subcommands. See
+                       ;; https://github.com/fish-shell/fish-shell/issues/4093.
+                       (prompt (if (not (member (car tokens) '("sudo" "env")))
+                                   raw-prompt
+                                 (setq tokens (cdr tokens))
+                                 (while (and tokens
+                                             (or (string-match "^-.*" (car tokens))
+                                                 (string-match "=" (car tokens))))
+                                   ;; Skip env/sudo parameters, like LC_ALL=C.
+                                   (setq tokens (cdr tokens)))
+                                 (mapconcat 'identity tokens " "))))
+                  ;; Completion result can be a filename. pcomplete expects
+                  ;; cannonical file names (i.e. without '~') while fish preserves
+                  ;; non-cannonical results. If the result contains a directory,
+                  ;; expand it.
+                  (split-string
+                   (with-output-to-string
+                     (with-current-buffer standard-output
+                       (call-process fish-completion-command
+                                     nil
+                                     t
+                                     nil
+                                     "-c"
+                                     (format "complete -C%s"
+                                             (shell-quote-argument prompt)))))
+                   "\n"
+                   t))))
+           (if (and fish-completion-fallback-on-bash-p
+                    (or (not completions)
+                        (file-exists-p (car completions)))
+                    (require 'bash-completion nil t))
+               ;; Remove trailing spaces of bash completion entries. (Does this
+               ;; only occurs when there is 1 completion item?)
+               ;; TODO: Maybe this should be fixed in bash-completion instead.
+               (mapcar 'string-trim-right
+                       (mapcar (lambda (s)
+                                 ;; bash-completion inserts "\" to escape white
+                                 ;; spaces, we need to remove them since pcomplete
+                                 ;; does that too.
+                                 (replace-regexp-in-string (regexp-quote "\\") "" s))
+                               (nth 2 (bash-completion-dynamic-complete-nocomint
+                                       (save-excursion (eshell-bol) (point)) (point)))))
+             (if (and completions (file-exists-p (car completions)))
+                 (pcomplete-dirs-or-entries)
+               (let ((formatted-completions
+                      (mapcar
+                       (lambda (e)
+                         (multiple-value-bind (flag description) (split-string e "\t")
+                           ;; Remove trailing spaces to avoid it being converted
+                           ;; into "\ ".
+                           (string-trim-right
+                            (if description
+                                (replace-regexp-in-string
+                                 (regexp-quote " ")
+                                 " "
+                                 (format "%-50s %s" flag description))
+                              flag))))
+                       completions)))
+                 formatted-completions))))))))
 #+end_src
 
 * suggest
