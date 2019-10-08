@@ -280,8 +280,8 @@ Evil emacs configuration.
 #+begin_src emacs-lisp :tangle yes
 (setq mpereira/custom-file (expand-file-name "custom.el" user-emacs-directory))
 (setq mpereira/leader ",")
-(setq mpereira/light-theme 'material-light)
-(setq mpereira/dark-theme 'material)
+(setq mpereira/light-theme 'github)
+(setq mpereira/dark-theme 'chocolate)
 (setq mpereira/dropbox-directory (file-name-as-directory
                                   (expand-file-name "~/Dropbox")))
 (setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
@@ -1481,34 +1481,41 @@ Sources:
 - http://daylerees.github.io/
 - http://raebear.net/comp/emacscolors.html
 
-Dark themes I use the most:
-1. =modus-vivendi=
-2. =material=
-3. =monokai=
-4. =nimbus=
-5. =doom-Ioskvem=
-6. =doom-dracula=
-7. =srcery=
+My favorite Dark themes:
+1. =chocolate=
+2. =doom-molokai=
+3. =modus-vivendi=
+4. =material=
+5. =monokai=
+6. =nimbus=
+7. =doom-Ioskvem=
+8. =doom-dracula=
+9. =srcery=
 
-Light themes I use the most:
-1. =modus-operandi=
-2. =material-light=
-3. =twilight-bright=
-4. =espresso=
+My favorite light themes:
+1. =github=
+2. =modus-operandi=
+3. =material-light=
+4. =twilight-bright=
+5. =espresso=
 
 #+begin_src emacs-lisp :tangle yes
 (setq custom-safe-themes t) ;; Don't ask whether custom themes are safe.
 
-;; (use-package modus-themes
-;;   :ensure nil
-;;   :quelpa (modus-themes
-;;            :fetcher gitlab
-;;            :repo "protesilaos/modus-themes"))
 (use-package material-theme :defer t)
+(use-package monokai-theme :defer t)
+(use-package github-theme :defer t)
 (use-package srcery-theme :defer t)
 (use-package nimbus-theme :defer t)
 (use-package doom-themes :defer t)
+(use-package espresso-theme :defer t)
 (use-package twilight-bright-theme :defer t)
+(use-package modus-themes
+  :ensure nil
+  :defer t
+  :quelpa (modus-themes
+           :fetcher gitlab
+           :repo "protesilaos/modus-themes"))
 (use-package chocolate-theme
   :ensure nil
   :defer t
