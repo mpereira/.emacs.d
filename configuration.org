@@ -30,6 +30,7 @@ Evil emacs configuration.
   -  [[#flyspell][flyspell]]
     -  [[#flyspell-correct-ivy][flyspell-correct-ivy]]
   -  [[#mw-thesaurus][mw-thesaurus]]
+  -  [[#stackoverflow][stackoverflow]]
   -  [[#persistent-scratch][persistent-scratch]]
   -  [[#too-long-lines-mode][too-long-lines-mode]]
   -  [[#disk-usage][disk-usage]]
@@ -44,6 +45,8 @@ Evil emacs configuration.
     -  [[#evil-nerd-commenter][evil-nerd-commenter]]
     -  [[#evil-surround][evil-surround]]
     -  [[#evil-matchit][evil-matchit]]
+    -  [[#evil-lion][evil-lion]]
+    -  [[#evil-string-inflection][evil-string-inflection]]
     -  [[#evil-goggles][evil-goggles]]
     -  [[#evil-multiedit][evil-multiedit]]
     -  [[#evil-collection][evil-collection]]
@@ -51,7 +54,9 @@ Evil emacs configuration.
   -  [[#highlight-indent-guide][highlight-indent-guide]]
   -  [[#hideshow][hideshow]]
   -  [[#string-inflection][string-inflection]]
+  -  [[#dired][dired]]
   -  [[#xterm-color][xterm-color]]
+  -  [[#shell][shell]]
   -  [[#eshell][eshell]]
     -  [[#configure-xterm-color][Configure xterm-color]]
   -  [[#fish-completion][fish-completion]]
@@ -64,6 +69,7 @@ Evil emacs configuration.
   -  [[#open-junk-file][open-junk-file]]
   -  [[#ialign][ialign]]
   -  [[#double-saber][double-saber]]
+  -  [[#gif-screencast][gif-screencast]]
   -  [[#ripgrep][ripgrep]]
   -  [[#ag][ag]]
   -  [[#web-mode][web-mode]]
@@ -93,6 +99,7 @@ Evil emacs configuration.
     -  [[#inf-clojure][inf-clojure]]
     -  [[#cider][cider]]
     -  [[#slamhound][slamhound]]
+  -  [[#go][Go]]
   -  [[#rust][Rust]]
     -  [[#rust-mode][rust-mode]]
     -  [[#racer][racer]]
@@ -149,6 +156,7 @@ Evil emacs configuration.
   -  [[#atomic-chrome][atomic-chrome]]
   -  [[#expand-region][expand-region]]
   -  [[#rainbow-delimiters][rainbow-delimiters]]
+  -  [[#frog-jump-buffer][frog-jump-buffer]]
   -  [[#org-autonum][org-autonum]]
   -  [[#json-snatcher][json-snatcher]]
   -  [[#osascripts][osascripts]]
@@ -168,6 +176,7 @@ Evil emacs configuration.
   -  [[#which-key][which-key]]
   -  [[#projectile][projectile]]
     -  [[#term-projectile][term-projectile]]
+    -  [[#ibuffer-projectile][ibuffer-projectile]]
   -  [[#perspective][perspective]]
     -  [[#persp-projectile][persp-projectile]]
   -  [[#avy][avy]]
@@ -201,6 +210,7 @@ Evil emacs configuration.
   -  [[#symbol-overlay][symbol-overlay]]
   -  [[#unfill][unfill]]
   -  [[#smex][smex]]
+  -  [[#org-pomodoro][org-pomodoro]]
   -  [[#mappings][Mappings]]
   -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
     -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
@@ -232,7 +242,7 @@ Evil emacs configuration.
   - =mpereira/secret-wolfram-alpha-app-id=
 
 * quelpa and quelpa-use-package
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package quelpa
   :config
   (quelpa
@@ -240,34 +250,34 @@ Evil emacs configuration.
      :fetcher github
      :repo "quelpa/quelpa-use-package"))
   (require 'quelpa-use-package))
-#+END_SRC
+#+end_src
 
 * s
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package s)
-#+END_SRC
+#+end_src
 
 * dash
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package dash)
-#+END_SRC
+#+end_src
 
 * general
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package general)
-#+END_SRC
+#+end_src
 
 * thingatpt+
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package thingatpt+
   :ensure nil
   :quelpa (thingatpt+
            :url "https://raw.githubusercontent.com/emacsmirror/emacswiki.org/master/thingatpt+.el"
            :fetcher url))
-#+END_SRC
+#+end_src
 
 * Variables
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (setq mpereira/custom-file (expand-file-name "custom.el" user-emacs-directory))
 (setq mpereira/leader ",")
 (setq mpereira/light-theme 'material-light)
@@ -281,10 +291,10 @@ Evil emacs configuration.
                                          mpereira/org-calendar-file))
 (setq mpereira/fill-column 80)
 (setq mpereira/fill-column-wide 120)
-#+END_SRC
+#+end_src
 
 * Redefinitions
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; Before:
 ;;   (:foo bar
 ;;         :baz qux)
@@ -444,10 +454,10 @@ fish."
                               flag))))
                        completions)))
                  formatted-completions))))))))
-#+END_SRC
+#+end_src
 
 * Helper functions
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defmacro comment (&rest body)
   "Comment out one or more s-expressions."
   nil)
@@ -601,24 +611,21 @@ fish."
   (indent-region (point-min) (point-max)))
 
 (with-eval-after-load "lispy"
-  (defun mpereira/inside-or-at-the-end-of-string ()
-    (when (lispy--in-string-p)
-      (let* ((p (point))
-             (bounds (lispy--bounds-string)))
-        (and (not (= p (car bounds)))
-             (not (= p (cdr bounds)))))))
-
-  (defun mpereira/maybe-move-to-after-string ()
-    (when-let (bounds (lispyville--in-string-p))
-      (goto-char (car bounds))))
+  (defun mpereira/inside-bounds-dwim ()
+    ;; (when-let (lispy--bounds-dwim)
+    ;;   (when (<)))
+  )
 
   (defun mpereira/backward-sexp-begin (arg)
     "Moves to the beginning of the previous ARG nth sexp."
     (interactive "p")
-    (if (mpereira/inside-or-at-the-end-of-string)
-        (let ((bounds (lispy--bounds-string)))
-          (goto-char (car bounds))
-          (backward-sexp (- arg 1)))
+    (if-let (bounds (lispyville--in-string-p))
+        ;; Go to beginning of string.
+        (goto-char (car bounds))
+      ;; `backward-sexp' will enter list-like sexps when point is on the closing
+      ;; character. So we move one character to the right.
+      (when (looking-at lispy-right)
+        (forward-char 1))
       (backward-sexp arg)))
 
   (defun mpereira/forward-sexp-begin (arg)
@@ -636,24 +643,51 @@ exist in any structured movement package is mind-boggling to me."
           (forward-sexp 1)
           (backward-sexp 1)))))
 
+  ;; Idea: move up to the parent sexp, count the number of sexps inside it with
+  ;; `scan-lists' or `scan-sexps' or `paredit-scan-sexps-hack' to know whether
+  ;; or not we're at the last sexp.
+  (require 'cl-lib)
   (defun mpereira/forward-sexp-end (arg)
     "Moves to the end of the next ARG nth sexp. The fact that this doesn't exist
 in any structured movement package is mind-boggling to me."
     (interactive "p")
-    ;; Prevent moving past the end of a list.
-    (unless (looking-at (concat "." lispy-right))
-      (progn
-        (if-let (bounds (lispyville--in-string-p))
-            ;; Move to point right after string end.
-            (progn
-              (goto-char (cdr bounds))
-              (forward-char 1))
-          (when-let (bounds (lispy--bounds-dwim))
-            ;; Move to point right after symbol or list end.
-            (goto-char (cdr bounds))
-            (forward-char 1)))
-        (forward-sexp 1)
-        (backward-char 1)))))
+    (let ((region-was-active (region-active-p)))
+      ;; If a region is selected, pretend it's not so that `lispy--bounds-dwim'
+      ;; doesn't return the bounds of the region. We want the bounds of the
+      ;; actual thing under the point.
+      (cl-letf (((symbol-function 'region-active-p) #'(lambda () nil)))
+        (when-let (bounds (lispy--bounds-dwim))
+          (let ((end (- (cdr bounds) 1)))
+            (if (< (point) end)
+                ;; Move to the end of the current sexp if not already there.
+                (progn
+                  (goto-char end)
+                  ;; When a region is active we need to move right an extra
+                  ;; character.
+                  (when (and region-was-active)
+                    (forward-char 1)))
+              (progn
+                ;; Move one character to the right in case point is on a list-like
+                ;; closing character so that the subsequent `lispy--bounds-dwim'
+                ;; start is right.
+                (when (looking-at lispy-right)
+                  (forward-char 1))
+                ;; Go to the beginning of the current sexp so that
+                ;; `mpereira/forward-sexp-begin' works.
+                (when-let (bounds (lispy--bounds-dwim))
+                  (goto-char (car bounds)))
+                ;; Move to the beginning of the next sexp.
+                (mpereira/forward-sexp-begin arg)
+                ;; Go to the end of the sexp.
+                (when-let (bounds (lispy--bounds-dwim))
+                  (goto-char (- (cdr bounds) 1))
+                  ;; When a region is active and we're not at the last sexp we
+                  ;; need to move right an extra character.
+                  (when (and region-was-active
+                             ;; TODO
+                             ;; (not last-sexp)
+                             )
+                    (forward-char 1)))))))))))
 
 ;; https://github.com/syl20bnr/spacemacs/blob/
 ;; b7e51d70aa3fb81df2da6dc16d9652a002ba5e6b/layers/%2Bspacemacs/
@@ -923,6 +957,7 @@ lines in the block (excluding the line with
     (aggressive-indent-mode)))
 
 (defun mpereira/lock-screen ()
+  "TODO: docstring."
   (interactive)
   ;; TODO: make file path joining portable.
   (let ((command (concat "/System"
@@ -943,17 +978,19 @@ lines in the block (excluding the line with
   (interactive)
   (let ((return-to-window-configuration
          (lambda ()
-           (when (boundp 'window-configuration-p)
+           (when (and (boundp 'window-configuration-p)
+                      (boundp 'mpereira/saved-window-configuration))
              (set-window-configuration mpereira/saved-window-configuration)
              (goto-char mpereira/saved-point)
-             (setq mpereira/saved-window-configuration nil))
+             (setq mpereira/saved-window-configuration nil)
+             (setq mpereira/saved-point nil))
            (when centered-p
              (olivetti-mode -1)
-             (setq mpereira/saved-point nil))
-           (setq mpereira/saved-centered-p nil))))
+             (setq mpereira/saved-centered-p nil)))))
     (if (= 1 (length (window-list)))
         (progn
-          ;; Centering single buffer.
+          ;; Toggling single buffer centering.
+          ()
           (if olivetti-mode
               (funcall return-to-window-configuration)
             (olivetti-mode 1)))
@@ -965,6 +1002,16 @@ lines in the block (excluding the line with
         (delete-other-windows)
         (when centered-p
           (olivetti-mode 1))))))
+
+;; FIXME: `counsel-symbol-at-point' was removed, so I'm adding a version I found
+;; on the internet here.
+(defun counsel-symbol-at-point ()
+  "Return current symbol at point as a string."
+  (let ((s (thing-at-point 'symbol)))
+    (and (stringp s)
+         (if (string-match "\\`[`']?\\(.*?\\)'?\\'" s)
+             (match-string 1 s)
+           s))))
 
 (defun mpereira/epoch-at-point-to-timestamp ()
   "TODO: docstring"
@@ -1137,13 +1184,63 @@ existing windows. Also restores cursor position on previous window."
       (if (lispy--file-list)
           (funcall 'lispy-goto-local args)
         (funcall 'counsel-imenu)))))
-#+END_SRC
+
+(defun mpereira/file-metadata ()
+  "TODO."
+  (interactive)
+  (let* ((fname (buffer-file-name))
+         (data (file-attributes fname))
+         (access (current-time-string (nth 4 data)))
+         (mod (current-time-string (nth 5 data)))
+         (change (current-time-string (nth 6 data)))
+         (size (nth 7 data))
+         (mode (nth 8 data))
+         (output (format
+                  "%s:
+
+Accessed: %s
+Modified: %s
+Changed:  %s
+Size:     %s bytes
+Mode:     %s"
+                  fname access mod change size mode)))
+    (kill-new output)
+    (message output)
+    output))
+
+(defun mpereira/org-git-log ()
+  "Open the git-org log."
+  (interactive)
+  (let* ((tmpfile (make-temp-file "git-log"))
+         (tmpbuf (find-file-noselect tmpfile))
+         (pwd default-directory)
+         (project (file-name-nondirectory
+                   (directory-file-name (projectile-project-root))))
+         (buf (get-buffer-create (format "*git-log %s*" project)))
+         (cmd (concat (format "cd %s; " pwd)
+                      "git log --date=format:'<%Y-%m-%d %H:%M:%S %a>'"
+                      "  --format='* %s%n"
+                      "  :PROPERTIES:%n"
+                      "  :ID:      %H%n"
+                      "  :AUTHOR:  %an%n"
+                      "  :DATE:    %ad%n"
+                      "  :PARENTS: %P%n"
+                      "  :END:%n%n"
+                      "%b%n'")))
+    (with-current-buffer buf
+      (erase-buffer)
+      (set-buffer-file-coding-system 'unix)
+      (org-mode)
+      (insert (shell-command-to-string cmd)))
+    (pop-to-buffer buf)
+    (goto-char (point-min))))
+#+end_src
 
 * Reload directory local variables when saving .dir-locals.el files
 
 Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defun mpereira/reload-dir-locals-for-current-buffer ()
   "Reload directory local variables on the current buffer."
   (interactive)
@@ -1168,10 +1265,10 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
               'mpereira/reload-dir-locals-for-all-buffer-in-this-directory)))
 
 (add-hook 'emacs-lisp-mode-hook #'mpereira/enable-autoreload-for-dir-locals)
-#+END_SRC
+#+end_src
 
 * Tramp
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (require 'tramp)
 
 ;; Disable version control on tramp buffers to avoid freezes.
@@ -1179,18 +1276,18 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
-#+END_SRC
+#+end_src
 
 * Server
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (require 'server)
 
 (unless (server-running-p)
   (server-start))
-#+END_SRC
+#+end_src
 
 * Options
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; Don't append customizations to init.el.
 (setq custom-file mpereira/custom-file)
 (load custom-file 'noerror)
@@ -1199,6 +1296,21 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (blink-cursor-mode -1)
+
+;; Don't show UI-based dialogs from mouse events.
+(setq use-dialog-box nil)
+
+;; Save session state.
+;; (desktop-save-mode 1)
+;; (setq desktop-restore-frames nil)
+;; 
+;; (defun mpereira/save-desktop ()
+;;   "Write the desktop save file to ~/.emacs.d."
+;;   (desktop-save user-emacs-directory))
+;; 
+;; (if (not (boundp 'mpereira/save-desktop-timer))
+;;     (setq mpereira/save-desktop-timer
+;;           (run-with-idle-timer 600 t 'mpereira/save-desktop)))
 
 ;; Show CRLF characters.
 ;; http://pragmaticemacs.com/emacs/dealing-with-dos-line-endings/
@@ -1212,6 +1324,9 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 
 ;; Start in full-screen.
 (add-hook 'after-init-hook #'toggle-frame-fullscreen)
+
+;; Automatically close brackets, parens, etc.
+(electric-pair-mode 1)
 
 ;; Show matching parens.
 (setq show-paren-delay 0)
@@ -1358,7 +1473,7 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (setq display-time-world-list '(("Europe/Berlin" "Hamburg")
                                 ("America/Sao_Paulo" "São Paulo")
                                 ("America/Los_Angeles" "San Francisco")))
-#+END_SRC
+#+end_src
 
 * Color theme
 Sources:
@@ -1367,18 +1482,28 @@ Sources:
 - http://raebear.net/comp/emacscolors.html
 
 Dark themes I use the most:
-1. =material=
-2. =nimbus=
-3. =doom-Ioskvem=
-4. =doom-dracula=
-5. =srcery=
+1. =modus-vivendi=
+2. =material=
+3. =monokai=
+4. =nimbus=
+5. =doom-Ioskvem=
+6. =doom-dracula=
+7. =srcery=
 
 Light themes I use the most:
-1. =material-light=
-2. =twilight-bright=
-3. =espresso=
+1. =modus-operandi=
+2. =material-light=
+3. =twilight-bright=
+4. =espresso=
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
+(setq custom-safe-themes t) ;; Don't ask whether custom themes are safe.
+
+;; (use-package modus-themes
+;;   :ensure nil
+;;   :quelpa (modus-themes
+;;            :fetcher gitlab
+;;            :repo "protesilaos/modus-themes"))
 (use-package material-theme :defer t)
 (use-package srcery-theme :defer t)
 (use-package nimbus-theme :defer t)
@@ -1386,10 +1511,10 @@ Light themes I use the most:
 (use-package twilight-bright-theme :defer t)
 
 (add-hook 'after-init-hook #'mpereira/load-light-theme t)
-#+END_SRC
+#+end_src
 
 * Configure Mode Line
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (with-eval-after-load "projectile"
   (with-eval-after-load "eshell"
     (with-eval-after-load "magit"
@@ -1483,15 +1608,15 @@ Source: https://git.io/vQKzv"
                                            mpereira/mode-line-buffer-position
                                            mode-line-misc-info
                                            mode-line-end-spaces)))))
-#+END_SRC
+#+end_src
 
 * Configure Header Line
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defun mpereira/set-header-line-format ()
   (setq header-line-format '((which-function-mode ("" which-func-format " ")))))
 
 (add-hook 'prog-mode-hook #'mpereira/set-header-line-format)
-#+END_SRC
+#+end_src
 
 * goto-address-mode
 #+begin_src emacs-lisp :tangle yes
@@ -1527,7 +1652,9 @@ Source: https://git.io/vQKzv"
 #+end_src
 
 * mw-thesaurus
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
+(use-package request)
+
 (use-package mw-thesaurus
   :general (:keymaps '(text-mode-map)
             :states '(normal visual)
@@ -1540,17 +1667,103 @@ Source: https://git.io/vQKzv"
 
   (add-to-list 'display-buffer-alist
                '("* Merriam-Webster Thesaurus *" display-buffer-below-selected)))
-#+END_SRC
+#+end_src
+
+* stackoverflow
+#+begin_src emacs-lisp :tangle yes
+(require 'json)
+
+(defun mpereira/get-stackoverflow-answers (query)
+  "TODO: docstring QUERY."
+  (interactive "sQuestion: ")
+  (let* ((question_ids
+          (with-current-buffer
+              (url-retrieve-synchronously
+               (concat "https://google.com/search?ie=utf-8&oe=utf-8&hl=en&as_qdr=all&q="
+                       (url-hexify-string (concat query " site:stackoverflow.com"))))
+            (let (ids)
+              (while (re-search-forward "https://stackoverflow.com/questions/\\([0-9]+\\)" nil t)
+                (push (match-string-no-properties 1) ids))
+              (setq ids (reverse ids))
+              (if (> (length ids) 5)
+                  (subseq ids 0 5)
+                ids))))
+
+         (url_template (format "https://api.stackexchange.com/2.2/questions/%s%%s?site=stackoverflow.com"
+                               (string-join question_ids ";")))
+
+         (questions (with-current-buffer
+                        (url-retrieve-synchronously
+                         (format url_template ""))
+                      (goto-char (point-min))
+                      (search-forward "\n\n")
+                      (append (assoc-default 'items (json-read)) nil)))
+
+         (answers (with-current-buffer
+                      (url-retrieve-synchronously
+                       (concat (format url_template "/answers")
+                               "&order=desc&sort=activity&filter=withbody"))
+                    (goto-char (point-min))
+                    (search-forward "\n\n")
+                    (sort (append (assoc-default 'items (json-read)) nil)
+                          (lambda (x y)
+                            (> (assoc-default 'score x)
+                               (assoc-default 'score y)))))))
+
+    (switch-to-buffer "*stackexchange*")
+    (erase-buffer)
+
+    (dolist (question_id (mapcar 'string-to-number question_ids))
+      (let ((question (some (lambda (question)
+                              (if (equal (assoc-default 'question_id question)
+                                         question_id)
+                                  question))
+                            questions)))
+        (insert "<hr><h2 style='background-color:paleturquoise'>Question: "
+                (format "<a href='%s'>%s</a>"
+                        (assoc-default 'link question)
+                        (assoc-default 'title question))
+                "</h2>"
+                "\n"
+                (mapconcat
+                 'identity
+                 (let ((rendered
+                        (remove-if
+                         'null
+                         (mapcar (lambda (answer)
+                                   (if (and (equal question_id
+                                                   (assoc-default 'question_id answer))
+                                            (>= (assoc-default 'score answer) 0))
+                                       (concat "<hr><h2 style='background-color:"
+                                               "#c1ffc1'>Answer - score: "
+                                               (number-to-string (assoc-default 'score answer))
+                                               "</h2>"
+                                               (assoc-default 'body answer))))
+                                 answers))))
+                   (if (> (length rendered) 5)
+                       (append (subseq rendered 0 5)
+                               (list (format "<br><br><a href='%s'>%s</a>"
+                                             (assoc-default 'link question)
+                                             "More answers...")))
+                     rendered))
+                 "\n")
+                )))
+    (shr-render-region (point-min) (point-max))
+    (goto-char (point-min))
+    (save-excursion
+      (while (search-forward "^M" nil t)
+        (replace-match "")))))
+#+end_src
 
 * persistent-scratch
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package persistent-scratch
   :config
   (persistent-scratch-autosave-mode))
-#+END_SRC
+#+end_src
 
 * too-long-lines-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package too-long-lines-mode
   :ensure nil
   :quelpa (too-long-lines-mode
@@ -1558,43 +1771,44 @@ Source: https://git.io/vQKzv"
            :repo "rakete/too-long-lines-mode")
   :config
   (too-long-lines-mode))
-#+END_SRC
+#+end_src
 
 * disk-usage
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package disk-usage)
-#+END_SRC
+#+end_src
 
 * rotate
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package rotate)
-#+END_SRC
+#+end_src
 
 * exec-path-from-shell
 This needs to be loaded before code that depends on PATH
 modifications, e.g. ~executable-find~.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package exec-path-from-shell
   :config
-  (dolist (shell-variable '("PYTHONPATH"
-                            "SSH_AUTH_SOCK"
+  (dolist (shell-variable '("SSH_AUTH_SOCK"
                             "SSH_AGENT_PID"))
     (add-to-list 'exec-path-from-shell-variables shell-variable))
   (exec-path-from-shell-initialize))
-#+END_SRC
+
+(exec-path-from-shell-getenv "PATH")
+#+end_src
 
 * with-editor
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package with-editor
   :config
   (add-hook 'eshell-mode-hook 'with-editor-export-editor)
   (add-hook 'term-exec-hook 'with-editor-export-editor)
   (add-hook 'shell-mode-hook 'with-editor-export-editor))
-#+END_SRC
+#+end_src
 
 * evil
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil
   :general
   (:keymaps '(evil-motion-state-map)
@@ -1625,12 +1839,14 @@ modifications, e.g. ~executable-find~.
   :config
   (evil-mode t)
 
+  (evil-ex-define-cmd "bdelete" #'kill-this-buffer)
+
   ;; Don't create a kill entry on every visual movement.
   ;; More details: https://emacs.stackexchange.com/a/15054:
   (fset 'evil-visual-update-x-selection 'ignore))
-#+END_SRC
+#+end_src
 ** evil-org
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-org
   :after evil org
   :config
@@ -1650,13 +1866,15 @@ modifications, e.g. ~executable-find~.
                                         navigation
                                         textobjects
                                         todo)))))
-#+END_SRC
+#+end_src
 ** evil-magit
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-magit
   :after evil magit
   :init
-  (setq evil-magit-use-z-for-folds t)
+  ;; FIXME: disabled this in an effort to see if "zz" works again in magit
+  ;; buffers.
+  (setq evil-magit-use-z-for-folds nil)
   :config
   (general-define-key
    :keymaps 'magit-mode-map
@@ -1667,53 +1885,71 @@ modifications, e.g. ~executable-find~.
    "C-k" 'magit-section-backward)
 
   (general-define-key
-   :states '(normal)
    :keymaps '(git-rebase-mode-map)
+   :states '(normal)
    "x" 'git-rebase-kill-line
    "C-S-j" 'git-rebase-move-line-down
    "C-S-k" 'git-rebase-move-line-up))
-#+END_SRC
+#+end_src
 ** evil-extra-operator
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-extra-operator
   :after evil
   :init
   (setq evil-extra-operator-eval-key "ge")
   :config
   (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
-#+END_SRC
+#+end_src
 ** evil-exchange
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-exchange
   :after evil
   :config
   (evil-exchange-install))
-#+END_SRC
+#+end_src
 ** evil-nerd-commenter
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-nerd-commenter
   :after evil
   :config
   (general-define-key
    :keymaps '(normal)
    "gc" 'evilnc-comment-operator))
-#+END_SRC
+#+end_src
 ** evil-surround
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-surround
   :after evil
   :config
   (global-evil-surround-mode t))
-#+END_SRC
+#+end_src
 ** evil-matchit
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-matchit
   :after evil
   :config
   (global-evil-matchit-mode 1))
-#+END_SRC
+#+end_src
+** evil-lion
+#+begin_src emacs-lisp :tangle yes
+(use-package evil-lion
+  :after evil
+  :config
+  (evil-lion-mode))
+#+end_src
+** evil-string-inflection
+#+begin_src emacs-lisp :tangle yes
+(use-package evil-string-inflection
+  :after evil
+  :config
+  ;; FIXME: doesn't come back to kebab case when cycling from a region.
+  ;; Check out https://github.com/strickinato/evil-briefcase.
+  (general-define-key
+   :states '(normal)
+   "g-" #'evil-operator-string-inflection))
+#+end_src
 ** evil-goggles
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-goggles
   :after evil
   :config
@@ -1724,9 +1960,9 @@ modifications, e.g. ~executable-find~.
   ;; (as defined by the color theme) other faces such as `diff-added` will
   ;; be used for other actions.
   (evil-goggles-use-diff-faces))
-#+END_SRC
+#+end_src
 ** evil-multiedit
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-multiedit
   :after evil
   :config
@@ -1756,31 +1992,62 @@ modifications, e.g. ~executable-find~.
    "RET" 'evil-multiedit-toggle-or-restrict-region
    "C-k" 'evil-multiedit-prev
    "C-j" 'evil-multiedit-next))
-#+END_SRC
+#+end_src
 ** evil-collection
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package evil-collection
   :after evil
   :config
-  (evil-collection-init))
-#+END_SRC
+  (evil-collection-init)
+
+  ;; FIXME: https://github.com/emacs-evil/evil-collection/pull/253.
+  ;; (evil-collection-define-key 'normal 'tablist-mode-map
+  ;;   (kbd "RET") 'tablist-find-entry
+  ;;   "d" 'tablist-flag-forward
+  ;;   "f" 'tablist-find-entry
+  ;;   "D" 'tablist-do-delete
+  ;;   "C" 'tablist-do-copy
+  ;;   "R" 'tablist-do-rename
+  ;;   "x" 'tablist-do-flagged-delete)
+
+  ;; (evil-collection-define-key 'normal 'tablist-minor-mode-map
+  ;;   "<"  'tablist-shrink-column
+  ;;   ">"  'tablist-enlarge-column
+  ;;   "\t" 'tablist-forward-column
+  ;;   "g%" tablist-mode-regexp-map
+  ;;   "g*" tablist-mode-mark-map
+  ;;   "g/" tablist-mode-filter-map
+  ;;   "gr" 'tablist-revert
+  ;;   ;; "k"  'tablist-do-kill-lines
+  ;;   "k"  nil
+  ;;   "m"  'tablist-mark-forward
+  ;;   "m"  'tablist-mark-forward
+  ;;   "q"  'tablist-quit
+  ;;   "s"  'tablist-sort
+  ;;   "t"  'tablist-toggle-marks
+  ;;   "U"  'tablist-unmark-all-marks
+  ;;   "u"  'tablist-unmark-forward
+  ;;   (kbd "TAB") 'tablist-forward-column
+  ;;   [backtab] 'tablist-backward-column)
+  )
+#+end_src
 
 * paradox
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package paradox
   :config
   (paradox-enable))
-#+END_SRC
+#+end_src
 
 * highlight-indent-guide
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package highlight-indent-guides
   :config
   (setq highlight-indent-guides-method 'character))
-#+END_SRC
+#+end_src
 
 * hideshow
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package hideshow
   :config
   (setq hs-isearch-open t)
@@ -1804,17 +2071,43 @@ modifications, e.g. ~executable-find~.
         (hs-show-all))))
 
   (add-hook 'prog-mode-hook #'hs-minor-mode))
-#+END_SRC
+#+end_src
 
 * string-inflection
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package string-inflection)
-#+END_SRC
+#+end_src
+
+* dired
+#+begin_src emacs-lisp :tangle yes
+(setq dired-recursive-copies 'always)
+(setq dired-recursive-deletes 'always)
+(setq dired-isearch-filenames 'dwim)
+(setq delete-by-moving-to-trash t)
+(setq dired-listing-switches "-AFlv --group-directories-first")
+(setq find-ls-option ;; applies to `find-name-dired'
+	    '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
+;;; activate this for case-insensitive names:
+;; (setq find-name-arg "-iname")
+(add-hook 'dired-mode-hook 'dired-hide-details-mode)
+(dired-async-mode 1)
+
+(require 'wdired)
+(setq wdired-allow-to-change-permissions t)
+#+end_src
 
 * xterm-color
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package xterm-color
   :config
+  ;; Subprocesses of Emacs do not have direct access to the terminal, so unless
+  ;; told otherwise they should only assume a dumb terminal. We are careful to
+  ;; do it late (after `term-setup-hook'), although the new multi-tty code does
+  ;; not use $TERM any more there anyway.
+  ;; FIXME: is this needed?
+  ;; (add-hook 'emacs-startup-hook (lambda ()
+  ;;                                 (setenv "TERM" "xterm-256color")))
+
   (setq comint-output-filter-functions (remove 'ansi-color-process-output
                                                comint-output-filter-functions))
 
@@ -1823,11 +2116,54 @@ modifications, e.g. ~executable-find~.
               (add-hook 'comint-preoutput-filter-functions
                         'xterm-color-filter
                         nil
-                        t))))
-#+END_SRC
+                        t)))
+
+  (defun mpereira/handle-progress-message (progress)
+    (setq mode-line-process
+          (if (string-match
+               "Progress: \\[ *\\([0-9]+\\)%\\]" progress)
+              (list
+               (concat ":%s "
+                       (match-string 1 progress)
+                       "%%%% "))
+            '(":%s")))
+    (force-mode-line-update))
+
+  (defun mpereira/handle-progress-bars-on-region (string)
+    "Fix progress bars for e.g. apt(8).
+Display progress in the mode line instead."
+
+    (string-match "\0337.*\0338" "\033720%\0338\033722%\0338")
+
+    (string= ""
+             (replace-regexp-in-string "\\\\0337.*?\\\\0338" "" "\\033720%\\0338\\033722%\\0338"))
+    (+ 2 2)
+
+    (when (string-match comint-password-prompt-regexp string)
+      (when (string-match "\0337.*\0338" string)
+        (setq string (replace-match "" t t string)))
+      (send-invisible string))
+
+
+    (send-invisible (replace-regexp-in-string "\\\\0337.*?\\\\0338" "" string)))
+
+  ;; (advice-add #'xterm-color-filter
+  ;;             :before #'mpereira/handle-progress-bars-on-region)
+  )
+#+end_src
+
+* shell
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'shell-mode-hook 'buffer-disable-undo)
+
+(general-define-key
+ :keymaps '(shell-mode-map)
+ :states '(insert)
+ "C-l" 'comint-clear-buffer)
+#+end_src
 
 * eshell
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (require 'eshell)
 (require 'em-dirs) ;; for `eshell/pwd'.
 (require 'em-smart)
@@ -2062,7 +2398,7 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (setq eshell-history-ring mpereira/eshell-history-global-ring))
 
 (add-hook 'eshell-mode-hook #'mpereira/eshell-hist-use-global-history)
-#+END_SRC
+#+end_src
 
 ** Configure xterm-color
 #+begin_src emacs-lisp :tangle yes
@@ -2079,72 +2415,81 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+end_src
 
 * fish-completion
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package fish-completion
   :after exec-path-from-shell
   :config
   (if (executable-find "fish")
       (global-fish-completion-mode)
     (message "fish executable not found, not enabling fish-completion-mode")))
-#+END_SRC
+#+end_src
 
 * suggest
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package suggest)
-#+END_SRC
+#+end_src
 
 * load-bash-alias
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package load-bash-alias
   :config
   (setq load-bash-alias-bashrc-file "~/.aliases"))
-#+END_SRC
+#+end_src
 
 * bm
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package bm)
-#+END_SRC
+#+end_src
 
 * yasnippet
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package yasnippet)
-#+END_SRC
+#+end_src
 ** yasnippet-snippets
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package yasnippet-snippets
   :after yasnippet)
-#+END_SRC
+#+end_src
 ** auto-yasnippet
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package auto-yasnippet
   :after yasnippet)
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (yas-reload-all)
 (add-hook 'prog-mode-hook #'yas-minor-mode)
-#+END_SRC
+#+end_src
 
 * open-junk-file
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package open-junk-file
   :config
   (setq open-junk-file-directory (concat user-emacs-directory
                                          "junk/%Y/%m/%d/%H%M%S.")))
-#+END_SRC
+#+end_src
 
 * ialign
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ialign)
-#+END_SRC
+#+end_src
 
 * double-saber
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package double-saber)
-#+END_SRC
+#+end_src
+
+* gif-screencast
+#+begin_src emacs-lisp :tangle yes
+(use-package gif-screencast
+  :config
+  (setq gif-screencast-args '("-x"))
+  (setq gif-screencast-cropping-program "mogrify")
+  (setq gif-screencast-capture-format "ppm"))
+#+end_src
 
 * ripgrep
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package rg
   :after double-saber
   ;; Original mappings at:
@@ -2178,15 +2523,15 @@ length of PATH (sans directory slashes) down to MAX-LEN."
             "l" nil)
   :config
   (setq rg-group-result t))
-#+END_SRC
+#+end_src
 
 * ag
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ag)
-#+END_SRC
+#+end_src
 
 * web-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package web-mode
   :config
   (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
@@ -2196,15 +2541,15 @@ length of PATH (sans directory slashes) down to MAX-LEN."
   (setq web-mode-engines-alist '())
 
   (setq web-mode-markup-indent-offset 2))
-#+END_SRC
+#+end_src
 
 * html
 ** auto-rename-tag
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package auto-rename-tag
   :config
   (add-hook 'html-mode-hook #'auto-rename-tag-mode))
-#+END_SRC
+#+end_src
 
 * css
 #+begin_src emacs-lisp :tangle yes
@@ -2212,23 +2557,23 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 #+end_src
 
 ** emacs-colorpicker
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; (use-package colorpicker
 ;;   :ensure nil
 ;;   :quelpa (emacs-colorpicker
 ;;            :fetcher github
 ;;            :repo "syohex/emacs-colorpicker"))
-#+END_SRC
+#+end_src
 
 * olivetti
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package olivetti
   :config
   (setq-default olivetti-body-width 0.5))
-#+END_SRC
+#+end_src
 
 * minibuffer-line
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package minibuffer-line
   :config
   (setq minibuffer-line-format
@@ -2241,10 +2586,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
                           'face 'default)
               time-string)))))
   (minibuffer-line-mode t))
-#+END_SRC
+#+end_src
 
 * buffer-expose
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package buffer-expose
   :config
   (general-define-key
@@ -2261,15 +2606,15 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "]" 'buffer-expose-next-page
    "[" 'buffer-expose-prev-page
    "d" 'buffer-expose-kill-buffer))
-#+END_SRC
+#+end_src
 
 * buffer-move
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package buffer-move)
-#+END_SRC
+#+end_src
 
 * dumb-jump
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package dumb-jump
   :config
   (setq dumb-jump-selector 'ivy)
@@ -2278,19 +2623,19 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    :states '(normal visual)
    "C-]" 'dumb-jump-go
    "C-}" 'dumb-jump-quick-look))
-#+END_SRC
+#+end_src
 
 * beacon
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package beacon
   :config
   (add-to-list 'beacon-dont-blink-major-modes 'eshell-mode)
   (beacon-mode 1)
   (setq beacon-size 40))
-#+END_SRC
+#+end_src
 
 * undo-tree
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (dolist (hook '(undo-tree-mode-hook
                 undo-tree-visualizer-mode-hook))
   (add-hook hook 'mpereira/hide-trailing-whitespace))
@@ -2303,10 +2648,14 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 (setq undo-tree-visualizer-diff t)
 
 (global-undo-tree-mode 1)
-#+END_SRC
+
+(global-undo-tree-mode -1)
+
+;; (remove-hook after-save-hook)
+#+end_src
 
 * company-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package company
   :config
   (setq company-global-modes '(not eshell-mode
@@ -2330,11 +2679,11 @@ length of PATH (sans directory slashes) down to MAX-LEN."
    "C-f" 'company-next-page
    "C-j" 'company-select-next
    "C-k" 'company-select-previous))
-#+END_SRC
+#+end_src
 
 * Flycheck
 ** flycheck
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package flycheck
   :config
   (general-define-key
@@ -2353,10 +2702,17 @@ length of PATH (sans directory slashes) down to MAX-LEN."
 
   (setq flycheck-display-errors-delay 0.3)
 
-  (add-hook 'prog-mode-hook #'flycheck-mode))
-#+END_SRC
+  (add-hook 'prog-mode-hook #'flycheck-mode)
+
+  (defun mpereira/disable-flycheck-in-org-src-block ()
+    "TODO: docstring."
+    (interactive)
+    (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+
+  (add-hook 'org-src-mode-hook #'mpereira/disable-flycheck-in-org-src-block))
+#+end_src
 ** flycheck-inline
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (require 'cus-edit) ;; for `custom-modified' face.
 
 (use-package flycheck-inline
@@ -2367,46 +2723,75 @@ length of PATH (sans directory slashes) down to MAX-LEN."
       (set-face-attribute face nil :box `(:line-width 5 :color ,background))
       (set-face-attribute face nil :background background)))
   (flycheck-inline-mode))
-#+END_SRC
+#+end_src
 ** flycheck-posframe
 Currently disabled because I'm using [[flycheck-inline][flycheck-inline]] instead. It has better
 support for showing full context for errors. flycheck-posframe only shows
 context for the thing currently being hovered.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package flycheck-posframe
   :after flycheck
   :config
   (flycheck-posframe-configure-pretty-defaults)
   ;; (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
   )
-#+END_SRC
+#+end_src
 
 * format-all
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package format-all
   :config
-  (define-format-all-formatter mpereira/sh-formatter
-    (:executable "shfmt")
-    (:install (macos ""))
-    (:modes sh-mode)
-    (:format (format-all--buffer-easy
-              executable
-              "-sr"
-              "-i" "2"
-              "-ln" (cl-case (and (boundp 'sh-shell) (symbol-value 'sh-shell))
-                      (bash "bash")
-                      (mksh "mksh")
-                      (t "posix")))))
+  ;; (define-format-all-formatter mpereira/sh-formatter
+  ;;   (:executable "shfmt")
+  ;;   (:install (macos ""))
+  ;;   (:modes sh-mode)
+  ;;   (:format (format-all--buffer-easy
+  ;;             executable
+  ;;             "-sr"
+  ;;             "-i" "2"
+  ;;             "-ln" (cl-case (and (boundp 'sh-shell) (symbol-value 'sh-shell))
+  ;;                     (bash "bash")
+  ;;                     (mksh "mksh")
+  ;;                     (t "posix")))))
 
-  (define-format-all-formatter mpereira/yaml-formatter
-    (:executable "prettier")
+  ;; (define-format-all-formatter mpereira/yaml-formatter
+  ;;   (:executable "prettier")
+  ;;   (:install (macos ""))
+  ;;   (:modes yaml-mode)
+  ;;   (:format (format-all--buffer-easy executable "--parser" "yaml")))
+
+  (defconst format-all--system-type
+    (cl-case system-type
+      (windows-nt 'windows)
+      (cygwin     'windows)
+      (darwin     'macos)
+      (gnu/linux  'linux)
+      (berkeley-unix
+       (save-match-data
+         (let ((case-fold-search t))
+           (cond ((string-match "freebsd" system-configuration) 'freebsd)
+                 ((string-match "openbsd" system-configuration) 'openbsd)
+                 ((string-match "netbsd"  system-configuration) 'netbsd))))))
+    "Current operating system according to the format-all package.")
+
+  (defun format-all--resolve-system (choices)
+    "Get first choice matching `format-all--system-type' from CHOICES."
+    (cl-dolist (choice choices)
+      (cond ((atom choice)
+             (cl-return choice))
+            ((eql format-all--system-type (car choice))
+             (cl-return (cadr choice))))))
+
+  (define-format-all-formatter mpereira/clang-formatter
+    (:executable "clang-format")
     (:install (macos ""))
-    (:modes yaml-mode)
-    (:format (format-all--buffer-easy executable "--parser" "yaml"))))
-#+END_SRC
+    (:modes java-mode)
+    (:format (format-all--buffer-easy "clang-format" "-style" "chromium")))
+  )
+#+end_src
 
 * Emacs Lisp
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package eros
   :config
   (eros-mode 1))
@@ -2433,18 +2818,18 @@ context for the thing currently being hovered.
  :states '(normal)
  "C-]" 'xref-find-definitions-other-window
  "K" 'helpful-at-point)
-#+END_SRC
+#+end_src
 
 * Java
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (add-hook 'java-mode-hook
           (lambda ()
             (setq-local whitespace-line-column mpereira/fill-column-wide)
             (setq-local fill-column mpereira/fill-column-wide)
             (setq-local comment-column mpereira/fill-column-wide)))
-#+END_SRC
+#+end_src
 ** meghanada
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package meghanada
   :config
   ;; (add-hook 'java-mode-hook
@@ -2453,25 +2838,28 @@ context for the thing currently being hovered.
   ;;             (setq c-basic-offset 4)
   ;;             (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
   )
-#+END_SRC
+#+end_src
 
 * Clojure
 ** clojure-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package clojure-mode)
-#+END_SRC
+#+end_src
 ** clj-refactor
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package clj-refactor
   :config
   (setq cljr-hotload-dependencies t))
-#+END_SRC
+#+end_src
+
+#+RESULTS:
+: t
 ** inf-clojure
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package inf-clojure)
-#+END_SRC
+#+end_src
 ** cider
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package cider
   :config
   (setq cider-prompt-for-symbol nil)
@@ -2511,19 +2899,30 @@ If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
    :states '(visual)
    :prefix mpereira/leader
    "ee" 'cider-eval-region))
-#+END_SRC
+#+end_src
 ** slamhound
 Currently disabled because it's only available via Marmalade.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; (use-package slamhound
 ;;   :after cider)
-#+END_SRC
+#+end_src
+
+* Go
+#+begin_src emacs-lisp :tangle yes
+(general-define-key
+ :keymaps 'go-mode-map
+ :states '(normal)
+ :prefix mpereira/leader
+ "tt" #'go-test-current-test
+ "tT" #'go-test-current-file
+ "pt" #'go-test-current-project)
+#+end_src
 
 * Rust
 ** rust-mode
 Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package rust-mode
   :config
   (general-define-key
@@ -2540,9 +2939,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (with-eval-after-load "lsp-mode"
     ;; (add-hook 'rust-mode-hook #'lsp-rust-enable t)
     ))
-#+END_SRC
+#+end_src
 ** racer
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package racer
   :config
   (general-define-key
@@ -2551,18 +2950,18 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
    "q" 'kill-current-buffer)
 
   (add-hook 'rust-mode-hook #'racer-mode))
-#+END_SRC
+#+end_src
 ** flycheck-rust
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package flycheck-rust
   :after rust-mode
   :config
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
-#+END_SRC
+#+end_src
 ** ob-rust
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ob-rust)
-#+END_SRC
+#+end_src
 
 * Kotlin
 #+begin_src emacs-lisp :tangle yes
@@ -2570,28 +2969,28 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+end_src
 
 ** flycheck-kotlin
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package flycheck-kotlin
   :after kotlin-mode
   :config
   (add-hook 'flycheck-mode-hook #'flycheck-kotlin-setup))
-#+END_SRC
+#+end_src
 
 * Javascript
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (setq js-indent-level 2)
-#+END_SRC
+#+end_src
 
 * Shell script
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (add-hook 'sh-mode-hook
           (lambda ()
             (setq-local sh-basic-offset 2)
             (setq-local sh-indentation 2)))
-#+END_SRC
+#+end_src
 
 * Python
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (with-eval-after-load "elpy"
   (general-define-key
    :keymaps '(python-mode-map)
@@ -2617,15 +3016,28 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
    :prefix mpereira/leader
    :infix "e"
    "e" 'elpy-shell-send-statement
+   "E" 'elpy-shell-send-buffer
    "p" 'elpy-shell-send-group))
+
+(setq python-indent-offset 4)
 
 (add-hook 'python-mode-hook
           (lambda ()
-            (setq evil-shift-width python-indent)))
-#+END_SRC
+            (setq evil-shift-width python-indent-offset)))
+
+(with-eval-after-load 'python
+  (defun python-shell-completion-native-try ()
+    "Return non-nil if can trigger native completion."
+    (let ((python-shell-completion-native-enable t)
+          (python-shell-completion-native-output-timeout
+           python-shell-completion-native-try-output-timeout))
+      (python-shell-completion-native-get-completions
+       (get-buffer-process (current-buffer))
+       nil "_"))))
+#+end_src
 
 ** elpy
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package elpy
   :init
   (setq flycheck-python-flake8-executable "python3")
@@ -2633,17 +3045,22 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (setq flycheck-python-pycompile-executable "python3")
   (setq elpy-rpc-python-command "python3")
   (setq python-shell-interpreter "python3")
-  (setq company-idle-delay-before-elpy-fucks-it-up company-idle-delay)
+
+  ;; https://github.com/jorgenschaefer/elpy/issues/1550#issuecomment-468763310
+  (setq elpy-shell-echo-output nil)
+
   (remove-hook 'elpy-modules 'elpy-module-eldoc)
   (remove-hook 'elpy-modules 'elpy-module-django)
+
+  (setq company-idle-delay-before-elpy-fucks-it-up company-idle-delay)
   (add-hook 'elpy-mode-hook
-            (lambda ()
-              (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up)))
+               (lambda ()
+                 (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up)))
   :config
   (elpy-enable))
-#+END_SRC
+#+end_src
 ** blacken
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package blacken
   :config
   (general-define-key
@@ -2651,21 +3068,23 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
    :states '(normal visual)
    :prefix mpereira/leader
    ;; FIXME: why doesn't this work?
-   "S-f" 'blacken-buffer))
-#+END_SRC
+   "S-f" 'blacken-buffer)
+
+  (setq blacken-line-length 'fill))
+#+end_src
 
 * JSON
 ** json-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package json-mode)
-#+END_SRC
+#+end_src
 ** json-navigator
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package json-navigator)
-#+END_SRC
+#+end_src
 
 * Org mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (setq org-directory (expand-file-name "org" mpereira/dropbox-directory))
 
 (setq org-modules '(org-habit
@@ -2719,7 +3138,8 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 (org-babel-do-load-languages 'org-babel-load-languages
                              '((shell . t)
-                               (emacs-lisp . t)))
+                               (emacs-lisp . t)
+                               (python . t)))
 
 (setq org-confirm-babel-evaluate nil)
 
@@ -2740,7 +3160,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
          "* TODO %i%?")
         ("c" "Calendar" entry
          (file mpereira/org-calendar-file)
-         "* %i%?\n  %^{When?}t")
+         "* %i%?\n  :PROPERTIES:\n  :calendar-id: %(caar mpereira/secret-org-gcal-file-alist)\n  :END:\n:org-gcal:\n%^{When?}t\n:END:")
         ("a" "Appointment" entry
          (file "appointments.org")
          "* %i%?\n  %^{When?}t")
@@ -2939,10 +3359,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
               (widen)
               (org-end-of-subtree t t)
               (org-paste-subtree level tree-text))))))))
-#+END_SRC
+#+end_src
 
 ** Org Clocking
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; org-clock stuff.
 (setq org-clock-idle-time 15)
 (setq org-clock-mode-line-total 'current)
@@ -2965,10 +3385,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (setq org-clock-report-include-clocking-task t)
 ;; Use pretty things for the clocktable.
 (setq org-pretty-entities nil)
-#+END_SRC
+#+end_src
 
 ** org-gcal
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package org-gcal
   :config
   (setq mpereira/org-gcal-directory (expand-file-name "gcal" org-directory))
@@ -2980,10 +3400,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (setq org-gcal-file-alist mpereira/secret-org-gcal-file-alist)
   (setq org-gcal-auto-archive nil)
   (setq org-gcal-notify-p nil))
-#+END_SRC
+#+end_src
 
 ** Org Agenda
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (require 'org-agenda)
 
 (setq org-agenda-files (list org-directory
@@ -3041,22 +3461,22 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                      (org-agenda-skip-function
                       '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))))
             ;; FIXME: not showing non-TODO entries (TIMESTAMP, TIMESTAMP_IA).
-            (tags (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+120d>\""
-                          "|"
-                          "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+120d>\""
-                          "|"
-                          "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+120d>\""
-                          "|"
-                          "TIMESTAMP>=\"<+8d>\"&TIMESTAMP<=\"<+120d>\""
-                          "/!")
-                  ((org-agenda-overriding-header
-                    "\nComing up\n")
-                   (org-agenda-skip-function
-                    '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
-                   (org-agenda-prefix-format
-                    " %-18c %(mpereira/org-agenda-tags-suffix)  ")
-                   (org-agenda-sorting-strategy '(timestamp-up))
-                   (org-agenda-remove-times-when-in-prefix nil)))
+            (search (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+120d>\""
+                            "|"
+                            "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+120d>\""
+                            "|"
+                            "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+120d>\""
+                            "|"
+                            "TIMESTAMP>=\"<+8d>\"&TIMESTAMP<=\"<+120d>\""
+                            "/!")
+                    ((org-agenda-overriding-header
+                      "\nComing up\n")
+                     (org-agenda-skip-function
+                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
+                     (org-agenda-prefix-format
+                      " %-18c %(mpereira/org-agenda-tags-suffix)  ")
+                     (org-agenda-sorting-strategy '(timestamp-up))
+                     (org-agenda-remove-times-when-in-prefix nil)))
             ;; Note: the section below was causing the agenda to
             ;; freeze some times. And I wasn't really using it anyway.
             ;;
@@ -3136,6 +3556,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
          ((org-agenda-block-separator ?\-)))))
 
 ;; Redo agenda after capturing.
+(add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
+
+(defun mpereira/foo ()
+  (interactive))
 (add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
 
 ;; Don't show empty agenda sections.
@@ -3233,17 +3657,17 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  ")" (calendar-action calendar-end-of-month)
  "0" (calendar-action calendar-beginning-of-week)
  "$" (calendar-action calendar-end-of-week))
-#+END_SRC
+#+end_src
 
 ** counsel-org-clock
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package counsel-org-clock
   :config
   (setq counsel-org-clock-default-action 'clock-in))
-#+END_SRC
+#+end_src
 
 ** org-expiry
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (add-to-list 'org-modules 'org-expiry)
 
 (require 'org-expiry)
@@ -3253,98 +3677,101 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (org-expiry-insinuate)
 
 (add-hook 'org-capture-before-finalize-hook 'org-expiry-insert-created)
-#+END_SRC
+#+end_src
 
 ** org-bullets
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package org-bullets
   :after org
   :config
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-#+END_SRC
+#+end_src
 
 ** org-make-toc
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package org-make-toc
   :after org)
-#+END_SRC
+#+end_src
 
 ** htmlize
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package htmlize)
-#+END_SRC
+#+end_src
 
 ** ox-jira
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ox-jira)
-#+END_SRC
+#+end_src
 
 ** ox-confluence
 This package lacks a file header as of [2019-06-23 Sun] and can't be installed
 by Quelpa.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; (use-package ox-confluence
 ;;   :ensure nil
 ;;   :quelpa (ox-confluence
 ;;            :url "https://raw.githubusercontent.com/emacsmirror/org/master/contrib/lisp/ox-confluence.el"
 ;;            :fetcher url))
 ;; 
-#+END_SRC
+#+end_src
 
 ** ox-gfm
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ox-gfm)
-#+END_SRC
+#+end_src
 
 ** ox-slimhtml
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ox-slimhtml)
-#+END_SRC
+#+end_src
 
 ** ox-hugo
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ox-hugo)
-#+END_SRC
+#+end_src
 
 ** ox-pandoc
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ox-pandoc)
-#+END_SRC
+#+end_src
 
 ** ob-async
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ob-async)
-#+END_SRC
+#+end_src
 
 ** org-tree-slide
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package org-tree-slide)
-#+END_SRC
+#+end_src
 
 * Scala
 ** scala-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package scala-mode)
-#+END_SRC
+#+end_src
 
 * Go
 ** go-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package go-mode)
-#+END_SRC
+#+end_src
 
 * SQL
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (require 'sql)
 
 (add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
-#+END_SRC
+#+end_src
 
 * Markdown
 ** markdown-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package markdown-mode
   :config
+  (setq markdown-fontify-code-blocks-natively t)
+  (setq markdown-command "pandoc --from markdown --to html")
+
   (general-define-key
    :keymaps 'markdown-mode-map
    :states '(normal visual)
@@ -3360,17 +3787,17 @@ by Quelpa.
    "j" 'evil-next-visual-line
    "C-k" 'markdown-outline-previous-same-level
    "C-j" 'markdown-outline-next-same-level))
-#+END_SRC
+#+end_src
 
 * TOML
 ** toml-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package toml-mode)
-#+END_SRC
+#+end_src
 
 * YAML
 ** yaml-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package yaml-mode
   :config
   (add-to-list 'auto-mode-alist '("\\.yml(?:\\.j2)?\\'" . yaml-mode))
@@ -3379,26 +3806,26 @@ by Quelpa.
    :keymaps '(yaml-mode-map)
    :states '(insert)
    "RET" 'newline-and-indent))
-#+END_SRC
+#+end_src
 
 * terraform-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package terraform-mode)
-#+END_SRC
+#+end_src
 
 * Docker
 ** docker
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package docker)
-#+END_SRC
+#+end_src
 ** dockerfile-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package dockerfile-mode
   :mode "Dockerfile.*\\'")
-#+END_SRC
+#+end_src
 
 * google-this
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package google-this
   :config
   (google-this-mode 1)
@@ -3412,10 +3839,10 @@ by Quelpa.
    :states '(visual)
    :prefix mpereira/leader
    "fg" 'google-this-region))
-#+END_SRC
+#+end_src
 
 * term
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; 2019-03-01: setting this to bash. Otherwise, org babel shell sessions are
 ;; forced to run fish.
 ;; (setq explicit-shell-file-name "/usr/local/bin/fish")
@@ -3461,55 +3888,64 @@ by Quelpa.
 ;; (ad-activate 'term-sentinel)
 
 (add-hook 'term-mode-hook #'mpereira/hide-trailing-whitespace)
-#+END_SRC
+#+end_src
 ** eterm-256color
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package eterm-256color
   :config
   (add-hook 'term-mode-hook #'eterm-256color-mode))
-#+END_SRC
+#+end_src
 
 * default-text-scale
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package default-text-scale)
-#+END_SRC
+#+end_src
 
 * transpose-frame
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package transpose-frame)
-#+END_SRC
+#+end_src
 
 * move-text
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package move-text)
-#+END_SRC
+#+end_src
 
 * atomic-chrome
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package atomic-chrome
   :config
   (setq atomic-chrome-default-major-mode 'org-mode)
   (atomic-chrome-start-server))
-#+END_SRC
+#+end_src
 
 * expand-region
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package expand-region
   :config
   (general-define-key
    :states '(normal visual)
    "+" 'er/expand-region))
-#+END_SRC
+#+end_src
 
 * rainbow-delimiters
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package rainbow-delimiters
   :config
   (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode))
-#+END_SRC
+#+end_src
+
+* frog-jump-buffer
+#+begin_src emacs-lisp :tangle yes
+(use-package frog-jump-buffer
+  :ensure nil
+  :quelpa (frog-jump-buffer
+           :fetcher github
+           :repo "waymondo/frog-jump-buffer"))
+#+end_src
 
 * org-autonum
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package org-autonum
   :ensure nil
   :quelpa (org-autonum
@@ -3583,10 +4019,10 @@ by Quelpa.
        'tree)
       (dotimes (i (- current-level 1))
         (org-demote-subtree)))))
-#+END_SRC
+#+end_src
 
 * json-snatcher
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package json-snatcher
   :ensure nil
   :quelpa (json-snatcher
@@ -3594,36 +4030,36 @@ by Quelpa.
            :repo "Sterlingg/json-snatcher")
   :config
   (setq jsons-path-printer #'jsons-print-path-jq))
-#+END_SRC
+#+end_src
 
 * osascripts
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package osascripts
   :ensure nil
   :quelpa (osascripts
            :fetcher github
            :repo "leoliu/osascripts"))
-#+END_SRC
+#+end_src
 
 * help-fns+
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package help-fns+
   :ensure nil
   :quelpa (help-fns+
            :fetcher github
            :repo "emacsmirror/help-fns-plus"))
-#+END_SRC
+#+end_src
 
 * hackernews
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package hackernews
   :config
   (add-to-list 'display-buffer-alist
                '("*hackernews top stories*" display-buffer-below-selected)))
-#+END_SRC
+#+end_src
 
 * helpful
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package helpful
   :config
   ;; I had this set to `t' for some reason. What was it?
@@ -3633,56 +4069,56 @@ by Quelpa.
                '("*helpful" display-buffer-below-selected))
   (add-to-list 'display-buffer-alist
                '("*Help*" display-buffer-below-selected)))
-#+END_SRC
+#+end_src
 
 * LSP
 ** lsp-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
   :config
   (with-eval-after-load "lsp-ui"
     (add-hook 'lsp-mode-hook 'lsp-ui-mode)))
-#+END_SRC
+#+end_src
 ** lsp-ui
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package lsp-ui)
-#+END_SRC
+#+end_src
 ** lsp-rust
 Depends on =rls-preview=, =rust-analysis= and =rust-src=. Please check the [[https://github.com/rust-lang-nursery/rls#setup][RLS
 install instructions]] for more details.
 
 Disabled for now. Using [[flycheck-inline]] instead.
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 ;; (use-package lsp-rust
 ;;   :after lsp-mode
 ;;   :init
 ;;   (setq lsp-rust-rls-command '("rustup" "run" "nightly" "rls" "--cli")))
-#+END_SRC
+#+end_src
 
 * eglot
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package eglot)
-#+END_SRC
+#+end_src
 
 * es-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package es-mode
   :config
   (add-to-list 'auto-mode-alist '("\\.es$" . es-mode)))
-#+END_SRC
+#+end_src
 
 * aggressive-indent
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package aggressive-indent
   :config
   (add-to-list 'aggressive-indent-excluded-modes 'sql-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'makefile-bsdmake-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'python-mode)
   (add-hook 'prog-mode-hook #'mpereira/maybe-enable-aggressive-indent-mode))
-#+END_SRC
+#+end_src
 
 * gist
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package gist
   :config
   (general-define-key
@@ -3715,10 +4151,10 @@ Disabled for now. Using [[flycheck-inline]] instead.
    "n" 'evil-search-next
    "N" 'evil-search-previous
    "X" 'gist-kill-current))
-#+END_SRC
+#+end_src
 
 * lispy
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package lispy
   :config
   (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
@@ -3764,10 +4200,10 @@ Disabled for now. Using [[flycheck-inline]] instead.
    "[" 'lispy-wrap-brackets
    "{" 'lispy-wrap-braces
    "c" 'lispy-clone))
-#+END_SRC
+#+end_src
 
 * lispyville
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package lispyville
   :after (evil lispy)
   :config
@@ -3782,8 +4218,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 
   (general-define-key
    :keymaps '(lispyville-mode-map)
-   :states '(normal)
-   "S" 'lispyville-change-whole-line
+   :states '(normal visual)
    "W" 'mpereira/forward-sexp-begin
    "B" 'mpereira/backward-sexp-begin
    "E" 'mpereira/forward-sexp-end
@@ -3792,7 +4227,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
    "C-(" 'lispyville-beginning-of-defun
    "C-)" 'lispyville-end-of-defun
    "{" 'lispy-knight-up
-   "}" 'lispy-knight-down
+   "}" 'lispy-knight-down)
+
+  (general-define-key
+   :keymaps '(lispyville-mode-map)
+   :states '(normal)
+   "S" 'lispyville-change-whole-line
    "gA" 'mpereira/append-to-end-of-list
    "gI" 'mpereira/insert-to-beginning-of-list
    "go" 'lispy-oneline
@@ -3810,17 +4250,17 @@ Disabled for now. Using [[flycheck-inline]] instead.
    ">f" 'lispyville-drag-forward
    "C-9" 'lispy-describe-inline
    "C-0" 'lispy-arglist-inline))
-#+END_SRC
+#+end_src
 
 * which-key
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package which-key
   :config
   (which-key-mode))
-#+END_SRC
+#+end_src
 
 * projectile
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package projectile
   :config
   (projectile-mode t)
@@ -3852,16 +4292,21 @@ Disabled for now. Using [[flycheck-inline]] instead.
    "h" 'mpereira/projectile-eshell
    "H" 'projectile-run-term
    "c" 'projectile-run-async-shell-command-in-root))
-#+END_SRC
+#+end_src
 
 ** term-projectile
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package term-projectile
   :after projectile)
-#+END_SRC
+#+end_src
+** ibuffer-projectile
+#+begin_src emacs-lisp :tangle yes
+(use-package ibuffer-projectile
+  :after projectile)
+#+end_src
 
 * perspective
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package perspective
   :ensure nil
   :quelpa (perspective
@@ -3871,10 +4316,10 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (setq persp-show-modestring nil)
   :config
   (persp-mode t))
-#+END_SRC
+#+end_src
 
 ** persp-projectile
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package persp-projectile
   :after perspective projectile
   :config
@@ -3883,19 +4328,22 @@ Disabled for now. Using [[flycheck-inline]] instead.
    :prefix mpereira/leader
    :infix "p"
    "p" 'persp-switch-last))
-#+END_SRC
+#+end_src
 
 * avy
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package avy
   :config
   (setq avy-all-windows nil))
-#+END_SRC
+#+end_src
 
 * ivy
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ivy
   :general
+  (:keymaps 'ivy-switch-buffer-map
+   "C-k" 'ivy-previous-line) ;; this is bound to `ivy-switch-buffer-kill' by
+                             ;; something.
   (:keymaps 'ivy-minibuffer-map
    "C-j" 'ivy-next-line
    "C-k" 'ivy-previous-line
@@ -3912,9 +4360,10 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (setq ivy-use-selectable-prompt t)
   (setq ivy-height 20)
   (setq ivy-wrap t))
-#+END_SRC
+#+end_src
+
 ** ivy-rich
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ivy-rich
   :after counsel
   :init
@@ -3956,9 +4405,9 @@ Disabled for now. Using [[flycheck-inline]] instead.
             (ivy-rich-file-last-modified-time (:face font-lock-comment-face))))))
   :config
   (ivy-rich-mode 1))
-#+END_SRC
+#+end_src
 ** ivy-posframe
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ivy-posframe
   :after ivy
   :config
@@ -3975,39 +4424,39 @@ Disabled for now. Using [[flycheck-inline]] instead.
   ;; (setq ivy-display-functions-alist
   ;;       '((t . ivy-display-function-fallback)))
 
-  ;; TODO: Disable for now. Width-changing at-point frames are annoying. Has
-  ;; some bugs with fullscreen.
+  ;; FIXME: Disable for now. Width-changing frames are annoying. Has some bugs
+  ;; with fullscreen. There doesn't seem to be a way to have colored borders.
   (ivy-posframe-mode -1))
-#+END_SRC
+#+end_src
 
 * prescient
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package prescient
   :config
   (prescient-persist-mode))
-#+END_SRC
+#+end_src
 ** ivy-prescient
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package ivy-prescient
   :after (ivy prescient)
   :config
   (ivy-prescient-mode))
-#+END_SRC
+#+end_src
 ** company-prescient
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package company-prescient
   :after (company prescient)
   :config
   (company-prescient-mode))
-#+END_SRC
+#+end_src
 
 * swiper
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package swiper)
-#+END_SRC
+#+end_src
 
 * counsel
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package counsel
   :after (ivy swiper)
   :config
@@ -4017,33 +4466,33 @@ Disabled for now. Using [[flycheck-inline]] instead.
 
   (setq counsel-describe-function-function #'helpful-callable
         counsel-describe-variable-function #'helpful-variable))
-#+END_SRC
+#+end_src
 
 * wgrep
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package wgrep
   :config
   (setq wgrep-auto-save-buffer t))
-#+END_SRC
+#+end_src
 
 * command-log-mode
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package command-log-mode
   :config
   (setq command-log-mode-auto-show t)
   (setq command-log-mode-window-size 60))
-#+END_SRC
+#+end_src
 
 * counsel-projectile
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package counsel-projectile
   :after (counsel projectile)
   :config
   (setq projectile-switch-project-action 'counsel-projectile-find-file))
-#+END_SRC
+#+end_src
 
 * neotree
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package neotree
   :after projectile
   :general
@@ -4062,32 +4511,32 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (setq neo-smart-open t)
   (setq neo-window-fixed-size nil)
   (setq neo-window-width 60))
-#+END_SRC
+#+end_src
 
 * all-the-icons
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package all-the-icons)
-#+END_SRC
+#+end_src
 
 * dired-sidebar
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package dired-sidebar
   :commands (dired-sidebar-toggle-sidebar))
-#+END_SRC
+#+end_src
 
 ** all-the-icons-dired
 Run =M-x all-the-icons-install-fonts= after installing.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package all-the-icons-dired
   :after (all-the-icons dired)
   :commands (all-the-icons-dired-mode)
   :config
   (add-hook 'dired-mode-hook #'all-the-icons-dired-mode))
-#+END_SRC
+#+end_src
 
 * diff-hl
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package diff-hl
   :config
   (global-diff-hl-mode t)
@@ -4101,37 +4550,37 @@ Run =M-x all-the-icons-install-fonts= after installing.
   (set-face-background 'diff-hl-change "yellow3")
   (set-face-foreground 'diff-hl-delete "none")
   (set-face-background 'diff-hl-delete "red4"))
-#+END_SRC
+#+end_src
 
 * dimmer
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package dimmer
   :config
   (setq dimmer-fraction 0.5))
-#+END_SRC
+#+end_src
 
 * emojify
 Not enabled globally by default for now.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package emojify)
-#+END_SRC
+#+end_src
 
 * browse-at-remote
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package browse-at-remote
   :config
   ;; Permanent SHA link.
   (setq browse-at-remote-prefer-symbolic nil))
-#+END_SRC
+#+end_src
 
 * git-timemachine
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package git-timemachine)
-#+END_SRC
+#+end_src
 
 * magit
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package magit
   :config
   (add-hook 'with-editor-mode-hook 'evil-insert-state)
@@ -4158,7 +4607,7 @@ Not enabled globally by default for now.
   ;; This makes magit slow when there are a lot of buffers. See:
   ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
-#+END_SRC
+#+end_src
 
 ** forge
 Sometimes I have trouble pulling topics/notifications through forge. I just
@@ -4173,14 +4622,58 @@ instead of credentials.
 I still sometimes see "502 Bad gateway /graphql" errors when trying to pull
 repositories, but it seems like just trying again a few times gets it done.
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package forge
   :after (ghub magit)
   :init
-  (setq ghub-use-workaround-for-emacs-bug nil))
-#+END_SRC
+  (setq ghub-use-workaround-for-emacs-bug nil)
+
+  (general-define-key
+   :keymaps '(forge-post-mode-map
+              forge-topic-mode-map
+              forge-post-section-map
+              forge-issue-section-map
+              forge-issues-section-map
+              forge-pullreq-section-map
+              forge-topic-list-mode-map
+              forge-issue-list-mode-map
+              forge-pullreqs-section-map
+              forge-pullreq-list-mode-map
+              forge-forge-repo-section-map
+              forge-notifications-mode-map
+              forge-topic-state-section-map
+              forge-topic-marks-section-map
+              forge-topic-title-section-map
+              forge-repository-list-mode-map
+              forge-topic-labels-section-map
+              forge-topic-assignees-section-map
+              forge-topic-review-requests-section-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "go" 'forge-browse-dwim)
+
+  (general-define-key
+   :keymaps '(forge-topic-list-mode-map
+              forge-topic-state-section-map
+              forge-topic-marks-section-map
+              forge-topic-title-section-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "go" 'forge-browse-topic)
+
+  (general-define-key
+   :keymaps '(forge-post-mode-map
+              forge-post-section-map
+              forge-topic-list-mode-map
+              forge-topic-state-section-map
+              forge-topic-marks-section-map
+              forge-topic-title-section-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   "go" 'forge-browse-post))
+#+end_src
 ** magit-todos
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package magit-todos
   :ensure nil
   :quelpa (magit-todos
@@ -4189,10 +4682,10 @@ repositories, but it seems like just trying again a few times gets it done.
   :after magit
   :config
   (add-hook 'magit-mode-hook 'magit-todos-mode))
-#+END_SRC
+#+end_src
 
 * Wolfram Alpha
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package wolfram
   :config
   (load-file (expand-file-name "wolfram-secrets.el" user-emacs-directory))
@@ -4205,11 +4698,14 @@ repositories, but it seems like just trying again a few times gets it done.
    :prefix mpereira/leader
    :infix "e"
    "w" 'wolfram-alpha))
-#+END_SRC
+#+end_src
 
 * circe
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package circe
+  :general
+  (:keymaps '(circe-mode-map)
+   "K" 'helpful-at-point)
   :config
   (enable-circe-color-nicks)
 
@@ -4253,10 +4749,10 @@ repositories, but it seems like just trying again a few times gets it done.
                       "#clojure"
                       "##rust"
                       "#haskell")))))
-#+END_SRC
+#+end_src
 
 * mingus
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package mingus
   :config
   (evil-set-initial-state 'mingus-help-mode 'emacs)
@@ -4266,41 +4762,49 @@ repositories, but it seems like just trying again a few times gets it done.
   (dolist (hook '(mingus-browse-hook
                   mingus-playlist-hooks))
     (add-hook hook 'mpereira/hide-trailing-whitespace)))
-#+END_SRC
+#+end_src
 
 * reveal-in-osx-finder
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package reveal-in-osx-finder)
-#+END_SRC
+#+end_src
 
 * symbol-overlay
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package symbol-overlay)
 
 ;; TODO: consider binding "*" to `symbol-overlay-put'?
-#+END_SRC
+#+end_src
 
 * unfill
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package unfill
   :config
   (general-define-key
    :keymaps '(global-map)
    "M-q" 'unfill-toggle))
-#+END_SRC
+#+end_src
 
 * smex
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (use-package smex
   :config
   (smex-initialize)
   (general-define-key
    :keymaps '(global-map)
    "M-X" 'smex-major-mode-commands))
-#+END_SRC
+#+end_src
+
+* org-pomodoro
+#+begin_src emacs-lisp :tangle yes
+(use-package org-pomodoro
+  :config
+  (setq org-pomodoro-format "%s"))
+#+end_src
+
 
 * Mappings
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (general-define-key
  :keymaps '(override) ;; Check out `general-override-mode-map'.
  :states '(normal visual insert)
@@ -4565,7 +5069,16 @@ repositories, but it seems like just trying again a few times gets it done.
  :states '(normal visual)
  :keymaps '(helpful-mode-map deadgrep-mode-map)
  "q" #'mpereira/kill-buffer-and-maybe-window)
-#+END_SRC
+
+(with-eval-after-load "evil-collection"
+  (add-hook 'evil-collection-setup
+            (lambda ()
+              (general-define-key
+               :states '(normal visual)
+               :keymaps '(dired-mode-map)
+               "H" #'evil-window-top
+               "L" #'evil-window-bottom))))
+#+end_src
 
 * Stuff I keep forgetting
 ** org mode file links to search patterns can't start with open parens
@@ -4573,285 +5086,504 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 ** =EXPRESSION= can be used only once per ~org-agenda-prefix-format~
 ** Emulate =C-u= (universal-argument)
 *** For raw prefix arg (interactive "P")
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (let ((current-prefix-arg '(4)))
   (call-interactively 'some-func))
-#+END_SRC
+#+end_src
 *** Otherwise
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (let ((current-prefix-arg 4))
   (call-interactively 'some-func))
-#+END_SRC
+#+end_src
 ** After modifying =PATH=
 Run ~exec-path-from-shell-initialize~ on eshell buffers.
 ** Terminate init.el loading early
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (with-current-buffer " *load*"
   (goto-char (point-max)))
-#+END_SRC
+#+end_src
 ** Change font: =M-x x-select-font=
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (use-package org-super-agenda)
+(use-package org-ql)
+(use-package ts)
 
-(let ((org-super-agenda-groups
-       '((:deadline (before "2018-09-01"))
-         (:discard (:anything t)))))
-  (org-todo-list))
+(defun format-org-element (element)
+  ;; This essentially needs to do what `org-agenda-format-item' does,
+  ;; which is a lot.  We are a long way from that, but it's a start.
+  "Return ELEMENT as a string with text-properties set by its property list.
+Its property list should be the second item in the list, as
+returned by `org-element-parse-buffer'.  If ELEMENT is nil,
+return an empty string."
+  (setq *element* element)
+  (if (not element)
+      ""
+    (let* ((properties (cadr element))
+           ;; Remove the :parent property, which so bloats the size of the
+           ;; properties list that it makes it essentially impossible to debug,
+           ;; because Emacs takes approximately forever to show it in the
+           ;; minibuffer or with `describe-text-properties'. FIXME: Shouldn't be
+           ;; necessary anymore since we're not parsing the whole buffer.
 
-(-let* (((sec minute hour day month year dow dst utcoff) (decode-time))
-        (last-day-of-month (calendar-last-day-of-month month year))
-        (target-date
-         ;; A hack that seems to work fine.  Yay, Postel!
-         (format "%d-%02d-%02d" year month (1+ last-day-of-month)))
-        (org-super-agenda-groups
-         `((:deadline (before ,target-date))
-           (:discard (:anything t)))))
-  (org-todo-list)
+           ;; Also, remove ":" from key symbols. FIXME: It would be better to
+           ;; avoid this somehow. At least, we should use a function to convert
+           ;; plists to alists, if possible.
+           (properties (cl-loop for (key val) on properties by #'cddr
+                                for symbol = (intern (cl-subseq (symbol-name key) 1))
+                                unless (member symbol '(parent))
+                                append (list symbol val)))
+           ;; TODO: --add-faces is used to add the :relative-due-date property,
+           ;; but that fact is hidden by doing it through --add-faces (which calls
+           ;; --add-scheduled-face and --add-deadline-face), and doing it in this
+           ;; form that gets the title hides it even more. Adding the relative due
+           ;; date property should probably be done explicitly and separately
+           ;; (which would also make it easier to do it independently of faces,
+           ;; etc).
+           (title (--> (org-ql-view--add-faces element)
+                       (org-element-property :raw-value it)
+                       (org-link-display-format it)))
+           (todo-keyword (-some--> (org-element-property :todo-keyword element)
+                                   (org-ql-view--add-todo-face it)))
+           ;; FIXME: Figure out whether I should use
+           ;; `org-agenda-use-tag-inheritance' or `org-use-tag-inheritance',
+           ;; etc.
+           (tag-list (if org-use-tag-inheritance
+                         ;; FIXME: Note that tag inheritance cannot be used
+                         ;; here unless markers are added, otherwise we can't
+                         ;; go to the item's buffer to look for inherited tags.
+                         ;; (Or does `org-element-headline-parser' parse
+                         ;; inherited tags too? I forget...)
+                         (if-let ((marker
+                                   (or (org-element-property :org-hd-marker element)
+                                       (org-element-property :org-marker element))))
+                             (with-current-buffer (marker-buffer marker)
+                               ;; I wish `org-get-tags' used the correct buffer
+                               ;; automatically.
+                               (org-get-tags marker (not org-use-tag-inheritance)))
+                           ;; No marker found
+                           (org-element-property :tags element))
+                       (org-element-property :tags element)))
+           (tag-string (when tag-list
+                         (--> tag-list
+                              (s-join ":" it)
+                              (s-wrap it ":")
+                              (org-add-props it nil 'face 'org-tag))))
+           ;;  (category (org-element-property :category element))
+           (priority-string (-some->> (org-element-property :priority element)
+                                      (char-to-string)
+                                      (format "[#%s]")
+                                      (org-ql-view--add-priority-face)))
+           (habit-property (org-with-point-at (org-element-property :begin element)
+                             (when (org-is-habit-p)
+                               (org-habit-parse-todo))))
+           (due-string (pcase (org-element-property :relative-due-date element)
+                         ('nil "foo")
+                         (string
+                          (format
+                           " %s "
+                           (org-add-props string nil 'face 'org-ql-view-due-date)))))
+           (string (s-join " " (-non-nil (list todo-keyword
+                                               priority-string
+                                               title
+                                               due-string
+                                               tag-string)))))
+      (remove-list-of-text-properties 0 (length string) '(line-prefix) string)
+      ;; Add all the necessary properties and faces to the whole string
+      (--> string
+           ;; FIXME: Use proper prefix
+           (concat "  " it)
+           (org-add-props it properties
+             'org-agenda-type 'search
+             'todo-state todo-keyword
+             'tags tag-list
+             'org-habit-p habit-property)))))
 
-  (use-package org-ql
-    :ensure nil
-    :quelpa (org-ql
-             :fetcher github
-             :repo "alphapapa/org-ql")
-    :config
-    (require 'org-habit)
-    (require 'org-ql-agenda))
+(org-element-property :relative-due-date *element*)
 
-  (defun timestamp->time (timestamp)
-    (let* ((year (plist-get timestamp ':year-end))
-           (month (plist-get timestamp ':month-end))
-           (day (plist-get timestamp ':day-end))
-           (hour (plist-get timestamp ':hour-end))
-           (minute (plist-get timestamp ':minute-end))
-           (second 0))
-      (encode-time second minute hour day month year)))
+(defun ts-duration->seconds (duration)
+  (let ((seconds (plist-get duration :seconds))
+        (minutes (plist-get duration :minutes))
+        (hours (plist-get duration :hours))
+        (days (plist-get duration :days))
+        (years (plist-get duration :years)))
+    (+ seconds
+       (* 60 minutes)
+       (* 3600 hours)
+       (* 86400 days)
+       (* 31536000 years))))
 
-  (defun timestamp->date (timestamp)
-    (let* ((year (plist-get timestamp ':year-end))
-           (month (plist-get timestamp ':month-end))
-           (day (plist-get timestamp ':day-end)))
-      (list month day year)))
+(--> (org-element-property :closed *element*)
+     (ts-parse-org-element it)
+     (ts-difference (ts-now) it)
+     (ts-human-duration it)
+     (plist-put it :hours 0)
+     (plist-put it :minutes 0)
+     (plist-put it :seconds 0)
+     (ts-duration->seconds it)
+     (ts-human-format-duration it))
 
-  (defun date->timestamp (date)
-    (let* ((year (calendar-extract-year date))
-           (month (calendar-extract-month date))
-           (day (calendar-extract-day date))
-           (hour 0)
-           (minute 0)
-           (second 0))
-      (list :year-start year
-            :year-end year
-            :month-start month
-            :month-end month
-            :day-start day
-            :day-end day
-            :hour-start hour
-            :hour-end hour
-            :minute-start minute
-            :minute-end minute
-            :second-start second
-            :second-end second)))
+(comment
+ (let ((org-agenda-custom-commands
+        '(("z" "Agenda"
+           ((agenda "" ((org-super-agenda-groups
+                         '((:name ""
+                            :time-grid t
+                            :date today
+                            :scheduled today
+                            :discard (:not today)
+                            :order 1)))
+                        (org-agenda-span 'day)
+                        (org-agenda-overriding-header
+                         (concat
+                          "\nToday "
+                          "(" (format-time-string "%A, %B %d" (current-time)) ")"))
+                        (org-agenda-format-date "")))
+            (agenda "" ((org-super-agenda-groups
+                         '((:name ""
+                            :time-grid t
+                            :discard (:not today)
+                            :order 2)))
+                        (org-agenda-overriding-header "\nNext 7 Days")
+                        (org-agenda-start-day "+1d")
+                        (org-agenda-span 'week)
+                        (org-agenda-start-on-weekday nil)
+                        (org-agenda-prefix-format " %i %-18c%?-12t% s")))
 
-  (defun date->time (date)
-    (let* ((year (calendar-extract-year date))
-           (month (calendar-extract-month date))
-           (day (calendar-extract-day date))
-           (hour 0)
-           (minute 0)
-           (second 0))
-      (encode-time second minute hour day month year)))
+            (search (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+120d>\""
+                            "|"
+                            "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+120d>\""
+                            "|"
+                            "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+120d>\""
+                            "|"
+                            "TIMESTAMP>=\"<+8d>\"&TIMESTAMP<=\"<+120d>\""
+                            "/!")
+                    ((org-agenda-overriding-header
+                      "\nComing up\n")
+                     ;; (org-agenda-prefix-format
+                     ;;  " %-18c %(mpereira/org-agenda-tags-suffix)  ")
+                     (org-agenda-sorting-strategy '(timestamp-up))
+                     (org-agenda-remove-times-when-in-prefix nil))))))))
 
-  (defun time->timestamp (raw-time)
-    (let* ((time (decode-time raw-time))
-           (year (nth 5 time))
-           (month (nth 4 time))
-           (day (nth 3 time))
-           (hour (nth 2 time))
-           (minute (nth 1 time))
-           (second (nth 0 time)))
-      (list :year-start year
-            :year-end year
-            :month-start month
-            :month-end month
-            :day-start day
-            :day-end day
-            :hour-start hour
-            :hour-end hour
-            :minute-start minute
-            :minute-end minute
-            :second-start second
-            :second-end second)))
+   (org-agenda nil "z"))
 
-  (defun time->date (raw-time)
-    (let* ((time (decode-time raw-time))
-           (year (nth 5 time))
-           (month (nth 4 time))
-           (day (nth 3 time)))
-      (list month day year)))
+ (let ((org-super-agenda-groups
+        '((:name "Done last week"
+           :closed :from "last sunday" :to "last saturday")
+          (:name "Done this week"
+           :closed (between "this sunday" "this saturday")))))
+   (org-ql-search (org-agenda-files)
+     '(closed)
+     :sort '(date)))
 
-  (time->date (time-subtract (date->time (calendar-current-date))
-                             (days-to-time 2)))
+ (org-ql-search (org-agenda-files)
+   '(and (todo "TODO")
+         (not (descendants (todo "NEXT"))))
+   :title "Stuck Projects")
 
-  (defun timestamp-in-date-interval-p (date-interval timestamp)
-    (let* ((start-date (nth 0 date-interval))
-           (end-date (nth 1 date-interval)))
-      (<= (calendar-absolute-from-gregorian start-date)
-          (calendar-absolute-from-gregorian (timestamp->date timestamp))
-          (calendar-absolute-from-gregorian end-date))))
+ (org-ql-search (org-agenda-files)
+   '(and (todo)
+         (children)
+         (not (children (todo)))))
 
-  (timestamp-in-date-interval-p (list (calendar-current-date)
-                                      (calendar-current-date))
-                                (time->timestamp (current-time)))
+ (org-ql (org-agenda-files)
+   '(ts :from -7 :to today)
+   :sort (date priority todo))
 
-  (timestamp-at-day-p (time-to-number-of-days (decode-time (current-time))) (time-to-days (decode-time (timestamp->time (time->timestamp (current-time))))))
+ (org-ql (org-agenda-files)
+   '(or (scheduled :from +7 :to +100)
+        (deadline :from +7 :to +100)
+        (ts-active :from +7 :to +100))
+   :sort '(ts))
 
-  (defun timestamp-filter (path start-date end-date entries)
-    (-filter (lambda (x)
-               (let* ((timestamp (get-in path x)))
-                 (when timestamp
-                   (timestamp-in-date-interval-p (list start-date end-date)
-                                                 timestamp))))
-             entries))
+ (org-ql-search (org-agenda-files)
+   '(or (ts-active :from +7 :to +100)
+        (scheduled :from +7 :to +100)
+        (deadline :from +7 :to +100))
+   :sort '(date))
 
-  (defun day-of-week (date)
-    (let ((dow (->> date
-                    (date->time)
-                    (decode-time)
-                    (nth 6))))
-      (if (= dow 0)
-          6
-        (- dow 1))))
+ (let ((org-agenda-custom-commands
+        `(("x"
+           "Someday"
+           ((org-ql-block
+             (org-ql (org-agenda-files) '(or (scheduled :from +7 :to +100)
+                                             (deadline :from +7 :to +100)
+                                             (ts-active :from +7 :to +100)))))))))
+   (org-agenda nil "x"))
 
-  (defun beginning-of-week (date)
-    (let ((day (day-of-week date)))
-      (if (= day 0)
-          date
-        (time->date (time-subtract (date->time date)
-                                   (days-to-time day))))))
+ (let ((org-agenda-custom-commands
+        '(("u" "Super view"
+           ((agenda "" ((org-super-agenda-groups
+                         '((:name "Today"
+                            :date today
+                            :todo ("TODO")
+                            :time-grid t)))))
+            ;; (agenda "" ((org-agenda-span 'week)
+            ;;             (org-agenda-start-day "+1d")
+            ;;             (org-agenda-overriding-header "\nNext 7 Days")
+            ;;             (org-super-agenda-groups
+            ;;              '((:name "Next 7 Days"
+            ;;                 :date "+1d"
+            ;;                 :todo ("TODO")
+            ;;                 :time-grid t)))))
+            ;; (tags "" ((org-agenda-overriding-header "Projects")
+            ;;           (org-super-agenda-groups
+            ;;            '((:name none  ; Disable super group header
+            ;;               :children todo)
+            ;;              (:discard (:anything t))))))
+            )))))
+   (org-agenda-list))
 
-  (defun beginning-of-month (date)
-    (let ((day (calendar-extract-day date)))
-      (if (= day 1)
-          date
-        (time->date (time-subtract (date->time date)
-                                   (days-to-time day))))))
+ (org-ql-search (org-agenda-files)
+   '(ts :from -7 :to today)
+   :title "Recent Items"
+   :sort '(date priority todo)
+   :groups '((:auto-ts t))))
 
-  (defun minus-days (days date)
-    (time->date (time-subtract (date->time date) (days-to-time days))))
+(defun timestamp->time (timestamp)
+  (let* ((year (plist-get timestamp ':year-end))
+         (month (plist-get timestamp ':month-end))
+         (day (plist-get timestamp ':day-end))
+         (hour (plist-get timestamp ':hour-end))
+         (minute (plist-get timestamp ':minute-end))
+         (second 0))
+    (encode-time second minute hour day month year)))
 
-  (defun closed-today (entries)
+(defun timestamp->date (timestamp)
+  (let* ((year (plist-get timestamp ':year-end))
+         (month (plist-get timestamp ':month-end))
+         (day (plist-get timestamp ':day-end)))
+    (list month day year)))
+
+(defun date->timestamp (date)
+  (let* ((year (calendar-extract-year date))
+         (month (calendar-extract-month date))
+         (day (calendar-extract-day date))
+         (hour 0)
+         (minute 0)
+         (second 0))
+    (list :year-start year
+          :year-end year
+          :month-start month
+          :month-end month
+          :day-start day
+          :day-end day
+          :hour-start hour
+          :hour-end hour
+          :minute-start minute
+          :minute-end minute
+          :second-start second
+          :second-end second)))
+
+(defun date->time (date)
+  (let* ((year (calendar-extract-year date))
+         (month (calendar-extract-month date))
+         (day (calendar-extract-day date))
+         (hour 0)
+         (minute 0)
+         (second 0))
+    (encode-time second minute hour day month year)))
+
+(defun time->timestamp (raw-time)
+  (let* ((time (decode-time raw-time))
+         (year (nth 5 time))
+         (month (nth 4 time))
+         (day (nth 3 time))
+         (hour (nth 2 time))
+         (minute (nth 1 time))
+         (second (nth 0 time)))
+    (list :year-start year
+          :year-end year
+          :month-start month
+          :month-end month
+          :day-start day
+          :day-end day
+          :hour-start hour
+          :hour-end hour
+          :minute-start minute
+          :minute-end minute
+          :second-start second
+          :second-end second)))
+
+(defun time->date (raw-time)
+  (let* ((time (decode-time raw-time))
+         (year (nth 5 time))
+         (month (nth 4 time))
+         (day (nth 3 time)))
+    (list month day year)))
+
+(time->date (time-subtract (date->time (calendar-current-date))
+                           (days-to-time 2)))
+
+(defun timestamp-in-date-interval-p (date-interval timestamp)
+  (let* ((start-date (nth 0 date-interval))
+         (end-date (nth 1 date-interval)))
+    (<= (calendar-absolute-from-gregorian start-date)
+        (calendar-absolute-from-gregorian (timestamp->date timestamp))
+        (calendar-absolute-from-gregorian end-date))))
+
+;; (timestamp-in-date-interval-p (list (calendar-current-date)
+;;                                     (calendar-current-date))
+;;                               (time->timestamp (current-time)))
+
+;; (timestamp-at-day-p (time-to-number-of-days (decode-time (current-time))) (time-to-days (decode-time (timestamp->time (time->timestamp (current-time))))))
+
+(defun timestamp-filter (path start-date end-date entries)
+  (-filter (lambda (x)
+             (let* ((timestamp (get-in path x)))
+               (when timestamp
+                 (timestamp-in-date-interval-p (list start-date end-date)
+                                               timestamp))))
+           entries))
+
+(defun day-of-week (date)
+  (let ((dow (->> date
+                  (date->time)
+                  (decode-time)
+                  (nth 6))))
+    (if (= dow 0)
+        6
+      (- dow 1))))
+
+(defun beginning-of-week (date)
+  (let ((day (day-of-week date)))
+    (if (= day 0)
+        date
+      (time->date (time-subtract (date->time date)
+                                 (days-to-time day))))))
+
+(defun beginning-of-month (date)
+  (let ((day (calendar-extract-day date)))
+    (if (= day 1)
+        date
+      (time->date (time-subtract (date->time date)
+                                 (days-to-time day))))))
+
+(defun minus-days (days date)
+  (time->date (time-subtract (date->time date) (days-to-time days))))
+
+(defun closed-today (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (calendar-current-date)
+                    (calendar-current-date)
+                    entries))
+
+(defun closed-yesterday (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (minus-days 2 (calendar-current-date))
+                    (minus-days 1 (calendar-current-date))
+                    entries))
+
+(defun closed-this-week-before-today (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-week (calendar-current-date))
+                    (minus-days 1 (calendar-current-date))
+                    entries))
+
+(defun closed-this-week-before-yesterday (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-week (calendar-current-date))
+                    (minus-days 2 (calendar-current-date))
+                    entries))
+
+(defun closed-last-week (entries)
+  (let ((last-day-of-last-week (minus-days 1 (beginning-of-week (calendar-current-date)))))
     (timestamp-filter '(headline :closed timestamp)
-                      (calendar-current-date)
-                      (calendar-current-date)
-                      entries))
+                      (beginning-of-week last-day-of-last-week)
+                      last-day-of-last-week
+                      entries)))
 
-  (defun closed-yesterday (entries)
-    (timestamp-filter '(headline :closed timestamp)
-                      (minus-days 2 (calendar-current-date))
-                      (minus-days 1 (calendar-current-date))
-                      entries))
+(defun closed-this-month-before-this-week (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-month (calendar-current-date))
+                    (beginning-of-week (calendar-current-date))
+                    entries))
 
-  (defun closed-this-week-before-today (entries)
-    (timestamp-filter '(headline :closed timestamp)
-                      (beginning-of-week (calendar-current-date))
-                      (minus-days 1 (calendar-current-date))
-                      entries))
+(defun closed-this-month (entries)
+  (timestamp-filter '(headline :closed timestamp)
+                    (beginning-of-month (calendar-current-date))
+                    (calendar-current-date)
+                    entries))
 
-  (defun closed-this-week-before-yesterday (entries)
-    (timestamp-filter '(headline :closed timestamp)
-                      (beginning-of-week (calendar-current-date))
-                      (minus-days 2 (calendar-current-date))
-                      entries))
+(ts-now)
 
-  (defun closed-last-week (entries)
-    (let ((last-day-of-last-week (minus-days 1 (beginning-of-week (calendar-current-date)))))
-      (timestamp-filter '(headline :closed timestamp)
-                        (beginning-of-week last-day-of-last-week)
-                        last-day-of-last-week
-                        entries)))
+(defun get-in (ks coll)
+  (if ks
+      (get-in (cdr ks) (let ((k (car ks)))
+                         (cond
+                          ((plist-member coll k) (plist-get coll k))
+                          ((integerp k) (nth k coll)))))
+    coll))
 
-  (defun closed-this-month-before-this-week (entries)
-    (timestamp-filter '(headline :closed timestamp)
-                      (beginning-of-month (calendar-current-date))
-                      (beginning-of-week (calendar-current-date))
-                      entries))
+(comment
+ (timestamp->date '(:type inactive
+                    :raw-value
+                    "[2017-11-03 Fri 15:57]"
+                    :year-start
+                    2017
+                    :month-start
+                    11
+                    :day-start
+                    3
+                    :hour-start
+                    15
+                    :minute-start
+                    57
+                    :year-end
+                    2017
+                    :month-end
+                    11
+                    :day-end
+                    3
+                    :hour-end
+                    15
+                    :minute-end
+                    57
+                    :begin
+                    15861
+                    :end
+                    15884
+                    :post-blank
+                    1))
 
-  (defun closed-this-month (entries)
-    (timestamp-filter '(headline :closed timestamp)
-                      (beginning-of-month (calendar-current-date))
-                      (calendar-current-date)
-                      entries))
 
-  (defun get-in (ks coll)
-    (if ks
-        (get-in (cdr ks) (let ((k (car ks)))
-                           (cond
-                            ((plist-member coll k) (plist-get coll k))
-                            ((integerp k) (nth k coll)))))
-      coll))
+ (let ((inhibit-read-only t))
+   (with-current-buffer (get-buffer-create "*foo*")
+     (erase-buffer)
+     (--> (org-ql (org-agenda-files)
+            (and (done))
+            :sort (date))
+          ;; (closed-today it)
+          ;; (closed-this-week-before-today it)
+          (closed-this-month-before-this-week it)
+          (car it)
+          (org-ql-view--format-element it)
+          ;; (length it)
+          ;; (nth 2 it)
+          (cl-prettyprint it))
+     (pop-to-buffer (current-buffer))))
 
-  (timestamp->date '(:type inactive
-                     :raw-value
-                     "[2017-11-03 Fri 15:57]"
-                     :year-start
-                     2017
-                     :month-start
-                     11
-                     :day-start
-                     3
-                     :hour-start
-                     15
-                     :minute-start
-                     57
-                     :year-end
-                     2017
-                     :month-end
-                     11
-                     :day-end
-                     3
-                     :hour-end
-                     15
-                     :minute-end
-                     57
-                     :begin
-                     15861
-                     :end
-                     15884
-                     :post-blank
-                     1))
-
-  (--> (org-ql (org-agenda-files)
-               (and (done))
-               :sort (date))
-       ;; (closed-today it)
-       ;; (closed-this-week-before-today it)
-       (closed-this-month-before-this-week it)
-       ;; (car it)
-       (length it)
-       ;; (cl-prettyprint it)
-       )
-
-  (funcall (get-in '(0 1 1) '((nil #'closed-today))) '())
-
-  (let ((inhibit-read-only t))
-    (with-current-buffer (get-buffer-create "*org-ql-complex*")
-      (erase-buffer)
-      (--each '(("Done today" #'closed-today)
-                ("Done yesterday" #'closed-yesterday)
-                ("Done this week" #'closed-this-week-before-yesterday)
-                ("Done last week" #'closed-last-week)
-                ("Done this month" #'closed-this-month))
-        (--> (list (car it) (funcall (get-in '(1 1) it)
-                                     (org-ql (org-agenda-files)
-                                             (done)
-                                             :sort (date)
-                                             :markers t)))
-             (list (car it) (--map (concat (org-ql-agenda--format-element it) "\n")
-                                   (nth 1 it)))
-             (insert (concat (car it) "\n" (apply #'concat (nth 1 it))) "\n")))
-      (pop-to-buffer (current-buffer))))
-#+END_SRC
+ (let ((inhibit-read-only t))
+   (with-current-buffer (get-buffer-create "*org-ql-complex*")
+     (erase-buffer)
+     (--each '(("Done today" #'closed-today)
+               ("Done yesterday" #'closed-yesterday)
+               ;; ("Done this week" #'closed-this-week-before-yesterday)
+               ;; ("Done last week" #'closed-last-week)
+               ;; ("Done this month" #'closed-this-month)
+               )
+       (--> (list (car it) (funcall (get-in '(1 1) it)
+                                    (org-ql (org-agenda-files)
+                                      (done)
+                                      :sort (date))))
+            (list (car it) (--map (concat (format-org-element it) "\n")
+                                  (nth 1 it)))
+            (insert (concat (car it)
+                            "\n"
+                            (concat (apply #'concat (nth 1 it))))
+                    "\n")))
+     (pop-to-buffer (current-buffer)))))
+#+end_src
 ** [[https://github.com/d12frosted/elpa-mirror][When melpa.org is down]]
 
 * File-local variables
