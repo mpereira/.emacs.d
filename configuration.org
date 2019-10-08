@@ -4389,7 +4389,11 @@ Disabled for now. Using [[flycheck-inline]] instead.
 ** ibuffer-projectile
 #+begin_src emacs-lisp :tangle yes
 (use-package ibuffer-projectile
-  :after projectile)
+  :after projectile
+  :general (:keymaps 'ibuffer-mode-map
+            :states '(normal)
+            "o" 'ibuffer-toggle-sorting-mode
+            "," nil))
 #+end_src
 
 * perspective
