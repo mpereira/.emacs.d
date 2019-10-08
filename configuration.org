@@ -4635,11 +4635,11 @@ Run =M-x all-the-icons-install-fonts= after installing.
 
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
 
-  (set-face-foreground 'diff-hl-insert "none")
+  (set-face-foreground 'diff-hl-insert "diff-nonexistent")
   (set-face-background 'diff-hl-insert "green4")
-  (set-face-foreground 'diff-hl-change "none")
+  (set-face-foreground 'diff-hl-change "diff-nonexistent")
   (set-face-background 'diff-hl-change "yellow3")
-  (set-face-foreground 'diff-hl-delete "none")
+  (set-face-foreground 'diff-hl-delete "diff-nonexistent")
   (set-face-background 'diff-hl-delete "red4"))
 #+end_src
 
