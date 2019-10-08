@@ -1,4 +1,4 @@
-EMACS_VERSION := 26.2
+EMACS_VERSION := 26.1
 EMACS := /Applications/Emacs-$(EMACS_VERSION).app/Contents/MacOS/Emacs
 
 PROJECT_ROOT := $(shell pwd)
@@ -7,7 +7,11 @@ TEST_HOME := $(TEST_RUNS_DIRECTORY)/$(shell date +%Y%m%d%H%M%S)
 TEST_HOME_EMACSD := $(TEST_HOME)/.emacs.d
 
 CUSTOM_EL := $(PROJECT_ROOT)/custom.el
-OLD_ELPA := $(PROJECT_ROOT)/$(shell date +%Y%m%d%H%M%S)
+
+TEST_ELPA_NAME := elpa-$(shell date +%Y%m%d%H%M%S)
+TEST_ELPA_FROM_TEST_NAME := elpa-from-test-$(shell date +%Y%m%d%H%M%S)
+TEST_ELPA := $(PROJECT_ROOT)/$(TEST_ELPA_NAME)
+TEST_ELPA_FILE := .test-elpa
 
 .DEFAULT_GOAL := test
 
@@ -15,7 +19,7 @@ OLD_ELPA := $(PROJECT_ROOT)/$(shell date +%Y%m%d%H%M%S)
 	clean        \
 	recompile    \
 	rm-custom.el \
-	test-clean   \
+	clean-test   \
 	test-quick
 
 clean-elc:
@@ -23,6 +27,21 @@ clean-elc:
 
 recompile: clean
 	$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0 t)'
+
+# test:
+# 	@echo "git diff:"
+# 	@git diff
+# 	@echo
+# 	@echo $(TEST_ELPA_NAME) > $(TEST_ELPA_FILE)
+# 	@mv elpa $(TEST_ELPA)
+# 	$(EMACS) --debug-init 2>/dev/null
+# 	@mv elpa $(TEST_ELPA_FROM_TEST_NAME)
+# 	@mv $(TEST_ELPA) elpa
+
+# Add condition: if TEST_ELPA_FILE exists and points to a file.
+test-revert-elpa:
+	@mv elpa $(shell cat $(TEST_ELPA_FILE))
+	@mv $(shell cat $(TEST_ELPA_FILE)) elpa
 
 test-quick:
 	@$(EMACS) --debug-init 2>/dev/null
@@ -48,7 +67,7 @@ rm-custom.el:
 custom.el:
 	touch $(CUSTOM_EL)
 
-test-clean:
+clean-test:
 	rm -rf $(TEST_RUNS_DIRECTORY)/*
 
-clean: test-clean rm-custom.el custom.el clean-elc
+clean: clean-test rm-custom.el custom.el clean-elc
