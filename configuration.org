@@ -284,6 +284,7 @@ Evil emacs configuration.
 (setq mpereira/leader ",")
 (setq mpereira/light-theme 'github)
 (setq mpereira/dark-theme 'modus-vivendi)
+(setq mpereira/initial-theme mpereira/dark-theme)
 (setq mpereira/dropbox-directory (file-name-as-directory
                                   (expand-file-name "~/Dropbox")))
 (setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
@@ -1447,7 +1448,10 @@ My favorite light themes:
            :fetcher github
            :repo "SavchenkoValeriy/emacs-chocolate-theme"))
 
-(add-hook 'after-init-hook #'mpereira/load-light-theme t)
+(add-hook 'after-init-hook
+          (lambda ()
+            (mpereira/load-theme mpereira/initial-theme))
+          t)
 #+end_src
 
 * Configure Mode Line
