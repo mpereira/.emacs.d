@@ -132,6 +132,7 @@ Evil emacs configuration.
     -  [[#ox-pandoc][ox-pandoc]]
     -  [[#ob-async][ob-async]]
     -  [[#org-tree-slide][org-tree-slide]]
+    -  [[#org-sidebar][org-sidebar]]
   -  [[#scala][Scala]]
     -  [[#scala-mode][scala-mode]]
   -  [[#go][Go]]
@@ -3778,6 +3779,10 @@ by Quelpa.
 ** org-tree-slide
 #+begin_src emacs-lisp :tangle yes
 (use-package org-tree-slide)
+#+end_src
+** org-sidebar
+#+begin_src emacs-lisp :tangle yes
+(use-package org-sidebar)
 #+end_src
 
 * Scala
