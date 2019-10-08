@@ -5074,10 +5074,10 @@ repositories, but it seems like just trying again a few times gets it done.
  "d" #'magit-diff-buffer-file
  "D" #'magit-diff-unstaged
  "f" #'magit-find-file
- "g" #'counsel-git-grep
+ "g" #'magit-dispatch
  "L" #'magit-log-all
  "l" #'magit-log-buffer-file
- "p" #'magit-push-popup
+ "p" #'magit-push
  "s" #'magit-status
  "t" #'git-timemachine-toggle
  "w" #'magit-stage-file
@@ -5092,6 +5092,7 @@ repositories, but it seems like just trying again a few times gets it done.
  :infix "p"
  "s" #'projectile-persp-switch-project
  "b" #'counsel-projectile-switch-to-buffer
+ "B" #'projectile-ibuffer
  "f" #'counsel-projectile-find-file
  "g" #'rg-project
  "G" #'rg-dwim-project-dir
