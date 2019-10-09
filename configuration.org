@@ -4744,7 +4744,8 @@ repositories, but it seems like just trying again a few times gets it done.
    "go" 'forge-browse-dwim)
 
   (general-define-key
-   :keymaps '(forge-topic-list-mode-map
+   :keymaps '(forge-topic-mode-map
+              forge-topic-list-mode-map
               forge-topic-state-section-map
               forge-topic-marks-section-map
               forge-topic-title-section-map)
