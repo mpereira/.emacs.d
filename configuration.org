@@ -3147,9 +3147,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (general-define-key
    :keymaps '(python-mode-map)
    :states '(normal visual)
-   :prefix mpereira/leader
-   ;; FIXME: why doesn't this work?
-   "S-f" 'blacken-buffer)
+   "F" 'blacken-buffer)
 
   (setq blacken-line-length 'fill))
 #+end_src
