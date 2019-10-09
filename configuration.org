@@ -4917,7 +4917,10 @@ repositories, but it seems like just trying again a few times gets it done.
 #+begin_src emacs-lisp :tangle yes
 (general-define-key
  :keymaps '(override) ;; Check out `general-override-mode-map'.
- :states '(normal visual insert)
+ ;; Adding `nil' to the states makes these keybindings work on buffers where
+ ;; they would usually not work, e.g. the *Messages* buffer or the
+ ;; `undo-tree-visualize' buffer.
+ :states '(normal visual insert nil)
  "M-+" #'default-text-scale-increase
  "M--" #'default-text-scale-decrease
  "M-=" #'default-text-scale-reset
