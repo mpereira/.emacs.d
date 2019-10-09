@@ -2721,10 +2721,6 @@ fish."
 (setq undo-tree-visualizer-diff t)
 
 (global-undo-tree-mode 1)
-
-(global-undo-tree-mode -1)
-
-;; (remove-hook after-save-hook)
 #+end_src
 
 * company-mode
