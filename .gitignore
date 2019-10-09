@@ -13,6 +13,7 @@
 /configuration.el
 /custom.el
 /elpa
+/elpy
 /emojis
 /eshell
 /forge-database.sqlite
