@@ -5093,6 +5093,7 @@ repositories, but it seems like just trying again a few times gets it done.
  "s" #'projectile-persp-switch-project
  "b" #'counsel-projectile-switch-to-buffer
  "B" #'projectile-ibuffer
+ "d" #'projectile-dired
  "f" #'counsel-projectile-find-file
  "g" #'rg-project
  "G" #'rg-dwim-project-dir
