@@ -3075,8 +3075,10 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (general-define-key
    :keymaps '(python-mode-map)
    :states '(normal visual)
-   "C-j" 'python-nav-forward-block
-   "C-k" 'python-nav-backward-block)
+   "C-j" 'elpy-nav-forward-block
+   "C-k" 'elpy-nav-backward-block
+   "S-C-j" 'elpy-nav-move-line-or-region-down
+   "S-C-k" 'elpy-nav-move-line-or-region-up)
 
   (general-define-key
    :keymaps '(python-mode-map)
