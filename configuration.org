@@ -294,6 +294,8 @@ Evil emacs configuration.
                                          mpereira/org-calendar-file))
 (setq mpereira/fill-column 80)
 (setq mpereira/fill-column-wide 120)
+(setq mpereira/eshell-prompt-max-directory-length 50)
+(setq mpereira/mode-line-max-directory-length 15)
 #+end_src
 
 * Redefinitions
@@ -395,29 +397,6 @@ Lisp function does not specify a special indentation."
        ,result-symbol)))
 
 (defalias 'remove-from-list 'object-remove-from-list)
-
-(defun mpereira/shorten-directory (project-root-dir dir max-length)
-  "Show up to MAX-LENGTH characters of a directory name DIR."
-  (let* ((directory-truncation-string (if (char-displayable-p ?…) "…/" ".../"))
-         (project-dir (s-chop-prefix project-root-dir dir))
-         (dir-short (abbreviate-file-name project-dir)))
-    ;; If it fits, return the string.
-    (if (<= (string-width dir-short) max-length) dir-short
-      ;; If it doesn't, shorten it.
-      (let ((path (reverse (split-string dir-short "/")))
-            (output ""))
-        (when (and path (equal "" (car path)))
-          (setq path (cdr path)))
-        (let ((max (- max-length (string-width directory-truncation-string))))
-          ;; Concat as many levels as possible, leaving 4 chars for safety.
-          (while (and path (<= (string-width (concat (car path) "/" output))
-                               max))
-            (setq output (concat (car path) "/" output))
-            (setq path (cdr path))))
-        ;; If we had to shorten, prepend .../
-        (when path
-          (setq output (concat directory-truncation-string output)))
-        output))))
 
 (defun mpereira/hide-trailing-whitespace ()
   (interactive)
@@ -1159,6 +1138,59 @@ Mode:     %s"
   "Remove all advices from symbol SYM."
   (interactive "aFunction symbol: ")
   (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+
+(defun mpereira/buffer-project-directory (project-root-directory
+                                          buffer-directory
+                                          &optional max-length)
+  "Returns a possibly left-truncated relative directory for a project buffer."
+  (let* ((truncation-string (if (char-displayable-p ?…) "…/" ".../"))
+         (relative-directory (s-chop-prefix project-root-directory buffer-directory))
+         (abbreviated-directory (abbreviate-file-name relative-directory))
+         (max-length (or max-length 1.0e+INF)))
+    ;; If it fits, return the string.
+    (if (and max-length
+             (<= (string-width abbreviated-directory) max-length))
+        abbreviated-directory
+      ;; If it doesn't, shorten it.
+      (let ((path (reverse (split-string abbreviated-directory "/")))
+            (output ""))
+        (when (and path (equal "" (car path)))
+          (setq path (cdr path)))
+        (let ((max (- max-length (string-width truncation-string))))
+          ;; Concat as many levels as possible, leaving 4 chars for safety.
+          (while (and path (<= (string-width (concat (car path) "/" output))
+                               max))
+            (setq output (concat (car path) "/" output))
+            (setq path (cdr path))))
+        ;; If we had to shorten, prepend …/.
+        (when path
+          (setq output (concat truncation-string output)))
+        output))))
+
+(defun mpereira/fish-path (directory &optional max-length)
+  "Returns a potentially trimmed-down version of the directory DIRECTORY,
+replacing parent directories with their initial characters to try to get the
+character length of directory (sans directory slashes) down to MAX-LENGTH."
+  (let* ((components (split-string (abbreviate-file-name directory) "/"))
+         (max-length (or max-length 1.0e+INF))
+         (len (+ (1- (length components))
+                 (cl-reduce '+ components :key 'length)))
+         (str ""))
+    (while (and (> len max-length)
+                (cdr components))
+      (setq str (concat str
+                        (cond ((= 0 (length (car components))) "/")
+                              ((= 1 (length (car components)))
+                               (concat (car components) "/"))
+                              (t
+                               (if (string= "."
+                                            (string (elt (car components) 0)))
+                                   (concat (substring (car components) 0 2)
+                                           "/")
+                                 (string (elt (car components) 0) ?/)))))
+            len (- len (1- (length (car components))))
+            components (cdr components)))
+    (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
 #+end_src
 
 * Reload directory local variables when saving .dir-locals.el files
@@ -1459,8 +1491,6 @@ My favorite light themes:
 (with-eval-after-load "projectile"
   (with-eval-after-load "eshell"
     (with-eval-after-load "magit"
-      (setq mpereira/mode-line-max-directory-length 20)
-
       (defconst mpereira/mode-line-projectile
         '(:eval
           (let ((face 'bold))
@@ -1473,11 +1503,12 @@ My favorite light themes:
       (defconst mpereira/mode-line-vc
         '(:eval
           (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
-            (let ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
-                  (face 'magit-mode-line-process))
+            (let* ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
+                   (truncated-branch (s-truncate 20 branch "…"))
+                   (face 'magit-mode-line-process))
               (concat
                (propertize " " 'face face)
-               (propertize (format "%s" branch) 'face face)
+               (propertize (format "%s" truncated-branch) 'face face)
                (propertize " " 'face face))))))
 
       (defconst mpereira/mode-line-buffer
@@ -1495,9 +1526,10 @@ My favorite light themes:
                 (buffer-name-face 'bold)
                 (modified-or-ro-symbol-face 'font-lock-comment-face)
                 (directory (if (projectile-project-p)
-                               (mpereira/shorten-directory
-                                (projectile-project-root)
-                                default-directory
+                               (mpereira/fish-path
+                                (mpereira/buffer-project-directory
+                                 (projectile-project-root)
+                                 default-directory)
                                 mpereira/mode-line-max-directory-length)
                              "")))
             (concat
@@ -1537,9 +1569,8 @@ Source: https://git.io/vQKzv"
                                      (info . "#83A598"))
                       as lighter = (mpereira/flycheck-lighter (car state))
                       when lighter
-                      concat (propertize
-                              lighter
-                              'face `(:foreground ,(cdr state))))
+                      concat (propertize lighter 'face `(:foreground
+                                                         ,(cdr state))))
              " "))))
 
       (setq-default mode-line-format (list mpereira/mode-line-projectile
@@ -2277,32 +2308,6 @@ Display progress in the mode line instead."
       (tramp-file-name-real-host (tramp-dissect-file-name default-directory))
     (tramp-file-name-host (tramp-dissect-file-name default-directory))))
 
-;; https://www.emacswiki.org/emacs/EshellPrompt
-(defun mpereira/fish-path (path)
-  "Return a potentially trimmed-down version of the directory PATH, replacing
-parent directories with their initial characters to try to get the character
-length of PATH (sans directory slashes) down to MAX-LEN."
-  (let* ((components (split-string (abbreviate-file-name path) "/"))
-         (max-len 30)
-         (len (+ (1- (length components))
-                 (cl-reduce '+ components :key 'length)))
-         (str ""))
-    (while (and (> len max-len)
-                (cdr components))
-      (setq str (concat str
-                        (cond ((= 0 (length (car components))) "/")
-                              ((= 1 (length (car components)))
-                               (concat (car components) "/"))
-                              (t
-                               (if (string= "."
-                                            (string (elt (car components) 0)))
-                                   (concat (substring (car components) 0 2)
-                                           "/")
-                                 (string (elt (car components) 0) ?/)))))
-            len (- len (1- (length (car components))))
-            components (cdr components)))
-    (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
-
 (defun mpereira/eshell-prompt ()
   (let ((user-name (if (mpereira/remote-p)
                        (mpereira/remote-user)
@@ -2319,7 +2324,10 @@ length of PATH (sans directory slashes) down to MAX-LEN."
      " "
      (propertize "in" 'face 'eshell-ls-unreadable)
      " "
-     (propertize (mpereira/fish-path (eshell/pwd)) 'face 'dired-directory)
+     (propertize (mpereira/fish-path
+                  (eshell/pwd)
+                  mpereira/eshell-prompt-max-directory-length)
+                 'face 'dired-directory)
      "\n"
      (propertize (if (= (user-uid) 0)
                      "#"
