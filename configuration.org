@@ -1191,6 +1191,12 @@ character length of directory (sans directory slashes) down to MAX-LENGTH."
             len (- len (1- (length (car components))))
             components (cdr components)))
     (concat str (cl-reduce (lambda (a b) (concat a "/" b)) components))))
+
+(defun mpereira/elpy-shell-clear-shell ()
+  "Clear the current shell buffer."
+  (interactive)
+  (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
+    (comint-clear-buffer)))
 #+end_src
 
 * Reload directory local variables when saving .dir-locals.el files
@@ -3061,6 +3067,11 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 * Python
 #+begin_src emacs-lisp :tangle yes
 (with-eval-after-load "elpy"
+  (general-define-key
+   :keymaps '(inferior-python-mode-map)
+   :states '(insert)
+   "C-l" 'mpereira/elpy-shell-clear-shell)
+
   (general-define-key
    :keymaps '(python-mode-map)
    :states '(normal visual)
