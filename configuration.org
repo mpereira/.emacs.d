@@ -4276,6 +4276,11 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (setcdr (assq 'lispy-mode minor-mode-map-alist)
           lispy-mode-map)
 
+  ;; `lispy-fill' doesn't handle filling comments really well. Override it.
+  (general-define-key
+   :keymaps 'lispy-mode-map
+   "M-q" 'unfill-toggle)
+
   (general-define-key
    :keymaps 'lispy-mode-map
    :states '(insert)
