@@ -1531,7 +1531,8 @@ My favorite light themes:
                 (directory-face 'italic)
                 (buffer-name-face 'bold)
                 (modified-or-ro-symbol-face 'font-lock-comment-face)
-                (directory (if (projectile-project-p)
+                (directory (if (and buffer-file-name
+                                    (projectile-project-p))
                                (mpereira/fish-path
                                 (mpereira/buffer-project-directory
                                  (projectile-project-root)
