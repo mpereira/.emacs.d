@@ -101,6 +101,7 @@ Evil emacs configuration.
     -  [[#cider][cider]]
     -  [[#slamhound][slamhound]]
   -  [[#go][Go]]
+    -  [[#go-mode][go-mode]]
   -  [[#rust][Rust]]
     -  [[#rust-mode][rust-mode]]
     -  [[#racer][racer]]
@@ -136,8 +137,6 @@ Evil emacs configuration.
     -  [[#org-sidebar][org-sidebar]]
   -  [[#scala][Scala]]
     -  [[#scala-mode][scala-mode]]
-  -  [[#go][Go]]
-    -  [[#go-mode][go-mode]]
   -  [[#sql][SQL]]
   -  [[#markdown][Markdown]]
     -  [[#markdown-mode][markdown-mode]]
@@ -2985,14 +2984,17 @@ Currently disabled because it's only available via Marmalade.
 #+end_src
 
 * Go
+** go-mode
 #+begin_src emacs-lisp :tangle yes
-(general-define-key
- :keymaps 'go-mode-map
- :states '(normal)
- :prefix mpereira/leader
- "tt" #'go-test-current-test
- "tT" #'go-test-current-file
- "pt" #'go-test-current-project)
+(use-package go-mode
+  :config
+  (general-define-key
+   :keymaps 'go-mode-map
+   :states '(normal)
+   :prefix mpereira/leader
+   "tt" #'go-test-current-test
+   "tT" #'go-test-current-file
+   "pt" #'go-test-current-project))
 #+end_src
 
 * Rust
@@ -3852,12 +3854,6 @@ by Quelpa.
 ** scala-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package scala-mode)
-#+end_src
-
-* Go
-** go-mode
-#+begin_src emacs-lisp :tangle yes
-(use-package go-mode)
 #+end_src
 
 * SQL
