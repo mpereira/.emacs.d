@@ -4677,9 +4677,23 @@ Not enabled globally by default for now.
 * browse-at-remote
 #+begin_src emacs-lisp :tangle yes
 (use-package browse-at-remote
+  :ensure nil
+  ;; FIXME: revert to official Melpa package when my PR gets merged:
+  ;; https://github.com/rmuslimov/browse-at-remote/pull/59
+  :quelpa (browse-at-remote
+           :fetcher github
+           :repo "mpereira/browse-at-remote"
+           :branch "patch-1")
   :config
   ;; Permanent SHA link.
-  (setq browse-at-remote-prefer-symbolic nil))
+  (setq browse-at-remote-prefer-symbolic nil)
+
+  (defun mpereira/browse-at-remote ()
+    "TODO: docstring."
+    (interactive)
+    (let ((url (browse-at-remote-get-url)))
+      (kill-new url)
+      (browse-url url))))
 #+end_src
 
 * git-timemachine
@@ -5032,7 +5046,7 @@ repositories, but it seems like just trying again a few times gets it done.
  "=" #'quick-calc
  "B" #'mpereira/bm-counsel-find-bookmark
  "b" #'switch-to-buffer
- "go" 'browse-at-remote
+ "go" 'mpereira/browse-at-remote
  "gr" 'diff-hl-revert-hunk
  "hs" #'mpereira/split-window-below-and-switch
  "hs" #'mpereira/split-window-below-and-switch
