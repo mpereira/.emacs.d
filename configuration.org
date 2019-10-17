@@ -5132,9 +5132,7 @@ repositories, but it seems like just trying again a few times gets it done.
  "f" #'counsel-projectile-find-file
  "g" #'rg-project
  "G" #'rg-dwim-project-dir
- ;; dired-sidebar still a bit quirky. Let's keep using neotree for now.
- ;; "t" #'dired-sidebar-toggle-sidebar
- "t" #'mpereira/neotree-project-dir)
+ "t" #'dired-sidebar-toggle-sidebar)
 
 ;; t -> toggle ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
