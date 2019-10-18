@@ -2991,6 +2991,12 @@ Currently disabled because it's only available via Marmalade.
   (general-define-key
    :keymaps 'go-mode-map
    :states '(normal)
+   "K" #'godoc-at-point
+   "C-]" #'godef-jump)
+
+  (general-define-key
+   :keymaps 'go-mode-map
+   :states '(normal)
    :prefix mpereira/leader
    "tt" #'go-test-current-test
    "tT" #'go-test-current-file
