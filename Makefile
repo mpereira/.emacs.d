@@ -1,4 +1,4 @@
-EMACS_VERSION := 26.1
+EMACS_VERSION := 26.3
 EMACS := /Applications/Emacs-$(EMACS_VERSION).app/Contents/MacOS/Emacs
 
 PROJECT_ROOT := $(shell pwd)
