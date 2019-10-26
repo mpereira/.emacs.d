@@ -49,6 +49,7 @@ Evil emacs configuration.
     -  [[#evil-string-inflection][evil-string-inflection]]
     -  [[#evil-goggles][evil-goggles]]
     -  [[#evil-multiedit][evil-multiedit]]
+    -  [[#evil-owl][evil-owl]]
     -  [[#evil-collection][evil-collection]]
   -  [[#paradox][paradox]]
   -  [[#highlight-indent-guide][highlight-indent-guide]]
@@ -1990,6 +1991,13 @@ modifications, e.g. ~executable-find~.
    "RET" 'evil-multiedit-toggle-or-restrict-region
    "C-k" 'evil-multiedit-prev
    "C-j" 'evil-multiedit-next))
+#+end_src
+** evil-owl
+#+begin_src emacs-lisp :tangle yes
+(use-package evil-owl
+  :after evil
+  :config
+  (evil-owl-mode))
 #+end_src
 ** evil-collection
 #+begin_src emacs-lisp :tangle yes
