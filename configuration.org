@@ -4489,9 +4489,6 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :config
   (ivy-mode t)
 
-  ;; Some commands set their ivy initial input as a caret. I don't want that.
-  (setq ivy-initial-inputs-alist nil)
-
   (setq ivy-use-selectable-prompt t)
   (setq ivy-height 20)
   (setq ivy-wrap t))
@@ -4599,8 +4596,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
 
   (setq counsel-find-file-ignore-regexp "/vendor/")
 
-  (setq counsel-describe-function-function #'helpful-callable
-        counsel-describe-variable-function #'helpful-variable))
+  ;; Counsel sets the ivy initial input as a caret for some of its functions. I
+  ;; don't want that.
+  (setq ivy-initial-inputs-alist nil)
+
+  (setq counsel-describe-function-function #'helpful-callable)
+  (setq counsel-describe-variable-function #'helpful-variable))
 #+end_src
 
 * wgrep
