@@ -4489,6 +4489,9 @@ Disabled for now. Using [[flycheck-inline]] instead.
   :config
   (ivy-mode t)
 
+  ;; Some commands set their ivy initial input as a caret. I don't want that.
+  (setq ivy-initial-inputs-alist nil)
+
   (setq ivy-use-selectable-prompt t)
   (setq ivy-height 20)
   (setq ivy-wrap t))
