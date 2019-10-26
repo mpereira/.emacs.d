@@ -127,6 +127,7 @@ Evil emacs configuration.
     -  [[#org-bullets][org-bullets]]
     -  [[#org-make-toc][org-make-toc]]
     -  [[#htmlize][htmlize]]
+    -  [[#grip-mode][grip-mode]]
     -  [[#ox-jira][ox-jira]]
     -  [[#ox-confluence][ox-confluence]]
     -  [[#ox-gfm][ox-gfm]]
@@ -3811,6 +3812,11 @@ region active."
 ** htmlize
 #+begin_src emacs-lisp :tangle yes
 (use-package htmlize)
+#+end_src
+
+** grip-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package grip-mode)
 #+end_src
 
 ** ox-jira
