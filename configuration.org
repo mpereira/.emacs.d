@@ -2043,7 +2043,11 @@ modifications, e.g. ~executable-find~.
 #+begin_src emacs-lisp :tangle yes
 (use-package paradox
   :config
-  (paradox-enable))
+  (paradox-enable)
+
+  ;; Disable annoying "do you want to set up GitHub integration" prompt.
+  ;; https://github.com/Malabarba/paradox/issues/23
+  (setq paradox-github-token t))
 #+end_src
 
 * highlight-indent-guide
