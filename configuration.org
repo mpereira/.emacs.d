@@ -176,6 +176,7 @@ Evil emacs configuration.
   -  [[#gist][gist]]
   -  [[#lispy][lispy]]
   -  [[#lispyville][lispyville]]
+  -  [[#discover-my-major][discover-my-major]]
   -  [[#which-key][which-key]]
   -  [[#projectile][projectile]]
     -  [[#term-projectile][term-projectile]]
@@ -4380,6 +4381,11 @@ Disabled for now. Using [[flycheck-inline]] instead.
    "C-0" 'lispy-arglist-inline))
 #+end_src
 
+* discover-my-major
+#+begin_src emacs-lisp :tangle yes
+(use-package discover-my-major)
+#+end_src
+
 * which-key
 #+begin_src emacs-lisp :tangle yes
 (use-package which-key
@@ -5070,7 +5076,7 @@ repositories, but it seems like just trying again a few times gets it done.
  "." #'ivy-resume
  "/" #'swiper
  "<backtab>" #'counsel-descbinds
- "<tab>" #'which-key-show-major-mode
+ "<tab>" #'discover-my-major
  "=" #'quick-calc
  "B" #'mpereira/bm-counsel-find-bookmark
  "b" #'switch-to-buffer
