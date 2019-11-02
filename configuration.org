@@ -37,6 +37,7 @@ Evil emacs configuration.
   -  [[#rotate][rotate]]
   -  [[#exec-path-from-shell][exec-path-from-shell]]
   -  [[#with-editor][with-editor]]
+  -  [[#electric-pair-mode][electric-pair-mode]]
   -  [[#evil][evil]]
     -  [[#evil-org][evil-org]]
     -  [[#evil-magit][evil-magit]]
@@ -1290,9 +1291,6 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 ;; Start in full-screen.
 (add-hook 'after-init-hook #'toggle-frame-fullscreen)
 
-;; Automatically close brackets, parens, etc.
-(electric-pair-mode 1)
-
 ;; Show matching parens.
 (setq show-paren-delay 0)
 (show-paren-mode 1)
@@ -1806,6 +1804,24 @@ modifications, e.g. ~executable-find~.
   (add-hook 'eshell-mode-hook 'with-editor-export-editor)
   (add-hook 'term-exec-hook 'with-editor-export-editor)
   (add-hook 'shell-mode-hook 'with-editor-export-editor))
+#+end_src
+
+* electric-pair-mode
+Automatically close brackets, parens, etc. Bundled with Emacs.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package electric-pair-mode
+  :config
+  (electric-pair-mode 1)
+
+  ;; Don't auto close brackets in org mode so that it doesn't conflict the `<s'
+  ;; expansion snippet provided by `org-tempo'.
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (setq-local electric-pair-inhibit-predicate
+                          `(lambda (c)
+                             (if (char-equal c ?<)
+                                 t (,electric-pair-inhibit-predicate c)))))))
 #+end_src
 
 * evil
