@@ -1810,7 +1810,7 @@ modifications, e.g. ~executable-find~.
 Automatically close brackets, parens, etc. Bundled with Emacs.
 
 #+begin_src emacs-lisp :tangle yes
-(use-package electric-pair-mode
+(use-package elec-pair
   :config
   (electric-pair-mode 1)
 
