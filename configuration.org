@@ -1419,9 +1419,11 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
       apropos-do-all t
       mouse-yank-at-point t
       require-final-newline t
-      load-prefer-newer t
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
+
+;; Workaround for "recursive load jka-compr.el.gz" issue.
+(setq load-prefer-newer nil)
 
 ;; Keep cursor position when scrolling.
 (setq scroll-preserve-screen-position 1)
