@@ -3231,11 +3231,13 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 (setq org-modules '(org-habit
                     org-info
+                    org-protocol
                     org-tempo))
 ;; Requiring these modules because org mode only does that for `org-modules'
 ;; when it's defined prior to loading it.
 (require 'org-habit)
 (require 'org-info)
+(require 'org-protocol)
 (require 'org-tempo)
 
 (setq org-log-done 'time)
