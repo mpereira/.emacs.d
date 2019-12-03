@@ -1,7 +1,6 @@
 * mpereira's emacs configuration
 :PROPERTIES:
 :TOC:      ignore
-:header-args:emacs-lisp: :results silent :exports both
 :END:
 
 Evil emacs configuration.
@@ -11,6 +10,7 @@ Evil emacs configuration.
 :TOC:      this
 :END:
   -  [[#dependencies][Dependencies]]
+  -  [[#silent-exports-for-emacs-lisp-org-babel-code-blocks][Silent exports for emacs lisp org babel code blocks]]
   -  [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
   -  [[#s][s]]
   -  [[#dash][dash]]
@@ -245,6 +245,21 @@ Evil emacs configuration.
   - =mpereira/secret-org-gcal-file-alist=
 - =~/.emacs.d/wolfram-secrets.el=
   - =mpereira/secret-wolfram-alpha-app-id=
+
+* Silent exports for emacs lisp org babel code blocks
+Having this as an org file property doesn't seem to work for some reason.
+
+#+begin_src emacs-lisp
+:PROPERTIES:
+:header-args: :results output silent :exports both
+:END:
+#+end_src
+
+Set it with emacs lisp.
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-babel-default-header-args:emacs-lisp '((:results . "output silent")))
+#+end_src
 
 * quelpa and quelpa-use-package
 #+begin_src emacs-lisp :tangle yes
