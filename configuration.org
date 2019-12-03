@@ -3709,6 +3709,10 @@ region active."
 ;; Don't show empty agenda sections.
 (add-hook 'org-agenda-finalize-hook #'mpereira/org-agenda-delete-empty-blocks)
 
+;; Disable `evil-lion-mode' so that "g" keeps the mapping to
+;; `org-agenda-maybe-redo'.
+(add-hook 'org-agenda-finalize-hook (lambda () (evil-lion-mode -1)))
+
 (defun mpereira/org-gcal-entry-at-point-p ()
   (when-let ((link (org-entry-get (point) "LINK")))
     (string-match "Go to gcal web page" link)))
