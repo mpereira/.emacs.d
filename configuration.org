@@ -4087,7 +4087,8 @@ by Quelpa.
 #+begin_src emacs-lisp :tangle yes
 (use-package atomic-chrome
   :config
-  (setq atomic-chrome-default-major-mode 'org-mode)
+  (setq atomic-chrome-url-major-mode-alist
+        '(("github\\.com" . gfm-mode)))
   (atomic-chrome-start-server))
 #+end_src
 
