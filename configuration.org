@@ -1437,7 +1437,8 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
       save-place-file (concat user-emacs-directory "places")
       backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
 
-;; Workaround for "recursive load jka-compr.el.gz" issue.
+;; Setting this to nil to prevent "recursive load jka-compr.el.gz" issue.
+;; See: https://github.com/bbatsov/prelude/issues/1134
 (setq load-prefer-newer nil)
 
 ;; Keep cursor position when scrolling.
