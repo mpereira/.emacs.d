@@ -4089,7 +4089,14 @@ by Quelpa.
   :config
   (setq atomic-chrome-url-major-mode-alist
         '(("github\\.com" . gfm-mode)))
-  (atomic-chrome-start-server))
+
+  (atomic-chrome-start-server)
+
+  (defun mpereira/prevent-buffer-kill ()
+    (interactive)
+    (emacs-lock-mode 'kill))
+
+  (add-hook 'atomic-chrome-edit-mode-hook #'mpereira/prevent-buffer-kill))
 #+end_src
 
 * expand-region
