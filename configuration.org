@@ -1811,8 +1811,6 @@ modifications, e.g. ~executable-find~.
                             "SSH_AGENT_PID"))
     (add-to-list 'exec-path-from-shell-variables shell-variable))
   (exec-path-from-shell-initialize))
-
-(exec-path-from-shell-getenv "PATH")
 #+end_src
 
 * with-editor
