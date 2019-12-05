@@ -4605,22 +4605,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 (use-package ivy-posframe
   :after ivy
   :config
-  ;; Override `ivy-display-functions-alist' to have all ivy completions be shown
-  ;; at point with a few exceptions.
-  ;; (setq ivy-display-functions-alist
-  ;;       '((magit-push-current-to-upstream . ivy-display-function-fallback)
-  ;;         (magit-reset-soft . ivy-display-function-fallback)
-  ;;         (magit-reset-hard . ivy-display-function-fallback)
-  ;;         (magit-checkout . ivy-display-function-fallback)
-  ;;         (counsel-projectile-find-file . ivy-display-function-fallback)
-  ;;         (swiper . ivy-display-function-fallback)
-  ;;         (t . ivy-posframe-display-at-point)))
-  ;; (setq ivy-display-functions-alist
-  ;;       '((t . ivy-display-function-fallback)))
-
-  ;; FIXME: Disable for now. Width-changing frames are annoying. Has some bugs
-  ;; with fullscreen. There doesn't seem to be a way to have colored borders.
-  (ivy-posframe-mode -1))
+  (ivy-posframe-mode))
 #+end_src
 
 * prescient
