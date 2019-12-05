@@ -4604,6 +4604,8 @@ Disabled for now. Using [[flycheck-inline]] instead.
 #+begin_src emacs-lisp :tangle yes
 (use-package ivy-posframe
   :after ivy
+  :custom
+  (ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
   :config
   (ivy-posframe-mode))
 #+end_src
