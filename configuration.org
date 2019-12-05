@@ -143,7 +143,6 @@ Evil emacs configuration.
   -  [[#sql][SQL]]
   -  [[#markdown][Markdown]]
     -  [[#markdown-mode][markdown-mode]]
-    -  [[#gfm-mode][gfm-mode]]
   -  [[#toml][TOML]]
     -  [[#toml-mode][toml-mode]]
   -  [[#yaml][YAML]]
@@ -3934,6 +3933,8 @@ by Quelpa.
 
 * Markdown
 ** markdown-mode
+=markdown-mode= also provides =gfm-mode=.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package markdown-mode
   :config
@@ -3955,10 +3956,6 @@ by Quelpa.
    "j" 'evil-next-visual-line
    "C-k" 'markdown-outline-previous-same-level
    "C-j" 'markdown-outline-next-same-level))
-#+end_src
-** gfm-mode
-#+begin_src emacs-lisp :tangle yes
-(use-package gfm-mode)
 #+end_src
 
 * TOML
