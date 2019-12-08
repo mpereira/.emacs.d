@@ -4605,7 +4605,12 @@ Disabled for now. Using [[flycheck-inline]] instead.
 (use-package ivy-posframe
   :after ivy
   :custom
-  (ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
+  (ivy-posframe-height-alist '((t . 20)))
+  (ivy-posframe-border-width 8)
+  (ivy-posframe-display-functions-alist
+   '((complete-symbol . ivy-posframe-display-at-point)
+     (swiper . nil)
+     (t . ivy-posframe-display-at-frame-center)))
   :config
   (ivy-posframe-mode))
 #+end_src
