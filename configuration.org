@@ -2850,13 +2850,15 @@ fish."
 Currently disabled because I'm using [[flycheck-inline][flycheck-inline]] instead. It has better
 support for showing full context for errors. flycheck-posframe only shows
 context for the thing currently being hovered.
+
+Update [2019-12-08 Sun]: using flycheck-posframe again... seems to be fine?
+
 #+begin_src emacs-lisp :tangle yes
 (use-package flycheck-posframe
   :after flycheck
   :config
   (flycheck-posframe-configure-pretty-defaults)
-  ;; (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
-  )
+  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
 #+end_src
 
 * format-all
