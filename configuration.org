@@ -4638,7 +4638,9 @@ Disabled for now. Using [[flycheck-inline]] instead.
 
 * swiper
 #+begin_src emacs-lisp :tangle yes
-(use-package swiper)
+(use-package swiper
+  :custom
+  (swiper-action-recenter t))
 #+end_src
 
 * counsel
