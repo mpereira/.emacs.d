@@ -1348,7 +1348,8 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 
 ;; macOS modifiers.
 (setq mac-command-modifier 'meta)
-(setq mac-option-modifier 'super)
+;; Setting "Option" to nil allows me to type umlauts with "Option+u".
+(setq mac-option-modifier nil)
 (setq mac-control-modifier 'control)
 (setq ns-function-modifier 'hyper)
 
