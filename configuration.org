@@ -1284,11 +1284,11 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 ;; Save session state.
 ;; (desktop-save-mode 1)
 ;; (setq desktop-restore-frames nil)
-;; 
+;;
 ;; (defun mpereira/save-desktop ()
 ;;   "Write the desktop save file to ~/.emacs.d."
 ;;   (desktop-save user-emacs-directory))
-;; 
+;;
 ;; (if (not (boundp 'mpereira/save-desktop-timer))
 ;;     (setq mpereira/save-desktop-timer
 ;;           (run-with-idle-timer 600 t 'mpereira/save-desktop)))
@@ -2846,6 +2846,7 @@ fish."
       (set-face-attribute face nil :background background)))
   (flycheck-inline-mode))
 #+end_src
+
 ** flycheck-posframe
 Currently disabled because I'm using [[flycheck-inline][flycheck-inline]] instead. It has better
 support for showing full context for errors. flycheck-posframe only shows
