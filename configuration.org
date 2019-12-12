@@ -1465,17 +1465,19 @@ Sources:
 
 My favorite Dark themes:
 1. =modus-vivendi=
-2. =doom-molokai=
+2. =doom-one=
 3. =chocolate=
-4. =monokai=
-5. =material=
-6. =nimbus=
-7. =doom-Ioskvem=
-8. =doom-dracula=
-9. =srcery=
+4. =doom-molokai=
+5. =monokai=
+6. =material=
+7. =nimbus=
+8. =doom-Ioskvem=
+9. =doom-dracula=
+10. =srcery=
 
 My favorite light themes:
 1. =modus-operandi=
+2. =doom-one-light=
 2. =github=
 3. =material-light=
 4. =twilight-bright=
