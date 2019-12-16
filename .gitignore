@@ -2,6 +2,7 @@
 /*-secrets.el
 /.cache
 /.dir-locals.el
+/.mc-lists.el
 /.org-id-locations
 /.persistent-scratch
 /.sx
