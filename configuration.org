@@ -131,6 +131,7 @@ Evil emacs configuration.
     -  [[#grip-mode][grip-mode]]
     -  [[#ox-jira][ox-jira]]
     -  [[#ox-confluence][ox-confluence]]
+    -  [[#ox-twbs][ox-twbs]]
     -  [[#ox-gfm][ox-gfm]]
     -  [[#ox-slimhtml][ox-slimhtml]]
     -  [[#ox-hugo][ox-hugo]]
@@ -3888,6 +3889,11 @@ by Quelpa.
 ;;            :url "https://raw.githubusercontent.com/emacsmirror/org/master/contrib/lisp/ox-confluence.el"
 ;;            :fetcher url))
 ;; 
+#+end_src
+
+** ox-twbs
+#+begin_src emacs-lisp :tangle yes
+(use-package ox-twbs)
 #+end_src
 
 ** ox-gfm
