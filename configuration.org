@@ -4821,6 +4821,14 @@ Not enabled globally by default for now.
   ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
   (setq magit-list-refs-sortby "-creatordate")
 
+  (setq magit-blame-styles '((headings
+                              (heading-format . "%-20a %C %s\n"))
+                             (margin
+                              (margin-format " %s%f" " %C %a" " %H")
+                              (margin-width . 60)
+                              (margin-face . magit-blame-margin)
+                              (margin-body-face magit-blame-dimmed))))
+
   (transient-bind-q-to-quit)
 
   ;; "q" is being bound to `quit-window' on the magit status buffer, for some
