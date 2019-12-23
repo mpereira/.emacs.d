@@ -220,7 +220,7 @@ Evil emacs configuration.
   -  [[#reveal-in-osx-finder][reveal-in-osx-finder]]
   -  [[#symbol-overlay][symbol-overlay]]
   -  [[#unfill][unfill]]
-  -  [[#smex][smex]]
+  -  [[#amx][amx]]
   -  [[#org-pomodoro][org-pomodoro]]
   -  [[#mappings][Mappings]]
   -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
@@ -4647,7 +4647,7 @@ Disabled for now. Using [[flycheck-inline]] instead.
 ** ivy-prescient
 #+begin_src emacs-lisp :tangle yes
 (use-package ivy-prescient
-  :after (ivy prescient)
+  :after (ivy counsel amx prescient)
   :config
   (ivy-prescient-mode))
 #+end_src
@@ -5015,14 +5015,14 @@ repositories, but it seems like just trying again a few times gets it done.
    "M-q" 'unfill-toggle))
 #+end_src
 
-* smex
+* amx
 #+begin_src emacs-lisp :tangle yes
-(use-package smex
+(use-package amx
   :config
-  (smex-initialize)
+  (amx-initialize)
   (general-define-key
    :keymaps '(global-map)
-   "M-X" 'smex-major-mode-commands))
+   "M-X" 'amx-major-mode-commands))
 #+end_src
 
 * org-pomodoro
