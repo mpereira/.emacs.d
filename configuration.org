@@ -1,3 +1,6 @@
+#+TITLE: mpereira's emacs configuration
+#+AUTHOR: Murilo Pereira <murilo@murilopereira.com>
+
 * mpereira's emacs configuration
 :PROPERTIES:
 :TOC:      ignore
