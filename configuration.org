@@ -2035,6 +2035,8 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
   (general-define-key
    :keymaps '(evil-multiedit-state-map)
    "RET" 'evil-multiedit-toggle-or-restrict-region
+   "C-n" 'evil-multiedit-match-symbol-and-next
+   "C-p" 'evil-multiedit-match-symbol-and-prev
    "C-k" 'evil-multiedit-prev
    "C-j" 'evil-multiedit-next))
 #+end_src
@@ -3394,6 +3396,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  "Cg" 'org-clock-goto
  "D" 'org-check-deadlines
  "l" 'org-store-link)
+
+(general-define-key
+ :keymaps '(org-mode-map)
+ :states '(visual)
+ "C-n" 'evil-multiedit-match-and-next
+ "C-p" 'evil-multiedit-match-and-prev)
 
 (general-define-key
  :keymaps '(org-mode-map)
