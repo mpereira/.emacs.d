@@ -214,6 +214,7 @@ Evil emacs configuration.
   -  [[#magit][magit]]
     -  [[#forge][forge]]
     -  [[#magit-todos][magit-todos]]
+    -  [[#gitignore-mode][gitignore-mode]]
   -  [[#wolfram-alpha][Wolfram Alpha]]
   -  [[#circe][circe]]
   -  [[#mingus][mingus]]
@@ -4920,6 +4921,10 @@ repositories, but it seems like just trying again a few times gets it done.
   :after magit
   :config
   (add-hook 'magit-mode-hook 'magit-todos-mode))
+#+end_src
+** gitignore-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package gitignore-mode)
 #+end_src
 
 * Wolfram Alpha
