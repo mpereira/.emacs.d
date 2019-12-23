@@ -1784,7 +1784,17 @@ Source: https://git.io/vQKzv"
 #+begin_src emacs-lisp :tangle yes
 (use-package persistent-scratch
   :config
-  (persistent-scratch-autosave-mode))
+  ;; Enables auto save and automatic backup restore.
+  (persistent-scratch-setup-default)
+
+  (setq persistent-scratch-autosave-interval 60)
+
+  (defun mpereira/persistent-scratch-scratch-buffer-p ()
+    "Return non-nil iff the current buffer's name starts with *scratch*."
+    (string-prefix-p "*scratch*" (buffer-name)))
+
+  (setq persistent-scratch-scratch-buffer-p-function
+        'mpereira/persistent-scratch-scratch-buffer-p))
 #+end_src
 
 * too-long-lines-mode
