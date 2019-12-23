@@ -1681,13 +1681,9 @@ Source: https://git.io/vQKzv"
 
 (use-package mw-thesaurus
   :general
-  (:keymaps '(text-mode-map)
+  (:keymaps '(text-mode-map org-mode-map)
    :states '(normal visual)
    "K" #'mw-thesaurus-lookup-at-point)
-  (:keymaps '(org-mode-map)
-   :states '(normal visual)
-   "q" nil
-   "K" nil)
   (:keymaps '(mw-thesaurus-mode-map)
    :states '(normal visual)
    "q" #'mw-thesaurus--quit)
