@@ -3210,6 +3210,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+begin_src emacs-lisp :tangle yes
 (use-package elpy
   :init
+  (setq flycheck-python-mypy-executable "mypy")
   (setq flycheck-python-flake8-executable "python3")
   (setq flycheck-python-pylint-executable "python3")
   (setq flycheck-python-pycompile-executable "python3")
