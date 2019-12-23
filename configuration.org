@@ -191,9 +191,11 @@ Evil emacs configuration.
   -  [[#perspective][perspective]]
     -  [[#persp-projectile][persp-projectile]]
   -  [[#avy][avy]]
+  -  [[#posframe][posframe]]
+    -  [[#ivy-posframe][ivy-posframe]]
+    -  [[#company-posframe][company-posframe]]
   -  [[#ivy][ivy]]
     -  [[#ivy-rich][ivy-rich]]
-    -  [[#ivy-posframe][ivy-posframe]]
   -  [[#prescient][prescient]]
     -  [[#ivy-prescient][ivy-prescient]]
     -  [[#company-prescient][company-prescient]]
@@ -2851,11 +2853,15 @@ fish."
 
   (add-hook 'org-src-mode-hook #'mpereira/disable-flycheck-in-org-src-block))
 #+end_src
+
 ** flycheck-inline
+Disabled since [2019-12-08 Sun] in favor of flycheck-posframe.
+
 #+begin_src emacs-lisp :tangle yes
 (require 'cus-edit) ;; for `custom-modified' face.
 
 (use-package flycheck-inline
+  :disabled
   :config
   ;; Draw a nice-looking padding around the overlays.
   (dolist (face '(flycheck-inline-info flycheck-inline-warning flycheck-inline-error))
@@ -4555,6 +4561,51 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (setq avy-all-windows nil))
 #+end_src
 
+* posframe
+Set a default border width for all posframe frames via
+~mpereira/posframe-arghandler~.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package posframe
+  :config
+  ;; Make ivy-posframe frames have fixed half-screen width and fixed height.
+  (setq mpereira/default-posframe-frame-plist '(:internal-border-width 8
+                                                :height 0))
+
+  (defun mpereira/posframe-arghandler (buffer-or-buffer-name arg-name value)
+    (let (buffer-name
+          (ivy-posframe-buffer-name " *ivy-posframe-buffer*"))
+      (if (bufferp buffer-or-buffer-name)
+          (setq buffer-name (buffer-name buffer-or-buffer-name))
+        (setq buffer-name buffer-or-buffer-name))
+      (if (string= ivy-posframe-buffer-name buffer-name)
+          (or (plist-get mpereira/default-posframe-frame-plist arg-name) value)
+        value)))
+
+  (setq posframe-arghandler #'mpereira/posframe-arghandler))
+#+end_src
+
+** ivy-posframe
+#+begin_src emacs-lisp :tangle yes
+(use-package ivy-posframe
+  :after (posframe ivy)
+  :custom
+  (ivy-posframe-height-alist '((t . 20)))
+  (ivy-posframe-display-functions-alist
+   '((complete-symbol . ivy-posframe-display-at-point)
+     (swiper . nil)
+     (t . ivy-posframe-display-at-frame-center)))
+  :config
+  (ivy-posframe-mode))
+#+end_src
+
+** company-posframe
+#+begin_src emacs-lisp :tangle yes
+(use-package company-posframe
+  :config
+  (company-posframe-mode))
+#+end_src
+
 * ivy
 #+begin_src emacs-lisp :tangle yes
 (use-package ivy
@@ -4623,20 +4674,6 @@ Disabled for now. Using [[flycheck-inline]] instead.
             (ivy-rich-file-last-modified-time (:face font-lock-comment-face))))))
   :config
   (ivy-rich-mode 1))
-#+end_src
-** ivy-posframe
-#+begin_src emacs-lisp :tangle yes
-(use-package ivy-posframe
-  :after ivy
-  :custom
-  (ivy-posframe-height-alist '((t . 20)))
-  (ivy-posframe-border-width 8)
-  (ivy-posframe-display-functions-alist
-   '((complete-symbol . ivy-posframe-display-at-point)
-     (swiper . nil)
-     (t . ivy-posframe-display-at-frame-center)))
-  :config
-  (ivy-posframe-mode))
 #+end_src
 
 * prescient
