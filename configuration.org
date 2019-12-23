@@ -310,8 +310,8 @@ Set it with emacs lisp.
 #+begin_src emacs-lisp :tangle yes
 (setq mpereira/custom-file (expand-file-name "custom.el" user-emacs-directory))
 (setq mpereira/leader ",")
-(setq mpereira/light-theme 'modus-operandi)
-(setq mpereira/dark-theme 'modus-vivendi)
+(setq mpereira/light-theme 'doom-one-light)
+(setq mpereira/dark-theme 'doom-one)
 (setq mpereira/initial-theme mpereira/dark-theme)
 (setq mpereira/dropbox-directory (file-name-as-directory
                                   (expand-file-name "~/Dropbox")))
