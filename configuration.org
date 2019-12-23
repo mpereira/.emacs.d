@@ -83,7 +83,9 @@ Evil emacs configuration.
     -  [[#auto-rename-tag][auto-rename-tag]]
   -  [[#css][css]]
     -  [[#emacs-colorpicker][emacs-colorpicker]]
-  -  [[#olivetti][olivetti]]
+  -  [[#distraction-free-editing][Distraction-free editing]]
+    -  [[#hide-mode-line][hide-mode-line]]
+    -  [[#olivetti][olivetti]]
   -  [[#minibuffer-line][minibuffer-line]]
   -  [[#buffer-expose][buffer-expose]]
   -  [[#buffer-move][buffer-move]]
@@ -2697,9 +2699,18 @@ fish."
 ;;            :repo "syohex/emacs-colorpicker"))
 #+end_src
 
-* olivetti
+* Distraction-free editing
+** hide-mode-line
+#+begin_src emacs-lisp :tangle yes
+(use-package hide-mode-line)
+#+end_src
+
+** olivetti
 #+begin_src emacs-lisp :tangle yes
 (use-package olivetti
+  ;; Don't add to hook until
+  ;; https://github.com/hlissner/emacs-hide-mode-line/issues/2 gets fixed.
+  ;; :hook (olivetti-mode . hide-mode-line-mode)
   :config
   (setq-default olivetti-body-width 0.5))
 #+end_src
