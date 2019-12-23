@@ -3429,7 +3429,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
  ;; TODO: remove temporary keybinding.
  "C-n" 'org-babel-next-src-block
  ;; TODO: remove temporary keybinding.
- "C-p" 'org-babel-previous-src-block)
+ "C-p" 'org-babel-previous-src-block
+ "C-S-j" 'org-move-subtree-down
+ "C-S-k" 'org-move-subtree-up)
 
 (general-define-key
  :keymaps '(org-mode-map)
