@@ -540,7 +540,7 @@ Lisp function does not specify a special indentation."
   (defun mpereira/inside-bounds-dwim ()
     ;; (when-let (lispy--bounds-dwim)
     ;;   (when (<)))
-  )
+    )
 
   (defun mpereira/backward-sexp-begin (arg)
     "Moves to the beginning of the previous ARG nth sexp."
@@ -2150,7 +2150,7 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 (setq delete-by-moving-to-trash t)
 (setq dired-listing-switches "-AFlv --group-directories-first")
 (setq find-ls-option ;; applies to `find-name-dired'
-	    '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
+      '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
 ;;; activate this for case-insensitive names:
 ;; (setq find-name-arg "-iname")
 (add-hook 'dired-mode-hook 'dired-hide-details-mode)
@@ -3233,8 +3233,8 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
   (setq company-idle-delay-before-elpy-fucks-it-up company-idle-delay)
   (add-hook 'elpy-mode-hook
-               (lambda ()
-                 (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up)))
+            (lambda ()
+              (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up)))
   :config
   (elpy-enable))
 #+end_src
