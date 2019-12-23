@@ -213,7 +213,8 @@ Evil emacs configuration.
   -  [[#emojify][emojify]]
   -  [[#browse-at-remote][browse-at-remote]]
   -  [[#git-timemachine][git-timemachine]]
-  -  [[#magit][magit]]
+  -  [[#git][git]]
+    -  [[#magit][magit]]
     -  [[#forge][forge]]
     -  [[#magit-todos][magit-todos]]
     -  [[#gitignore-mode][gitignore-mode]]
@@ -4863,7 +4864,8 @@ Not enabled globally by default for now.
 (use-package git-timemachine)
 #+end_src
 
-* magit
+* git
+** magit
 #+begin_src emacs-lisp :tangle yes
 (use-package magit
   :config
@@ -4900,7 +4902,6 @@ Not enabled globally by default for now.
   ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
   (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
 #+end_src
-
 ** forge
 Sometimes I have trouble pulling topics/notifications through forge. I just
 ([2019-03-18 Mon]) did something that fixed it:
