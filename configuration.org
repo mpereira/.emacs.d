@@ -124,7 +124,7 @@ Evil emacs configuration.
   -  [[#json][JSON]]
     -  [[#json-mode][json-mode]]
     -  [[#json-navigator][json-navigator]]
-  -  [[#org-mode][Org mode]]
+  -  [[#org][Org]]
     -  [[#org-clocking][Org Clocking]]
     -  [[#org-gcal][org-gcal]]
     -  [[#org-agenda][Org Agenda]]
@@ -3262,7 +3262,7 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 (use-package json-navigator)
 #+end_src
 
-* Org mode
+* Org
 #+begin_src emacs-lisp :tangle yes
 (setq org-directory (expand-file-name "org" mpereira/dropbox-directory))
 
