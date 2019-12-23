@@ -4117,8 +4117,12 @@ by Quelpa.
 #+end_src
 
 * default-text-scale
+Enable =default-text-scale-mode= so that the font size changes for all frames.
+
 #+begin_src emacs-lisp :tangle yes
-(use-package default-text-scale)
+(use-package default-text-scale
+  :config
+  (default-text-scale-mode))
 #+end_src
 
 * transpose-frame
