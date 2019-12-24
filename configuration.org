@@ -204,7 +204,6 @@ Evil emacs configuration.
   -  [[#wgrep][wgrep]]
   -  [[#command-log-mode][command-log-mode]]
   -  [[#counsel-projectile][counsel-projectile]]
-  -  [[#neotree][neotree]]
   -  [[#all-the-icons][all-the-icons]]
   -  [[#dired-sidebar][dired-sidebar]]
     -  [[#all-the-icons-dired][all-the-icons-dired]]
@@ -4764,28 +4763,6 @@ Set a default border width for all posframe frames via
   :after (counsel projectile)
   :config
   (setq projectile-switch-project-action 'counsel-projectile-find-file))
-#+end_src
-
-* neotree
-#+begin_src emacs-lisp :tangle yes
-(use-package neotree
-  :after projectile
-  :general
-  (:keymaps 'neotree-mode-map
-   :states '(normal visual)
-   "RET" #'neotree-enter
-   "TAB" #'neotree-enter
-   "r" #'neotree-refresh
-   "q" #'neotree-hide)
-  (:keymaps 'neotree-mode-map
-   :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "p"
-   "t" #'neotree-hide)
-  :config
-  (setq neo-smart-open t)
-  (setq neo-window-fixed-size nil)
-  (setq neo-window-width 60))
 #+end_src
 
 * all-the-icons
