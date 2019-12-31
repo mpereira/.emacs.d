@@ -4857,10 +4857,12 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
 * Commands
 ** amx
+Only installing this package for its functions. I get the actual "candidate
+recency" functionality for =M-x= from ivy-prescient.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package amx
   :config
-  (amx-initialize)
   (general-define-key
    :keymaps '(global-map)
    "M-X" 'amx-major-mode-commands))
