@@ -5577,10 +5577,12 @@ recency" functionality for =M-x= from ivy-prescient.
 #+end_src
 
 ** let-it-snow
-FIXME: Doesn't work.
+FIXME: Doesn't work. Disabled for now.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package snow
   :ensure nil
+  :disabled t
   :quelpa (snow
            :fetcher github
            :repo "alphapapa/snow.el"))
