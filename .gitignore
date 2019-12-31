@@ -6,6 +6,7 @@
 /.org-id-locations
 /.persistent-scratch
 /.sx
+/amx-items
 /auto-save-list
 /backups
 /bookmarks
@@ -33,7 +34,6 @@
 /secrets.el
 /semanticdb
 /sessions
-/smex-items
 /speed-type
 /test_runs
 /tramp
