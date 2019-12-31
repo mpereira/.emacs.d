@@ -19,6 +19,7 @@ Evil emacs configuration.
     -  [[#dash][dash]]
     -  [[#thingatpt][thingatpt+]]
     -  [[#help-fns][help-fns+]]
+    -  [[#ts][ts]]
   -  [[#package-management][Package management]]
     -  [[#general][general]]
     -  [[#paradox][paradox]]
@@ -324,6 +325,15 @@ Set it with emacs lisp.
   :quelpa (help-fns+
            :fetcher github
            :repo "emacsmirror/help-fns-plus"))
+#+end_src
+
+** ts
+#+begin_src emacs-lisp :tangle yes
+(use-package ts
+  :ensure nil
+  :quelpa (ts
+           :fetcher github
+           :repo "alphapapa/ts.el"))
 #+end_src
 
 * Package management
@@ -2059,7 +2069,7 @@ Source: https://git.io/vQKzv"
  :states '(normal visual)
  :prefix mpereira/leader
  :infix "o"
- "a" 'mpereira/custom-agenda
+ "a" 'mpereira/open-or-build-org-agenda
  "A" (lambda ()
        (interactive)
        (org-agenda nil "r"))
@@ -2294,7 +2304,10 @@ region active."
 
 (setq org-agenda-format-date 'mpereira/org-agenda-format-date)
 
-(defun mpereira/custom-agenda ()
+(defvar mpereira/org-agenda-last-built nil
+  "The last time the org agenda was built.")
+
+(defun mpereira/build-org-agenda ()
   "TODO: docstring."
   (interactive)
   (let* ((settings
@@ -2349,8 +2362,8 @@ region active."
                       " %-18c %(mpereira/org-agenda-tags-suffix)  ")
                      (org-agenda-sorting-strategy '(timestamp-up))
                      (org-agenda-remove-times-when-in-prefix nil)))
-            ;; Note: the section below was causing the agenda to
-            ;; freeze some times. And I wasn't really using it anyway.
+            ;; Note: the section below was causing the agenda to freeze some
+            ;; times. And I wasn't really using it anyway.
             ;;
             ;; (todo "TODO"
             ;;       ((org-agenda-overriding-header "\nNext Tasks\n")
@@ -2384,10 +2397,27 @@ region active."
                                        "c" "Custom agenda view"
                                        settings
                                        '((org-agenda-block-separator ?\-))))))
-    (org-agenda nil "c")))
+    (org-agenda nil "c")
+    (setq mpereira/org-agenda-last-built (ts-now))))
 
-;; TODO: any reason this is a custom agenda command and not just a
-;; function like `mpereira/custom-agenda'?
+(defun mpereira/open-or-build-org-agenda ()
+  "TODO: docstring."
+  (interactive)
+  (let* ((org-agenda-buffer-name "*Org Agenda*")
+         (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
+    (if (bufferp org-agenda-buffer)
+        (progn
+          (switch-to-buffer org-agenda-buffer)
+          (let* ((last-built (ts-human-format-duration
+                              (ts-difference (ts-now)
+                                             mpereira/org-agenda-last-built))))
+            (message (format "Last built %s ago" last-built))) )
+      (progn
+        (mpereira/build-org-agenda)
+        (message "Built now")))))
+
+;; TODO: any reason this is a custom agenda command and not just a function like
+;; `mpereira/build-org-agenda'?
 (setq org-agenda-custom-commands
       `(("r" "Review"
          ((tags ,(mpereira/org-agenda-review-search "today" "+1d")
@@ -2487,6 +2517,7 @@ region active."
  "q" #'org-agenda-quit
  "r" #'org-agenda-refile
  "s" #'org-agenda-schedule
+ "q" #'bury-buffer                      ; for persistent org agenda.
  "t" #'org-agenda-todo
  "T" #'org-agenda-set-tags
  "u" #'org-agenda-undo
