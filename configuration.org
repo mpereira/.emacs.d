@@ -2561,9 +2561,11 @@ region active."
        (org-save-all-org-buffers)
        (org-agenda-maybe-redo))
  "h" nil
+ "i" #'org-agenda-clock-in
  "j" #'org-agenda-next-item
  "k" #'org-agenda-previous-item
  "l" nil
+ "o" #'org-agenda-clock-out
  "n" #'org-agenda-add-note
  "q" #'org-agenda-quit
  "r" #'org-agenda-refile
