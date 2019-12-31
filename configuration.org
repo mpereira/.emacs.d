@@ -425,13 +425,13 @@ configuration.org (org src)<2>
 
 ** Improve Lisp code indentation
 Before
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (:foo bar
       :baz qux)
 #+end_src
 
 After
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (:foo bar
  :baz qux)
 #+end_src
@@ -518,7 +518,7 @@ into a package]]. For now I'm making this source block not be tangled and using
 [[https://gitlab.com/andersjohansson/org-archive-hierarchically][andersjohansson/org-archive-hierarchically]] instead.
 
 Not tangled!
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defadvice org-archive-subtree (around fix-hierarchy activate)
   (let* ((fix-archive-p (and (not current-prefix-arg)
                              (not (use-region-p))))
