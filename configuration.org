@@ -257,6 +257,7 @@ Evil emacs configuration.
     -  [[#after-modifying-path][After modifying PATH]]
     -  [[#terminate-initel-loading-early][Terminate init.el loading early]]
     -  [[#change-font-m-x-x-select-font][Change font: M-x x-select-font]]
+  -  [[#sandbox-not-tangled][Sandbox (not tangled)]]
     -  [[#httpsgithubcomd12frostedelpa-mirrorwhen-melpaorg-is-down][When melpa.org is down]]
   -  [[#file-local-variables][File-local variables]]
 
@@ -361,19 +362,27 @@ Set it with emacs lisp.
 * Variables
 #+begin_src emacs-lisp :tangle yes
 (setq mpereira/custom-file (expand-file-name "custom.el" user-emacs-directory))
+
 (setq mpereira/leader ",")
+
 (setq mpereira/light-theme 'doom-one-light)
 (setq mpereira/dark-theme 'doom-one)
 (setq mpereira/initial-theme mpereira/dark-theme)
+
 (setq mpereira/dropbox-directory (file-name-as-directory
                                   (expand-file-name "~/Dropbox")))
 (setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
+
 (setq mpereira/org-calendar-file (expand-file-name "gcal/calendar.org"
                                                    mpereira/org-directory))
 (setq mpereira/org-calendar-buffer-name (file-name-nondirectory
                                          mpereira/org-calendar-file))
+;; Empirically, 2 seconds seems to be good enough.
+(setq mpereira/org-gcal-request-timeout 2)
+
 (setq mpereira/fill-column 80)
 (setq mpereira/fill-column-wide 120)
+
 (setq mpereira/eshell-prompt-max-directory-length 50)
 (setq mpereira/mode-line-max-directory-length 15)
 #+end_src
@@ -2146,6 +2155,18 @@ Source: https://git.io/vQKzv"
   ;; https://github.com/bbatsov/helm-projectile/issues/51
   (advice-add hook :after (lambda (&rest _) (org-save-all-org-buffers))))
 
+(defun mpereira/org-unfill-toggle ()
+  "Toggle filling/unfilling of the current region, or current paragraph if no
+region active."
+  (interactive)
+  (let (deactivate-mark
+        (fill-column
+         (if (eq last-command this-command)
+             (progn (setq this-command nil)
+                    most-positive-fixnum)
+           fill-column)))
+    (call-interactively 'org-fill-paragraph)))
+
 (general-define-key
  :states '(normal visual)
  :prefix mpereira/leader
@@ -2204,18 +2225,6 @@ Source: https://git.io/vQKzv"
  :prefix mpereira/leader
  :infix "e"
  "e" 'org-babel-execute-src-block)
-
-(defun mpereira/org-unfill-toggle ()
-  "Toggle filling/unfilling of the current region, or current paragraph if no
-region active."
-  (interactive)
-  (let (deactivate-mark
-        (fill-column
-         (if (eq last-command this-command)
-             (progn (setq this-command nil)
-                    most-positive-fixnum)
-           fill-column)))
-    (call-interactively 'org-fill-paragraph)))
 
 (general-define-key
  :keymaps '(org-mode-map)
@@ -2500,10 +2509,6 @@ region active."
 ;; Redo agenda after capturing.
 (add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
 
-(defun mpereira/foo ()
-  (interactive))
-(add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
-
 ;; Don't show empty agenda sections.
 (add-hook 'org-agenda-finalize-hook #'mpereira/org-agenda-delete-empty-blocks)
 
@@ -2514,9 +2519,6 @@ region active."
 (defun mpereira/org-gcal-entry-at-point-p ()
   (when-let ((link (org-entry-get (point) "LINK")))
     (string-match "Go to gcal web page" link)))
-
-;; Empirically, 2 seconds seems to be good enough.
-(setq mpereira/org-gcal-request-timeout 2)
 
 (evil-set-initial-state 'org-agenda-mode 'normal)
 
@@ -2765,7 +2767,7 @@ by Quelpa.
 ;;   :quelpa (ox-confluence
 ;;            :url "https://raw.githubusercontent.com/emacsmirror/org/master/contrib/lisp/ox-confluence.el"
 ;;            :fetcher url))
-;; 
+;;
 #+end_src
 
 ** ox-twbs
@@ -4243,9 +4245,6 @@ Disabled for now. Using [[flycheck-inline]] instead.
   (setq cljr-hotload-dependencies t))
 #+end_src
 
-#+RESULTS:
-: t
-
 *** inf-clojure
 #+begin_src emacs-lisp :tangle yes
 (use-package inf-clojure)
@@ -5579,6 +5578,7 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
 #+end_src
 ** Change font: =M-x x-select-font=
 
+* Sandbox (not tangled)
 #+begin_src emacs-lisp :tangle no
 (use-package org-super-agenda)
 (use-package org-ql)
