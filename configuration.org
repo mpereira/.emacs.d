@@ -1774,9 +1774,18 @@ Source: https://git.io/vQKzv"
 * Configure Header Line
 #+begin_src emacs-lisp :tangle yes
 (defun mpereira/set-header-line-format ()
+  (interactive)
   (setq header-line-format '((which-function-mode ("" which-func-format " ")))))
 
-(add-hook 'prog-mode-hook #'mpereira/set-header-line-format)
+(defun mpereira/clear-header-line-format ()
+  (interactive)
+  (setq header-line-format nil))
+
+(setq which-func-unknown "…")
+
+;; TODO: do I want this?
+;; (add-hook 'prog-mode-hook #'which-function-mode)
+;; (add-hook 'prog-mode-hook #'mpereira/set-header-line-format)
 #+end_src
 
 * Vi emulation
