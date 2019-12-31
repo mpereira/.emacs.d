@@ -251,7 +251,7 @@ Evil emacs configuration.
   -  [[#fun][Fun]]
     -  [[#fireplace][fireplace]]
     -  [[#let-it-snow][let-it-snow]]
-  -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
+  -  [[#tips-and-tricks][Tips and tricks]]
     -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
     -  [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][EXPRESSION can be used only once per org-agenda-prefix-format]]
     -  [[#emulate-c-u-universal-argument][Emulate C-u (universal-argument)]]
@@ -260,8 +260,8 @@ Evil emacs configuration.
     -  [[#after-modifying-path][After modifying PATH]]
     -  [[#terminate-initel-loading-early][Terminate init.el loading early]]
     -  [[#change-font-m-x-x-select-font][Change font: M-x x-select-font]]
-  -  [[#sandbox-not-tangled][Sandbox (not tangled)]]
     -  [[#httpsgithubcomd12frostedelpa-mirrorwhen-melpaorg-is-down][When melpa.org is down]]
+  -  [[#sandbox-not-tangled][Sandbox (not tangled)]]
   -  [[#file-local-variables][File-local variables]]
 
 * Dependencies
@@ -5586,7 +5586,7 @@ FIXME: Doesn't work.
            :repo "alphapapa/snow.el"))
 #+end_src
 
-* Stuff I keep forgetting
+* Tips and tricks
 ** org mode file links to search patterns can't start with open parens
 https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
 ** =EXPRESSION= can be used only once per ~org-agenda-prefix-format~
@@ -5609,6 +5609,7 @@ Run ~exec-path-from-shell-initialize~ on eshell buffers.
   (goto-char (point-max)))
 #+end_src
 ** Change font: =M-x x-select-font=
+** [[https://github.com/d12frosted/elpa-mirror][When melpa.org is down]]
 
 * Sandbox (not tangled)
 #+begin_src emacs-lisp :tangle no
@@ -6091,7 +6092,6 @@ return an empty string."
                     "\n")))
      (pop-to-buffer (current-buffer)))))
 #+end_src
-** [[https://github.com/d12frosted/elpa-mirror][When melpa.org is down]]
 
 * File-local variables
 These need to be at the end of the file.
