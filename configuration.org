@@ -20,9 +20,10 @@ Evil emacs configuration.
     -  [[#thingatpt][thingatpt+]]
     -  [[#help-fns][help-fns+]]
     -  [[#ts][ts]]
-  -  [[#package-management][Package management]]
+  -  [[#package-management-foundational][Package management, foundational]]
     -  [[#general][general]]
     -  [[#paradox][paradox]]
+    -  [[#exec-path-from-shell][exec-path-from-shell]]
   -  [[#variables][Variables]]
   -  [[#redefinitions-advices][Redefinitions, advices]]
     -  [[#make-org-src-buffer-name-shorter-and-nicer][Make org src buffer name shorter and nicer]]
@@ -78,7 +79,6 @@ Evil emacs configuration.
     -  [[#dired-subtree][dired-subtree]]
     -  [[#reveal-in-osx-finder][reveal-in-osx-finder]]
   -  [[#shell-terminal][Shell, terminal]]
-    -  [[#exec-path-from-shell][exec-path-from-shell]]
     -  [[#with-editor][with-editor]]
     -  [[#xterm-color][xterm-color]]
     -  [[#shell][shell]]
@@ -345,7 +345,7 @@ Set it with emacs lisp.
            :repo "alphapapa/ts.el"))
 #+end_src
 
-* Package management
+* Package management, foundational
 ** general
 #+begin_src emacs-lisp :tangle yes
 (use-package general)
@@ -360,6 +360,19 @@ Set it with emacs lisp.
   ;; Disable annoying "do you want to set up GitHub integration" prompt.
   ;; https://github.com/Malabarba/paradox/issues/23
   (setq paradox-github-token t))
+#+end_src
+
+** exec-path-from-shell
+This needs to be loaded before code that depends on PATH modifications, e.g.
+~executable-find~.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package exec-path-from-shell
+  :config
+  (dolist (shell-variable '("SSH_AUTH_SOCK"
+                            "SSH_AGENT_PID"))
+    (add-to-list 'exec-path-from-shell-variables shell-variable))
+  (exec-path-from-shell-initialize))
 #+end_src
 
 * Variables
@@ -2843,19 +2856,6 @@ by Quelpa.
 #+end_src
 
 * Shell, terminal
-** exec-path-from-shell
-This needs to be loaded before code that depends on PATH
-modifications, e.g. ~executable-find~.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package exec-path-from-shell
-  :config
-  (dolist (shell-variable '("SSH_AUTH_SOCK"
-                            "SSH_AGENT_PID"))
-    (add-to-list 'exec-path-from-shell-variables shell-variable))
-  (exec-path-from-shell-initialize))
-#+end_src
-
 ** with-editor
 #+begin_src emacs-lisp :tangle yes
 (use-package with-editor
