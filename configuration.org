@@ -248,6 +248,9 @@ Evil emacs configuration.
     -  [[#mingus][mingus]]
     -  [[#osascripts][osascripts]]
   -  [[#mappings][Mappings]]
+  -  [[#fun][Fun]]
+    -  [[#fireplace][fireplace]]
+    -  [[#let-it-snow][let-it-snow]]
   -  [[#stuff-i-keep-forgetting][Stuff I keep forgetting]]
     -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
     -  [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][EXPRESSION can be used only once per org-agenda-prefix-format]]
@@ -5563,6 +5566,22 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
                :keymaps '(dired-mode-map)
                "H" #'evil-window-top
                "L" #'evil-window-bottom))))
+#+end_src
+
+* Fun
+** fireplace
+#+begin_src emacs-lisp :tangle yes
+(use-package fireplace)
+#+end_src
+
+** let-it-snow
+FIXME: Doesn't work.
+#+begin_src emacs-lisp :tangle yes
+(use-package snow
+  :ensure nil
+  :quelpa (snow
+           :fetcher github
+           :repo "alphapapa/snow.el"))
 #+end_src
 
 * Stuff I keep forgetting
