@@ -24,7 +24,10 @@ Evil emacs configuration.
     -  [[#general][general]]
     -  [[#paradox][paradox]]
   -  [[#variables][Variables]]
-  -  [[#redefinitions][Redefinitions]]
+  -  [[#redefinitions-advices][Redefinitions, advices]]
+    -  [[#make-org-src-buffer-name-shorter-and-nicer][Make org src buffer name shorter and nicer]]
+    -  [[#improve-lisp-code-indentation][Improve Lisp code indentation]]
+    -  [[#archive-org-subtrees-under-the-same-hierarchy-as-the-original-in-the-archive-files][Archive org subtrees under the same hierarchy as the original in the archive files]]
   -  [[#helper-functions][Helper functions]]
   -  [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
   -  [[#tramp][Tramp]]
@@ -60,6 +63,7 @@ Evil emacs configuration.
     -  [[#org-tree-slide][org-tree-slide]]
     -  [[#org-sidebar][org-sidebar]]
     -  [[#org-pomodoro][org-pomodoro]]
+    -  [[#org-archive-hierarchically][org-archive-hierarchically]]
     -  [[#org-autonum][org-autonum]]
     -  [[#ob-async][ob-async]]
     -  [[#ox-jira][ox-jira]]
@@ -373,16 +377,42 @@ Set it with emacs lisp.
 (setq mpereira/mode-line-max-directory-length 15)
 #+end_src
 
-* Redefinitions
+* Redefinitions, advices
+** Make org src buffer name shorter and nicer
+Before
+#+begin_src text
+*Org Src configuration.org[ emacs-lisp ]*
+*Org Src configuration.org[ emacs-lisp ]<2>*
+#+end_src
+
+After
+#+begin_src text
+configuration.org (org src)
+configuration.org (org src)<2>
+#+end_src
+
 #+begin_src emacs-lisp :tangle yes
-;; Before:
-;;   (:foo bar
-;;         :baz qux)
-;; After:
-;;   (:foo bar
-;;    :baz qux)
-;; Got from:
-;; https://github.com/Fuco1/.emacs.d/blob/a8230343bb7e2f07f5eac8e63e5506fa164344f6/site-lisp/my-redef.el#L25
+(defun org-src--construct-edit-buffer-name (org-buffer-name lang)
+  "Construct the buffer name for a source editing buffer."
+  (concat org-buffer-name " (org src)"))
+#+end_src
+
+** Improve Lisp code indentation
+Before
+#+begin_src emacs-lisp
+(:foo bar
+      :baz qux)
+#+end_src
+
+After
+#+begin_src emacs-lisp
+(:foo bar
+ :baz qux)
+#+end_src
+
+I got this from [[https://github.com/Fuco1/.emacs.d/blob/a8230343bb7e2f07f5eac8e63e5506fa164344f6/site-lisp/my-redef.el#L25][Fuco1/.emacs.d/site-lisp/my-redef.el]].
+
+#+begin_src emacs-lisp :tangle yes
 (eval-after-load "lisp-mode"
   '(defun lisp-indent-function (indent-point state)
      "This function is the normal value of the variable `lisp-indent-function'.
@@ -451,6 +481,56 @@ Lisp function does not specify a special indentation."
                                         indent-point normal-indent))
                  (method
                   (funcall method indent-point state)))))))))
+#+end_src
+
+** Archive org subtrees under the same hierarchy as the original in the archive files
+I got this from [[https://github.com/Fuco1/.emacs.d/blob/b55c7e85d87186f16c395bd35f289da0b5bb84b1/files/org-defs.el#L1582-L1619][Fuco1/.emacs.d/files/org-defs.el]].
+
+FIXME: I've been having issues with archiving lately because this defadvice
+became incompatible with newer versions of org. Fuco1 is [[https://github.com/Fuco1/.emacs.d/issues/60][thinking of turning it
+into a package]]. For now I'm making this source block not be tangled and using
+[[https://gitlab.com/andersjohansson/org-archive-hierarchically][andersjohansson/org-archive-hierarchically]] instead.
+
+Not tangled!
+#+begin_src emacs-lisp
+(defadvice org-archive-subtree (around fix-hierarchy activate)
+  (let* ((fix-archive-p (and (not current-prefix-arg)
+                             (not (use-region-p))))
+         (afile (org-extract-archive-file (org-get-local-archive-location)))
+         (buffer (or (find-buffer-visiting afile) (find-file-noselect afile))))
+    ad-do-it
+    (when fix-archive-p
+      (with-current-buffer buffer
+        (goto-char (point-max))
+        (while (org-up-heading-safe))
+        (let* ((olpath (org-entry-get (point) "ARCHIVE_OLPATH"))
+               (path (and olpath (split-string olpath "/")))
+               (level 1)
+               tree-text)
+          (when olpath
+            (org-mark-subtree)
+            (setq tree-text (buffer-substring (region-beginning) (region-end)))
+            (let (this-command) (org-cut-subtree))
+            (goto-char (point-min))
+            (save-restriction
+              (widen)
+              (-each path
+                (lambda (heading)
+                  (if (re-search-forward
+                       (rx-to-string
+                        `(: bol (repeat ,level "*") (1+ " ") ,heading)) nil t)
+                      (org-narrow-to-subtree)
+                    (goto-char (point-max))
+                    (unless (looking-at "^")
+                      (insert "\n"))
+                    (insert (make-string level ?*)
+                            " "
+                            heading
+                            "\n"))
+                  (cl-incf level)))
+              (widen)
+              (org-end-of-subtree t t)
+              (org-paste-subtree level tree-text))))))))
 #+end_src
 
 * Helper functions
@@ -2161,7 +2241,7 @@ region active."
  "Cl" 'org-clock-in-last
  "Co" 'org-clock-out
  "d" 'org-deadline
- "D" 'org-archive-subtree
+ "D" 'org-archive-hierarchically
  "b" (lambda ()
        (interactive)
        (mpereira/call-interactively-with-prefix-arg
@@ -2200,47 +2280,6 @@ region active."
        (org-columns-quit)
        (org-sort-entries nil ?r)
        (org-columns)))
-
-;; Archive subtrees under the same hierarchy as original in the archive files.
-;; https://github.com/Fuco1/.emacs.d/blob/b55c7e85d87186f16c395bd35f289da0b5bb84b1/files/org-defs.el#L1582-L1619
-(defadvice org-archive-subtree (around fix-hierarchy activate)
-  (let* ((fix-archive-p (and (not current-prefix-arg)
-                             (not (use-region-p))))
-         (afile (org-extract-archive-file (org-get-local-archive-location)))
-         (buffer (or (find-buffer-visiting afile) (find-file-noselect afile))))
-    ad-do-it
-    (when fix-archive-p
-      (with-current-buffer buffer
-        (goto-char (point-max))
-        (while (org-up-heading-safe))
-        (let* ((olpath (org-entry-get (point) "ARCHIVE_OLPATH"))
-               (path (and olpath (split-string olpath "/")))
-               (level 1)
-               tree-text)
-          (when olpath
-            (org-mark-subtree)
-            (setq tree-text (buffer-substring (region-beginning) (region-end)))
-            (let (this-command) (org-cut-subtree))
-            (goto-char (point-min))
-            (save-restriction
-              (widen)
-              (-each path
-                (lambda (heading)
-                  (if (re-search-forward
-                       (rx-to-string
-                        `(: bol (repeat ,level "*") (1+ " ") ,heading)) nil t)
-                      (org-narrow-to-subtree)
-                    (goto-char (point-max))
-                    (unless (looking-at "^")
-                      (insert "\n"))
-                    (insert (make-string level ?*)
-                            " "
-                            heading
-                            "\n"))
-                  (cl-incf level)))
-              (widen)
-              (org-end-of-subtree t t)
-              (org-paste-subtree level tree-text))))))))
 #+end_src
 
 ** Org Clocking
@@ -2615,6 +2654,18 @@ region active."
 (use-package org-pomodoro
   :config
   (setq org-pomodoro-format "%s"))
+#+end_src
+
+** org-archive-hierarchically
+FIXME: this seems to insert unwanted whitespace between the parent and the first
+child tree.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package org-archive-hierarchically
+  :ensure nil
+  :quelpa (org-archive-hierarchically
+           :fetcher gitlab
+           :repo "andersjohansson/org-archive-hierarchically"))
 #+end_src
 
 ** org-autonum
