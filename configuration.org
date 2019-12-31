@@ -162,6 +162,7 @@ Evil emacs configuration.
       -  [[#inf-clojure][inf-clojure]]
       -  [[#cider][cider]]
       -  [[#slamhound][slamhound]]
+      -  [[#miracle][miracle]]
     -  [[#go][Go]]
       -  [[#go-mode][go-mode]]
     -  [[#rust][Rust]]
@@ -4304,6 +4305,44 @@ Currently disabled because it's only available via Marmalade.
 #+begin_src emacs-lisp :tangle yes
 ;; (use-package slamhound
 ;;   :after cider)
+#+end_src
+
+*** miracle
+#+begin_src emacs-lisp :tangle yes
+(use-package miracle
+  :ensure nil
+  :after cider
+  :quelpa (miracle
+           :fetcher github
+           :repo "Saikyun/miracle")
+  :config
+  (general-define-key
+   :keymaps 'miracle-interaction-mode-map
+   :states '(normal visual)
+   "K" 'miracle-describe
+   "gf" 'miracle-jump)
+
+  (defun mpereira/miracle-eval-sexp-at-point ()
+    "Evaluate the expression at point."
+    (interactive)
+    (save-excursion
+      (goto-char (cadr (cider-sexp-at-point 'bounds)))
+      (miracle-eval-expression-at-point)))
+
+  (general-define-key
+   :keymaps 'miracle-interaction-mode-map
+   :states '(normal)
+   :prefix mpereira/leader
+   "e(" #'miracle-eval-defun
+   "eE" #'miracle-eval-buffer
+   "ee" #'mpereira/miracle-eval-sexp-at-point
+   "ek" #'miracle-interrupt)
+
+  (general-define-key
+   :keymaps 'miracle-interaction-mode-map
+   :states '(visual)
+   :prefix mpereira/leader
+   "ee" 'miracle-eval-region))
 #+end_src
 
 ** Go
