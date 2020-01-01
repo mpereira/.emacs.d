@@ -2521,7 +2521,7 @@ Example: | todo  | int |
 
 (general-define-key
  :keymaps '(org-agenda-mode-map)
- :states  '(normal emacs)
+ :states '(normal emacs)
  "/" 'org-agenda-filter-by-regexp
  "<" #'org-agenda-filter-by-category
  "c" (lambda ()
