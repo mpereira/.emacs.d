@@ -57,6 +57,7 @@ Evil emacs configuration.
   -  [[#evil-collection][evil-collection]]
 -  [[#org][Org]]
   -  [[#org-mode][org-mode]]
+  -  [[#align-all-tags-in-the-buffer-on-tag-changes][Align all tags in the buffer on tag changes]]
   -  [[#sort-org-entries-by-multiple-properties][Sort org entries by multiple properties]]
   -  [[#org-clock][Org clock]]
   -  [[#org-gcal][org-gcal]]
@@ -2332,6 +2333,17 @@ region active."
        (org-columns-quit)
        (org-sort-entries nil ?r)
        (org-columns)))
+#+end_src
+
+** Align all tags in the buffer on tag changes
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/org-align-all-tags ()
+  "Aligns all org tags in the buffer."
+  (interactive)
+  (when (eq major-mode 'org-mode)
+    (org-align-tags t)))
+
+(add-hook 'org-after-tags-change-hook #'mpereira/org-align-all-tags)
 #+end_src
 
 ** Sort org entries by multiple properties
