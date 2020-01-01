@@ -569,6 +569,20 @@ Not tangled!
               (org-paste-subtree level tree-text))))))))
 #+end_src
 
+** Provide ~counsel-symbol-at-point~
+~counsel-symbol-at-point~ was removed from counsel so I'm adding a version I found
+on the internet here.
+
+#+begin_src emacs-lisp :tangle yes
+(defun counsel-symbol-at-point ()
+  "Return current symbol at point as a string."
+  (let ((s (thing-at-point 'symbol)))
+    (and (stringp s)
+         (if (string-match "\\`[`']?\\(.*?\\)'?\\'" s)
+             (match-string 1 s)
+           s))))
+#+end_src
+
 * Helper functions
 #+begin_src emacs-lisp :tangle yes
 (defmacro comment (&rest body)
@@ -1060,17 +1074,6 @@ lines in the block (excluding the line with
                          " "
                          "-suspend")))
     (shell-command command)))
-
-
-;; FIXME: `counsel-symbol-at-point' was removed, so I'm adding a version I found
-;; on the internet here.
-(defun counsel-symbol-at-point ()
-  "Return current symbol at point as a string."
-  (let ((s (thing-at-point 'symbol)))
-    (and (stringp s)
-         (if (string-match "\\`[`']?\\(.*?\\)'?\\'" s)
-             (match-string 1 s)
-           s))))
 
 (defun mpereira/epoch-at-point-to-timestamp ()
   "TODO: docstring"
