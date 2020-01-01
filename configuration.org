@@ -2554,7 +2554,7 @@ Example: | todo  | int |
  "q" #'org-agenda-quit
  "r" #'org-agenda-refile
  "s" #'org-agenda-schedule
- "q" #'bury-buffer                      ; for persistent org agenda.
+ "q" #'winner-undo                      ; for persistent org agenda.
  "t" #'org-agenda-todo
  "T" #'org-agenda-set-tags
  "u" #'org-agenda-undo
@@ -2604,12 +2604,12 @@ Example: | todo  | int |
 #+end_src
 
 ** Persistent (cached) org agenda
-My agenda is a bit heavy to build so I don't kill its buffer (I use ~bury-buffer~
+My agenda is a bit heavy to build so I don't kill its buffer (I use ~winner-undo~
 instead, which is bound to =q=). I have a keybinding (=<leader> O a=) that displays
 an existing agenda buffer, or builds and displays a fresh agenda buffer.
 
-I'm also planning to add automatic and periodic background refreshing of the
-agenda buffer with ~run-with-idle-timer~ soon.
+I'm also planning to add automatic and periodic background refreshing (and
+perhaps exporting) of the agenda buffer with ~run-with-idle-timer~ soon.
 
 #+begin_src emacs-lisp :tangle yes
 (defvar mpereira/org-agenda-last-built nil
@@ -2715,18 +2715,16 @@ agenda buffer with ~run-with-idle-timer~ soon.
          (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
     (if (bufferp org-agenda-buffer)
         (progn
+          ;; These two actions are reversed with `winner-undo'.
           (switch-to-buffer org-agenda-buffer)
-          (maximize-window)
+          (delete-other-windows)
           (let* ((last-built (ts-human-format-duration
                               (ts-difference (ts-now)
                                              mpereira/org-agenda-last-built))))
-            (message (format "Last built %s ago" last-built))) )
+            (message (format "Last built %s ago" last-built))))
       (progn
         (mpereira/build-org-agenda)
         (message "Built now")))))
-#+end_src
-
-#+begin_src emacs-lisp :tangle yes
 #+end_src
 
 ** counsel-org-clock
