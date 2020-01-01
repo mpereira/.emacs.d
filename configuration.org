@@ -4000,9 +4000,21 @@ repositories, but it seems like just trying again a few times gets it done.
            :repo "alphapapa/magit-todos")
   :after magit
   :config
-  (add-hook 'magit-mode-hook 'magit-todos-mode))
-#+end_src
+  (add-hook 'magit-mode-hook 'magit-todos-mode)
 
+  ;; Remove keybindings that conflict with evil.
+  (general-define-key
+   :keymaps '(magit-todos-section-map magit-todos-item-section-map)
+   "jT" nil
+   "jl" nil
+   "j" nil)
+
+  ;; Required until https://github.com/alphapapa/magit-todos/pull/93 gets
+  ;; merged.
+  (general-define-key
+   :keymaps '(magit-todos-item-section-map)
+   "RET" #'magit-todos-jump-to-item))
+#+end_src
 
 ** gist
 #+begin_src emacs-lisp :tangle yes
