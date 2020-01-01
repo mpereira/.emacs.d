@@ -1476,6 +1476,7 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (setq inhibit-eol-conversion t)
 
 ;; Set default font size to 18.
+;; FIXME: This needs to be updated when the font size changes.
 (set-face-attribute 'default nil :family "Consolas" :height 180)
 
 ;; Enable narrowing commands.
