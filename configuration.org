@@ -56,9 +56,10 @@ Evil emacs configuration.
   -  [[#org][Org]]
     -  [[#org-mode][org-mode]]
     -  [[#sort-org-entries-by-multiple-fields][Sort org entries by multiple fields]]
-    -  [[#org-clocking][Org Clocking]]
+    -  [[#org-clock][Org clock]]
     -  [[#org-gcal][org-gcal]]
-    -  [[#org-agenda][Org Agenda]]
+    -  [[#org-agenda][Org agenda]]
+    -  [[#persistent-cached-org-agenda][Persistent (cached) org agenda]]
     -  [[#counsel-org-clock][counsel-org-clock]]
     -  [[#org-expiry][org-expiry]]
     -  [[#org-bullets][org-bullets]]
@@ -2387,7 +2388,7 @@ Example: | todo  | int |
   (org-sort-entries nil ?f #'mpereira/org-sort-key))
 #+end_src
 
-** Org Clocking
+** Org clock
 #+begin_src emacs-lisp :tangle yes
 ;; org-clock stuff.
 (setq org-clock-idle-time 15)
@@ -2428,7 +2429,7 @@ Example: | todo  | int |
   (setq org-gcal-notify-p nil))
 #+end_src
 
-** Org Agenda
+** Org agenda
 #+begin_src emacs-lisp :tangle yes
 (require 'org-agenda)
 
@@ -2448,11 +2449,161 @@ Example: | todo  | int |
 
 (setq org-agenda-format-date 'mpereira/org-agenda-format-date)
 
+;; TODO: any reason this is a custom agenda command and not just a function like
+;; `mpereira/build-org-agenda'?
+(setq org-agenda-custom-commands
+      `(("r" "Review"
+         ((tags ,(mpereira/org-agenda-review-search "today" "+1d")
+                ((org-agenda-overriding-header
+                  (concat
+                   "\nDone today "
+                   "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))
+                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
+          (tags ,(mpereira/org-agenda-review-search "-1d" "today")
+                ((org-agenda-overriding-header
+                  (concat
+                   "\nDone yesterday "
+                   "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))
+                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
+          (tags ,(mpereira/org-agenda-review-search
+                  (mpereira/org-agenda-date-week-start
+                   (mpereira/format-calendar-date-Y-m-d
+                    (mpereira/calendar-read-date "today")))
+                  (mpereira/format-calendar-date-Y-m-d
+                   (mpereira/calendar-read-date "today")))
+                ((org-agenda-overriding-header "\nDone this week\n")
+                 (org-agenda-prefix-format
+                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                 (org-agenda-show-all-dates t)
+                 (org-agenda-sorting-strategy '(timestamp-down))))
+          (tags (mpereira/org-agenda-review-search
+                 (mpereira/org-agenda-date-week-start
+                  (mpereira/format-calendar-date-Y-m-d
+                   (mpereira/calendar-read-date "-1w")))
+                 (mpereira/org-agenda-date-week-end
+                  (mpereira/format-calendar-date-Y-m-d
+                   (mpereira/calendar-read-date "-1w"))))
+                ((org-agenda-overriding-header "\nDone last week\n")
+                 (org-agenda-prefix-format
+                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                 (org-agenda-show-all-dates t)
+                 (org-agenda-sorting-strategy '(timestamp-down)))))
+         ((org-agenda-block-separator ?\-)))))
+
+;; Redo agenda after capturing.
+(add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
+
+;; Don't show empty agenda sections.
+(add-hook 'org-agenda-finalize-hook #'mpereira/org-agenda-delete-empty-blocks)
+
+;; Disable `evil-lion-mode' so that "g" keeps the mapping to
+;; `org-agenda-maybe-redo'.
+(add-hook 'org-agenda-finalize-hook (lambda () (evil-lion-mode -1)))
+
+(defun mpereira/org-gcal-entry-at-point-p ()
+  (when-let ((link (org-entry-get (point) "LINK")))
+    (string-match "Go to gcal web page" link)))
+
+(evil-set-initial-state 'org-agenda-mode 'normal)
+
+(general-define-key
+ :keymaps '(org-agenda-mode-map)
+ :states  '(normal emacs)
+ "/" 'org-agenda-filter-by-regexp
+ "<" #'org-agenda-filter-by-category
+ "c" (lambda ()
+       (interactive)
+       ;; When capturing to a calendar org-gcal sends a network request that
+       ;; reorders the calendar headings on completion, causing them to have a
+       ;; different order than the agenda entries. Here we install a buffer
+       ;; local hook that will sync the agenda entries with the calendar
+       ;; headings.
+       (add-hook 'org-capture-after-finalize-hook
+                 (lambda ()
+                   (interactive)
+                   (run-at-time mpereira/org-gcal-request-timeout
+                                nil
+                                #'org-agenda-maybe-redo))
+                 nil
+                 t)
+       (org-agenda-capture))
+ "d" #'org-agenda-deadline
+ "f" #'org-attach
+ "F" #'org-gcal-sync
+ "g" #'mpereira/build-org-agenda
+ "h" nil
+ "i" #'org-agenda-clock-in
+ "j" #'org-agenda-next-item
+ "k" #'org-agenda-previous-item
+ "l" nil
+ "o" #'org-agenda-clock-out
+ "n" #'org-agenda-add-note
+ "q" #'org-agenda-quit
+ "r" #'org-agenda-refile
+ "s" #'org-agenda-schedule
+ "q" #'bury-buffer                      ; for persistent org agenda.
+ "t" #'org-agenda-todo
+ "T" #'org-agenda-set-tags
+ "u" #'org-agenda-undo
+ "w" nil
+ "x" (lambda ()
+       (interactive)
+       (save-window-excursion
+         (let ((agenda-buffer (current-buffer)))
+           (org-agenda-goto)
+           (if (mpereira/org-gcal-entry-at-point-p)
+               (progn
+                 (org-gcal-delete-at-point)
+                 ;; org-gcal only removes the calendar headings after the
+                 ;; network request finishes.
+                 (run-at-time mpereira/org-gcal-request-timeout
+                              nil
+                              #'org-agenda-maybe-redo))
+             (progn
+               (quit-window)
+               (org-agenda-kill))))))
+ "C-j" #'org-agenda-next-item
+ "C-k" #'org-agenda-previous-item
+ "C-f" #'scroll-up-command
+ "C-b" #'scroll-down-command)
+
+(defmacro calendar-action (func)
+  `(lambda ()
+     "TODO: docstring."
+     (interactive)
+     (org-eval-in-calendar #'(,func 1))))
+
+(general-define-key
+ :keymaps '(org-read-date-minibuffer-local-map)
+ "q" 'minibuffer-keyboard-quit
+ "h" (calendar-action calendar-backward-day)
+ "l" (calendar-action calendar-forward-day)
+ "k" (calendar-action calendar-backward-week)
+ "j" (calendar-action calendar-forward-week)
+ "{" (calendar-action calendar-backward-month)
+ "}" (calendar-action calendar-forward-month)
+ "[" (calendar-action calendar-backward-year)
+ "]" (calendar-action calendar-forward-year)
+ "(" (calendar-action calendar-beginning-of-month)
+ ")" (calendar-action calendar-end-of-month)
+ "0" (calendar-action calendar-beginning-of-week)
+ "$" (calendar-action calendar-end-of-week))
+#+end_src
+
+** Persistent (cached) org agenda
+My agenda is a bit heavy to build so I don't kill its buffer (I use ~bury-buffer~
+instead, which is bound to =q=). I have a keybinding (=<leader> O a=) that displays
+an existing agenda buffer, or builds and displays a fresh agenda buffer.
+
+I'm also planning to add automatic and periodic background refreshing of the
+agenda buffer with ~run-with-idle-timer~ soon.
+
+#+begin_src emacs-lisp :tangle yes
 (defvar mpereira/org-agenda-last-built nil
   "The last time the org agenda was built.")
 
 (defun mpereira/build-org-agenda ()
-  "TODO: docstring."
+  "Build and display the org agenda."
   (interactive)
   (let* ((settings
           '((todo "DOING"
@@ -2545,13 +2696,14 @@ Example: | todo  | int |
     (setq mpereira/org-agenda-last-built (ts-now))))
 
 (defun mpereira/open-or-build-org-agenda ()
-  "TODO: docstring."
+  "Display cached org agenda if it exists, build and display it otherwise."
   (interactive)
   (let* ((org-agenda-buffer-name "*Org Agenda*")
          (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
     (if (bufferp org-agenda-buffer)
         (progn
           (switch-to-buffer org-agenda-buffer)
+          (maximize-window)
           (let* ((last-built (ts-human-format-duration
                               (ts-difference (ts-now)
                                              mpereira/org-agenda-last-built))))
@@ -2559,150 +2711,9 @@ Example: | todo  | int |
       (progn
         (mpereira/build-org-agenda)
         (message "Built now")))))
+#+end_src
 
-;; TODO: any reason this is a custom agenda command and not just a function like
-;; `mpereira/build-org-agenda'?
-(setq org-agenda-custom-commands
-      `(("r" "Review"
-         ((tags ,(mpereira/org-agenda-review-search "today" "+1d")
-                ((org-agenda-overriding-header
-                  (concat
-                   "\nDone today "
-                   "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))
-                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
-          (tags ,(mpereira/org-agenda-review-search "-1d" "today")
-                ((org-agenda-overriding-header
-                  (concat
-                   "\nDone yesterday "
-                   "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))
-                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
-          (tags ,(mpereira/org-agenda-review-search
-                  (mpereira/org-agenda-date-week-start
-                   (mpereira/format-calendar-date-Y-m-d
-                    (mpereira/calendar-read-date "today")))
-                  (mpereira/format-calendar-date-Y-m-d
-                   (mpereira/calendar-read-date "today")))
-                ((org-agenda-overriding-header "\nDone this week\n")
-                 (org-agenda-prefix-format
-                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
-                 (org-agenda-show-all-dates t)
-                 (org-agenda-sorting-strategy '(timestamp-down))))
-          (tags (mpereira/org-agenda-review-search
-                 (mpereira/org-agenda-date-week-start
-                  (mpereira/format-calendar-date-Y-m-d
-                   (mpereira/calendar-read-date "-1w")))
-                 (mpereira/org-agenda-date-week-end
-                  (mpereira/format-calendar-date-Y-m-d
-                   (mpereira/calendar-read-date "-1w"))))
-                ((org-agenda-overriding-header "\nDone last week\n")
-                 (org-agenda-prefix-format
-                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
-                 (org-agenda-show-all-dates t)
-                 (org-agenda-sorting-strategy '(timestamp-down)))))
-         ((org-agenda-block-separator ?\-)))))
-
-;; Redo agenda after capturing.
-(add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
-
-;; Don't show empty agenda sections.
-(add-hook 'org-agenda-finalize-hook #'mpereira/org-agenda-delete-empty-blocks)
-
-;; Disable `evil-lion-mode' so that "g" keeps the mapping to
-;; `org-agenda-maybe-redo'.
-(add-hook 'org-agenda-finalize-hook (lambda () (evil-lion-mode -1)))
-
-(defun mpereira/org-gcal-entry-at-point-p ()
-  (when-let ((link (org-entry-get (point) "LINK")))
-    (string-match "Go to gcal web page" link)))
-
-(evil-set-initial-state 'org-agenda-mode 'normal)
-
-(general-define-key
- :keymaps '(org-agenda-mode-map)
- :states  '(normal emacs)
- "/" 'org-agenda-filter-by-regexp
- "<" #'org-agenda-filter-by-category
- "c" (lambda ()
-       (interactive)
-       ;; When capturing to a calendar org-gcal sends a network request that
-       ;; reorders the calendar headings on completion, causing them to have a
-       ;; different order than the agenda entries. Here we install a buffer
-       ;; local hook that will sync the agenda entries with the calendar
-       ;; headings.
-       (add-hook 'org-capture-after-finalize-hook
-                 (lambda ()
-                   (interactive)
-                   (run-at-time mpereira/org-gcal-request-timeout
-                                nil
-                                #'org-agenda-maybe-redo))
-                 nil
-                 t)
-       (org-agenda-capture))
- "d" #'org-agenda-deadline
- "f" #'org-attach
- "F" #'org-gcal-sync
- "g" (lambda ()
-       (interactive)
-       (org-agenda-filter-remove-all)
-       (org-save-all-org-buffers)
-       (org-agenda-maybe-redo))
- "h" nil
- "i" #'org-agenda-clock-in
- "j" #'org-agenda-next-item
- "k" #'org-agenda-previous-item
- "l" nil
- "o" #'org-agenda-clock-out
- "n" #'org-agenda-add-note
- "q" #'org-agenda-quit
- "r" #'org-agenda-refile
- "s" #'org-agenda-schedule
- "q" #'bury-buffer                      ; for persistent org agenda.
- "t" #'org-agenda-todo
- "T" #'org-agenda-set-tags
- "u" #'org-agenda-undo
- "w" nil
- "x" (lambda ()
-       (interactive)
-       (save-window-excursion
-         (let ((agenda-buffer (current-buffer)))
-           (org-agenda-goto)
-           (if (mpereira/org-gcal-entry-at-point-p)
-               (progn
-                 (org-gcal-delete-at-point)
-                 ;; org-gcal only removes the calendar headings after the
-                 ;; network request finishes.
-                 (run-at-time mpereira/org-gcal-request-timeout
-                              nil
-                              #'org-agenda-maybe-redo))
-             (progn
-               (quit-window)
-               (org-agenda-kill))))))
- "C-j" #'org-agenda-next-item
- "C-k" #'org-agenda-previous-item
- "C-f" #'scroll-up-command
- "C-b" #'scroll-down-command)
-
-(defmacro calendar-action (func)
-  `(lambda ()
-     "TODO: docstring."
-     (interactive)
-     (org-eval-in-calendar #'(,func 1))))
-
-(general-define-key
- :keymaps '(org-read-date-minibuffer-local-map)
- "q" 'minibuffer-keyboard-quit
- "h" (calendar-action calendar-backward-day)
- "l" (calendar-action calendar-forward-day)
- "k" (calendar-action calendar-backward-week)
- "j" (calendar-action calendar-forward-week)
- "{" (calendar-action calendar-backward-month)
- "}" (calendar-action calendar-forward-month)
- "[" (calendar-action calendar-backward-year)
- "]" (calendar-action calendar-forward-year)
- "(" (calendar-action calendar-beginning-of-month)
- ")" (calendar-action calendar-end-of-month)
- "0" (calendar-action calendar-beginning-of-week)
- "$" (calendar-action calendar-end-of-week))
+#+begin_src emacs-lisp :tangle yes
 #+end_src
 
 ** counsel-org-clock
