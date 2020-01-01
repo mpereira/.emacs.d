@@ -1059,36 +1059,6 @@ lines in the block (excluding the line with
                          "-suspend")))
     (shell-command command)))
 
-;; FIXME: this is broken.
-(defun mpereira/toggle-maximize-buffer (&optional centered-p)
-  "Toggle maximize buffer. TODO: document CENTERED-P."
-  (interactive)
-  (let ((return-to-window-configuration
-         (lambda ()
-           (when (and (boundp 'window-configuration-p)
-                      (boundp 'mpereira/saved-window-configuration))
-             (set-window-configuration mpereira/saved-window-configuration)
-             (goto-char mpereira/saved-point)
-             (setq mpereira/saved-window-configuration nil)
-             (setq mpereira/saved-point nil))
-           (when centered-p
-             (olivetti-mode -1)
-             (setq mpereira/saved-centered-p nil)))))
-    (if (= 1 (length (window-list)))
-        (progn
-          ;; Toggling single buffer centering.
-          ()
-          (if olivetti-mode
-              (funcall return-to-window-configuration)
-            (olivetti-mode 1)))
-      ;; Maximizing selected buffer.
-      (progn
-        (setq mpereira/saved-window-configuration (current-window-configuration))
-        (setq mpereira/saved-point (point))
-        (setq mpereira/saved-centered-p centered-p)
-        (delete-other-windows)
-        (when centered-p
-          (olivetti-mode 1))))))
 
 ;; FIXME: `counsel-symbol-at-point' was removed, so I'm adding a version I found
 ;; on the internet here.
@@ -1384,6 +1354,41 @@ character length of directory (sans directory slashes) down to MAX-LENGTH."
   (interactive)
   (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
     (comint-clear-buffer)))
+#+end_src
+
+* Toggle buffer maximize
+#+begin_src emacs-lisp :tangle yes
+(defvar mpereira/toggle-buffer-maximize-window-configuration nil
+  "A window configuration to return to when unmaximizing the buffer.")
+
+(defvar mpereira/toggle-buffer-maximize-point nil
+  "A point to return to when unmaximizing the buffer.")
+
+(defvar mpereira/toggle-buffer-maximize-centered-p nil
+  "Whether or not the buffer was maximixed in centered mode.")
+
+(defun mpereira/toggle-buffer-maximize (&optional centered-p)
+  "Saves the current window configuration and makes the current buffer occupy
+the whole window. Calling it a second time will restore the saved window
+configuration."
+  (interactive)
+  (if (bound-and-true-p mpereira/toggle-buffer-maximize-window-configuration)
+      (progn
+        (set-window-configuration mpereira/toggle-buffer-maximize-window-configuration)
+        (setq mpereira/toggle-buffer-maximize-window-configuration nil)
+        (goto-char mpereira/toggle-buffer-maximize-point)
+        (setq mpereira/toggle-buffer-maximize-point nil)
+        (when mpereira/toggle-buffer-maximize-centered-p
+          (call-interactively 'olivetti-mode)
+          (setq mpereira/toggle-buffer-maximize-centered-p nil)))
+    (progn
+      (setq mpereira/toggle-buffer-maximize-window-configuration
+            (current-window-configuration))
+      (setq mpereira/toggle-buffer-maximize-point (point))
+      (setq mpereira/toggle-buffer-maximize-centered-p centered-p)
+      (delete-other-windows)
+      (when centered-p
+        (call-interactively 'olivetti-mode)))))
 #+end_src
 
 * Reload directory local variables when saving .dir-locals.el files
@@ -5398,8 +5403,8 @@ recency" functionality for =M-x= from ivy-prescient.
  "M-J" 'buf-move-down
  "M-K" 'buf-move-up
  "M-L" 'buf-move-right
- "M-M" #'mpereira/toggle-maximize-buffer
- "M-N" (lambda () (interactive) (mpereira/toggle-maximize-buffer t))
+ "M-M" #'mpereira/toggle-buffer-maximize
+ "M-N" (lambda () (interactive) (mpereira/toggle-buffer-maximize t))
  "M-O" #'transpose-frame
  "M-h" #'evil-window-left
  "M-j" #'evil-window-down
