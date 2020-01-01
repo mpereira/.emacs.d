@@ -2329,8 +2329,9 @@ I have org trees for projects which I like sorted by:
 |        1 | asc   | TODO     |
 |        2 | asc   | ALLTAGS  |
 |        3 | asc   | PRIORITY |
-|        4 | desc  | CREATED  |
-|        5 | asc   | ITEM     |
+|        4 | desc  | CLOSED   |
+|        5 | desc  | CREATED  |
+|        6 | asc   | ITEM     |
 
 I get that with ~M-x mpereira/org-sort-entries~.
 
@@ -2359,8 +2360,9 @@ Example: | todo  | int |
 |        1 | asc   | TODO     |
 |        2 | asc   | ALLTAGS  |
 |        3 | asc   | PRIORITY |
-|        4 | desc  | CREATED  |
-|        5 | asc   | ITEM     |"
+|        4 | desc  | CLOSED   |
+|        5 | desc  | CREATED  |
+|        6 | asc   | ITEM     |"
   (interactive)
   (let* ((todo-max (apply #'max (mapcar #'length org-todo-keywords)))
          (todo (org-entry-get (point) "TODO"))
@@ -2369,20 +2371,26 @@ Example: | todo  | int |
                      todo-max))
          (priority (org-entry-get (point) "PRIORITY"))
          (priority-int (if priority (string-to-char priority) org-default-priority))
+         (date-int-min 10000000000000) ; YYYY=1000 mm=00 dd=00 HH=00 MM=00 SS=00
+         (date-int-max 30000000000000) ; YYYY=3000 mm=00 dd=00 HH=00 MM=00 SS=00
+         (closed (org-entry-get (point) "CLOSED"))
+         (closed-int (if closed
+                          (string-to-number
+                           (ts-format "%Y%m%d%H%M%S" (ts-parse-org closed)))
+                        date-int-min))
          (created (org-entry-get (point) "CREATED"))
-         (created-int-min 10000000000000) ; YYYY=1000 mm=00 dd=00 HH=00 MM=00 SS=00
-         (created-int-max 30000000000000) ; YYYY=3000 mm=00 dd=00 HH=00 MM=00 SS=00
          (created-int (if created
                           (string-to-number
                            (ts-format "%Y%m%d%H%M%S" (ts-parse-org created)))
-                        created-int-min))
+                        date-int-min))
          (alltags (org-entry-get (point) "ALLTAGS"))
          (item (org-entry-get (point) "ITEM"))
-         (sort-key (format "%03d %s %03d %.10f %s"
+         (sort-key (format "%03d %s %03d %.10f %.10f %s"
                            todo-int
                            alltags
                            priority-int
-                           (/ (float created-int-max) created-int)
+                           (/ (float date-int-max) closed-int)
+                           (/ (float date-int-max) created-int)
                            item)))
     (message sort-key)
     sort-key))
