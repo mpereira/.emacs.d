@@ -2415,7 +2415,6 @@ Example: | todo  | int |
                            (/ (float date-int-max) closed-int)
                            (/ (float date-int-max) created-int)
                            item)))
-    (message sort-key)
     sort-key))
 
 (defun mpereira/org-sort-entries ()
