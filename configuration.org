@@ -15,6 +15,7 @@ Evil emacs configuration.
   -  [[#silent-exports-for-emacs-lisp-org-babel-code-blocks][Silent exports for emacs lisp org babel code blocks]]
   -  [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
   -  [[#utility-libraries][Utility libraries]]
+    -  [[#cl-lib][cl-lib]]
     -  [[#s][s]]
     -  [[#dash][dash]]
     -  [[#thingatpt][thingatpt+]]
@@ -54,6 +55,7 @@ Evil emacs configuration.
     -  [[#evil-collection][evil-collection]]
   -  [[#org][Org]]
     -  [[#org-mode][org-mode]]
+    -  [[#sort-org-entries-by-multiple-fields][Sort org entries by multiple fields]]
     -  [[#org-clocking][Org Clocking]]
     -  [[#org-gcal][org-gcal]]
     -  [[#org-agenda][Org Agenda]]
@@ -308,6 +310,11 @@ Set it with emacs lisp.
 #+end_src
 
 * Utility libraries
+** cl-lib
+#+begin_src emacs-lisp :tangle yes
+(use-package cl-lib)
+#+end_src
+
 ** s
 #+begin_src emacs-lisp :tangle yes
 (use-package s)
@@ -726,7 +733,6 @@ exist in any structured movement package is mind-boggling to me."
   ;; Idea: move up to the parent sexp, count the number of sexps inside it with
   ;; `scan-lists' or `scan-sexps' or `paredit-scan-sexps-hack' to know whether
   ;; or not we're at the last sexp.
-  (require 'cl-lib)
   (defun mpereira/forward-sexp-end (arg)
     "Moves to the end of the next ARG nth sexp. The fact that this doesn't exist
 in any structured movement package is mind-boggling to me."
@@ -1112,7 +1118,6 @@ lines in the block (excluding the line with
     (message path)
     path))
 
-(eval-when-compile (require 'cl)) ;; for `lexical-let'.
 (defun mpereira/make-hs-hide-level (n)
   "TODO: docstring"
   (lexical-let ((n n))
@@ -2315,6 +2320,71 @@ region active."
        (org-columns-quit)
        (org-sort-entries nil ?r)
        (org-columns)))
+#+end_src
+
+** Sort org entries by multiple fields
+I have org trees for projects which I like sorted by:
+1. asc  TODO
+2. asc  ALLTAGS
+3. asc  PRIORITY
+4. desc CREATED
+5. asc  ITEM
+
+I get that with ~M-x mpereira/org-sort-entries~.
+
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/todo-to-int (todo)
+  "Returns incrementally bigger integers for todo values.
+Example: | todo  | int |
+         |-------+-----|
+         | TODO  |   0 |
+         | DOING |   1 |
+         | DONE  |   2 |"
+  (first (-non-nil
+          (mapcar (lambda (keywords)
+                    (let ((todo-seq
+                           (-map (lambda (x) (first (split-string  x "(")))
+                                 (rest keywords))))
+                      (cl-position-if (lambda (x) (string= x todo)) todo-seq)))
+                  org-todo-keywords))))
+
+(defun mpereira/org-sort-key ()
+  "Returns a sort key for an org entry based on:
+1. asc  TODO
+2. asc  ALLTAGS
+3. asc  PRIORITY
+4. desc CREATED
+5. asc  ITEM"
+  (interactive)
+  (let* ((todo-max (apply #'max (mapcar #'length org-todo-keywords)))
+         (todo (org-entry-get (point) "TODO"))
+         (todo-int (if (and todo (mpereira/todo-to-int todo))
+                       (mpereira/todo-to-int todo)
+                     todo-max))
+         (priority (org-entry-get (point) "PRIORITY"))
+         (priority-int (if priority (string-to-char priority) org-default-priority))
+         (created (org-entry-get (point) "CREATED"))
+         (created-int-min 10000000000000) ; YYYY=1000 mm=00 dd=00 HH=00 MM=00 SS=00
+         (created-int-max 30000000000000) ; YYYY=3000 mm=00 dd=00 HH=00 MM=00 SS=00
+         (created-int (if created
+                          (string-to-number
+                           (ts-format "%Y%m%d%H%M%S" (ts-parse-org created)))
+                        created-int-min))
+         (alltags (org-entry-get (point) "ALLTAGS"))
+         (item (org-entry-get (point) "ITEM"))
+         (sort-key (format "%03d %s %03d %.10f %s"
+                           todo-int
+                           alltags
+                           priority-int
+                           (/ (float created-int-max) created-int)
+                           item)))
+    (message sort-key)
+    sort-key))
+
+(defun mpereira/org-sort-entries ()
+  "Sorts child entries based on `mpereiera/ort-sort-key'."
+  (interactive)
+  (org-sort-entries nil ?f #'mpereira/org-sort-key))
 #+end_src
 
 ** Org Clocking
