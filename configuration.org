@@ -55,7 +55,7 @@ Evil emacs configuration.
     -  [[#evil-collection][evil-collection]]
   -  [[#org][Org]]
     -  [[#org-mode][org-mode]]
-    -  [[#sort-org-entries-by-multiple-fields][Sort org entries by multiple fields]]
+    -  [[#sort-org-entries-by-multiple-properties][Sort org entries by multiple properties]]
     -  [[#org-clock][Org clock]]
     -  [[#org-gcal][org-gcal]]
     -  [[#org-agenda][Org agenda]]
@@ -2323,19 +2323,21 @@ region active."
        (org-columns)))
 #+end_src
 
-** Sort org entries by multiple fields
+** Sort org entries by multiple properties
 I have org trees for projects which I like sorted by:
-1. asc  TODO
-2. asc  ALLTAGS
-3. asc  PRIORITY
-4. desc CREATED
-5. asc  ITEM
+| Priority | Order | Property |
+|        1 | asc   | TODO     |
+|        2 | asc   | ALLTAGS  |
+|        3 | asc   | PRIORITY |
+|        4 | desc  | CREATED  |
+|        5 | asc   | ITEM     |
 
 I get that with ~M-x mpereira/org-sort-entries~.
 
 #+begin_src emacs-lisp :tangle yes
 (defun mpereira/todo-to-int (todo)
   "Returns incrementally bigger integers for todo values.
+
 Example: | todo  | int |
          |-------+-----|
          | TODO  |   0 |
@@ -2351,11 +2353,14 @@ Example: | todo  | int |
 
 (defun mpereira/org-sort-key ()
   "Returns a sort key for an org entry based on:
-1. asc  TODO
-2. asc  ALLTAGS
-3. asc  PRIORITY
-4. desc CREATED
-5. asc  ITEM"
+
+| Priority | Order | Property |
+|----------+-------+----------|
+|        1 | asc   | TODO     |
+|        2 | asc   | ALLTAGS  |
+|        3 | asc   | PRIORITY |
+|        4 | desc  | CREATED  |
+|        5 | asc   | ITEM     |"
   (interactive)
   (let* ((todo-max (apply #'max (mapcar #'length org-todo-keywords)))
          (todo (org-entry-get (point) "TODO"))
