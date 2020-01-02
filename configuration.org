@@ -2086,6 +2086,9 @@ Source: https://git.io/vQKzv"
 (require 'org-protocol)
 (require 'org-tempo)
 
+;; Pretty ellipsis.
+(setq org-ellipsis "…")
+
 (setq org-log-done 'time)
 
 ;; Force newline between headings.
