@@ -64,6 +64,7 @@ Evil emacs configuration.
   -  [[#org-agenda][Org agenda]]
   -  [[#persistent-cached-org-agenda][Persistent (cached) org agenda]]
   -  [[#counsel-org-clock][counsel-org-clock]]
+  -  [[#org-web-tools][org-web-tools]]
   -  [[#org-expiry][org-expiry]]
   -  [[#org-bullets][org-bullets]]
   -  [[#org-make-toc][org-make-toc]]
@@ -2770,6 +2771,14 @@ perhaps exporting) of the agenda buffer with ~run-with-idle-timer~ soon.
 (use-package counsel-org-clock
   :config
   (setq counsel-org-clock-default-action 'clock-in))
+#+end_src
+
+** org-web-tools
+~org-web-tools-insert-web-page-as-entry~ is so useful. I use it to capture
+websites into my to-read list.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package org-web-tools)
 #+end_src
 
 ** org-expiry
