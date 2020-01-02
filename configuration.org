@@ -2333,6 +2333,7 @@ region active."
  "S" 'org-sort-entries
  "t" 'counsel-org-tag
  "u" 'org-toggle-link-display
+ "w" 'org-web-tools-insert-web-page-as-entry
  "x" 'org-export-dispatch
  "y" 'org-copy-subtree)
 
