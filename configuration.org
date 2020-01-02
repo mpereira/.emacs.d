@@ -2350,8 +2350,8 @@ region active."
 I have org trees for projects which I like sorted by:
 | Priority | Order | Property |
 |        1 | asc   | TODO     |
-|        2 | asc   | ALLTAGS  |
-|        3 | asc   | PRIORITY |
+|        2 | asc   | PRIORITY |
+|        3 | asc   | ALLTAGS  |
 |        4 | desc  | CLOSED   |
 |        5 | desc  | CREATED  |
 |        6 | asc   | ITEM     |
@@ -2381,8 +2381,8 @@ Example: | todo  | int |
 | Priority | Order | Property |
 |----------+-------+----------|
 |        1 | asc   | TODO     |
-|        2 | asc   | ALLTAGS  |
-|        3 | asc   | PRIORITY |
+|        2 | asc   | PRIORITY |
+|        3 | asc   | ALLTAGS  |
 |        4 | desc  | CLOSED   |
 |        5 | desc  | CREATED  |
 |        6 | asc   | ITEM     |"
@@ -2398,9 +2398,9 @@ Example: | todo  | int |
          (date-int-max 30000000000000) ; YYYY=3000 mm=00 dd=00 HH=00 MM=00 SS=00
          (closed (org-entry-get (point) "CLOSED"))
          (closed-int (if closed
-                          (string-to-number
-                           (ts-format "%Y%m%d%H%M%S" (ts-parse-org closed)))
-                        date-int-min))
+                         (string-to-number
+                          (ts-format "%Y%m%d%H%M%S" (ts-parse-org closed)))
+                       date-int-min))
          (created (org-entry-get (point) "CREATED"))
          (created-int (if created
                           (string-to-number
@@ -2408,19 +2408,21 @@ Example: | todo  | int |
                         date-int-min))
          (alltags (org-entry-get (point) "ALLTAGS"))
          (item (org-entry-get (point) "ITEM"))
-         (sort-key (format "%03d %s %03d %.10f %.10f %s"
+         (sort-key (format "%03d %03d %s %.10f %.10f %s"
                            todo-int
-                           alltags
                            priority-int
+                           alltags
                            (/ (float date-int-max) closed-int)
                            (/ (float date-int-max) created-int)
                            item)))
+    (message sort-key)
     sort-key))
 
 (defun mpereira/org-sort-entries ()
   "Sorts child entries based on `mpereiera/ort-sort-key'."
   (interactive)
-  (org-sort-entries nil ?f #'mpereira/org-sort-key))
+  (save-excursion
+    (org-sort-entries nil ?f #'mpereira/org-sort-key)))
 #+end_src
 
 ** Org clock
