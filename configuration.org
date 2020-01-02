@@ -1360,6 +1360,11 @@ character length of directory (sans directory slashes) down to MAX-LENGTH."
   (interactive)
   (with-current-buffer (process-buffer (elpy-shell-get-or-create-process))
     (comint-clear-buffer)))
+
+(defun mpereira/prevent-buffer-kill ()
+  "Prevents the current buffer from being killed."
+  (interactive)
+  (emacs-lock-mode 'kill))
 #+end_src
 
 * Toggle buffer maximize
@@ -4817,14 +4822,9 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+begin_src emacs-lisp :tangle yes
 (use-package atomic-chrome
   :config
-  (setq atomic-chrome-url-major-mode-alist
-        '(("github\\.com" . gfm-mode)))
+  (setq atomic-chrome-url-major-mode-alist '(("github\\.com" . gfm-mode)))
 
   (atomic-chrome-start-server)
-
-  (defun mpereira/prevent-buffer-kill ()
-    (interactive)
-    (emacs-lock-mode 'kill))
 
   (add-hook 'atomic-chrome-edit-mode-hook #'mpereira/prevent-buffer-kill))
 #+end_src
