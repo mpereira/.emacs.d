@@ -1457,6 +1457,8 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (setq custom-file mpereira/custom-file)
 (load custom-file 'noerror)
 
+(setq confirm-kill-emacs 'y-or-n-p)
+
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
