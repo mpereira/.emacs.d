@@ -2325,7 +2325,7 @@ region active."
          '(4) 'org-schedule))
  "s" 'org-schedule
  "S" 'org-sort-entries
- "t" 'org-set-tags-command
+ "t" 'counsel-org-tag
  "u" 'org-toggle-link-display
  "x" 'org-export-dispatch
  "y" 'org-copy-subtree)
