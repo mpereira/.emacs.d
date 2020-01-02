@@ -213,6 +213,7 @@ Evil emacs configuration.
   -  [[#buffer-move][buffer-move]]
   -  [[#rotate][rotate]]
   -  [[#persistent-scratch][persistent-scratch]]
+  -  [[#prevent-scratch-buffers-from-being-killed][Prevent scratch buffers from being killed]]
 -  [[#project-management][Project management]]
   -  [[#projectile][projectile]]
   -  [[#term-projectile][term-projectile]]
@@ -1539,9 +1540,6 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (setq mac-option-modifier nil)
 (setq mac-control-modifier 'control)
 (setq ns-function-modifier 'hyper)
-
-;; Start scratch buffers in org-mode.
-(setq initial-major-mode 'org-mode)
 
 ;; Make cursor the width of the character it is under e.g. full width of a TAB.
 (setq x-stretch-cursor t)
@@ -4898,6 +4896,15 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 
   (setq persistent-scratch-scratch-buffer-p-function
         'mpereira/persistent-scratch-scratch-buffer-p))
+#+end_src
+
+** Prevent scratch buffers from being killed
+Also start them in Org mode.
+#+begin_src emacs-lisp :tangle yes
+(setq initial-major-mode (lambda ()
+                           (persistent-scratch-mode)
+                           (org-mode)))
+
 #+end_src
 
 * Project management
