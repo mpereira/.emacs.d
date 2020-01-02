@@ -2379,6 +2379,10 @@ Example: | todo  | int |
                       (cl-position-if (lambda (x) (string= x todo)) todo-seq)))
                   org-todo-keywords))))
 
+(defun mpereira/escape-string (s)
+  "Makes strings safe to be printed with `message'."
+  (s-replace-all '(("%" . "%%")) s))
+
 (defun mpereira/org-sort-key ()
   "Returns a sort key for an org entry based on:
 
@@ -2410,7 +2414,8 @@ Example: | todo  | int |
                           (string-to-number
                            (ts-format "%Y%m%d%H%M%S" (ts-parse-org created)))
                         date-int-min))
-         (alltags (org-entry-get (point) "ALLTAGS"))
+         (alltags-default "zzzzzzzzzz")
+         (alltags (or (org-entry-get (point) "ALLTAGS") alltags-default))
          (item (org-entry-get (point) "ITEM"))
          (sort-key (format "%03d %03d %s %.10f %.10f %s"
                            todo-int
@@ -2418,7 +2423,7 @@ Example: | todo  | int |
                            alltags
                            (/ (float date-int-max) closed-int)
                            (/ (float date-int-max) created-int)
-                           item)))
+                           (mpereira/escape-string item))))
     (message sort-key)
     sort-key))
 
