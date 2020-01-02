@@ -2309,6 +2309,7 @@ region active."
  "k" 'org-cut-subtree
  "n" 'org-add-note
  "p" 'org-set-property
+ "P" 'org-priority
  "r" 'org-refile
  "X" (lambda ()
        (interactive)
