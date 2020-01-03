@@ -2984,7 +2984,7 @@ by Quelpa.
  :keymaps '(dired-mode-map)
  :states '(normal visual)
  "(" 'dired-subtree-up
- ")" 'dired-hide-details-mode
+ "C-9" 'dired-hide-details-mode
  "C-j" 'dired-next-dirline
  "C-k" 'dired-prev-dirline)
 #+end_src
