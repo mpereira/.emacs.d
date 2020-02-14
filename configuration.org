@@ -62,7 +62,10 @@ Evil emacs configuration.
   -  [[#org-clock][Org clock]]
   -  [[#org-gcal][org-gcal]]
   -  [[#org-agenda][Org agenda]]
-  -  [[#persistent-cached-org-agenda][Persistent (cached) org agenda]]
+  -  [[#my-custom-persistent-cached-org-agendas][My custom persistent (cached) org agendas]]
+    -  [[#main-agenda][Main agenda]]
+    -  [[#review-agenda][Review agenda]]
+    -  [[#common][Common]]
   -  [[#counsel-org-clock][counsel-org-clock]]
   -  [[#org-web-tools][org-web-tools]]
   -  [[#org-expiry][org-expiry]]
@@ -2226,10 +2229,8 @@ region active."
  :states '(normal visual)
  :prefix mpereira/leader
  :infix "o"
- "a" 'mpereira/open-or-build-org-agenda
- "A" (lambda ()
-       (interactive)
-       (org-agenda nil "r"))
+ "a" #'mpereira/open-or-build-main-org-agenda
+ "A" #'mpereira/open-or-build-review-org-agenda
  "c" 'org-capture
  "Ci" 'org-clock-in
  "Co" 'org-clock-out
@@ -2504,47 +2505,6 @@ Example: | todo  | int |
 
 (setq org-agenda-format-date 'mpereira/org-agenda-format-date)
 
-;; TODO: any reason this is a custom agenda command and not just a function like
-;; `mpereira/build-org-agenda'?
-(setq org-agenda-custom-commands
-      `(("r" "Review"
-         ((tags ,(mpereira/org-agenda-review-search "today" "+1d")
-                ((org-agenda-overriding-header
-                  (concat
-                   "\nDone today "
-                   "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))
-                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
-          (tags ,(mpereira/org-agenda-review-search "-1d" "today")
-                ((org-agenda-overriding-header
-                  (concat
-                   "\nDone yesterday "
-                   "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))
-                 (org-agenda-prefix-format " %i %-18c%?-12t% s")))
-          (tags ,(mpereira/org-agenda-review-search
-                  (mpereira/org-agenda-date-week-start
-                   (mpereira/format-calendar-date-Y-m-d
-                    (mpereira/calendar-read-date "today")))
-                  (mpereira/format-calendar-date-Y-m-d
-                   (mpereira/calendar-read-date "today")))
-                ((org-agenda-overriding-header "\nDone this week\n")
-                 (org-agenda-prefix-format
-                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
-                 (org-agenda-show-all-dates t)
-                 (org-agenda-sorting-strategy '(timestamp-down))))
-          (tags (mpereira/org-agenda-review-search
-                 (mpereira/org-agenda-date-week-start
-                  (mpereira/format-calendar-date-Y-m-d
-                   (mpereira/calendar-read-date "-1w")))
-                 (mpereira/org-agenda-date-week-end
-                  (mpereira/format-calendar-date-Y-m-d
-                   (mpereira/calendar-read-date "-1w"))))
-                ((org-agenda-overriding-header "\nDone last week\n")
-                 (org-agenda-prefix-format
-                  " %-18c %(mpereira/org-agenda-review-suffix-format) ")
-                 (org-agenda-show-all-dates t)
-                 (org-agenda-sorting-strategy '(timestamp-down)))))
-         ((org-agenda-block-separator ?\-)))))
-
 ;; Redo agenda after capturing.
 (add-hook 'org-capture-after-finalize-hook 'org-agenda-maybe-redo)
 
@@ -2645,22 +2605,25 @@ Example: | todo  | int |
  "$" (calendar-action calendar-end-of-week))
 #+end_src
 
-** Persistent (cached) org agenda
-My agenda is a bit heavy to build so I don't kill its buffer (I use ~winner-undo~
-instead, which is bound to =q=). I have a keybinding (=<leader> O a=) that displays
-an existing agenda buffer, or builds and displays a fresh agenda buffer.
+** My custom persistent (cached) org agendas
+My agendas are a bit heavy to build so I don't kill their buffers (I use
+~set-window-configuration~ instead to go back to the window configuration state
+right before opening the agenda, which is bound to =q=). I have keybindings
+(=<leader> O a= for the main agenda and =<leader> O A= for the review agenda) that
+display an existing agenda buffer, or build and display a fresh agenda buffer.
 
 I'm also planning to add automatic and periodic background refreshing (and
-perhaps exporting) of the agenda buffer with ~run-with-idle-timer~ soon.
+perhaps exporting) of the agenda buffers with ~run-with-idle-timer~ soon.
 
+*** Main agenda
 #+begin_src emacs-lisp :tangle yes
-(defvar mpereira/org-agenda-last-built nil
+(defvar mpereira/main-org-agenda-last-built nil
   "The last time the org agenda was built.")
 
-(defvar mpereira/org-agenda-previous-window-configuration nil
+(defvar mpereira/main-org-agenda-previous-window-configuration nil
   "A window configuration to return to when closing the org agenda.")
 
-(defvar mpereira/org-agenda-previous-point nil
+(defvar mpereira/main-org-agenda-previous-point nil
   "A point to return to when closing the org agenda.")
 
 (defun mpereira/build-org-agenda ()
@@ -2750,40 +2713,148 @@ perhaps exporting) of the agenda buffer with ~run-with-idle-timer~ soon.
                        (org-agenda-files (list ,inbox-file)))))))
          (org-agenda-custom-commands (list
                                       (list
-                                       "c" "Custom agenda view"
+                                       "c" "Main agenda"
                                        settings
                                        '((org-agenda-block-separator ?\-))))))
     (org-agenda nil "c")
-    (setq mpereira/org-agenda-last-built (ts-now))))
+    (setq mpereira/main-org-agenda-last-built (ts-now))))
 
-(defun mpereira/open-or-build-org-agenda ()
-  "Display org agenda if it was already built. Build and display it otherwise."
+(defun mpereira/open-or-build-main-org-agenda ()
+  "Display main org agenda if it was already built. Build and display it
+otherwise."
   (interactive)
-  (let* ((org-agenda-buffer-name "*Org Agenda*")
+  (let* ((org-agenda-buffer-name "*Main Org Agenda*")
          (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
-    (setq mpereira/org-agenda-previous-window-configuration
+    (setq mpereira/main-org-agenda-previous-window-configuration
           (current-window-configuration))
-    (setq mpereira/org-agenda-previous-point (point))
+    (setq mpereira/main-org-agenda-previous-point (point))
     (if (bufferp org-agenda-buffer)
         (progn
           (switch-to-buffer org-agenda-buffer)
           (delete-other-windows)
-          (let* ((last-built (ts-human-format-duration
-                              (ts-difference (ts-now)
-                                             mpereira/org-agenda-last-built))))
+          (let ((last-built (ts-human-format-duration
+                             (ts-difference (ts-now)
+                                            mpereira/main-org-agenda-last-built))))
             (message (format "Last built %s ago" last-built))))
       (progn
         (mpereira/build-org-agenda)
         (message "Built now")))))
+#+end_src
 
-(defun mpereira/close-org-agenda ()
-  "Close the org agenda and restore the previous window configuration and point
-position."
+*** Review agenda
+#+begin_src emacs-lisp :tangle yes
+(defvar mpereira/review-org-agenda-last-built nil
+  "The last time the review org agenda was built.")
+
+(defvar mpereira/review-org-agenda-previous-window-configuration nil
+  "A window configuration to return to when closing the review org agenda.")
+
+(defvar mpereira/review-org-agenda-previous-point nil
+  "A point to return to when closing the review org agenda.")
+
+(defun mpereira/build-review-org-agenda ()
+  "Build and display the review org agenda."
   (interactive)
-  (set-window-configuration mpereira/org-agenda-previous-window-configuration)
-  (setq mpereira/org-agenda-previous-window-configuration nil)
-  (goto-char mpereira/org-agenda-previous-point)
-  (setq mpereira/org-agenda-previous-point nil))
+  (let* ((settings
+          `((tags ,(mpereira/org-agenda-review-search "today" "+1d")
+                  ((org-agenda-overriding-header
+                    (concat
+                     "\nDone today "
+                     "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))
+                   (org-agenda-prefix-format " %i %-18c%?-12t% s")))
+            (tags ,(mpereira/org-agenda-review-search "-1d" "today")
+                  ((org-agenda-overriding-header
+                    (concat
+                     "\nDone yesterday "
+                     "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))
+                   (org-agenda-prefix-format " %i %-18c%?-12t% s")))
+            (tags ,(mpereira/org-agenda-review-search
+                    (mpereira/org-agenda-date-week-start
+                     (mpereira/format-calendar-date-Y-m-d
+                      (mpereira/calendar-read-date "today")))
+                    (mpereira/format-calendar-date-Y-m-d
+                     (mpereira/calendar-read-date "today")))
+                  ((org-agenda-overriding-header "\nDone this week\n")
+                   (org-agenda-prefix-format
+                    " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                   (org-agenda-show-all-dates t)
+                   (org-agenda-sorting-strategy '(timestamp-down))))
+            (tags (mpereira/org-agenda-review-search
+                   (mpereira/org-agenda-date-week-start
+                    (mpereira/format-calendar-date-Y-m-d
+                     (mpereira/calendar-read-date "-1w")))
+                   (mpereira/org-agenda-date-week-end
+                    (mpereira/format-calendar-date-Y-m-d
+                     (mpereira/calendar-read-date "-1w"))))
+                  ((org-agenda-overriding-header "\nDone last week\n")
+                   (org-agenda-prefix-format
+                    " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                   (org-agenda-show-all-dates t)
+                   (org-agenda-sorting-strategy '(timestamp-down))))))
+         (org-agenda-custom-commands (list
+                                      (list
+                                       "c" "Review agenda"
+                                       settings
+                                       '((org-agenda-block-separator ?\-))))))
+    (org-agenda nil "c")
+    (setq mpereira/review-org-agenda-last-built (ts-now))))
+
+(defun mpereira/open-or-build-review-org-agenda ()
+  "Display review org agenda if it was already built. Build and display it
+otherwise."
+  (interactive)
+  (let* ((org-agenda-buffer-name "*Review Org Agenda*")
+         (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
+    (setq mpereira/review-org-agenda-previous-window-configuration
+          (current-window-configuration))
+    (setq mpereira/review-org-agenda-previous-point (point))
+    (if (bufferp org-agenda-buffer)
+        (progn
+          (switch-to-buffer org-agenda-buffer)
+          (delete-other-windows)
+          (let ((last-built (ts-human-format-duration
+                             (ts-difference
+                              (ts-now)
+                              mpereira/review-org-agenda-last-built))))
+            (message (format "Last built %s ago" last-built))))
+      (progn
+        (mpereira/build-review-org-agenda)
+        (message "Built now")))))
+#+end_src
+
+*** Common
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/close-org-agenda ()
+  "Close the last opened org agenda and restore the previous window
+configuration and point position."
+  (interactive)
+  (let ((close-review-org-agenda
+         (lambda ()
+           (set-window-configuration
+            mpereira/review-org-agenda-previous-window-configuration)
+           (setq mpereira/review-org-agenda-previous-window-configuration nil)
+           (goto-char mpereira/review-org-agenda-previous-point)
+           (setq mpereira/review-org-agenda-previous-point nil)))
+        (close-main-org-agenda
+         (lambda ()
+           (set-window-configuration
+            mpereira/main-org-agenda-previous-window-configuration)
+           (setq mpereira/main-org-agenda-previous-window-configuration nil)
+           (goto-char mpereira/main-org-agenda-previous-point)
+           (setq mpereira/main-org-agenda-previous-point nil))))
+    (cond
+     ((and mpereira/main-org-agenda-previous-window-configuration
+           (not mpereira/review-org-agenda-previous-window-configuration))
+      (funcall close-main-org-agenda))
+     ((and mpereira/review-org-agenda-previous-window-configuration
+           (not mpereira/main-org-agenda-previous-window-configuration))
+      (funcall close-review-org-agenda))
+     ((and mpereira/main-org-agenda-previous-window-configuration
+           mpereira/review-org-agenda-previous-window-configuration)
+      (if (ts<= mpereira/main-org-agenda-last-built
+                mpereira/review-org-agenda-last-built)
+          (funcall close-review-org-agenda)
+        (funcall close-main-org-agenda))))))
 #+end_src
 
 ** counsel-org-clock
