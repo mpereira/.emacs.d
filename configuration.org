@@ -2596,7 +2596,7 @@ Example: | todo  | int |
  "q" #'org-agenda-quit
  "r" #'org-agenda-refile
  "s" #'org-agenda-schedule
- "q" #'winner-undo                      ; for persistent org agenda.
+ "q" #'mpereira/close-org-agenda
  "t" #'org-agenda-todo
  "T" #'org-agenda-set-tags
  "u" #'org-agenda-undo
@@ -2656,6 +2656,12 @@ perhaps exporting) of the agenda buffer with ~run-with-idle-timer~ soon.
 #+begin_src emacs-lisp :tangle yes
 (defvar mpereira/org-agenda-last-built nil
   "The last time the org agenda was built.")
+
+(defvar mpereira/org-agenda-previous-window-configuration nil
+  "A window configuration to return to when closing the org agenda.")
+
+(defvar mpereira/org-agenda-previous-point nil
+  "A point to return to when closing the org agenda.")
 
 (defun mpereira/build-org-agenda ()
   "Build and display the org agenda."
@@ -2751,13 +2757,15 @@ perhaps exporting) of the agenda buffer with ~run-with-idle-timer~ soon.
     (setq mpereira/org-agenda-last-built (ts-now))))
 
 (defun mpereira/open-or-build-org-agenda ()
-  "Display cached org agenda if it exists, build and display it otherwise."
+  "Display org agenda if it was already built. Build and display it otherwise."
   (interactive)
   (let* ((org-agenda-buffer-name "*Org Agenda*")
          (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
+    (setq mpereira/org-agenda-previous-window-configuration
+          (current-window-configuration))
+    (setq mpereira/org-agenda-previous-point (point))
     (if (bufferp org-agenda-buffer)
         (progn
-          ;; These two actions are reversed with `winner-undo'.
           (switch-to-buffer org-agenda-buffer)
           (delete-other-windows)
           (let* ((last-built (ts-human-format-duration
@@ -2767,6 +2775,15 @@ perhaps exporting) of the agenda buffer with ~run-with-idle-timer~ soon.
       (progn
         (mpereira/build-org-agenda)
         (message "Built now")))))
+
+(defun mpereira/close-org-agenda ()
+  "Close the org agenda and restore the previous window configuration and point
+position."
+  (interactive)
+  (set-window-configuration mpereira/org-agenda-previous-window-configuration)
+  (setq mpereira/org-agenda-previous-window-configuration nil)
+  (goto-char mpereira/org-agenda-previous-point)
+  (setq mpereira/org-agenda-previous-point nil))
 #+end_src
 
 ** counsel-org-clock
