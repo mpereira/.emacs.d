@@ -1493,7 +1493,10 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (put 'narrow-to-region 'disabled nil)
 
 ;; Start in full-screen.
-(add-hook 'after-init-hook #'toggle-frame-fullscreen)
+;; FIXME: Using `toggle-frame-maximized' instead of `toggle-frame-fullscreen'
+;; because of
+;; https://github.com/tumashu/posframe/issues/30#issuecomment-586370312.
+(add-hook 'after-init-hook #'toggle-frame-maximized)
 
 ;; Show matching parens.
 (setq show-paren-delay 0)
