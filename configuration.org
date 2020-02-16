@@ -63,6 +63,7 @@ Evil emacs configuration.
   -  [[#org-gcal][org-gcal]]
   -  [[#org-agenda][Org agenda]]
   -  [[#my-custom-persistent-cached-org-agendas][My custom persistent (cached) org agendas]]
+    -  [[#agenda-library][Agenda library]]
     -  [[#main-agenda][Main agenda]]
     -  [[#review-agenda][Review agenda]]
     -  [[#common][Common]]
@@ -827,202 +828,6 @@ in any structured movement package is mind-boggling to me."
       (interactive "p")
       (lispyville-up-list)
       (evil-insert arg))))
-
-(defun mpereira/org-current-subtree-state-p (state)
-  (string= state (org-get-todo-state)))
-
-(defun mpereira/org-up-heading-top-level ()
-  "Move to the top level heading."
-  (while (not (= 1 (org-outline-level)))
-    (org-up-heading-safe)))
-
-(defun mpereira/org-skip-all-but-first ()
-  "Skip all but the first non-done entry."
-  (let (should-skip-entry)
-    (unless (mpereira/org-current-subtree-state-p "TODO")
-      (setq should-skip-entry t))
-    (save-excursion
-      (while (and (not should-skip-entry) (org-goto-sibling t))
-        (when (mpereira/org-current-subtree-state-p "TODO"))
-        (setq should-skip-entry t)))
-    (when should-skip-entry
-      (or (outline-next-heading)
-          (goto-char (point-max))))))
-
-(defun mpereira/org-skip-subtree-if-habit ()
-  "Skip an agenda entry if it has a STYLE property equal to \"habit\"."
-  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-    (if (string= (org-entry-get nil "STYLE") "habit")
-        subtree-end
-      nil)))
-
-(defun mpereira/org-skip-subtree-unless-habit ()
-  "Skip an agenda entry unless it has a STYLE property equal to \"habit\"."
-  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-    (if (string= (org-entry-get nil "STYLE") "habit")
-        nil
-      subtree-end)))
-
-(defun mpereira/org-skip-inbox ()
-  "Skip agenda entries coming from the inbox."
-  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-    (if (string= (org-get-category) "inbox")
-        subtree-end
-      nil)))
-
-(defun mpereira/org-skip-someday-projects-subheadings ()
-  "Skip agenda entries under a project with state \"SOMEDAY\"."
-  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-    (mpereira/org-up-heading-top-level)
-    (if (mpereira/org-current-subtree-state-p "SOMEDAY")
-        subtree-end
-      nil)))
-
-(defun mpereira/org-entry-at-point-get (property)
-  (org-entry-get (point) property))
-
-(defun mpereira/deadline-or-scheduled ()
-  (interactive)
-  (cond
-   ((mpereira/org-entry-at-point-get "DEADLINE") "Deadline")
-   ((mpereira/org-entry-at-point-get "SCHEDULED") "Scheduled")))
-
-(defun mpereira/org-agenda-tags-suffix ()
-  (interactive)
-  (let* ((timestamp (or (mpereira/org-entry-at-point-get "DEADLINE")
-                        (mpereira/org-entry-at-point-get "SCHEDULED")))
-         (current (calendar-date-string (calendar-current-date)))
-         (days (time-to-number-of-days (time-subtract
-                                        (org-read-date nil t timestamp)
-                                        (org-read-date nil t current))))
-         (string (format-time-string "%d %b %Y" (org-read-date t t timestamp))))
-    (format "In %dd (%s) %10s:"
-            days
-            string
-            (mpereira/deadline-or-scheduled))))
-
-(defun mpereira/org-agenda-project-name-prefix-format ()
-  (s-truncate 20 (car (org-get-outline-path t))))
-
-(defun mpereira/org-agenda-format-date (date)
-  "Format a DATE string for display in the daily/weekly agenda.
-This function makes sure that dates are aligned for easy reading."
-  (let* ((dayname (calendar-day-name date))
-         (day (cadr date))
-         (day-of-week (calendar-day-of-week date))
-         (month (car date))
-         (monthname (calendar-month-name month))
-         (year (nth 2 date)))
-    (format "\n%-9s %2d %s"
-            dayname day monthname year)))
-
-(defun mpereira/yesterday ()
-  (time-subtract (current-time) (days-to-time 1)))
-
-(defun mpereira/time-to-calendar-date (time)
-  (let* ((decoded-time (decode-time time))
-         (day (nth 3 decoded-time))
-         (month (nth 4 decoded-time))
-         (year (nth 5 decoded-time)))
-    (list month day year)))
-
-(defun mpereira/format-calendar-date-Y-m-d (calendar-date)
-  (format-time-string "%Y-%m-%d"
-                      (mpereira/calendar-date-to-time calendar-date)))
-
-(defun mpereira/format-calendar-date-d-m-Y (calendar-date)
-  (format-time-string "%d %B %Y"
-                      (mpereira/calendar-date-to-time calendar-date)))
-
-(defun mpereira/calendar-date-to-time (calendar-date)
-  (let* ((day (calendar-extract-day calendar-date))
-         (month (calendar-extract-month calendar-date))
-         (year (calendar-extract-year calendar-date)))
-    (encode-time 0 0 0 day month year)))
-
-(defun mpereira/calendar-read-date (string)
-  (mpereira/time-to-calendar-date (org-read-date t t string)))
-
-(defun mpereira/org-agenda-date-week-start (string)
-  "Returns the first day of the week at DATE."
-  (let* ((calendar-date (mpereira/calendar-read-date string)))
-    (mpereira/format-calendar-date-Y-m-d
-     (mpereira/time-to-calendar-date
-      (time-subtract
-       (mpereira/calendar-date-to-time calendar-date)
-       (days-to-time (if (zerop (calendar-day-of-week calendar-date))
-                         6 ;; magic.
-                       (- (calendar-day-of-week calendar-date)
-                          calendar-week-start-day))))))))
-
-(defun mpereira/org-agenda-date-week-end (string)
-  "Returns the last day of the week at DATE."
-  (let* ((calendar-date (mpereira/calendar-read-date string)))
-    (if (= (calendar-week-end-day) (calendar-day-of-week calendar-date))
-        string
-      (mpereira/format-calendar-date-Y-m-d
-       (mpereira/time-to-calendar-date
-        (time-add
-         (mpereira/calendar-date-to-time calendar-date)
-         (days-to-time (- 7 (calendar-day-of-week calendar-date)))))))))
-
-(defun mpereira/org-agenda-review-suffix-format ()
-  (let* ((timestamp (or (mpereira/org-entry-at-point-get "TIMESTAMP")
-                        (mpereira/org-entry-at-point-get "TIMESTAMP_IA")
-                        (mpereira/org-entry-at-point-get "DEADLINE")
-                        (mpereira/org-entry-at-point-get "SCHEDULED")))
-         (calendar-date (mpereira/calendar-read-date timestamp)))
-    (format "%s  %-22s"
-            (mpereira/format-calendar-date-Y-m-d calendar-date)
-            (mpereira/org-agenda-project-name-prefix-format))))
-
-(defun mpereira/org-agenda-review-search (start end)
-  (concat "TODO=\"DONE\""
-          "&"
-          "TIMESTAMP_IA>=\"<" start ">\""
-          "&"
-          "TIMESTAMP_IA<=\"<" end ">\""
-          "|"
-          "TODO=\"DONE\""
-          "&"
-          "TIMESTAMP>=\"<" start ">\""
-          "&"
-          "TIMESTAMP<=\"<" end ">\""))
-
-;; https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html
-(defun mpereira/org-agenda-delete-empty-blocks ()
-  "Remove empty agenda blocks.
-A block is identified as empty if there are fewer than 2 non-empty
-lines in the block (excluding the line with
-`org-agenda-block-separator' characters)."
-  (when org-agenda-compact-blocks
-    (user-error "Cannot delete empty compact blocks"))
-  (setq buffer-read-only nil)
-  (save-excursion
-    (goto-char (point-min))
-    (let* ((blank-line-re "^\\s-*$")
-           (content-line-count (if (looking-at-p blank-line-re) 0 1))
-           (start-pos (point))
-           (block-re (format "%c\\{10,\\}" org-agenda-block-separator)))
-      (while (and (not (eobp)) (forward-line))
-        (cond
-         ((looking-at-p block-re)
-          (when (< content-line-count 2)
-            (delete-region start-pos (1+ (point-at-bol))))
-          (setq start-pos (point))
-          (forward-line)
-          (setq content-line-count (if (looking-at-p blank-line-re) 0 1)))
-         ((not (looking-at-p blank-line-re))
-          (setq content-line-count (1+ content-line-count)))))
-      (when (< content-line-count 2)
-        (delete-region start-pos (point-max)))
-      (goto-char (point-min))
-      ;; The above strategy can leave a separator line at the beginning of the
-      ;; buffer.
-      (when (looking-at-p block-re)
-        (delete-region (point) (1+ (point-at-eol))))))
-  (setq buffer-read-only t))
-
 
 (defun mpereira/org-sort-parent-entries (&rest args)
   ;; `org-sort-entries' doesn't respect `save-excursion'.
@@ -2615,34 +2420,288 @@ display an existing agenda buffer, or build and display a fresh agenda buffer.
 I'm also planning to add automatic and periodic background refreshing (and
 perhaps exporting) of the agenda buffers with ~run-with-idle-timer~ soon.
 
+*** Agenda library
+These are functions that I use in the actual custom agenda definitions.
+
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/org-current-subtree-state-p (state)
+  (string= state (org-get-todo-state)))
+
+(defun mpereira/org-up-heading-top-level ()
+  "Move to the top level heading."
+  (while (not (= 1 (org-outline-level)))
+    (org-up-heading-safe)))
+
+(defun mpereira/org-skip-all-but-first ()
+  "Skip all but the first non-done entry."
+  (let (should-skip-entry)
+    (unless (mpereira/org-current-subtree-state-p "TODO")
+      (setq should-skip-entry t))
+    (save-excursion
+      (while (and (not should-skip-entry) (org-goto-sibling t))
+        (when (mpereira/org-current-subtree-state-p "TODO"))
+        (setq should-skip-entry t)))
+    (when should-skip-entry
+      (or (outline-next-heading)
+          (goto-char (point-max))))))
+
+(defun mpereira/org-skip-subtree-if-habit ()
+  "Skip an agenda entry if it has a STYLE property equal to \"habit\"."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (string= (org-entry-get nil "STYLE") "habit")
+        subtree-end
+      nil)))
+
+(defun mpereira/org-skip-subtree-unless-habit ()
+  "Skip an agenda entry unless it has a STYLE property equal to \"habit\"."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (string= (org-entry-get nil "STYLE") "habit")
+        nil
+      subtree-end)))
+
+(defun mpereira/org-skip-inbox ()
+  "Skip agenda entries coming from the inbox."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (string= (org-get-category) "inbox")
+        subtree-end
+      nil)))
+
+(defun mpereira/org-skip-someday-projects-subheadings ()
+  "Skip agenda entries under a project with state \"SOMEDAY\"."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (mpereira/org-up-heading-top-level)
+    (if (mpereira/org-current-subtree-state-p "SOMEDAY")
+        subtree-end
+      nil)))
+
+(defun mpereira/org-entry-at-point-get (property)
+  (org-entry-get (point) property))
+
+(defun mpereira/org-entry-parent-root-heading ()
+  "Returns the root heading for the entry at point. Makes the root heading
+available in the kill ring if called interactively.
+
+For example, in an org file like
+
+,* Emacs
+,** TODO Periodically refresh org agenda
+
+the \"parent root heading\" for the TODO entry would be \"Emacs\".
+the \"parent root heading\" for the \"Emacs\" entry would be nil.
+"
+  (interactive)
+  (let* ((outline-path (org-get-outline-path t))
+         (parent-heading-name (when (< 1 (length outline-path))
+                                (car outline-path))))
+    (when (and parent-heading-name
+               (called-interactively-p 'any))
+      (kill-new parent-heading-name))
+    ;; `concat' turns nil into an empty string.
+    (concat parent-heading-name)))
+
+(defun mpereira/timestamp-type ()
+  (interactive)
+  (cond
+   ((mpereira/org-entry-at-point-get "DEADLINE") "Deadline")
+   ((mpereira/org-entry-at-point-get "SCHEDULED") "Scheduled")
+   ((mpereira/org-entry-at-point-get "TIMESTAMP") "Timestamp")
+   ((mpereira/org-entry-at-point-get "TIMESTAMP_IA") "Timestamp (inactive)")))
+
+(defun mpereira/org-agenda-tags-prefix-format ()
+  "Used in the \"tags\" section of the main org agenda.
+
+This function is only necessary because multiple EXPRESSIONs would be required
+to achieve the same outcome just with a single `org-agenda-prefix-format', and
+that's not allowed."
+  (interactive)
+  (let* ((timestamp (or (mpereira/org-entry-at-point-get "DEADLINE")
+                        (mpereira/org-entry-at-point-get "SCHEDULED")
+                        (mpereira/org-entry-at-point-get "TIMESTAMP")))
+         (current (calendar-date-string (calendar-current-date)))
+         (days (time-to-number-of-days (time-subtract
+                                        (org-read-date nil t timestamp)
+                                        (org-read-date nil t current))))
+         (date (format-time-string "%d %b" (org-read-date t t timestamp))))
+    (concat (format "%-20s"
+                    (s-truncate 18
+                                (mpereira/org-entry-parent-root-heading)
+                                "…"))
+            (format "%11s: " (mpereira/timestamp-type))
+            " "
+            (format "%6s" (format "In %dd" days))
+            " "
+            (format "%8s" (format "(%s)" date)))))
+
+(defun mpereira/org-agenda-format-date (date)
+  "Format a DATE string for display in the daily/weekly agenda.
+This function makes sure that dates are aligned for easy reading."
+  (let* ((dayname (calendar-day-name date))
+         (day (cadr date))
+         (day-of-week (calendar-day-of-week date))
+         (month (car date))
+         (monthname (calendar-month-name month))
+         (year (nth 2 date)))
+    (format "\n%-9s %2d %s"
+            dayname day monthname year)))
+
+(defun mpereira/yesterday ()
+  (time-subtract (current-time) (days-to-time 1)))
+
+(defun mpereira/time-to-calendar-date (time)
+  (let* ((decoded-time (decode-time time))
+         (day (nth 3 decoded-time))
+         (month (nth 4 decoded-time))
+         (year (nth 5 decoded-time)))
+    (list month day year)))
+
+(defun mpereira/format-calendar-date-Y-m-d (calendar-date)
+  (format-time-string "%Y-%m-%d"
+                      (mpereira/calendar-date-to-time calendar-date)))
+
+(defun mpereira/format-calendar-date-d-m-Y (calendar-date)
+  (format-time-string "%d %B %Y"
+                      (mpereira/calendar-date-to-time calendar-date)))
+
+(defun mpereira/calendar-date-to-time (calendar-date)
+  (let* ((day (calendar-extract-day calendar-date))
+         (month (calendar-extract-month calendar-date))
+         (year (calendar-extract-year calendar-date)))
+    (encode-time 0 0 0 day month year)))
+
+(defun mpereira/calendar-read-date (string)
+  (mpereira/time-to-calendar-date (org-read-date t t string)))
+
+(defun mpereira/org-agenda-date-week-start (string)
+  "Returns the first day of the week at DATE."
+  (let* ((calendar-date (mpereira/calendar-read-date string)))
+    (mpereira/format-calendar-date-Y-m-d
+     (mpereira/time-to-calendar-date
+      (time-subtract
+       (mpereira/calendar-date-to-time calendar-date)
+       (days-to-time (if (zerop (calendar-day-of-week calendar-date))
+                         6 ;; magic.
+                       (- (calendar-day-of-week calendar-date)
+                          calendar-week-start-day))))))))
+
+(defun mpereira/org-agenda-date-week-end (string)
+  "Returns the last day of the week at DATE."
+  (let* ((calendar-date (mpereira/calendar-read-date string)))
+    (if (= (calendar-week-end-day) (calendar-day-of-week calendar-date))
+        string
+      (mpereira/format-calendar-date-Y-m-d
+       (mpereira/time-to-calendar-date
+        (time-add
+         (mpereira/calendar-date-to-time calendar-date)
+         (days-to-time (- 7 (calendar-day-of-week calendar-date)))))))))
+
+(defun mpereira/org-agenda-review-prefix-format ()
+  (let* ((timestamp (or (mpereira/org-entry-at-point-get "CLOSED")
+                        (mpereira/org-entry-at-point-get "DEADLINE")
+                        (mpereira/org-entry-at-point-get "TIMESTAMP")
+                        (mpereira/org-entry-at-point-get "TIMESTAMP_IA")
+                        (mpereira/org-entry-at-point-get "SCHEDULED")))
+         (calendar-date (mpereira/calendar-read-date timestamp)))
+    (format "%-20s  %s"
+            (s-truncate 18 (mpereira/org-entry-parent-root-heading) "…")
+            (mpereira/format-calendar-date-Y-m-d calendar-date))))
+
+(defun mpereira/org-agenda-review-search (start end)
+  (concat "CLOSED>=\"<" start ">\""
+          "&"
+          "CLOSED<=\"<" end ">\""
+          "|"
+          "TIMESTAMP_IA>=\"<" start ">\""
+          "&"
+          "TIMESTAMP_IA<=\"<" end ">\""
+          "|"
+          "TIMESTAMP>=\"<" start ">\""
+          "&"
+          "TIMESTAMP<=\"<" end ">\""))
+
+;; https://lists.gnu.org/archive/html/emacs-orgmode/2015-06/msg00266.html
+(defun mpereira/org-agenda-delete-empty-blocks ()
+  "Remove empty agenda blocks.
+A block is identified as empty if there are fewer than 2 non-empty
+lines in the block (excluding the line with
+`org-agenda-block-separator' characters)."
+  (when org-agenda-compact-blocks
+    (user-error "Cannot delete empty compact blocks"))
+  (setq buffer-read-only nil)
+  (save-excursion
+    (goto-char (point-min))
+    (let* ((blank-line-re "^\\s-*$")
+           (content-line-count (if (looking-at-p blank-line-re) 0 1))
+           (start-pos (point))
+           (block-re (format "%c\\{10,\\}" org-agenda-block-separator)))
+      (while (and (not (eobp)) (forward-line))
+        (cond
+         ((looking-at-p block-re)
+          (when (< content-line-count 2)
+            (delete-region start-pos (1+ (point-at-bol))))
+          (setq start-pos (point))
+          (forward-line)
+          (setq content-line-count (if (looking-at-p blank-line-re) 0 1)))
+         ((not (looking-at-p blank-line-re))
+          (setq content-line-count (1+ content-line-count)))))
+      (when (< content-line-count 2)
+        (delete-region start-pos (point-max)))
+      (goto-char (point-min))
+      ;; The above strategy can leave a separator line at the beginning of the
+      ;; buffer.
+      (when (looking-at-p block-re)
+        (delete-region (point) (1+ (point-at-eol))))))
+  (setq buffer-read-only t))
+#+end_src
+
 *** Main agenda
 #+begin_src emacs-lisp :tangle yes
+(defvar mpereira/main-org-agenda-buffer-name "*Main Org Agenda*"
+  "The name of the main org agenda.")
+
 (defvar mpereira/main-org-agenda-last-built nil
-  "The last time the org agenda was built.")
+  "The last time the main org agenda was built.")
 
 (defvar mpereira/main-org-agenda-previous-window-configuration nil
-  "A window configuration to return to when closing the org agenda.")
+  "A window configuration to return to when closing the main org agenda.")
 
 (defvar mpereira/main-org-agenda-previous-point nil
-  "A point to return to when closing the org agenda.")
+  "A point to return to when closing the main org agenda.")
 
-(defun mpereira/build-org-agenda ()
-  "Build and display the org agenda."
+(defun mpereira/build-main-org-agenda ()
+  "Build and display the main org agenda."
   (interactive)
-  (let* ((settings
+  ;; Remember that EXPRESSION (e.g. "%(foo)") can be used only once per
+  ;; `org-agenda-prefix-format'.
+  (let* ((todo-prefix-format
+          (concat "  "
+                  ;; CATEGORY property or file name.
+                  "%-10c"
+                  " "
+                  ;; Truncated root heading.
+                  "%-20(s-truncate 18 (mpereira/org-entry-parent-root-heading) \"…\")"
+                  " "
+                  ;; Time of day specification.
+                  "%?-12t"
+                  " "
+                  ;; Scheduling/Deadline information.
+                  "%-12s"))
+         (tags-prefix-format
+          (concat "  "
+                  ;; CATEGORY property or file name.
+                  "%-10c"
+                  " "
+                  "%(mpereira/org-agenda-tags-prefix-format)"
+                  "  "))
+         (agenda-ignore-todos '("DOING" "WAITING" "DONE" "CANCELLED"))
+         (settings
           '((todo "DOING"
                   ((org-agenda-overriding-header "\nDoing\n")
-                   (org-agenda-prefix-format " %i %-18c%?-12t% s")
-                   (org-agenda-skip-function
-                    '(org-agenda-skip-entry-if 'scheduled))))
-            (todo "BLOCKED"
-                  ((org-agenda-overriding-header "\Blocked\n")
-                   (org-agenda-prefix-format " %i %-18c%?-12t% s")
+                   (org-agenda-prefix-format todo-prefix-format)
                    (org-agenda-skip-function
                     '(org-agenda-skip-entry-if 'scheduled))))
             (todo "WAITING"
                   ((org-agenda-overriding-header "\nWaiting\n")
-                   (org-agenda-prefix-format " %i %-18c%?-12t% s")))
+                   (org-agenda-prefix-format todo-prefix-format)))
             (agenda ""
                     ((org-agenda-overriding-header
                       (concat
@@ -2652,54 +2711,29 @@ perhaps exporting) of the agenda buffers with ~run-with-idle-timer~ soon.
                      (org-agenda-span 'day)
                      (org-agenda-use-time-grid t)
                      (org-agenda-format-date "")
-                     (org-agenda-prefix-format " %i %-18c%?-12t% s")
+                     (org-agenda-prefix-format todo-prefix-format)
                      (org-habit-show-habits nil)
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))))
+                      '(org-agenda-skip-entry-if 'todo agenda-ignore-todos))))
             (agenda ""
                     ((org-agenda-overriding-header "\nNext 7 Days")
                      (org-agenda-start-day "+1d")
                      (org-agenda-span 'week)
                      (org-agenda-start-on-weekday nil)
-                     (org-agenda-prefix-format " %i %-18c%?-12t% s")
+                     (org-agenda-prefix-format todo-prefix-format)
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE" "CANCELLED")))))
-            ;; FIXME: not showing non-TODO entries (TIMESTAMP, TIMESTAMP_IA).
-            (search (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+120d>\""
-                            "|"
-                            "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+120d>\""
-                            "|"
-                            "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+120d>\""
-                            "|"
-                            "TIMESTAMP>=\"<+8d>\"&TIMESTAMP<=\"<+120d>\""
-                            "/!")
-                    ((org-agenda-overriding-header
-                      "\nComing up\n")
-                     (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo '("WAITING" "DONE")))
-                     (org-agenda-prefix-format
-                      " %-18c %(mpereira/org-agenda-tags-suffix)  ")
-                     (org-agenda-sorting-strategy '(timestamp-up))
-                     (org-agenda-remove-times-when-in-prefix nil)))
-            ;; Note: the section below was causing the agenda to freeze some
-            ;; times. And I wasn't really using it anyway.
-            ;;
-            ;; (todo "TODO"
-            ;;       ((org-agenda-overriding-header "\nNext Tasks\n")
-            ;;        (org-agenda-skip-function
-            ;;         '(or (org-agenda-skip-entry-if 'scheduled 'deadline)
-            ;;              (mpereira/org-skip-inbox)
-            ;;              (mpereira/org-skip-subtree-if-habit)
-            ;;              (mpereira/org-skip-all-but-first)
-            ;;              (mpereira/org-skip-someday-projects-subheadings)))
-            ;;        (org-agenda-sorting-strategy '(deadline-up
-            ;;                                       scheduled-up
-            ;;                                       time-up
-            ;;                                       timestamp-up
-            ;;                                       todo-state-up
-            ;;                                       alpha-up))
-            ;;        (org-agenda-prefix-format
-            ;;         " %-18c %-22(mpereira/org-agenda-project-name-prefix-format)")))
+                      '(org-agenda-skip-entry-if 'todo agenda-ignore-todos))))
+            (tags (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+30d>\""
+                          "|"
+                          "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+30d>\""
+                          "|"
+                          "TIMESTAMP>=\"<+8d>\"&TIMESTAMP<=\"<+30d>\""
+                          "|"
+                          "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+30d>\""
+                          "/-DONE")
+                  ((org-agenda-overriding-header "\nComing up\n")
+                   (org-agenda-prefix-format tags-prefix-format)
+                   (org-agenda-sorting-strategy '(timestamp-up))))
             ))
          (inbox-file (expand-file-name "inbox.org" org-directory))
          (inbox-buffer (find-file-noselect inbox-file))
@@ -2710,7 +2744,9 @@ perhaps exporting) of the agenda buffers with ~run-with-idle-timer~ soon.
                'settings
                `(todo "TODO"
                       ((org-agenda-overriding-header "\nInbox\n")
+                       (org-agenda-prefix-format todo-prefix-format)
                        (org-agenda-files (list ,inbox-file)))))))
+         (org-agenda-buffer-name mpereira/main-org-agenda-buffer-name)
          (org-agenda-custom-commands (list
                                       (list
                                        "c" "Main agenda"
@@ -2723,8 +2759,7 @@ perhaps exporting) of the agenda buffers with ~run-with-idle-timer~ soon.
   "Display main org agenda if it was already built. Build and display it
 otherwise."
   (interactive)
-  (let* ((org-agenda-buffer-name "*Main Org Agenda*")
-         (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
+  (let ((org-agenda-buffer (get-buffer mpereira/main-org-agenda-buffer-name)))
     (setq mpereira/main-org-agenda-previous-window-configuration
           (current-window-configuration))
     (setq mpereira/main-org-agenda-previous-point (point))
@@ -2737,12 +2772,15 @@ otherwise."
                                             mpereira/main-org-agenda-last-built))))
             (message (format "Last built %s ago" last-built))))
       (progn
-        (mpereira/build-org-agenda)
+        (mpereira/build-main-org-agenda)
         (message "Built now")))))
 #+end_src
 
 *** Review agenda
 #+begin_src emacs-lisp :tangle yes
+(defvar mpereira/review-org-agenda-buffer-name "*Review Org Agenda*"
+  "The name of the review org agenda.")
+
 (defvar mpereira/review-org-agenda-last-built nil
   "The last time the review org agenda was built.")
 
@@ -2755,19 +2793,21 @@ otherwise."
 (defun mpereira/build-review-org-agenda ()
   "Build and display the review org agenda."
   (interactive)
-  (let* ((settings
+  (let* ((single-day-prefix-format " %-10c %?-12t% s")
+         (multi-day-prefix-format " %-10c %(mpereira/org-agenda-review-prefix-format) ")
+         (settings
           `((tags ,(mpereira/org-agenda-review-search "today" "+1d")
                   ((org-agenda-overriding-header
                     (concat
                      "\nDone today "
                      "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))
-                   (org-agenda-prefix-format " %i %-18c%?-12t% s")))
+                   (org-agenda-prefix-format single-day-prefix-format)))
             (tags ,(mpereira/org-agenda-review-search "-1d" "today")
                   ((org-agenda-overriding-header
                     (concat
                      "\nDone yesterday "
                      "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))
-                   (org-agenda-prefix-format " %i %-18c%?-12t% s")))
+                   (org-agenda-prefix-format single-day-prefix-format)))
             (tags ,(mpereira/org-agenda-review-search
                     (mpereira/org-agenda-date-week-start
                      (mpereira/format-calendar-date-Y-m-d
@@ -2775,8 +2815,8 @@ otherwise."
                     (mpereira/format-calendar-date-Y-m-d
                      (mpereira/calendar-read-date "today")))
                   ((org-agenda-overriding-header "\nDone this week\n")
-                   (org-agenda-prefix-format
-                    " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                   (org-agenda-prefix-format multi-day-prefix-format)
+                   (org-agenda-sorting-strategy '(timestamp-up))
                    (org-agenda-show-all-dates t)
                    (org-agenda-sorting-strategy '(timestamp-down))))
             (tags (mpereira/org-agenda-review-search
@@ -2787,10 +2827,10 @@ otherwise."
                     (mpereira/format-calendar-date-Y-m-d
                      (mpereira/calendar-read-date "-1w"))))
                   ((org-agenda-overriding-header "\nDone last week\n")
-                   (org-agenda-prefix-format
-                    " %-18c %(mpereira/org-agenda-review-suffix-format) ")
+                   (org-agenda-prefix-format multi-day-prefix-format)
                    (org-agenda-show-all-dates t)
                    (org-agenda-sorting-strategy '(timestamp-down))))))
+         (org-agenda-buffer-name mpereira/review-org-agenda-buffer-name)
          (org-agenda-custom-commands (list
                                       (list
                                        "c" "Review agenda"
@@ -2803,8 +2843,7 @@ otherwise."
   "Display review org agenda if it was already built. Build and display it
 otherwise."
   (interactive)
-  (let* ((org-agenda-buffer-name "*Review Org Agenda*")
-         (org-agenda-buffer (get-buffer org-agenda-buffer-name)))
+  (let ((org-agenda-buffer (get-buffer mpereira/review-org-agenda-buffer-name)))
     (setq mpereira/review-org-agenda-previous-window-configuration
           (current-window-configuration))
     (setq mpereira/review-org-agenda-previous-point (point))
@@ -2824,8 +2863,25 @@ otherwise."
 
 *** Common
 #+begin_src emacs-lisp :tangle yes
+(defun mpereira/build-org-agenda ()
+  "Build the last opened org agenda."
+  (interactive)
+  (cond
+   ((and mpereira/main-org-agenda-previous-window-configuration
+         (not mpereira/review-org-agenda-previous-window-configuration))
+    (funcall #'mpereira/build-main-org-agenda))
+   ((and mpereira/review-org-agenda-previous-window-configuration
+         (not mpereira/main-org-agenda-previous-window-configuration))
+    (funcall #'mpereira/build-review-org-agenda))
+   ((and mpereira/main-org-agenda-previous-window-configuration
+         mpereira/review-org-agenda-previous-window-configuration)
+    (if (ts<= mpereira/main-org-agenda-last-built
+              mpereira/review-org-agenda-last-built)
+        (funcall #'mpereira/build-review-org-agenda)
+      (funcall #'mpereira/build-main-org-agenda)))))
+
 (defun mpereira/close-org-agenda ()
-  "Close the last opened org agenda and restore the previous window
+  "Close the currently opened org agenda and restore the previous window
 configuration and point position."
   (interactive)
   (let ((close-review-org-agenda
@@ -2843,18 +2899,11 @@ configuration and point position."
            (goto-char mpereira/main-org-agenda-previous-point)
            (setq mpereira/main-org-agenda-previous-point nil))))
     (cond
-     ((and mpereira/main-org-agenda-previous-window-configuration
-           (not mpereira/review-org-agenda-previous-window-configuration))
+     ((string= mpereira/main-org-agenda-buffer-name (buffer-name))
       (funcall close-main-org-agenda))
-     ((and mpereira/review-org-agenda-previous-window-configuration
-           (not mpereira/main-org-agenda-previous-window-configuration))
+     ((string= mpereira/review-org-agenda-buffer-name (buffer-name))
       (funcall close-review-org-agenda))
-     ((and mpereira/main-org-agenda-previous-window-configuration
-           mpereira/review-org-agenda-previous-window-configuration)
-      (if (ts<= mpereira/main-org-agenda-last-built
-                mpereira/review-org-agenda-last-built)
-          (funcall close-review-org-agenda)
-        (funcall close-main-org-agenda))))))
+     (t (mpereira/kill-buffer-and-maybe-window)))))
 #+end_src
 
 ** counsel-org-clock
