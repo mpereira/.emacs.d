@@ -2199,6 +2199,10 @@ Example: | todo  | int |
   "Makes strings safe to be printed with `message'."
   (s-replace-all '(("%" . "%%")) s))
 
+(defun mpereira/org-todo-completed? (todo)
+  (or (string= "DONE" todo)
+      (string= "CANCELLED" todo)))
+
 (defun mpereira/org-sort-key ()
   "Returns a sort key for an org entry based on:
 
@@ -2209,7 +2213,19 @@ Example: | todo  | int |
 |        3 | asc   | ALLTAGS  |
 |        4 | desc  | CLOSED   |
 |        5 | desc  | CREATED  |
-|        6 | asc   | ITEM     |"
+|        6 | asc   | ITEM     |
+
+if they aren't DONE or CANCELLED. In that case the sort key disregards tags,
+giving priority to CREATED:
+
+| Priority | Order | Property |
+|----------+-------+----------|
+|        1 | asc   | TODO     |
+|        2 | asc   | PRIORITY |
+|        4 | desc  | CLOSED   |
+|        5 | desc  | CREATED  |
+|        6 | asc   | ITEM     |
+"
   (interactive)
   (let* ((todo-max (apply #'max (mapcar #'length org-todo-keywords)))
          (todo (org-entry-get (point) "TODO"))
@@ -2231,12 +2247,15 @@ Example: | todo  | int |
                            (ts-format "%Y%m%d%H%M%S" (ts-parse-org created)))
                         date-int-min))
          (alltags-default "zzzzzzzzzz")
-         (alltags (or (org-entry-get (point) "ALLTAGS") alltags-default))
+         (alltags (or (org-entry-get (point) "ALLTAGS")
+                      alltags-default))
          (item (org-entry-get (point) "ITEM"))
          (sort-key (format "%03d %03d %s %.10f %.10f %s"
                            todo-int
                            priority-int
-                           alltags
+                           (if (mpereira/org-todo-completed? todo)
+                               alltags-default
+                             alltags)
                            (/ (float date-int-max) closed-int)
                            (/ (float date-int-max) created-int)
                            (mpereira/escape-string item))))
