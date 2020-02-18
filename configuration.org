@@ -2692,16 +2692,16 @@ lines in the block (excluding the line with
                   " "
                   "%(mpereira/org-agenda-tags-prefix-format)"
                   "  "))
-         (agenda-ignore-todos '("DOING" "WAITING" "DONE" "CANCELLED"))
+         (agenda-ignore-todos '(list "DOING" "WAITING" "DONE" "CANCELLED"))
          (settings
-          '((todo "DOING"
+          `((todo "DOING"
                   ((org-agenda-overriding-header "\nDoing\n")
-                   (org-agenda-prefix-format todo-prefix-format)
+                   (org-agenda-prefix-format ,todo-prefix-format)
                    (org-agenda-skip-function
                     '(org-agenda-skip-entry-if 'scheduled))))
             (todo "WAITING"
                   ((org-agenda-overriding-header "\nWaiting\n")
-                   (org-agenda-prefix-format todo-prefix-format)))
+                   (org-agenda-prefix-format ,todo-prefix-format)))
             (agenda ""
                     ((org-agenda-overriding-header
                       (concat
@@ -2711,18 +2711,18 @@ lines in the block (excluding the line with
                      (org-agenda-span 'day)
                      (org-agenda-use-time-grid t)
                      (org-agenda-format-date "")
-                     (org-agenda-prefix-format todo-prefix-format)
+                     (org-agenda-prefix-format ,todo-prefix-format)
                      (org-habit-show-habits nil)
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo agenda-ignore-todos))))
+                      `(org-agenda-skip-entry-if 'todo ,agenda-ignore-todos))))
             (agenda ""
                     ((org-agenda-overriding-header "\nNext 7 Days")
                      (org-agenda-start-day "+1d")
                      (org-agenda-span 'week)
                      (org-agenda-start-on-weekday nil)
-                     (org-agenda-prefix-format todo-prefix-format)
+                     (org-agenda-prefix-format ,todo-prefix-format)
                      (org-agenda-skip-function
-                      '(org-agenda-skip-entry-if 'todo agenda-ignore-todos))))
+                      `(org-agenda-skip-entry-if 'todo ,agenda-ignore-todos))))
             (tags (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+30d>\""
                           "|"
                           "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+30d>\""
@@ -2732,7 +2732,7 @@ lines in the block (excluding the line with
                           "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+30d>\""
                           "/-DONE")
                   ((org-agenda-overriding-header "\nComing up\n")
-                   (org-agenda-prefix-format tags-prefix-format)
+                   (org-agenda-prefix-format ,tags-prefix-format)
                    (org-agenda-sorting-strategy '(timestamp-up))))
             ))
          (inbox-file (expand-file-name "inbox.org" org-directory))
@@ -2744,7 +2744,7 @@ lines in the block (excluding the line with
                'settings
                `(todo "TODO"
                       ((org-agenda-overriding-header "\nInbox\n")
-                       (org-agenda-prefix-format todo-prefix-format)
+                       (org-agenda-prefix-format ,todo-prefix-format)
                        (org-agenda-files (list ,inbox-file)))))))
          (org-agenda-buffer-name mpereira/main-org-agenda-buffer-name)
          (org-agenda-custom-commands (list
@@ -2801,13 +2801,13 @@ otherwise."
                     (concat
                      "\nDone today "
                      "(" (format-time-string "%A, %B %d" (current-time)) ")\n"))
-                   (org-agenda-prefix-format single-day-prefix-format)))
+                   (org-agenda-prefix-format ,single-day-prefix-format)))
             (tags ,(mpereira/org-agenda-review-search "-1d" "today")
                   ((org-agenda-overriding-header
                     (concat
                      "\nDone yesterday "
                      "(" (format-time-string "%A, %B %d" (mpereira/yesterday)) ")\n"))
-                   (org-agenda-prefix-format single-day-prefix-format)))
+                   (org-agenda-prefix-format ,single-day-prefix-format)))
             (tags ,(mpereira/org-agenda-review-search
                     (mpereira/org-agenda-date-week-start
                      (mpereira/format-calendar-date-Y-m-d
@@ -2815,7 +2815,7 @@ otherwise."
                     (mpereira/format-calendar-date-Y-m-d
                      (mpereira/calendar-read-date "today")))
                   ((org-agenda-overriding-header "\nDone this week\n")
-                   (org-agenda-prefix-format multi-day-prefix-format)
+                   (org-agenda-prefix-format ,multi-day-prefix-format)
                    (org-agenda-sorting-strategy '(timestamp-up))
                    (org-agenda-show-all-dates t)
                    (org-agenda-sorting-strategy '(timestamp-down))))
@@ -2827,7 +2827,7 @@ otherwise."
                     (mpereira/format-calendar-date-Y-m-d
                      (mpereira/calendar-read-date "-1w"))))
                   ((org-agenda-overriding-header "\nDone last week\n")
-                   (org-agenda-prefix-format multi-day-prefix-format)
+                   (org-agenda-prefix-format ,multi-day-prefix-format)
                    (org-agenda-show-all-dates t)
                    (org-agenda-sorting-strategy '(timestamp-down))))))
          (org-agenda-buffer-name mpereira/review-org-agenda-buffer-name)
