@@ -2715,9 +2715,7 @@ lines in the block (excluding the line with
          (settings
           `((todo "DOING"
                   ((org-agenda-overriding-header "\nDoing\n")
-                   (org-agenda-prefix-format ,todo-prefix-format)
-                   (org-agenda-skip-function
-                    '(org-agenda-skip-entry-if 'scheduled))))
+                   (org-agenda-prefix-format ,todo-prefix-format)))
             (todo "WAITING"
                   ((org-agenda-overriding-header "\nWaiting\n")
                    (org-agenda-prefix-format ,todo-prefix-format)))
@@ -2732,6 +2730,9 @@ lines in the block (excluding the line with
                      (org-agenda-format-date "")
                      (org-agenda-prefix-format ,todo-prefix-format)
                      (org-habit-show-habits nil)
+                     ;; Not using something like (org-agenda-skip-entry-if
+                     ;; 'nottodo '("TODO")) here because I want non-TODO
+                     ;; headings (e.g. calendar events) showing up here as well.
                      (org-agenda-skip-function
                       `(org-agenda-skip-entry-if 'todo ,agenda-ignore-todos))))
             (agenda ""
@@ -2740,6 +2741,9 @@ lines in the block (excluding the line with
                      (org-agenda-span 'week)
                      (org-agenda-start-on-weekday nil)
                      (org-agenda-prefix-format ,todo-prefix-format)
+                     ;; Not using something like (org-agenda-skip-entry-if
+                     ;; 'nottodo '("TODO")) here because I want non-TODO
+                     ;; headings (e.g. calendar events) showing up here as well.
                      (org-agenda-skip-function
                       `(org-agenda-skip-entry-if 'todo ,agenda-ignore-todos))))
             (tags (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+30d>\""
@@ -2752,8 +2756,7 @@ lines in the block (excluding the line with
                           "/-DONE")
                   ((org-agenda-overriding-header "\nComing up\n")
                    (org-agenda-prefix-format ,tags-prefix-format)
-                   (org-agenda-sorting-strategy '(timestamp-up))))
-            ))
+                   (org-agenda-sorting-strategy '(timestamp-up))))))
          (inbox-file (expand-file-name "inbox.org" org-directory))
          (inbox-buffer (find-file-noselect inbox-file))
          (inbox (with-current-buffer inbox-buffer
