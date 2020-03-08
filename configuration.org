@@ -4271,6 +4271,9 @@ repositories, but it seems like just trying again a few times gets it done.
   ;; Permanent SHA link.
   (setq browse-at-remote-prefer-symbolic nil)
 
+  ;; Browse file with no lines if no lines are selected.
+  (setq browse-at-remote-add-line-number-if-no-region-selected nil)
+
   (defun mpereira/browse-at-remote ()
     "TODO: docstring."
     (interactive)
