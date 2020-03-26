@@ -33,6 +33,7 @@
 /savehist
 /secrets.el
 /semanticdb
+/session.*
 /sessions
 /speed-type
 /test_runs
