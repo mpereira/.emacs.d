@@ -4200,6 +4200,11 @@ repositories, but it seems like just trying again a few times gets it done.
                                (let ((inhibit-message t))
                                  (magit-todos-mode 1))))
 
+  ;; Refresh TODOs daily. Maybe set this on a per-project basis?
+  ;; FIXME: This doesn't seem to work as expected, the magit-todos section is
+  ;; still updated when calling magit-status.
+  (setq magit-todos-update 86400)
+
   ;; Remove keybindings that conflict with evil.
   (general-define-key
    :keymaps '(magit-todos-section-map magit-todos-item-section-map)
