@@ -1698,8 +1698,7 @@ Source: https://git.io/vQKzv"
             (lambda ()
               (evil-org-set-key-theme '(operators
                                         navigation
-                                        textobjects
-                                        todo)))))
+                                        textobjects)))))
 #+end_src
 
 ** evil-magit
@@ -1908,12 +1907,11 @@ Source: https://git.io/vQKzv"
 
 (setq org-log-done 'time)
 
-;; Force newline between headings.
-(setq org-blank-before-new-entry '((heading . t)
-                                   (plain-list-item . auto)))
-
-;; New headings are inserted after the current subtree contents.
-(setq org-insert-heading-respect-content t)
+;; When this is set to `nil':
+;; - `org-insert-heading' will insert a heading *before* the current heading.
+;; - `org-insert-heading-after-current' will insert a heading *after* the
+;;   current heading.
+(setq org-insert-heading-respect-content nil)
 
 ;; TODO: is this needed?
 (setq org-catch-invisible-edits 'show)
@@ -2030,6 +2028,13 @@ region active."
            fill-column)))
     (call-interactively 'org-fill-paragraph)))
 
+(defun mpereira/org-insert-heading ()
+  "`org-insert-heading' will break the current heading unless the pointer is at
+the beginning of the line. This fixes that."
+  (interactive)
+  (move-beginning-of-line nil)
+  (org-insert-heading))
+
 (general-define-key
  :states '(normal visual)
  :prefix mpereira/leader
@@ -2052,6 +2057,9 @@ region active."
 (general-define-key
  :keymaps '(org-mode-map)
  :states '(normal)
+ "t" 'org-todo
+ "T" 'mpereira/org-insert-heading
+ "M-t" 'org-insert-heading-after-current
  "(" 'org-up-element
  ")" 'org-down-element
  "k" 'evil-previous-visual-line
