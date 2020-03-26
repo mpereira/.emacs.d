@@ -4195,7 +4195,10 @@ repositories, but it seems like just trying again a few times gets it done.
            :repo "alphapapa/magit-todos")
   :after magit
   :config
-  (add-hook 'magit-mode-hook 'magit-todos-mode)
+  ;; Suppress annoying "Not overriding bind of 'jT'..." output.
+  (add-hook 'magit-mode-hook (lambda ()
+                               (let ((inhibit-message t))
+                                 (magit-todos-mode 1))))
 
   ;; Remove keybindings that conflict with evil.
   (general-define-key
