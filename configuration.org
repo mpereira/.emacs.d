@@ -4196,9 +4196,8 @@ repositories, but it seems like just trying again a few times gets it done.
   :after magit
   :config
   ;; Suppress annoying "Not overriding bind of 'jT'..." output.
-  (add-hook 'magit-mode-hook (lambda ()
-                               (let ((inhibit-message t))
-                                 (magit-todos-mode 1))))
+  (let ((inhibit-message t))
+    (magit-todos-mode 1))
 
   ;; Refresh TODOs daily. Maybe set this on a per-project basis?
   ;; FIXME: This doesn't seem to work as expected, the magit-todos section is
