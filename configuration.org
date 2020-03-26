@@ -2517,7 +2517,13 @@ the \"parent root heading\" for the TODO entry would be \"Emacs\".
 the \"parent root heading\" for the \"Emacs\" entry would be nil.
 "
   (interactive)
-  (let* ((outline-path (org-get-outline-path t))
+  (let* ((outline-path (condition-case err
+                           (org-get-outline-path t)
+                         (error
+                          (message "Error calling `org-get-outline-path' with heading (%s): %s"
+                                   (org-get-heading)
+                                   (error-message-string err))
+                          "?")))
          (parent-heading-name (when (< 1 (length outline-path))
                                 (car outline-path))))
     (when (and parent-heading-name
