@@ -3263,6 +3263,9 @@ Display progress in the mode line instead."
 ;; Don't display the "Welcome to the Emacs shell" banner.
 (setq eshell-banner-message "")
 
+;; Make it possible to get a remote eshell buffer.
+(add-to-list 'eshell-modules-list 'eshell-tramp)
+
 (setenv "LANG" "en_US.UTF-8")
 (setenv "LC_ALL" "en_US.UTF-8")
 (setenv "LC_CTYPE" "en_US.UTF-8")
