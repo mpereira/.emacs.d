@@ -2748,7 +2748,7 @@ lines in the block (excluding the line with
                      ;; 'nottodo '("TODO")) here because I want non-TODO
                      ;; headings (e.g. calendar events) showing up here as well.
                      (org-agenda-skip-function
-                      `(org-agenda-skip-entry-if 'todo ,agenda-ignore-todos))))
+                      (quote (org-agenda-skip-entry-if 'todo ,agenda-ignore-todos)))))
             (agenda ""
                     ((org-agenda-overriding-header "\nNext 7 Days")
                      (org-agenda-start-day "+1d")
@@ -2759,7 +2759,7 @@ lines in the block (excluding the line with
                      ;; 'nottodo '("TODO")) here because I want non-TODO
                      ;; headings (e.g. calendar events) showing up here as well.
                      (org-agenda-skip-function
-                      `(org-agenda-skip-entry-if 'todo ,agenda-ignore-todos))))
+                      (quote (org-agenda-skip-entry-if 'todo ,agenda-ignore-todos)))))
             (tags (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+30d>\""
                           "|"
                           "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+30d>\""
