@@ -5664,7 +5664,9 @@ recency" functionality for =M-x= from ivy-prescient.
  "M-h" #'evil-window-left
  "M-j" #'evil-window-down
  "M-k" #'evil-window-up
- "M-l" #'evil-window-right)
+ "M-l" #'evil-window-right
+ "<C-left>" #'winner-undo
+ "<C-right>" #'winner-redo)
 
 (general-define-key
  "<escape>" #'keyboard-quit)
