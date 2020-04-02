@@ -1245,12 +1245,30 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 * Tramp
 #+begin_src emacs-lisp :tangle yes
 (require 'tramp)
+#+end_src
 
 ;; Disable version control on tramp buffers to avoid freezes.
+#+begin_src emacs-lisp :tangle yes
 (setq vc-ignore-dir-regexp
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
+#+end_src
+
+Don't clean up recentf tramp buffers.
+#+begin_src emacs-lisp :tangle yes
+(setq recentf-auto-cleanup 'never)
+#+end_src
+
+[[https://github.com/syl20bnr/spacemacs/issues/11381#issuecomment-481239700][Make Emacs not crazy slow under TRAMP]].
+#+begin_src emacs-lisp :tangle yes
+(defadvice projectile-project-root (around ignore-remote first activate)
+  (unless (file-remote-p default-directory) ad-do-it))
+#+end_src
+
+Cache SSH passwords during the whole Emacs session.
+#+begin_src emacs-lisp :tangle yes
+(setq password-cache-expiry nil)
 #+end_src
 
 * Server
