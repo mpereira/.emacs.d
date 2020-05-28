@@ -1462,6 +1462,14 @@ Cache SSH passwords during the whole Emacs session.
 (setq password-cache-expiry nil)
 #+end_src
 
+Reuse SSH connections. Taken from the [[https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html][TRAMP FAQ]].
+#+begin_src emacs-lisp :tangle yes
+(customize-set-variable 'tramp-ssh-controlmaster-options
+                        (concat
+                         "-o ControlPath=/tmp/ssh-tramp-%%r@%%h:%%p "
+                         "-o ControlMaster=auto -o ControlPersist=yes"))
+#+end_src
+
 ** counsel-tramp
 #+begin_src emacs-lisp :tangle yes
 (use-package counsel-tramp)
