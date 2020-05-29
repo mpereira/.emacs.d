@@ -1937,13 +1937,24 @@ Source: https://git.io/vQKzv"
   (setq evil-want-C-u-scroll t)
   (setq evil-search-module 'evil-search)
 
-  ;; The combination of the following two configurations prevent the cursor from
-  ;; moving beyond the end of line.
+  ;; Prevent the cursor from moving beyond the end of line.
   (setq evil-move-cursor-back t)
   (setq evil-move-beyond-eol nil)
+
   :config
   (evil-mode t)
 
+  ;; Make `v$' not include the newline character.
+  ;; Resources:
+  ;; - https://github.com/emacs-evil/evil/issues/897
+  ;; - `evil-end-of-line-or-visual-line'
+  ;; - `evil-end-of-line'
+  ;; - `end-of-visual-line'
+  (general-define-key
+   :states '(motion)
+   "$" '(lambda ()
+          (interactive)
+          (evil-end-of-line)))
   (evil-ex-define-cmd "bdelete" #'kill-this-buffer)
 
   ;; Don't create a kill entry on every visual movement.
@@ -1970,7 +1981,22 @@ Source: https://git.io/vQKzv"
             (lambda ()
               (evil-org-set-key-theme '(operators
                                         navigation
-                                        textobjects)))))
+                                        textobjects))
+              ;; Make `v$' not include the newline character.
+              ;; Resources:
+              ;; - https://github.com/emacs-evil/evil/issues/897
+              ;; - `evil-end-of-line-or-visual-line'
+              ;; - `evil-end-of-line'
+              ;; - `end-of-visual-line'
+              ;;
+              ;; This needs to run right after `evil-org-mode' is loaded and
+              ;; `evil-org-set-key-theme' is run.
+              (general-define-key
+               :keymaps '(evil-org-mode-map)
+               :states '(motion)
+               "$" '(lambda ()
+                      (interactive)
+                      (evil-end-of-line))))))
 #+end_src
 
 ** evil-magit
