@@ -73,6 +73,7 @@ Vanilla evil emacs literate configuration.
   - [[#org-babel][Org Babel]]
     - [[#verb][verb]]
     - [[#org-babel][org-babel]]
+    - [[#prevent-oo-evil-open-belowabove-from-scrolling-window][Prevent o/O (evil-open-below/above) from scrolling window]]
   - [[#align-all-tags-in-the-buffer-on-tag-changes][Align all tags in the buffer on tag changes]]
   - [[#sort-org-entries-by-multiple-properties][Sort org entries by multiple properties]]
   - [[#org-clock][Org clock]]
@@ -2542,6 +2543,23 @@ the beginning of the line. This fixes that."
   )
 
 (mpereira/org-babel-initialize)
+#+end_src
+
+*** Prevent o/O (=evil-open-below/above=) from scrolling window
+It calls =indent-according-to-mode= which does the undesired scrolling.
+
+https://github.com/emacs-evil/evil/issues/1068
+
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/evil-open-no-auto-indent (oldfun arg)
+  (if (and evil-auto-indent
+           (eq major-mode 'org-mode))
+      (let ((evil-auto-indent nil))
+        (funcall oldfun arg))
+    (funcall oldfun arg)))
+
+(advice-add #'evil-open-above :around #'mpereira/evil-open-no-auto-indent)
+(advice-add #'evil-open-below :around #'mpereira/evil-open-no-auto-indent)
 #+end_src
 
 ** Align all tags in the buffer on tag changes
