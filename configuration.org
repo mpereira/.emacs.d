@@ -5228,6 +5228,13 @@ Install some dependencies:
 rustup component add rustfmt
 #+end_src
 
+#+begin_src bash :tangle setup.sh :results verbatim
+curl https://github.com/snoe/clojure-lsp/releases/download/release-20200514T134144/clojure-lsp \
+     -L  \
+     -o /usr/local/bin/clojure-lsp
+chmod 755 /usr/local/bin/clojure-lsp
+#+end_src
+
 *** lsp-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
@@ -5237,13 +5244,15 @@ rustup component add rustfmt
   (add-hook 'python-mode-hook 'lsp)
   (add-hook 'js2-mode-hook 'lsp)
   (add-hook 'rust-mode-hook 'lsp)
+  (add-hook 'clojure-mode-hook 'lsp)
 
-  (setq lsp-enable-symbol-highlighting nil)
-
-  (setq lsp-ui-doc-enable nil)
-  (setq lsp-ui-doc-delay 0)
-  (setq lsp-ui-sideline-show-hover t)
   (setq lsp-eldoc-enable-hover nil)
+  (setq lsp-enable-symbol-highlighting nil)
+  (setq lsp-ui-doc-delay 0)
+  (setq lsp-ui-doc-enable nil)
+  (setq lsp-ui-peek-always-show t)
+  (setq lsp-ui-sideline-show-hover t)
+  (setq lsp-ui-sideline-update-mode 'line)
 
   (general-define-key
    :keymaps '(lsp-mode-map)
