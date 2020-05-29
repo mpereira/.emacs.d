@@ -1919,12 +1919,7 @@ Source: https://git.io/vQKzv"
   (:keymaps '(evil-motion-state-map)
    ";" #'evil-ex
    ":" #'evil-command-window-ex)
-  ;; `evil-search' as the `evil-search-module' is nice, but I still want to
-  ;; navigate history with C-j and C-k.
-  ;; FIXME: this isn't working for some reason?
-  ;; (:keymaps '(evil-ex-search-keymap isearch-mode-map)
-  ;;  "C-k" #'isearch-ring-retreat
-  ;;  "C-j" #'isearch-ring-advance)
+
   :init
   ;; Setup for `evil-collection'.
   (setq evil-want-integration t)
@@ -1955,6 +1950,12 @@ Source: https://git.io/vQKzv"
    "$" '(lambda ()
           (interactive)
           (evil-end-of-line)))
+
+  (general-define-key
+   :keymaps '(evil-ex-search-keymap minibuffer-local-map)
+   "C-k" #'previous-line-or-history-element
+   "C-j" #'next-line-or-history-element)
+
   (evil-ex-define-cmd "bdelete" #'kill-this-buffer)
 
   ;; Don't create a kill entry on every visual movement.
