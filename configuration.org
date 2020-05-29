@@ -49,6 +49,7 @@ Vanilla evil emacs literate configuration.
   - [[#start-up-profiler-esup][Start-up profiler: esup]]
   - [[#explain-pause-mode][explain-pause-mode]]
 - [[#color-theme][Color theme]]
+  - [[#create-hook-for-theme-change][Create hook for theme change]]
   - [[#change-themes-when-changing-macos-light-or-dark-appearance][Change themes when changing MacOS light or dark appearance]]
 - [[#configure-mode-line][Configure Mode Line]]
 - [[#configure-header-line][Configure Header Line]]
@@ -1771,6 +1772,17 @@ My favorite light themes:
           t)
 #+end_src
 
+** Create hook for theme change
+
+#+begin_src emacs-lisp :tangle yes
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+
+(defadvice load-theme (after run-after-load-theme-hook activate)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
+#+end_src
+
 ** Change themes when changing MacOS light or dark appearance
 This doesn't seem to be working.
 
@@ -2151,17 +2163,23 @@ the same as the =ivy-posframe= one.
   :config
   (setq evil-owl-max-string-length 50)
   (setq evil-owl-display-method 'posframe)
-  ;; FIXME: this needs to be updated on theme changes.
-  (setq evil-owl-extra-posframe-args
-        `(:width 80
-          :height 20
-          :background-color ,(face-attribute 'ivy-posframe :background nil t)
-          :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
-          :internal-border-width ,ivy-posframe-border-width
-          :internal-border-color ,(face-attribute 'ivy-posframe-border
-                                                  :background
-                                                  nil
-                                                  t)))
+
+  (defun mpereira/update-evil-owl-posframe-args ()
+    (interactive)
+    (setq evil-owl-extra-posframe-args
+          `(:width 80
+            :height 20
+            :background-color ,(face-attribute 'ivy-posframe :background nil t)
+            :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
+            :internal-border-width ,ivy-posframe-border-width
+            :internal-border-color ,(face-attribute 'ivy-posframe-border
+                                                    :background
+                                                    nil
+                                                    t))))
+
+  (add-hook 'after-init-hook 'mpereira/update-evil-owl-posframe-args)
+  (add-hook 'after-load-theme-hook 'mpereira/update-evil-owl-posframe-args)
+
   (evil-owl-mode))
 #+end_src
 
@@ -4143,33 +4161,27 @@ Set a default border width and height for all posframe frames via
   (setq company-posframe-quickhelp-delay 0)
   (setq company-posframe-quickhelp-show-header nil)
 
-  ;; FIXME: This needs to run on theme changes as well.
-  ;;
-  ;; (defvar after-load-theme-hook nil
-  ;;   "Hook run after a color theme is loaded using `load-theme'.")
-  ;; (defadvice load-theme (after run-after-load-theme-hook activate)
-  ;;   "Run `after-load-theme-hook'."
-  ;;   (run-hooks 'after-load-theme-hook))
-  ;;
-  (add-hook 'after-init-hook
-            (lambda ()
-              (setq mpereira/company-posframe-extra-frame-args `())
+  (defun mpereira/update-company-posframe-args ()
+    (interactive)
+    (setq mpereira/company-posframe-extra-frame-args `())
 
-              (setq mpereira/company-posframe-quickhelp-extra-frame-args
-                    `(:background-color ,(face-attribute 'ivy-posframe :background nil t)
-                      :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
-                      :internal-border-width ,ivy-posframe-border-width
-                      :internal-border-color ,(face-attribute 'ivy-posframe-border
-                                                              :background
-                                                              nil
-                                                              t)))
-              (plist-each (lambda (k v)
-                            (plist-put company-posframe-show-params k v))
-                          mpereira/company-posframe-extra-frame-args)
-              (plist-each (lambda (k v)
-                            (plist-put company-posframe-quickhelp-show-params k v))
-                          mpereira/company-posframe-quickhelp-extra-frame-args))
-            t)
+    (setq mpereira/company-posframe-quickhelp-extra-frame-args
+          `(:background-color ,(face-attribute 'ivy-posframe :background nil t)
+            :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
+            :internal-border-width ,ivy-posframe-border-width
+            :internal-border-color ,(face-attribute 'ivy-posframe-border
+                                                    :background
+                                                    nil
+                                                    t)))
+    (plist-each (lambda (k v)
+                  (plist-put company-posframe-show-params k v))
+                mpereira/company-posframe-extra-frame-args)
+    (plist-each (lambda (k v)
+                  (plist-put company-posframe-quickhelp-show-params k v))
+                mpereira/company-posframe-quickhelp-extra-frame-args))
+
+  (add-hook 'after-init-hook 'mpereira/update-company-posframe-args)
+  (add-hook 'after-load-theme-hook 'mpereira/update-company-posframe-args)
 
   (company-posframe-mode))
 #+end_src
