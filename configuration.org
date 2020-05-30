@@ -123,6 +123,7 @@ Vanilla evil emacs literate configuration.
   - [[#ivy-posframe][ivy-posframe]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
   - [[#company-posframe][company-posframe]]
+  - [[#company-box][company-box]]
   - [[#default-text-scale][default-text-scale]]
   - [[#minibuffer-line][minibuffer-line]]
   - [[#highlight-indent-guide][highlight-indent-guide]]
@@ -4202,6 +4203,29 @@ Set a default border width and height for all posframe frames via
   (add-hook 'after-load-theme-hook 'mpereira/update-company-posframe-args)
 
   (company-posframe-mode))
+#+end_src
+
+** company-box
+This package fixes the positioning of the quickhelp buffers that display next to
+the company candidate list window. Without company-box, quickhelp buffers can be
+positioned "outside" the frame or on top of the company candidate list window.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package company-box
+  :after (company)
+  :hook (company-mode . company-box-mode)
+  :init
+  (setq company-box-show-single-candidate t)
+  (setq company-box-max-candidates 1000)
+  :config
+  ;; Make company-box redraw popup on different movements than line up/down.
+  ;; https://github.com/sebastiencs/company-box/issues/58#issuecomment-573317553
+  (advice-add 'company-next-page :after #'company-box--change-line)
+  (advice-add 'company-previous-page :after #'company-box--change-line)
+  (advice-add 'company-search-candidates :after #'company-box--change-line)
+  (advice-add 'company-filter-candidates :after #'company-box--change-line)
+  (advice-add 'company-search-repeat-forward :after #'company-box--change-line)
+  (advice-add 'company-search-repeat-backward :after #'company-box--change-line))
 #+end_src
 
 ** default-text-scale
