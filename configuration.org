@@ -4316,10 +4316,28 @@ positioned "outside" the frame or on top of the company candidate list window.
 #+end_src
 
 ** dimmer
+This package seems to cause Emacs to become sluggish after being enabled.
+Disabling it doesn't help, only restarting Emacs.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package dimmer
+  :after (ivy-posframe company-posframe)
   :config
-  (setq dimmer-fraction 0.5))
+  (setq dimmer-fraction 0.5)
+  (setq dimmer-exclusion-predicates '(window-minibuffer-p))
+  ;; Seems to improve performance a bit.
+  (setq dimmer-watch-frame-focus-events nil)
+  (setq dimmer-exclusion-regexp-list
+        `(,ivy-posframe-buffer
+          ,company-posframe-buffer
+          ,company-posframe-quickhelp-buffer
+          "^\\*Minibuf-[0-9]+\\*$"
+          "^\\*Echo.*\\*$"
+          " \\*transient\\*"
+          ".*which-key.*"
+          ".*Messages.*"
+          ".*Async.*"
+          ".*Warnings.*")))
 #+end_src
 
 ** all-the-icons
