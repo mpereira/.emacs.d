@@ -44,8 +44,9 @@ Vanilla evil emacs literate configuration.
   - [[#counsel-tramp][counsel-tramp]]
 - [[#server][Server]]
 - [[#options][Options]]
-  - [[#performance][Performance]]
 - [[#performance][Performance]]
+  - [[#increase-the-amount-of-data-read-from-processes][Increase the amount of data read from processes]]
+  - [[#make-cursor-movement-an-order-of-magnitude-faster][Make cursor movement an order of magnitude faster]]
   - [[#start-up-profiler-esup][Start-up profiler: esup]]
   - [[#explain-pause-mode][explain-pause-mode]]
 - [[#color-theme][Color theme]]
@@ -1661,8 +1662,15 @@ Reuse SSH connections. Taken from the [[https://www.gnu.org/software/emacs/manua
                                 ("America/Los_Angeles" "San Francisco")))
 #+end_src
 
-** Performance
-Make cursor movement an order of magnitude faster. From:
+* Performance
+** Increase the amount of data read from processes
+https://emacs-lsp.github.io/lsp-mode/page/performance/
+#+begin_src emacs-lisp :tangle yes
+(setq read-process-output-max (* 1024 1024)) ; 1mb.
+#+end_src
+
+** Make cursor movement an order of magnitude faster
+From:
 https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
 #+begin_src emacs-lisp :tangle yes
 (setq auto-window-vscroll nil)
@@ -1674,7 +1682,6 @@ https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doo
 (setq jit-lock-defer-time 0)
 #+end_src
 
-* Performance
 ** Start-up profiler: esup
 #+begin_src emacs-lisp :tangle yes
 (use-package esup
