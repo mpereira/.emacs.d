@@ -1596,16 +1596,52 @@ Cache SSH passwords during the whole Emacs session.
 ;; Keep cursor position when scrolling.
 (setq scroll-preserve-screen-position 1)
 
-;; Make cursor movement an order of magnitude faster.
-;; https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
-(setq auto-window-vscroll nil)
-
 ;; Delete trailing whitespace on save.
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 (setq display-time-world-list '(("Europe/Berlin" "Hamburg")
                                 ("America/Sao_Paulo" "São Paulo")
                                 ("America/Los_Angeles" "San Francisco")))
+#+end_src
+
+** Performance
+Make cursor movement an order of magnitude faster. From:
+https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/28746
+#+begin_src emacs-lisp :tangle yes
+(setq auto-window-vscroll nil)
+#+end_src
+
+https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doom_emacs/fp392eh/
+#+begin_src emacs-lisp :tangle yes
+(setq fast-but-imprecise-scrolling 't)
+(setq jit-lock-defer-time 0)
+#+end_src
+
+* Performance
+** Start-up profiler: esup
+#+begin_src emacs-lisp :tangle yes
+(use-package esup
+  :pin melpa
+  :commands (esup))
+#+end_src
+
+** explain-pause-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package explain-pause-mode
+  :ensure nil
+  :quelpa (explain-pause-mode
+           :fetcher github
+           :repo "lastquestion/explain-pause-mode")
+  :init
+  (setq explain-pause-alert-via-message nil)
+  :config
+  ;; Override to use `profiler-report-profile-other-window'.
+  (defun explain--profile-report-click-profile (button)
+    "Click-handler when profile BUTTON is clicked in event profile report view."
+    (let ((profile (button-get button 'profile)))
+      (profiler-report-profile profile)))
+
+  (explain-pause-mode 1))
 #+end_src
 
 * Color theme
