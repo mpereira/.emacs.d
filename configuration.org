@@ -1402,9 +1402,15 @@ A more representative name for this file.
 (setq tramp-persistency-file-name
       (expand-file-name "tramp-connection-history" user-emacs-directory))
 #+end_src
+
 Cache SSH passwords during the whole Emacs session.
 #+begin_src emacs-lisp :tangle yes
 (setq password-cache-expiry nil)
+#+end_src
+
+** counsel-tramp
+#+begin_src emacs-lisp :tangle yes
+(use-package counsel-tramp)
 #+end_src
 
 * Server
@@ -1678,15 +1684,30 @@ My favorite light themes:
 (use-package github-theme :defer t)
 (use-package srcery-theme :defer t)
 (use-package nimbus-theme :defer t)
-(use-package doom-themes :defer t)
 (use-package espresso-theme :defer t)
 (use-package twilight-bright-theme :defer t)
-(use-package modus-themes
+(use-package doom-themes
+  :defer t
+  :config
+  (doom-themes-org-config))
+(use-package modus-operandi-theme
   :ensure nil
   :defer t
   :quelpa (modus-themes
            :fetcher gitlab
            :repo "protesilaos/modus-themes"))
+(use-package modus-vivendi-theme
+  :ensure nil
+  :defer t
+  :quelpa (modus-themes
+           :fetcher gitlab
+           :repo "protesilaos/modus-themes"))
+(use-package tron-legacy-theme
+  :ensure nil
+  :defer t
+  :quelpa (tron-legacy-theme
+           :fetcher github
+           :repo "ianpan870102/tron-legacy-emacs-theme"))
 (use-package chocolate-theme
   :ensure nil
   :defer t
@@ -4337,6 +4358,14 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
   (setq blacken-line-length 'fill))
 #+end_src
 
+** prettier
+#+begin_src emacs-lisp :tangle yes
+(use-package prettier-js
+  :config
+  (add-hook 'js2-mode-hook 'prettier-js-mode)
+  (add-hook 'web-mode-hook 'prettier-js-mode))
+#+end_src
+
 * git
 ** magit
 #+begin_src emacs-lisp :tangle yes
@@ -5294,6 +5323,37 @@ python3 -m pip install mypy flake8 pylint black
 (setq css-indent-offset 2)
 #+end_src
 
+** js2-refactor
+#+begin_src emacs-lisp :tangle yes
+(use-package js2-refactor
+  :config
+  (add-hook 'js2-mode-hook #'js2-refactor-mode))
+#+end_src
+
+** rjsx-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package rjsx-mode
+  :mode ("\\.jsx?$" . rjsx-mode)
+  :config
+  ;; js-mode and js2-mode indent multiline chained function calls like:
+  ;;
+  ;; foo.
+  ;; .bar()
+  ;; .baz()
+  ;;
+  ;; while Prettier indents it like:
+  ;;
+  ;; foo.
+  ;;   .bar()
+  ;;   .baz()
+  ;;
+  ;; Disable aggressive indent for js2-mode to give priority to Prettier auto
+  ;; formatting.
+  (add-to-list 'aggressive-indent-excluded-modes 'js-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'js2-mode)
+  (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode)))
+#+end_src
+
 ** emacs-colorpicker
 #+begin_src emacs-lisp :tangle yes
 ;; (use-package colorpicker
@@ -5892,6 +5952,43 @@ recency" functionality for =M-x= from ivy-prescient.
     (save-excursion
       (while (search-forward "^M" nil t)
         (replace-match "")))))
+#+end_src
+
+** engine-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package engine-mode
+  :config
+  (engine-mode t)
+
+  (defengine duckduckgo
+    "https://duckduckgo.com/?q=%s")
+
+  (defengine github
+    "https://github.com/search?ref=simplesearch&q=%s")
+
+  (defengine google
+    "https://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
+
+  (defengine google-images
+    "https://www.google.com/images?hl=en&source=hp&biw=1440&bih=795&gbv=2&aq=f&aqi=&aql=&oq=&q=%s")
+
+  (defengine google-maps
+    "https://maps.google.com/maps?q=%s")
+
+  (defengine stack-overflow
+    "https://stackoverflow.com/search?q=%s")
+
+  (defengine twitter
+    "https://twitter.com/search?q=%s")
+
+  (defengine wikipedia
+    "https://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s")
+
+  (defengine wolfram-alpha
+    "https://www.wolframalpha.com/input/?i=%s")
+
+  (defengine youtube
+    "https://www.youtube.com/results?aq=f&oq=&search_query=%s"))
 #+end_src
 
 ** google-this
