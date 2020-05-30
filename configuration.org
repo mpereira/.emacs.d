@@ -5559,7 +5559,32 @@ Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
   (add-hook 'flycheck-mode-hook #'flycheck-kotlin-setup))
 #+end_src
 
-** Javascript
+** C#
+~omnisharp-install-server~ needs to be run on a first install.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package omnisharp
+  :after company
+  :disabled
+  :config
+  (remove 'company-omnisharp company-backends)
+  (add-to-list 'company-backends 'company-omnisharp))
+
+(use-package csharp-mode
+  :after company
+  :hook ((csharp-mode . omnisharp-mode)
+         (csharp-mode . flycheck-mode)
+         (csharp-mode . flycheck-mode)))
+
+(defun seq-first (sequence)
+  "Return the first element of SEQUENCE."
+  (seq-elt sequence 0))
+
+(use-package lsp-mode
+  :hook ((csharp-mode . lsp)))
+#+end_src
+
+** JavaScript
 #+begin_src emacs-lisp :tangle yes
 (setq js-indent-level 2)
 #+end_src
