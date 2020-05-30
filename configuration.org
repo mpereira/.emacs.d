@@ -338,6 +338,16 @@ Set it with emacs lisp.
 #+end_src
 
 * Utility libraries
+** async
+#+begin_src emacs-lisp :tangle yes
+(use-package async)
+#+end_src
+
+** aio
+#+begin_src emacs-lisp :tangle yes
+(use-package aio)
+#+end_src
+
 ** cl-lib
 #+begin_src emacs-lisp :tangle yes
 (use-package cl-lib)
@@ -3200,6 +3210,20 @@ by Quelpa.
  "C-k" 'dired-prev-dirline)
 #+end_src
 
+** dired-show-readme
+Disabled for now. Doesn't allow navigating README, doesn't render markdown.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package dired-show-readme
+  :disabled
+  :ensure nil
+  :quelpa (dired-show-readme
+           :fetcher gitlab
+           :repo "kisaragi-hiu/dired-show-readme")
+  :config
+  (add-hook 'dired-mode-hook 'dired-show-readme-mode))
+#+end_src
+
 ** dired-subtree
 #+begin_src emacs-lisp :tangle yes
 (use-package dired-subtree
@@ -3506,6 +3530,13 @@ Display progress in the mode line instead."
   (setq eshell-history-ring mpereira/eshell-history-global-ring))
 
 (add-hook 'eshell-mode-hook #'mpereira/eshell-hist-use-global-history)
+#+end_src
+
+** vterm
+#+begin_src emacs-lisp :tangle yes
+(use-package vterm
+  :init
+  (setq vterm-always-compile-module t))
 #+end_src
 
 ** term
@@ -3912,6 +3943,16 @@ Not enabled globally by default for now.
   :quelpa (frog-jump-buffer
            :fetcher github
            :repo "waymondo/frog-jump-buffer"))
+#+end_src
+
+** link-hint
+#+begin_src emacs-lisp :tangle yes
+(use-package link-hint
+  :general (:keymaps '(global-map)
+            :states '(normal visual)
+            :prefix mpereira/leader
+            "F" #'link-hint-open-link
+            "C" #'link-hint-copy-link))
 #+end_src
 
 * Text search and manipulation
@@ -5060,6 +5101,12 @@ python3 -m pip install mypy flake8 pylint black
   :mode "Dockerfile.*\\'")
 #+end_src
 
+** literate-calc-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package literate-calc-mode
+  :mode "\\.calc\\'")
+#+end_src
+
 * Web development
 ** web-mode
 #+begin_src emacs-lisp :tangle yes
@@ -5328,6 +5375,11 @@ Also start them in Org mode.
   :after (counsel projectile)
   :config
   (setq projectile-switch-project-action 'counsel-projectile-find-file))
+#+end_src
+
+** find-file-in-project
+#+begin_src emacs-lisp :tangle yes
+(use-package find-file-in-project)
 #+end_src
 
 * Commands
