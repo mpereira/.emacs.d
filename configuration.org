@@ -4090,6 +4090,23 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 (setq undo-tree-visualizer-diff t)
 
 (global-undo-tree-mode 1)
+
+(defun undo-tree-visualizer-show-diff (&optional node)
+  (setq undo-tree-visualizer-diff t)
+  (let ((diff-buffer (with-current-buffer undo-tree-visualizer-parent-buffer
+		                   (undo-tree-diff node)))
+	      (display-buffer-mark-dedicated 'soft))
+    (display-buffer diff-buffer)))
+
+(defun undo-tree-visualizer-hide-diff ()
+  (setq undo-tree-visualizer-diff nil)
+  (when-let ((diff-buffer-window (get-buffer-window undo-tree-diff-buffer-name)))
+    (with-selected-window diff-buffer-window
+      (kill-buffer-and-window))))
+
+(defun undo-tree-visualizer-update-diff (&optional node)
+  (with-current-buffer undo-tree-visualizer-parent-buffer
+    (undo-tree-diff node)))
 #+end_src
 
 ** move-text
@@ -5180,10 +5197,7 @@ python3 -m pip install mypy flake8 pylint black
    :states '(normal visual)
    "q" #'mw-thesaurus--quit)
   :config
-  (mw-thesaurus-mode)
-
-  (add-to-list 'display-buffer-alist
-               '("* Merriam-Webster Thesaurus *" display-buffer-below-selected)))
+  (mw-thesaurus-mode))
 #+end_src
 
 ** atomic-chrome
@@ -5273,6 +5287,65 @@ Also start them in Org mode.
                            (persistent-scratch-mode)
                            (org-mode)))
 
+#+end_src
+
+** =display-buffer-alist= configuration
+#+begin_src emacs-lisp :tangle yes
+(use-package emacs
+  :init
+  ;; Inspiration, resources:
+  ;; - https://github.com/hlissner/doom-emacs/blob/master/modules/ui/popup/config.el
+  ;; - https://web.archive.org/web/20160409014815/https://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
+  ;; - http://juanjose.garciaripoll.com/blog/arranging-emacs-windows
+  (setq display-buffer-alist
+        '(("\\* Merriam-Webster Thesaurus \\*"
+           (display-buffer-below-selected))
+
+          ("\\*hackernews top stories\\*"
+           (display-buffer-in-side-window)
+           (window-width . 120)
+           (side . left)
+           (slot . 0)
+           (mode-line-format . (" " "%b")))
+
+          ("^\\(\\*help.*\\)$"
+           (display-buffer-below-selected))
+
+          ("^\\(\\*lsp-help\\*\\)$"
+           (display-buffer-below-selected))
+
+          ("\\(\\Wo\\)?*Man.*"
+           (display-buffer-below-selected))
+
+          ("\\*\\(compilation\\|run .*\\)\\*"
+           (display-buffer-at-bottom)
+           (window-height . 0.3)
+           (mode-line-format . (" " "%b")))
+
+          ("\\*\\(rg\\)\\*"
+           (display-buffer-at-bottom)
+           (window-height . 0.5)
+           (mode-line-format . (" " "%b")))
+
+          ("\\*Flycheck.*\\*"
+           (display-buffer-below-selected))
+
+          ("\\(\\*undo-tree\\*\\)"
+           (display-buffer-in-side-window)
+           (window-width . 80)
+           (window-height . 0.5)
+           (window-parameters . ((split-window . t)))
+           (side . left)
+           (slot . 0)
+           (mode-line-format . (" " "%b")))
+
+          ("\\(\\*undo-tree Diff\\*\\)"
+           (display-buffer-in-side-window)
+           (window-width . 80)
+           (window-height . 0.5)
+           (side . left)
+           (slot . 1)
+           (mode-line-format . (" " "%b"))))))
 #+end_src
 
 * Project management
@@ -5491,15 +5564,7 @@ recency" functionality for =M-x= from ivy-prescient.
 * Help
 ** helpful
 #+begin_src emacs-lisp :tangle yes
-(use-package helpful
-  :config
-  ;; I had this set to `t' for some reason. What was it?
-  ;; (setq-default helpful--view-literal t)
-
-  (add-to-list 'display-buffer-alist
-               '("*helpful" display-buffer-below-selected))
-  (add-to-list 'display-buffer-alist
-               '("*Help*" display-buffer-below-selected)))
+(use-package helpful)
 #+end_src
 
 ** discover-my-major
@@ -5710,10 +5775,7 @@ recency" functionality for =M-x= from ivy-prescient.
 
 ** hackernews
 #+begin_src emacs-lisp :tangle yes
-(use-package hackernews
-  :config
-  (add-to-list 'display-buffer-alist
-               '("*hackernews top stories*" display-buffer-below-selected)))
+(use-package hackernews)
 #+end_src
 
 * Miscellaneous
@@ -5999,7 +6061,12 @@ recency" functionality for =M-x= from ivy-prescient.
  "]" #'git-timemachine-show-next-revision
  "b" #'magit-blame
  "c" #'magit-commit-popup
- "d" #'magit-diff-buffer-file
+ "d" #'(lambda ()
+         (interactive)
+         (let ((display-buffer-alist (append display-buffer-alist
+                                             '(("magit-diff.*"
+                                                (display-buffer-same-window))))))
+           (magit-diff-buffer-file)))
  "D" #'magit-diff-unstaged
  "f" #'magit-find-file
  "g" #'magit-dispatch
