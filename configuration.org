@@ -1270,6 +1270,43 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (add-hook 'emacs-lisp-mode-hook #'mpereira/enable-autoreload-for-dir-locals)
 #+end_src
 
+* Asynchronous =undo-tree= history save
+I found that ~undo-tree-save-history-from-hook~, which =undo-tree= calls via the
+~write-file-functions~ hook (called on every file save), took 1-2 seconds on any
+non-trivial org mode buffers. This was a special nuisance when making small
+changes in small indirect buffers.
+
+The following replaces ~undo-tree-save-history-from-hook~ with an asynchronous
+version.
+
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/undo-tree-async-save-history ()
+  "TODO: docstring."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (async-start
+     `(lambda ()
+        ,(async-inject-variables "\\`load-path\\'")
+        (with-output-to-string
+          (require 'undo-tree)
+          (find-file ,file-name)
+          (undo-tree-save-history-from-hook)))
+     `(lambda (output)
+        (let ((inhibit-message t))
+          (message (format "undo-tree history saved asynchronously for %s%s"
+                           ,file-name
+                           (if (string= "" output)
+                               ""
+                             (format ": %s" output)))))))
+    ;; Hooks added to `write-file-functions' need to return non-nil so that the
+    ;; file is written.
+    nil))
+
+(with-eval-after-load "undo-tree"
+  (remove-hook 'write-file-functions #'undo-tree-save-history-from-hook)
+  (add-hook 'write-file-functions #'mpereira/undo-tree-async-save-history))
+#+end_src
+
 * Tramp
 #+begin_src emacs-lisp :tangle yes
 (require 'tramp)
