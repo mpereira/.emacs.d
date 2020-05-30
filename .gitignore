@@ -2,13 +2,13 @@
 /*-secrets.el
 /.cache
 /.dir-locals.el
+/.lsp-session-*
 /.mc-lists.el
 /.org-id-locations
 /.persistent-scratch
 /.sx
 /amx-items
 /auto-save-list
-/backups
 /bookmarks
 /configuration.el
 /custom.el
@@ -16,6 +16,7 @@
 /elpy
 /emojis
 /eshell
+/file-backups
 /forge-database.sqlite
 /hackernews
 /image-dired
@@ -25,6 +26,7 @@
 /network-security.data
 /org-clock-save.el
 /org-gcal
+/package-repository-backups
 /places
 /projectile-bookmarks.eld
 /projectile.cache
@@ -36,8 +38,9 @@
 /session.*
 /sessions
 /speed-type
-/test_runs
+/test-runs
 /tramp
+/tramp-connection-history
 /transient
 /undo*
 /url

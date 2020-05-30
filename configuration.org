@@ -5,276 +5,305 @@
 :TOC:      ignore
 :END:
 
-Evil emacs configuration.
+Vanilla evil emacs literate configuration.
 
 * Table of Contents
 :PROPERTIES:
-:TOC:      this
+:TOC:      :include all :depth 3
 :END:
--  [[#dependencies][Dependencies]]
--  [[#silent-exports-for-emacs-lisp-org-babel-code-blocks][Silent exports for emacs lisp org babel code blocks]]
--  [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
--  [[#utility-libraries][Utility libraries]]
-  -  [[#cl-lib][cl-lib]]
-  -  [[#s][s]]
-  -  [[#dash][dash]]
-  -  [[#thingatpt][thingatpt+]]
-  -  [[#help-fns][help-fns+]]
-  -  [[#ts][ts]]
--  [[#package-management-foundational][Package management, foundational]]
-  -  [[#general][general]]
-  -  [[#paradox][paradox]]
-  -  [[#exec-path-from-shell][exec-path-from-shell]]
--  [[#variables][Variables]]
--  [[#redefinitions-advices][Redefinitions, advices]]
-  -  [[#make-org-src-buffer-name-shorter-and-nicer][Make org src buffer name shorter and nicer]]
-  -  [[#improve-lisp-code-indentation][Improve Lisp code indentation]]
-  -  [[#archive-org-subtrees-under-the-same-hierarchy-as-the-original-in-the-archive-files][Archive org subtrees under the same hierarchy as the original in the archive files]]
-  -  [[#provide-counsel-symbol-at-point][Provide counsel-symbol-at-point]]
--  [[#helper-functions][Helper functions]]
--  [[#toggle-buffer-maximize][Toggle buffer maximize]]
--  [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
--  [[#tramp][Tramp]]
--  [[#server][Server]]
--  [[#options][Options]]
--  [[#color-theme][Color theme]]
--  [[#configure-mode-line][Configure Mode Line]]
--  [[#configure-header-line][Configure Header Line]]
--  [[#vi-emulation][Vi emulation]]
-  -  [[#evil][evil]]
-  -  [[#evil-org][evil-org]]
-  -  [[#evil-magit][evil-magit]]
-  -  [[#evil-extra-operator][evil-extra-operator]]
-  -  [[#evil-exchange][evil-exchange]]
-  -  [[#evil-nerd-commenter][evil-nerd-commenter]]
-  -  [[#evil-surround][evil-surround]]
-  -  [[#evil-matchit][evil-matchit]]
-  -  [[#evil-lion][evil-lion]]
-  -  [[#evil-string-inflection][evil-string-inflection]]
-  -  [[#evil-goggles][evil-goggles]]
-  -  [[#evil-multiedit][evil-multiedit]]
-  -  [[#evil-owl][evil-owl]]
-  -  [[#evil-collection][evil-collection]]
--  [[#org][Org]]
-  -  [[#org-mode][org-mode]]
-  -  [[#align-all-tags-in-the-buffer-on-tag-changes][Align all tags in the buffer on tag changes]]
-  -  [[#sort-org-entries-by-multiple-properties][Sort org entries by multiple properties]]
-  -  [[#org-clock][Org clock]]
-  -  [[#org-gcal][org-gcal]]
-  -  [[#org-agenda][Org agenda]]
-  -  [[#my-custom-persistent-cached-org-agendas][My custom persistent (cached) org agendas]]
-    -  [[#agenda-library][Agenda library]]
-    -  [[#main-agenda][Main agenda]]
-    -  [[#review-agenda][Review agenda]]
-    -  [[#common][Common]]
-  -  [[#counsel-org-clock][counsel-org-clock]]
-  -  [[#org-web-tools][org-web-tools]]
-  -  [[#org-expiry][org-expiry]]
-  -  [[#org-bullets][org-bullets]]
-  -  [[#org-make-toc][org-make-toc]]
-  -  [[#org-tree-slide][org-tree-slide]]
-  -  [[#org-sidebar][org-sidebar]]
-  -  [[#org-pomodoro][org-pomodoro]]
-  -  [[#org-archive-hierarchically][org-archive-hierarchically]]
-  -  [[#org-autonum][org-autonum]]
-  -  [[#ob-async][ob-async]]
-  -  [[#ox-jira][ox-jira]]
-  -  [[#ox-confluence][ox-confluence]]
-  -  [[#ox-twbs][ox-twbs]]
-  -  [[#ox-gfm][ox-gfm]]
-  -  [[#ox-slimhtml][ox-slimhtml]]
-  -  [[#ox-hugo][ox-hugo]]
-  -  [[#ox-pandoc][ox-pandoc]]
--  [[#file-management][File management]]
-  -  [[#dired][dired]]
-  -  [[#dired-subtree][dired-subtree]]
-  -  [[#reveal-in-osx-finder][reveal-in-osx-finder]]
--  [[#shell-terminal][Shell, terminal]]
-  -  [[#with-editor][with-editor]]
-  -  [[#xterm-color][xterm-color]]
-  -  [[#shell][shell]]
-  -  [[#eshell][eshell]]
-  -  [[#term][term]]
-  -  [[#eterm-256color][eterm-256color]]
-  -  [[#configure-xterm-color][Configure xterm-color]]
-  -  [[#fish-completion][fish-completion]]
-  -  [[#load-bash-alias][load-bash-alias]]
--  [[#ui][UI]]
-  -  [[#posframe][posframe]]
-  -  [[#ivy-posframe][ivy-posframe]]
-  -  [[#too-long-lines-mode][too-long-lines-mode]]
-  -  [[#company-posframe][company-posframe]]
-  -  [[#default-text-scale][default-text-scale]]
-  -  [[#minibuffer-line][minibuffer-line]]
-  -  [[#highlight-indent-guide][highlight-indent-guide]]
-  -  [[#hideshow][hideshow]]
-  -  [[#beacon][beacon]]
-  -  [[#rainbow-delimiters][rainbow-delimiters]]
-  -  [[#diff-hl][diff-hl]]
-  -  [[#dimmer][dimmer]]
-  -  [[#all-the-icons][all-the-icons]]
-  -  [[#dired-sidebar][dired-sidebar]]
-  -  [[#all-the-icons-dired][all-the-icons-dired]]
-  -  [[#emojify][emojify]]
--  [[#movement][Movement]]
-  -  [[#bm][bm]]
-  -  [[#avy][avy]]
-  -  [[#goto-address-mode][goto-address-mode]]
-  -  [[#dumb-jump][dumb-jump]]
-  -  [[#frog-jump-buffer][frog-jump-buffer]]
--  [[#text-search-and-manipulation][Text search and manipulation]]
-  -  [[#swiper][swiper]]
-  -  [[#ripgrep][ripgrep]]
-  -  [[#wgrep][wgrep]]
-  -  [[#double-saber][double-saber]]
-  -  [[#ag][ag]]
-  -  [[#symbol-overlay][symbol-overlay]]
-  -  [[#expand-region][expand-region]]
-  -  [[#ialign][ialign]]
-  -  [[#yasnippet][yasnippet]]
-  -  [[#yasnippet-snippets][yasnippet-snippets]]
-  -  [[#auto-yasnippet][auto-yasnippet]]
-  -  [[#electric-pair-mode][electric-pair-mode]]
-  -  [[#undo-tree][undo-tree]]
-  -  [[#move-text][move-text]]
-  -  [[#unfill][unfill]]
-  -  [[#string-inflection][string-inflection]]
-  -  [[#format-all][format-all]]
-  -  [[#blacken][blacken]]
--  [[#git][git]]
-  -  [[#magit][magit]]
-  -  [[#forge][forge]]
-  -  [[#magit-todos][magit-todos]]
-  -  [[#gist][gist]]
-  -  [[#gitignore-mode][gitignore-mode]]
-  -  [[#git-timemachine][git-timemachine]]
-  -  [[#browse-at-remote][browse-at-remote]]
--  [[#software-development][Software development]]
-  -  [[#flycheck][Flycheck]]
-    -  [[#flycheck][flycheck]]
-    -  [[#flycheck-inline][flycheck-inline]]
-    -  [[#flycheck-posframe][flycheck-posframe]]
-  -  [[#lsp][LSP]]
-    -  [[#lsp-mode][lsp-mode]]
-    -  [[#lsp-ui][lsp-ui]]
-    -  [[#lsp-rust][lsp-rust]]
-  -  [[#eglot][eglot]]
-  -  [[#company-mode][company-mode]]
-  -  [[#aggressive-indent][aggressive-indent]]
-  -  [[#lisp][LISP]]
-    -  [[#lispy][lispy]]
-    -  [[#lispyville][lispyville]]
-  -  [[#emacs-lisp][Emacs Lisp]]
-  -  [[#java][Java]]
-    -  [[#meghanada][meghanada]]
-  -  [[#clojure][Clojure]]
-    -  [[#clojure-mode][clojure-mode]]
-    -  [[#clj-refactor][clj-refactor]]
-    -  [[#inf-clojure][inf-clojure]]
-    -  [[#cider][cider]]
-    -  [[#slamhound][slamhound]]
-    -  [[#miracle][miracle]]
-  -  [[#go][Go]]
-    -  [[#go-mode][go-mode]]
-  -  [[#rust][Rust]]
-    -  [[#rust-mode][rust-mode]]
-    -  [[#racer][racer]]
-    -  [[#flycheck-rust][flycheck-rust]]
-    -  [[#ob-rust][ob-rust]]
-  -  [[#kotlin][Kotlin]]
-    -  [[#kotlin-mode][kotlin-mode]]
-    -  [[#flycheck-kotlin][flycheck-kotlin]]
-  -  [[#javascript][Javascript]]
-  -  [[#shell-script][Shell script]]
-  -  [[#python][Python]]
-    -  [[#elpy][elpy]]
-  -  [[#json][JSON]]
-    -  [[#json-mode][json-mode]]
-    -  [[#json-navigator][json-navigator]]
-    -  [[#json-snatcher][json-snatcher]]
-  -  [[#scala][Scala]]
-    -  [[#scala-mode][scala-mode]]
-  -  [[#sql][SQL]]
-  -  [[#es-mode][es-mode]]
-  -  [[#terraform-mode][terraform-mode]]
-  -  [[#docker][docker]]
-  -  [[#dockerfile-mode][dockerfile-mode]]
--  [[#web-development][Web development]]
-  -  [[#web-mode][web-mode]]
-  -  [[#auto-rename-tag][auto-rename-tag]]
-  -  [[#css][css]]
-  -  [[#emacs-colorpicker][emacs-colorpicker]]
--  [[#writing-prose][Writing prose]]
-  -  [[#flyspell][flyspell]]
-  -  [[#flyspell-correct-ivy][flyspell-correct-ivy]]
-  -  [[#mw-thesaurus][mw-thesaurus]]
-  -  [[#atomic-chrome][atomic-chrome]]
--  [[#distraction-free-editing][Distraction-free editing]]
-  -  [[#hide-mode-line][hide-mode-line]]
-  -  [[#olivetti][olivetti]]
--  [[#buffer-management][Buffer management]]
-  -  [[#transpose-frame][transpose-frame]]
-  -  [[#buffer-expose][buffer-expose]]
-  -  [[#buffer-move][buffer-move]]
-  -  [[#rotate][rotate]]
-  -  [[#persistent-scratch][persistent-scratch]]
-  -  [[#prevent-scratch-buffers-from-being-killed][Prevent scratch buffers from being killed]]
--  [[#project-management][Project management]]
-  -  [[#projectile][projectile]]
-  -  [[#term-projectile][term-projectile]]
-  -  [[#ibuffer-projectile][ibuffer-projectile]]
-  -  [[#perspective][perspective]]
-  -  [[#counsel][counsel]]
-  -  [[#persp-projectile][persp-projectile]]
-  -  [[#counsel-projectile][counsel-projectile]]
--  [[#commands][Commands]]
-  -  [[#amx][amx]]
-  -  [[#ivy][ivy]]
-  -  [[#ivy-rich][ivy-rich]]
-  -  [[#prescient][prescient]]
-  -  [[#ivy-prescient][ivy-prescient]]
-  -  [[#company-prescient][company-prescient]]
--  [[#help][Help]]
-  -  [[#helpful][helpful]]
-  -  [[#discover-my-major][discover-my-major]]
-  -  [[#which-key][which-key]]
-  -  [[#command-log-mode][command-log-mode]]
--  [[#markup][Markup]]
-  -  [[#markdown-mode][markdown-mode]]
-  -  [[#toml-mode][toml-mode]]
-  -  [[#yaml-mode][yaml-mode]]
-  -  [[#htmlize][htmlize]]
-  -  [[#grip-mode][grip-mode]]
--  [[#interactions-with-websites][Interactions with websites]]
-  -  [[#counsel-web][counsel-web]]
-  -  [[#stackoverflow][stackoverflow]]
-  -  [[#google-this][google-this]]
-  -  [[#wolfram-alpha][Wolfram Alpha]]
-  -  [[#hackernews][hackernews]]
--  [[#miscellaneous][Miscellaneous]]
-  -  [[#suggest][suggest]]
-  -  [[#open-junk-file][open-junk-file]]
-  -  [[#gif-screencast][gif-screencast]]
-  -  [[#disk-usage][disk-usage]]
-  -  [[#circe][circe]]
-  -  [[#mingus][mingus]]
-  -  [[#osascripts][osascripts]]
--  [[#mappings][Mappings]]
--  [[#fun][Fun]]
-  -  [[#fireplace][fireplace]]
-  -  [[#let-it-snow][let-it-snow]]
--  [[#tips-and-tricks][Tips and tricks]]
-  -  [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
-  -  [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][EXPRESSION can be used only once per org-agenda-prefix-format]]
-  -  [[#emulate-c-u-universal-argument][Emulate C-u (universal-argument)]]
-    -  [[#for-raw-prefix-arg-interactive-p][For raw prefix arg (interactive "P")]]
-    -  [[#otherwise][Otherwise]]
-  -  [[#after-modifying-path][After modifying PATH]]
-  -  [[#terminate-initel-loading-early][Terminate init.el loading early]]
-  -  [[#change-font-m-x-x-select-font][Change font: M-x x-select-font]]
-  -  [[#httpsgithubcomd12frostedelpa-mirrorwhen-melpaorg-is-down][When melpa.org is down]]
--  [[#sandbox-not-tangled][Sandbox (not tangled)]]
--  [[#file-local-variables][File-local variables]]
+:CONTENTS:
+- [[#table-of-contents][Table of Contents]]
+- [[#dependencies][Dependencies]]
+- [[#silent-exports-for-emacs-lisp-org-babel-code-blocks][Silent exports for emacs lisp org babel code blocks]]
+- [[#quelpa-and-quelpa-use-package][quelpa and quelpa-use-package]]
+- [[#utility-libraries][Utility libraries]]
+  - [[#async][async]]
+  - [[#aio][aio]]
+  - [[#cl-lib][cl-lib]]
+  - [[#s][s]]
+  - [[#dash][dash]]
+  - [[#thingatpt][thingatpt+]]
+  - [[#help-fns][help-fns+]]
+  - [[#ts][ts]]
+- [[#package-management-foundational][Package management, foundational]]
+  - [[#general][general]]
+  - [[#paradox][paradox]]
+  - [[#exec-path-from-shell][exec-path-from-shell]]
+- [[#variables][Variables]]
+- [[#redefinitions-advices][Redefinitions, advices]]
+  - [[#make-org-src-buffer-name-shorter-and-nicer][Make org src buffer name shorter and nicer]]
+  - [[#improve-lisp-code-indentation][Improve Lisp code indentation]]
+  - [[#archive-org-subtrees-under-the-same-hierarchy-as-the-original-in-the-archive-files][Archive org subtrees under the same hierarchy as the original in the archive files]]
+  - [[#provide-counsel-symbol-at-point][Provide counsel-symbol-at-point]]
+- [[#helper-functions][Helper functions]]
+- [[#toggle-buffer-maximize][Toggle buffer maximize]]
+- [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
+- [[#asynchronous-undo-tree-history-save][Asynchronous undo-tree history save]]
+- [[#asynchronous-org-babel-tangle-org-toc-generation-and-byte-recompilation][Asynchronous Org Babel tangle, Org TOC generation and byte recompilation]]
+- [[#tramp][Tramp]]
+  - [[#counsel-tramp][counsel-tramp]]
+- [[#server][Server]]
+- [[#options][Options]]
+  - [[#performance][Performance]]
+- [[#performance][Performance]]
+  - [[#start-up-profiler-esup][Start-up profiler: esup]]
+  - [[#explain-pause-mode][explain-pause-mode]]
+- [[#color-theme][Color theme]]
+  - [[#change-themes-when-changing-macos-light-or-dark-appearance][Change themes when changing MacOS light or dark appearance]]
+- [[#configure-mode-line][Configure Mode Line]]
+- [[#configure-header-line][Configure Header Line]]
+- [[#vi-emulation][Vi emulation]]
+  - [[#evil][evil]]
+  - [[#evil-org][evil-org]]
+  - [[#evil-magit][evil-magit]]
+  - [[#evil-extra-operator][evil-extra-operator]]
+  - [[#evil-exchange][evil-exchange]]
+  - [[#evil-nerd-commenter][evil-nerd-commenter]]
+  - [[#evil-surround][evil-surround]]
+  - [[#evil-matchit][evil-matchit]]
+  - [[#evil-lion][evil-lion]]
+  - [[#evil-string-inflection][evil-string-inflection]]
+  - [[#evil-goggles][evil-goggles]]
+  - [[#evil-multiedit][evil-multiedit]]
+  - [[#evil-owl][evil-owl]]
+  - [[#evil-collection][evil-collection]]
+- [[#org][Org]]
+  - [[#org-mode][org-mode]]
+  - [[#org-babel][Org Babel]]
+    - [[#verb][verb]]
+    - [[#org-babel][org-babel]]
+  - [[#align-all-tags-in-the-buffer-on-tag-changes][Align all tags in the buffer on tag changes]]
+  - [[#sort-org-entries-by-multiple-properties][Sort org entries by multiple properties]]
+  - [[#org-clock][Org clock]]
+  - [[#org-gcal][org-gcal]]
+  - [[#org-agenda][Org agenda]]
+  - [[#my-custom-persistent-cached-org-agendas][My custom persistent (cached) org agendas]]
+    - [[#agenda-library][Agenda library]]
+    - [[#main-agenda][Main agenda]]
+    - [[#review-agenda][Review agenda]]
+    - [[#common][Common]]
+  - [[#counsel-org-clock][counsel-org-clock]]
+  - [[#org-web-tools][org-web-tools]]
+  - [[#org-expiry][org-expiry]]
+  - [[#org-bullets][org-bullets]]
+  - [[#org-make-toc][org-make-toc]]
+  - [[#org-tree-slide][org-tree-slide]]
+  - [[#org-sidebar][org-sidebar]]
+  - [[#org-pomodoro][org-pomodoro]]
+  - [[#org-archive-hierarchically][org-archive-hierarchically]]
+  - [[#org-autonum][org-autonum]]
+  - [[#ob-async][ob-async]]
+  - [[#ox-jira][ox-jira]]
+  - [[#ox-confluence][ox-confluence]]
+  - [[#ox-twbs][ox-twbs]]
+  - [[#ox-gfm][ox-gfm]]
+  - [[#ox-slimhtml][ox-slimhtml]]
+  - [[#ox-hugo][ox-hugo]]
+  - [[#ox-pandoc][ox-pandoc]]
+- [[#file-management][File management]]
+  - [[#dired][dired]]
+  - [[#dired-show-readme][dired-show-readme]]
+  - [[#dired-subtree][dired-subtree]]
+  - [[#reveal-in-osx-finder][reveal-in-osx-finder]]
+- [[#shell-terminal][Shell, terminal]]
+  - [[#with-editor][with-editor]]
+  - [[#xterm-color][xterm-color]]
+  - [[#shell][shell]]
+  - [[#eshell][eshell]]
+  - [[#vterm][vterm]]
+  - [[#term][term]]
+  - [[#eterm-256color][eterm-256color]]
+  - [[#configure-xterm-color][Configure xterm-color]]
+  - [[#fish-completion][fish-completion]]
+  - [[#load-bash-alias][load-bash-alias]]
+- [[#ui][UI]]
+  - [[#posframe][posframe]]
+  - [[#ivy-posframe][ivy-posframe]]
+  - [[#too-long-lines-mode][too-long-lines-mode]]
+  - [[#company-posframe][company-posframe]]
+  - [[#default-text-scale][default-text-scale]]
+  - [[#minibuffer-line][minibuffer-line]]
+  - [[#highlight-indent-guide][highlight-indent-guide]]
+  - [[#hideshow][hideshow]]
+  - [[#beacon][beacon]]
+  - [[#rainbow-delimiters][rainbow-delimiters]]
+  - [[#diff-hl][diff-hl]]
+  - [[#dimmer][dimmer]]
+  - [[#all-the-icons][all-the-icons]]
+  - [[#dired-sidebar][dired-sidebar]]
+  - [[#all-the-icons-dired][all-the-icons-dired]]
+  - [[#emojify][emojify]]
+  - [[#ivy-rich][ivy-rich]]
+    - [[#run-ivy-rich-mode-only-after-loading-all-the-icons-ivy-rich][Run ivy-rich-mode only after loading all-the-icons-ivy-rich]]
+  - [[#all-the-icons-ivy-rich][all-the-icons-ivy-rich]]
+- [[#movement][Movement]]
+  - [[#bm][bm]]
+  - [[#avy][avy]]
+  - [[#goto-address-mode][goto-address-mode]]
+  - [[#dumb-jump][dumb-jump]]
+  - [[#frog-jump-buffer][frog-jump-buffer]]
+  - [[#link-hint][link-hint]]
+- [[#text-search-and-manipulation][Text search and manipulation]]
+  - [[#swiper][swiper]]
+  - [[#ripgrep][ripgrep]]
+  - [[#wgrep][wgrep]]
+  - [[#double-saber][double-saber]]
+  - [[#ag][ag]]
+  - [[#symbol-overlay][symbol-overlay]]
+  - [[#expand-region][expand-region]]
+  - [[#ialign][ialign]]
+  - [[#yasnippet][yasnippet]]
+  - [[#yasnippet-snippets][yasnippet-snippets]]
+  - [[#add-yasnippet-support-for-all-company-backends][Add yasnippet support for all company backends]]
+  - [[#electric-pair-mode][electric-pair-mode]]
+  - [[#undo-tree][undo-tree]]
+  - [[#move-text][move-text]]
+  - [[#unfill][unfill]]
+  - [[#string-inflection][string-inflection]]
+  - [[#format-all][format-all]]
+  - [[#blacken][blacken]]
+  - [[#prettier][prettier]]
+- [[#git][git]]
+  - [[#magit][magit]]
+  - [[#forge][forge]]
+  - [[#magit-todos][magit-todos]]
+  - [[#gist][gist]]
+  - [[#gitignore-mode][gitignore-mode]]
+  - [[#git-timemachine][git-timemachine]]
+  - [[#browse-at-remote][browse-at-remote]]
+- [[#software-development][Software development]]
+  - [[#flycheck][Flycheck]]
+    - [[#flycheck][flycheck]]
+    - [[#flycheck-posframe][flycheck-posframe]]
+  - [[#lsp][LSP]]
+    - [[#lsp-mode][lsp-mode]]
+    - [[#lsp-python-ms][lsp-python-ms]]
+    - [[#lsp-ui][lsp-ui]]
+    - [[#company-lsp][company-lsp]]
+  - [[#company-mode][company-mode]]
+  - [[#aggressive-indent][aggressive-indent]]
+  - [[#lisp][LISP]]
+    - [[#lispy][lispy]]
+    - [[#lispyville][lispyville]]
+  - [[#emacs-lisp][Emacs Lisp]]
+  - [[#java][Java]]
+    - [[#meghanada][meghanada]]
+  - [[#clojure][Clojure]]
+    - [[#clojure-mode][clojure-mode]]
+    - [[#clj-refactor][clj-refactor]]
+    - [[#inf-clojure][inf-clojure]]
+    - [[#cider][cider]]
+    - [[#slamhound][slamhound]]
+    - [[#miracle][miracle]]
+  - [[#go][Go]]
+    - [[#go-mode][go-mode]]
+  - [[#rust][Rust]]
+    - [[#rust-mode][rust-mode]]
+    - [[#racer][racer]]
+    - [[#flycheck-rust][flycheck-rust]]
+    - [[#ob-rust][ob-rust]]
+  - [[#kotlin][Kotlin]]
+    - [[#kotlin-mode][kotlin-mode]]
+    - [[#flycheck-kotlin][flycheck-kotlin]]
+  - [[#c][C#]]
+  - [[#javascript][JavaScript]]
+  - [[#shell-script][Shell script]]
+  - [[#python][Python]]
+    - [[#elpy][elpy]]
+  - [[#json][JSON]]
+    - [[#json-mode][json-mode]]
+    - [[#json-navigator][json-navigator]]
+    - [[#json-snatcher][json-snatcher]]
+  - [[#scala][Scala]]
+    - [[#scala-mode][scala-mode]]
+  - [[#sql][SQL]]
+  - [[#es-mode][es-mode]]
+  - [[#terraform-mode][terraform-mode]]
+  - [[#docker][docker]]
+  - [[#dockerfile-mode][dockerfile-mode]]
+  - [[#literate-calc-mode][literate-calc-mode]]
+- [[#web-development][Web development]]
+  - [[#web-mode][web-mode]]
+  - [[#auto-rename-tag][auto-rename-tag]]
+  - [[#css][css]]
+  - [[#js2-refactor][js2-refactor]]
+  - [[#rjsx-mode][rjsx-mode]]
+  - [[#emacs-colorpicker][emacs-colorpicker]]
+- [[#writing-prose][Writing prose]]
+  - [[#flyspell][flyspell]]
+  - [[#flyspell-correct-ivy][flyspell-correct-ivy]]
+  - [[#mw-thesaurus][mw-thesaurus]]
+  - [[#atomic-chrome][atomic-chrome]]
+- [[#distraction-free-editing][Distraction-free editing]]
+  - [[#hide-mode-line][hide-mode-line]]
+  - [[#olivetti][olivetti]]
+- [[#buffer-management][Buffer management]]
+  - [[#transpose-frame][transpose-frame]]
+  - [[#buffer-expose][buffer-expose]]
+  - [[#buffer-move][buffer-move]]
+  - [[#rotate][rotate]]
+  - [[#persistent-scratch][persistent-scratch]]
+  - [[#prevent-scratch-buffers-from-being-killed][Prevent scratch buffers from being killed]]
+  - [[#display-buffer-alist-configuration][display-buffer-alist configuration]]
+- [[#project-management][Project management]]
+  - [[#projectile][projectile]]
+  - [[#term-projectile][term-projectile]]
+  - [[#ibuffer-projectile][ibuffer-projectile]]
+  - [[#perspective][perspective]]
+  - [[#counsel][counsel]]
+  - [[#persp-projectile][persp-projectile]]
+  - [[#counsel-projectile][counsel-projectile]]
+  - [[#find-file-in-project][find-file-in-project]]
+- [[#commands][Commands]]
+  - [[#amx][amx]]
+  - [[#ivy][ivy]]
+  - [[#prescient][prescient]]
+  - [[#ivy-prescient][ivy-prescient]]
+  - [[#company-prescient][company-prescient]]
+- [[#help][Help]]
+  - [[#helpful][helpful]]
+  - [[#discover-my-major][discover-my-major]]
+  - [[#which-key][which-key]]
+  - [[#dash-at-point][dash-at-point]]
+  - [[#command-log-mode][command-log-mode]]
+- [[#markup][Markup]]
+  - [[#markdown-mode][markdown-mode]]
+  - [[#toml-mode][toml-mode]]
+  - [[#yaml-mode][yaml-mode]]
+  - [[#htmlize][htmlize]]
+  - [[#grip-mode][grip-mode]]
+- [[#interactions-with-websites][Interactions with websites]]
+  - [[#counsel-web][counsel-web]]
+  - [[#stackoverflow][stackoverflow]]
+  - [[#engine-mode][engine-mode]]
+  - [[#google-this][google-this]]
+  - [[#wolfram-alpha][Wolfram Alpha]]
+  - [[#hackernews][hackernews]]
+- [[#miscellaneous][Miscellaneous]]
+  - [[#suggest][suggest]]
+  - [[#open-junk-file][open-junk-file]]
+  - [[#gif-screencast][gif-screencast]]
+  - [[#disk-usage][disk-usage]]
+  - [[#circe][circe]]
+  - [[#mingus][mingus]]
+  - [[#osascripts][osascripts]]
+- [[#mappings][Mappings]]
+- [[#fun][Fun]]
+  - [[#fireplace][fireplace]]
+  - [[#let-it-snow][let-it-snow]]
+- [[#tips-and-tricks][Tips and tricks]]
+  - [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
+  - [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][EXPRESSION can be used only once per org-agenda-prefix-format]]
+  - [[#emulate-c-u-universal-argument][Emulate C-u (universal-argument)]]
+    - [[#for-raw-prefix-arg-interactive-p][For raw prefix arg (interactive "P")]]
+    - [[#otherwise][Otherwise]]
+  - [[#after-modifying-path][After modifying PATH]]
+  - [[#terminate-initel-loading-early][Terminate init.el loading early]]
+  - [[#change-font-m-x-x-select-font][Change font: M-x x-select-font]]
+  - [[#when-melpaorg-is-down][When melpa.org is down]]
+- [[#sandbox-not-tangled][Sandbox (not tangled)]]
+- [[#file-local-variables][File-local variables]]
+:END:
 
 * Dependencies
 
@@ -827,23 +856,6 @@ in any structured movement package is mind-boggling to me."
                              )
                     (forward-char 1)))))))))))
 
-;; https://github.com/syl20bnr/spacemacs/blob/
-;; b7e51d70aa3fb81df2da6dc16d9652a002ba5e6b/layers/%2Bspacemacs/
-;; spacemacs-layouts/funcs.el#352
-;;
-;; plus `projectile-persp-switch-project'
-(with-eval-after-load "ivy"
-  (with-eval-after-load "projectile"
-    (with-eval-after-load "perspective"
-      (defun mpereira/ivy-persp-switch-project (arg)
-        (interactive "P")
-        (ivy-read "Switch to Project Perspective: "
-                  (if (projectile-project-p)
-                      (cons (abbreviate-file-name (projectile-project-root))
-                            (projectile-relevant-known-projects))
-                    projectile-known-projects)
-                  :action #'projectile-persp-switch-project)))))
-
 (with-eval-after-load "evil"
   (with-eval-after-load "lispyville"
     (defun mpereira/insert-to-beginning-of-list (arg)
@@ -874,17 +886,84 @@ in any structured movement package is mind-boggling to me."
   (let ((current-prefix-arg prefix-arg))
     (call-interactively func)))
 
-(with-eval-after-load "eshell"
-  (with-eval-after-load "projectile"
-    (defun mpereira/projectile-eshell ()
+(defun mpereira/perspective-switch (perspective-name
+                                    &optional after-perspective-creation-function)
+  "TODO: docstring."
+  (let ((perspective (gethash perspective-name (perspectives-hash))))
+    (if perspective
+        ;; Perspective already exists and is not the current.
+        (when (not (equal perspective (persp-curr)))
+          (persp-switch perspective-name))
+      ;; Perspective doesn't exist.
+      (progn
+        (persp-switch perspective-name)
+        (and after-perspective-creation-function
+             (funcall after-perspective-creation-function perspective-name))))))
+
+(defun mpereira/counsel-projectile-perspective-switch-project (&optional default-action)
+  "TODO: docstring."
+  (interactive)
+  (ivy-read (projectile-prepend-project-name "Switch to project: ")
+            (projectile-relevant-known-projects)
+            :preselect (and (projectile-project-p)
+                            (abbreviate-file-name (projectile-project-root)))
+            :action (lambda (project-path)
+                      (let ((perspective-name (funcall
+                                               projectile-project-name-function
+                                               project-path)))
+                        (mpereira/perspective-switch
+                         perspective-name
+                         (lambda (perspective-name)
+                           (counsel-projectile-switch-project-action
+                            project-path)))))
+            :require-match t
+            :sort counsel-projectile-sort-projects
+            :caller 'counsel-projectile-switch-project))
+
+(with-eval-after-load "find-file-in-project"
+  (defun mpereira/find-directory ()
+    (interactive)
+    (ffip-find-files "" nil t)))
+
+(with-eval-after-load "projectile"
+  (defun mpereira/maybe-projectile-dired ()
+    (interactive)
+    (if (projectile-project-p)
+        (projectile-dired)
+      (dired ".")))
+
+  (defun mpereira/maybe-projectile-ibuffer ()
+    (interactive)
+    (if (projectile-project-p)
+        (projectile-ibuffer nil)
+      (ibuffer ".")))
+
+  (with-eval-after-load "eshell"
+    (defun mpereira/maybe-projectile-eshell ()
       (interactive)
       (if (projectile-project-p)
-          (let ((eshell-buffer-name (concat "*eshell "
-                                            (projectile-project-name)
-                                            "*")))
-            (projectile-with-default-dir (projectile-project-root)
-              (eshell t)))
-        (eshell t)))))
+          (projectile-run-eshell t)
+        (eshell t))))
+
+  (with-eval-after-load "find-file-in-project"
+    (with-eval-after-load "counsel-projectile"
+      (defun mpereira/maybe-projectile-switch-buffer ()
+        (interactive)
+        (if (projectile-project-p)
+            (counsel-projectile-switch-to-buffer)
+          (ivy-switch-buffer)))
+
+      (defun mpereira/maybe-projectile-find-file ()
+        (interactive)
+        (if (projectile-project-p)
+            (counsel-projectile-find-file)
+          (ffip)))
+
+      (defun mpereira/maybe-projectile-find-directory ()
+        (interactive)
+        (if (projectile-project-p)
+            (counsel-projectile-find-dir)
+          (mpereira/find-directory))))))
 
 (defun mpereira/enable-line-numbers ()
   (setq display-line-numbers t))
@@ -977,17 +1056,6 @@ Arguments: none."
                           (bm-goto bookmark)))
               :sort t)))
 
-(defun mpereira/neotree-project-dir ()
-  "Open NeoTree using the git root."
-  (interactive)
-  (let ((project-dir (projectile-project-root))
-        (file-name (buffer-file-name)))
-    (if project-dir
-        (progn
-          (neotree-dir project-dir)
-          (neotree-find file-name))
-      (message "Could not find git project root."))))
-
 (defun mpereira/narrow-or-widen-dwim (p)
   "Widen if buffer is narrowed, narrow-dwim otherwise.
 Dwim means: region, org-src-block, org-subtree, or defun, whichever applies
@@ -1054,25 +1122,22 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
   "Show list of system processes.
 Copies the selected process's PID to the clipboard."
   (interactive)
-  (let ((ps (split-string
-             (shell-command-to-string
-              "ps axco user,pid,%cpu,%mem,start,time,command -r")
-             "\n"
-             t)))
+  (let ((ps (split-string (shell-command-to-string
+                           "ps axco user,pid,%cpu,%mem,start,time,command -r")
+                          "\n"
+                          t)))
     (ivy-read "Process: "
               ps
-              :action (lambda (x)
-                        (kill-new (cadr (split-string x " " t)))))))
+              :action (lambda (project-path)
+                        (kill-new (cadr (split-string project-path " " t)))))))
 
 (defun mpereira/kill-buffer-and-maybe-window ()
-  "Kill current buffer. Kill window unless it had any previous buffers.
-Useful when killing help buffers that were opened on top of other buffers on
-existing windows. Also restores cursor position on previous window."
+  "TODO."
   (interactive)
   (if (window-prev-buffers)
-      (progn
-        (evil-window-prev 1)
-        (kill-buffer (current-buffer)))
+      (let ((previous-buffer (car (window-prev-buffers))) ; not using this.
+            (current-buffer* (current-buffer)))
+        (kill-buffer current-buffer*))
     (kill-buffer-and-window)))
 
 (with-eval-after-load "counsel"
@@ -1085,6 +1150,7 @@ existing windows. Also restores cursor position on previous window."
           (funcall 'lispy-goto-local args)
         (funcall 'counsel-imenu)))))
 
+;; TODO: make it be able to get indirect buffer file names.
 (defun mpereira/file-metadata ()
   "TODO."
   (interactive)
@@ -1107,33 +1173,6 @@ Mode:     %s"
     (kill-new output)
     (message output)
     output))
-
-(defun mpereira/org-git-log ()
-  "Open the git-org log."
-  (interactive)
-  (let* ((tmpfile (make-temp-file "git-log"))
-         (tmpbuf (find-file-noselect tmpfile))
-         (pwd default-directory)
-         (project (file-name-nondirectory
-                   (directory-file-name (projectile-project-root))))
-         (buf (get-buffer-create (format "*git-log %s*" project)))
-         (cmd (concat (format "cd %s; " pwd)
-                      "git log --date=format:'<%Y-%m-%d %H:%M:%S %a>'"
-                      "  --format='* %s%n"
-                      "  :PROPERTIES:%n"
-                      "  :ID:      %H%n"
-                      "  :AUTHOR:  %an%n"
-                      "  :DATE:    %ad%n"
-                      "  :PARENTS: %P%n"
-                      "  :END:%n%n"
-                      "%b%n'")))
-    (with-current-buffer buf
-      (erase-buffer)
-      (set-buffer-file-coding-system 'unix)
-      (org-mode)
-      (insert (shell-command-to-string cmd)))
-    (pop-to-buffer buf)
-    (goto-char (point-min))))
 
 (defun mpereira/unadvice (sym)
   "Remove all advices from symbol SYM."
@@ -1168,7 +1207,7 @@ Mode:     %s"
           (setq output (concat truncation-string output)))
         output))))
 
-(defun mpereira/fish-path (directory &optional max-length)
+(defun mpereira/short-directory-path (directory &optional max-length)
   "Returns a potentially trimmed-down version of the directory DIRECTORY,
 replacing parent directories with their initial characters to try to get the
 character length of directory (sans directory slashes) down to MAX-LENGTH."
@@ -1203,6 +1242,21 @@ character length of directory (sans directory slashes) down to MAX-LENGTH."
   "Prevents the current buffer from being killed."
   (interactive)
   (emacs-lock-mode 'kill))
+
+(defun mpereira/exec-path-from-shell-initialize ()
+  "Clears PATH before running `exec-path-from-shell-initialize' so that there's
+no duplicate or conflicting entries."
+  (interactive)
+  (setenv "PATH" "")
+  (exec-path-from-shell-initialize))
+
+(defun mpereira/org-todo-with-date (&optional arg)
+  (interactive "P")
+  (cl-letf* ((org-read-date-prefer-future nil)
+             (my-current-time (org-read-date t t nil "when:" nil nil nil))
+             ((symbol-function #'org-current-effective-time)
+              #'(lambda () my-current-time)))
+    (org-todo arg)))
 #+end_src
 
 * Toggle buffer maximize
@@ -1429,6 +1483,9 @@ Cache SSH passwords during the whole Emacs session.
 
 (setq confirm-kill-emacs 'y-or-n-p)
 
+;; Automatically scroll compilation buffers to the bottom.
+(setq compilation-scroll-output t)
+
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
@@ -1457,14 +1514,14 @@ Cache SSH passwords during the whole Emacs session.
 ;; FIXME: This needs to be updated when the font size changes.
 (set-face-attribute 'default nil :family "Consolas" :height 180)
 
+(eval-after-load "ivy-posframe"
+  (setq ivy-posframe-font "Consolas-22"))
+
 ;; Enable narrowing commands.
 (put 'narrow-to-region 'disabled nil)
 
 ;; Start in full-screen.
-;; FIXME: Using `toggle-frame-maximized' instead of `toggle-frame-fullscreen'
-;; because of
-;; https://github.com/tumashu/posframe/issues/30#issuecomment-586370312.
-(add-hook 'after-init-hook #'toggle-frame-maximized)
+(add-hook 'after-init-hook #'toggle-frame-fullscreen)
 
 ;; Show matching parens.
 (setq show-paren-delay 0)
@@ -1525,8 +1582,12 @@ Cache SSH passwords during the whole Emacs session.
 ;; Switch to help buffer when it's opened.
 (setq help-window-select t)
 
-;; Don't recenter buffer point when point goes outside window.
+;; Don't recenter buffer point when point goes outside window. This prevents
+;; centering the buffer when scrolling down its last line.
 (setq scroll-conservatively 100)
+
+;; Keep cursor position when scrolling.
+(setq scroll-preserve-screen-position 1)
 
 (dolist (hook '(prog-mode-hook text-mode-hook))
   (add-hook hook #'mpereira/enable-line-numbers))
@@ -1539,25 +1600,12 @@ Cache SSH passwords during the whole Emacs session.
 (require 'saveplace)
 (save-place-mode t)
 
-;; Remove `erase-buffer' from the disabled command list.
-;; I had this set to `nil' for some reason. Why was it? Maybe I can just remove
-;; this?
-;; (put 'erase-buffer 'disabled nil)
-
 ;; Save a bunch of session state stuff.
 (require 'savehist)
 (setq savehist-additional-variables '(regexp-search-ring)
       savehist-autosave-interval 60
       savehist-file (expand-file-name "savehist" user-emacs-directory))
 (savehist-mode t)
-
-;; Show trailing whitespace.
-(require 'whitespace)
-(setq whitespace-style '(face lines-tail trailing))
-(dolist (hook '(prog-mode-hook text-mode-hook))
-  ;; Disabling whitespace mode for now.
-  ;; (add-hook hook #'whitespace-mode)
-  )
 
 ;; `setq', `setq-default' and `setq-local' don't seem to work with symbol
 ;; variables, hence the absence of a `dolist' here.
@@ -1593,14 +1641,7 @@ Cache SSH passwords during the whole Emacs session.
       mouse-yank-at-point t
       require-final-newline t
       save-place-file (concat user-emacs-directory "places")
-      backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
-
-;; Setting this to nil to prevent "recursive load jka-compr.el.gz" issue.
-;; See: https://github.com/bbatsov/prelude/issues/1134
-(setq load-prefer-newer nil)
-
-;; Keep cursor position when scrolling.
-(setq scroll-preserve-screen-position 1)
+      backup-directory-alist `(("." . ,(concat user-emacs-directory "file-backups"))))
 
 ;; Delete trailing whitespace on save.
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
@@ -1671,10 +1712,11 @@ My favorite Dark themes:
 My favorite light themes:
 1. =modus-operandi=
 2. =doom-one-light=
-2. =github=
-3. =material-light=
-4. =twilight-bright=
-5. =espresso=
+3. =doom-acario-light=
+4. =github=
+5. =material-light=
+6. =twilight-bright=
+7. =espresso=
 
 #+begin_src emacs-lisp :tangle yes
 (setq custom-safe-themes t) ;; Don't ask whether custom themes are safe.
@@ -1721,6 +1763,17 @@ My favorite light themes:
           t)
 #+end_src
 
+** Change themes when changing MacOS light or dark appearance
+This doesn't seem to be working.
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'ns-system-appearance-change-functions
+          (lambda (appearance)
+            (pcase appearance
+              ('light (mpereira/load-light-theme))
+              ('dark (mpereira/load-dark-theme)))))
+#+end_src
+
 * Configure Mode Line
 #+begin_src emacs-lisp :tangle yes
 (with-eval-after-load "projectile"
@@ -1762,7 +1815,7 @@ My favorite light themes:
                 (modified-or-ro-symbol-face 'font-lock-comment-face)
                 (directory (if (and buffer-file-name
                                     (projectile-project-p))
-                               (mpereira/fish-path
+                               (mpereira/short-directory-path
                                 (mpereira/buffer-project-directory
                                  (projectile-project-root)
                                  default-directory)
@@ -1938,8 +1991,11 @@ Source: https://git.io/vQKzv"
 #+end_src
 
 ** evil-extra-operator
+REVIEW: disabled on [2020-05-28 Thu] because I don't use it and it was clashing
+with another keybinding.
 #+begin_src emacs-lisp :tangle yes
 (use-package evil-extra-operator
+  :disabled
   :after evil
   :init
   (setq evil-extra-operator-eval-key "ge")
@@ -2123,9 +2179,8 @@ the same as the =ivy-posframe= one.
                     org-protocol
                     org-tempo))
 ;; Requiring these modules because org mode only does that for `org-modules'
-;; when it's defined prior to loading it.
+;; defined prior to loading it.
 (require 'org-habit)
-(require 'org-info)
 (require 'org-protocol)
 (require 'org-tempo)
 
@@ -2170,16 +2225,6 @@ the same as the =ivy-posframe= one.
 
 ;; Make TAB act as if it were issued in a buffer of the language’s major mode.
 (setq org-src-tab-acts-natively t)
-
-(org-babel-do-load-languages 'org-babel-load-languages
-                             '((shell . t)
-                               (emacs-lisp . t)
-                               (python . t)))
-
-(setq org-confirm-babel-evaluate nil)
-
-;; By default, don't evaluate src blocks when exporting.
-(setq org-export-use-babel nil)
 
 (setq org-todo-keywords '((sequence "TODO(t!)"
                                     "DOING(d!)"
@@ -2308,6 +2353,25 @@ the beginning of the line. This fixes that."
  "C-S-j" 'org-move-subtree-down
  "C-S-k" 'org-move-subtree-up)
 
+;; org source blocks ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun mpereira/maybe-org-edit-src-save ()
+  (interactive)
+  (if (buffer-modified-p)
+      (org-edit-src-save)
+    (message "(No changes need to be saved)")))
+
+(general-define-key
+ :states '(normal visual)
+ :keymaps '(org-src-mode-map)
+ :prefix mpereira/leader
+ ;; Originally bound to `save-buffer' via the global keymap.
+ "w" 'mpereira/maybe-org-edit-src-save
+ ;; Originally bound to `org-edit-src-exit'.
+ "q" 'evil-quit)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (general-define-key
  :keymaps '(org-mode-map)
  :states '(normal visual)
@@ -2388,6 +2452,43 @@ the beginning of the line. This fixes that."
        (org-columns-quit)
        (org-sort-entries nil ?r)
        (org-columns)))
+#+end_src
+
+** Org Babel
+*** verb
+#+begin_src emacs-lisp :tangle yes
+(use-package verb
+  :config
+  (setq tempo-template-org-verb '("#+begin_src verb :wrap src ob-verb-response"
+                                  nil '> n p n
+                                  "#+end_src" >))
+  (add-to-list 'org-tempo-tags '("<h" . tempo-template-org-verb)))
+#+end_src
+
+*** org-babel
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/org-babel-initialize ()
+  "TODO: docstring."
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               '((shell . t)
+                                 (emacs-lisp . t)
+                                 (python . t)
+                                 (verb . t)))
+
+  (setq org-confirm-babel-evaluate nil)
+
+  ;; By default, don't evaluate src blocks when exporting.
+  (setq org-export-use-babel nil)
+
+  ;; REVIEW: doing this causes :e to load the whole file contents into the src
+  ;; block buffer.
+  ;; (defadvice org-edit-src-code (around set-buffer-file-name activate compile)
+  ;;   (let ((file-name (buffer-file-name)))
+  ;;     ad-do-it
+  ;;     (setq buffer-file-name file-name)))
+  )
+
+(mpereira/org-babel-initialize)
 #+end_src
 
 ** Align all tags in the buffer on tag changes
@@ -3382,6 +3483,9 @@ by Quelpa.
 (require 'wdired)
 (setq wdired-allow-to-change-permissions t)
 
+(require 'dired-x)
+(add-hook 'dired-mode-hook 'dired-omit-mode)
+
 (general-define-key
  :keymaps '(dired-mode-map)
  :states '(normal visual)
@@ -3550,6 +3654,38 @@ Display progress in the mode line instead."
   (interactive)
   (eshell/clear))
 
+;; Inspired by Prot's.
+(defun mpereira/eshell-complete-recent-directory (&optional arg)
+  "Switch to a recent `eshell' directory using completion.
+With \\[universal-argument] also open the directory in a `dired' buffer."
+  (interactive "P")
+  (ivy-read "Switch to recent dir: "
+            (delete-dups (ring-elements eshell-last-dir-ring))
+            :action (lambda (x)
+                      (insert dir)
+                      (eshell-send-input)
+                      (when arg
+                        (dired dir)))))
+
+;; Inspired by Prot's.
+(defun mpereira/eshell-switch-to-last-output-buffer ()
+  "Produce a buffer with output of last `eshell' command."
+  (interactive)
+  (let ((eshell-output (kill-region (eshell-beginning-of-output)
+                                    (eshell-end-of-output))))
+    (with-current-buffer (get-buffer-create "*last-eshell-output*")
+      (erase-buffer)
+      ;; TODO do it with `insert' and `delete-region'?
+      (yank)
+      (switch-to-buffer-other-window (current-buffer)))))
+
+;; Inspired by Prot's.
+(defun mpereira/eshell-complete-redirect-to-buffer ()
+  "Complete the syntax for appending to a buffer via `eshell'."
+  (interactive)
+  (end-of-line)
+  (insert (concat " >>> #<" (format "%s" (ivy-switch-buffer)) ">")))
+
 ;; I don't use `counsel-esh-history' because it doesn't take into consideration
 ;; the current input.
 (defun mpereira/eshell-history ()
@@ -3659,7 +3795,7 @@ Display progress in the mode line instead."
      " "
      (propertize "in" 'face 'eshell-ls-unreadable)
      " "
-     (propertize (mpereira/fish-path
+     (propertize (mpereira/short-directory-path
                   (eshell/pwd)
                   mpereira/eshell-prompt-max-directory-length)
                  'face 'dired-directory)
@@ -3722,10 +3858,7 @@ Display progress in the mode line instead."
 
 ** term
 #+begin_src emacs-lisp :tangle yes
-;; 2019-03-01: setting this to bash. Otherwise, org babel shell sessions are
-;; forced to run fish.
-;; (setq explicit-shell-file-name "/usr/local/bin/fish")
-(setq explicit-shell-file-name "/usr/local/bin/bash")
+(setq explicit-shell-file-name "bash")
 
 ;; Infinite buffer.
 (setq term-buffer-maximum-size 0)
@@ -3894,49 +4027,49 @@ fish."
                        completions)))
                  formatted-completions))))))))
 #+end_src
-
 ** load-bash-alias
 #+begin_src emacs-lisp :tangle yes
 (use-package load-bash-alias
   :config
   (setq load-bash-alias-bashrc-file "~/.aliases"))
 #+end_src
-
 * UI
 ** posframe
-Set a default border width for all posframe frames via
-~mpereira/posframe-arghandler~.
+Set a default border width and height for all posframe frames via
+~mpereira/ivy-posframe-arghandler~.
 
 #+begin_src emacs-lisp :tangle yes
-(use-package posframe
-  :config
-  ;; Make ivy-posframe frames have fixed half-screen width and fixed height.
-  (setq mpereira/default-posframe-frame-plist '(:internal-border-width 8
-                                                :height 0))
+(use-package posframe)
+#+end_src
 
-  (defun mpereira/posframe-arghandler (buffer-or-buffer-name arg-name value)
+** ivy-posframe
+#+begin_src emacs-lisp :tangle yes
+(use-package ivy-posframe
+  :after (ivy posframe)
+
+  :custom
+  (ivy-posframe-height-alist '((t . 20)))
+  (ivy-posframe-display-functions-alist '((swiper . ivy-display-function-fallback)
+                                          (t . ivy-posframe-display-at-frame-center)))
+
+  :init
+  (setq mpereira/ivy-posframe-override-frame-plist '(:internal-border-width 8
+                                                     :min-width 150
+                                                     :height 0))
+
+  (defun mpereira/ivy-posframe-arghandler (buffer-or-buffer-name arg-name value)
+    "Make ivy-posframe frames have a fixed internal border width and height."
     (let (buffer-name
           (ivy-posframe-buffer-name " *ivy-posframe-buffer*"))
       (if (bufferp buffer-or-buffer-name)
           (setq buffer-name (buffer-name buffer-or-buffer-name))
         (setq buffer-name buffer-or-buffer-name))
       (if (string= ivy-posframe-buffer-name buffer-name)
-          (or (plist-get mpereira/default-posframe-frame-plist arg-name) value)
+          (or (plist-get mpereira/ivy-posframe-override-frame-plist arg-name) value)
         value)))
 
-  (setq posframe-arghandler #'mpereira/posframe-arghandler))
-#+end_src
+  (setq posframe-arghandler #'mpereira/ivy-posframe-arghandler)
 
-** ivy-posframe
-#+begin_src emacs-lisp :tangle yes
-(use-package ivy-posframe
-  :after (posframe ivy)
-  :custom
-  (ivy-posframe-height-alist '((t . 20)))
-  (ivy-posframe-display-functions-alist
-   '((complete-symbol . ivy-posframe-display-at-point)
-     (swiper . nil)
-     (t . ivy-posframe-display-at-frame-center)))
   :config
   (ivy-posframe-mode))
 #+end_src
@@ -4515,6 +4648,7 @@ revert back from the quelpa setup.
             "C" #'link-hint-copy-link))
 #+end_src
 
+
 * Text search and manipulation
 ** swiper
 #+begin_src emacs-lisp :tangle yes
@@ -4601,8 +4735,11 @@ revert back from the quelpa setup.
 #+end_src
 
 ** yasnippet
+I can't get this to plan nice with `company-mode`, so I'm disabling it.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package yasnippet
+  :disabled
   :config
   (yas-reload-all)
   (add-hook 'prog-mode-hook #'yas-minor-mode))
@@ -4611,13 +4748,28 @@ revert back from the quelpa setup.
 ** yasnippet-snippets
 #+begin_src emacs-lisp :tangle yes
 (use-package yasnippet-snippets
+  :disabled
   :after yasnippet)
 #+end_src
 
-** auto-yasnippet
-#+begin_src emacs-lisp :tangle yes
-(use-package auto-yasnippet
-  :after yasnippet)
+** Add yasnippet support for all company backends
+Got this from [[https://github.com/syl20bnr/spacemacs/pull/179][here]].
+
+Not tangled.
+#+begin_src emacs-lisp :tangle no
+(defvar mpereira/company-mode-enable-yas t
+  "Enable yasnippet for all backends.")
+
+(defun mpereira/company-mode-add-yas-backend (backend)
+  (if (or (not mpereira/company-mode-enable-yas)
+          (and (listp backend)
+               (member 'company-yasnippet backend)))
+      backend
+    (append (if (consp backend) backend (list backend))
+            '(:with company-yasnippet))))
+
+(setq company-backends (mapcar #'mpereira/company-mode-add-yas-backend
+                               company-backends))
 #+end_src
 
 ** electric-pair-mode
@@ -4735,11 +4887,11 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
             ((eql format-all--system-type (car choice))
              (cl-return (cadr choice))))))
 
-  (define-format-all-formatter mpereira/clang-formatter
-    (:executable "clang-format")
-    (:install (macos ""))
-    (:modes java-mode)
-    (:format (format-all--buffer-easy "clang-format" "-style" "chromium")))
+  ;; (define-format-all-formatter mpereira/clang-formatter
+  ;;   (:executable "clang-format")
+  ;;   (:install (macos ""))
+  ;;   (:modes java-mode)
+  ;;   (:format (format-all--buffer-easy "clang-format" "-style" "chromium")))
   )
 #+end_src
 
@@ -4818,7 +4970,13 @@ Show black output, if black exit abnormally and DISPLAY is t."
   (general-define-key
    :keymaps '(magit-status-mode-map)
    :states '(normal visual)
-   "q" #'magit-mode-bury-buffer
+   "q" #'magit-mode-bury-buffer)
+
+  (general-define-key
+   :keymaps '(magit-mode-map)
+   :states '(normal visual)
+   "<" #'magit-go-backward
+   ">" #'magit-go-forward
    "zb" #'evil-scroll-line-to-bottom
    "zt" #'evil-scroll-line-to-top
    "zz" #'evil-scroll-line-to-center)
@@ -4896,6 +5054,8 @@ repositories, but it seems like just trying again a few times gets it done.
 ** magit-todos
 #+begin_src emacs-lisp :tangle yes
 (use-package magit-todos
+  ;; Disabled on 2020-05-05.
+  :disabled
   :ensure nil
   :quelpa (magit-todos
            :fetcher github
@@ -4903,10 +5063,11 @@ repositories, but it seems like just trying again a few times gets it done.
   :after (magit ivy)
   :config
   ;; Only show magit-todos on non-TRAMP magit status buffers.
-  (add-hook 'magit-status-mode-hook (lambda ()
-                                      (when (not (ivy--remote-buffer-p (current-buffer)))
-                                        (let ((magit-todos-mode t))
-                                          (magit-todos-update))))))
+  (add-hook 'magit-status-mode-hook
+            (lambda ()
+              (when (not (ivy--remote-buffer-p (current-buffer)))
+                (let ((magit-todos-mode t))
+                  (magit-todos-update))))))
 #+end_src
 
 ** gist
@@ -4998,46 +5159,27 @@ repositories, but it seems like just trying again a few times gets it done.
    "k" 'flycheck-previous-error
    "l" 'flycheck-list-errors
    "n" 'flycheck-next-error
-   "p" 'flycheck-previous-error)
+   "p" 'flycheck-previous-error
+   "y" 'flycheck-copy-errors-as-kill)
 
   (setq flycheck-display-errors-delay 0.3)
 
   (add-hook 'prog-mode-hook #'flycheck-mode)
 
-  (defun mpereira/disable-flycheck-in-org-src-block ()
+  (defun mpereira/disable-emacs-lisp-checkdoc-checker ()
     "TODO: docstring."
     (interactive)
     (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 
-  (add-hook 'org-src-mode-hook #'mpereira/disable-flycheck-in-org-src-block))
-#+end_src
-
-*** flycheck-inline
-Disabled since [2019-12-08 Sun] in favor of flycheck-posframe.
-
-#+begin_src emacs-lisp :tangle yes
-(require 'cus-edit) ;; for `custom-modified' face.
-
-(use-package flycheck-inline
-  :disabled
-  :config
-  ;; Draw a nice-looking padding around the overlays.
-  (dolist (face '(flycheck-inline-info flycheck-inline-warning flycheck-inline-error))
-    (let ((background (face-attribute 'custom-modified :background)))
-      (set-face-attribute face nil :box `(:line-width 5 :color ,background))
-      (set-face-attribute face nil :background background)))
-  (flycheck-inline-mode))
+  (add-hook 'org-src-mode-hook #'mpereira/disable-emacs-lisp-checkdoc-checker))
 #+end_src
 
 *** flycheck-posframe
-Currently disabled because I'm using [[flycheck-inline][flycheck-inline]] instead. It has better
-support for showing full context for errors. flycheck-posframe only shows
-context for the thing currently being hovered.
-
-Update [2019-12-08 Sun]: using flycheck-posframe again... seems to be fine?
+Disabling on [2020-05-23 Sat] it for LSP.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package flycheck-posframe
+  :disabled
   :after flycheck
   :config
   (flycheck-posframe-configure-pretty-defaults)
@@ -5184,20 +5326,33 @@ rustup component add rustfmt
 
   (add-hook 'after-init-hook 'global-company-mode)
 
-  (setq company-tooltip-align-annotations t)
   (setq company-require-match 'never)
-  (setq company-idle-delay 1)
+  (setq company-idle-delay nil)
+  (setq company-transformers '(company-sort-by-backend-importance))
+  (setq company-frontends '(;; Show tooltip even for single candidate.
+                            company-pseudo-tooltip-frontend
+                            company-echo-metadata-frontend))
+
 
   (general-define-key
    :states '(insert)
-   "TAB" 'company-complete)
+   "TAB" 'company-complete
+   "<backtab>" 'counsel-company)
 
   (general-define-key
-   :keymaps '(company-active-map)
+   :keymaps '(company-search-map)
+   "ESC" 'company-search-abort
+   "TAB" 'company-search-abort)
+
+  (general-define-key
+   :keymaps '(company-active-map company-posframe-active-map)
    "C-b" 'company-previous-page
    "C-f" 'company-next-page
    "C-j" 'company-select-next
-   "C-k" 'company-select-previous))
+   "C-k" 'company-select-previous
+   "ESC" 'company-abort
+   "RET" 'company-complete-selection
+   "TAB" 'company-abort))
 #+end_src
 
 ** aggressive-indent
@@ -5369,7 +5524,10 @@ rustup component add rustfmt
 ** Clojure
 *** clojure-mode
 #+begin_src emacs-lisp :tangle yes
-(use-package clojure-mode)
+(use-package clojure-mode
+  :config
+  ;; aggressive-indent-mode is too slow for editing Clojure.
+  (add-to-list 'aggressive-indent-excluded-modes 'clojure-mode))
 #+end_src
 
 *** clj-refactor
@@ -5412,7 +5570,9 @@ If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
    :prefix mpereira/leader
    "ee" #'mpereira/cider-eval-sexp-at-point
    "e(" #'cider-eval-defun-at-point
+   "F" #'cider-format-buffer
    "eE" #'cider-eval-buffer
+   "en" #'cider-eval-ns-form
    "dd" #'cider-debug-defun-at-point
    "tt" #'cider-test-run-test
    "tr" #'cider-test-rerun-test
@@ -5468,8 +5628,14 @@ Currently disabled because it's only available via Marmalade.
    :prefix mpereira/leader
    "e(" #'miracle-eval-defun
    "eE" #'miracle-eval-buffer
+   "en" #'miracle-eval-namespace
    "ee" #'mpereira/miracle-eval-sexp-at-point
    "ek" #'miracle-interrupt)
+
+  (general-define-key
+   :keymaps 'miracle-mode-map
+   :states '(insert)
+   "C-l" #'comint-clear-buffer)
 
   (general-define-key
    :keymaps 'miracle-interaction-mode-map
@@ -5500,29 +5666,25 @@ Currently disabled because it's only available via Marmalade.
 
 ** Rust
 *** rust-mode
-Using [[eglot]] and [[flycheck-inline]] instead of [[lsp-rust]].
 #+begin_src emacs-lisp :tangle yes
 (use-package rust-mode
   :config
-  (general-define-key
-   :keymaps '(rust-mode-map)
-   :states '(normal visual)
-   "C-9" 'racer-describe-tooltip
-   "C-K" 'racer-describe-tooltip
-   "C-]" 'racer-find-definition
-   "K" 'racer-describe)
-
-  (with-eval-after-load "eglot"
-    (add-hook 'rust-mode-hook #'eglot-ensure))
-
-  (with-eval-after-load "lsp-mode"
-    ;; (add-hook 'rust-mode-hook #'lsp-rust-enable t)
-    ))
+  ;; (general-define-key
+  ;;  :keymaps '(rust-mode-map)
+  ;;  :states '(normal visual)
+  ;;  "C-9" 'racer-describe-tooltip
+  ;;  "C-K" 'racer-describe-tooltip
+  ;;  "C-]" 'racer-find-definition
+  ;;  "K" 'racer-describe)
+  )
 #+end_src
 
 *** racer
+Disabled since [2020-05-23 Sat] to try out LSP.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package racer
+  :disabled
   :config
   (general-define-key
    :states '(normal)
@@ -5610,34 +5772,45 @@ python3 -m pip install mypy flake8 pylint black
    :states '(insert)
    "C-l" 'mpereira/elpy-shell-clear-shell)
 
-  (general-define-key
-   :keymaps '(python-mode-map)
-   :states '(normal visual)
-   "C-j" 'elpy-nav-forward-block
-   "C-k" 'elpy-nav-backward-block
-   "S-C-j" 'elpy-nav-move-line-or-region-down
-   "S-C-k" 'elpy-nav-move-line-or-region-up)
+  (setq flycheck-python-mypy-executable "mypy")
+  (setq flycheck-python-flake8-executable "python3")
+  (setq flycheck-python-pylint-executable "python3")
+  (setq flycheck-python-pycompile-executable "python3")
+  (setq python-shell-interpreter "python3")
 
-  (general-define-key
-   :keymaps '(python-mode-map)
-   :states '(normal visual)
-   "K" 'elpy-doc)
+  ;; Disabling to try out LSP.
+  ;; (general-define-key
+  ;;  :keymaps '(python-mode-map)
+  ;;  :states '(normal visual)
+  ;;  "C-j" 'elpy-nav-forward-block
+  ;;  "C-k" 'elpy-nav-backward-block
+  ;;  "S-C-j" 'elpy-nav-move-line-or-region-down
+  ;;  "S-C-k" 'elpy-nav-move-line-or-region-up)
 
-  (general-define-key
-   :keymaps '(python-mode-map)
-   :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "f"
-   "o" 'imenu)
+  ;; Disabling to try out LSP.
+  ;; (general-define-key
+  ;;  :keymaps '(python-mode-map)
+  ;;  :states '(normal visual)
+  ;;  "K" 'elpy-doc)
 
-  (general-define-key
-   :keymaps '(python-mode-map)
-   :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "e"
-   "e" 'elpy-shell-send-statement
-   "E" 'elpy-shell-send-buffer
-   "p" 'elpy-shell-send-group))
+  ;; Disabling to try out LSP.
+  ;; (general-define-key
+  ;;  :keymaps '(python-mode-map)
+  ;;  :states '(normal visual)
+  ;;  :prefix mpereira/leader
+  ;;  :infix "f"
+  ;;  "o" 'imenu)
+
+  ;; Disabling to try out LSP.
+  ;; (general-define-key
+  ;;  :keymaps '(python-mode-map)
+  ;;  :states '(normal visual)
+  ;;  :prefix mpereira/leader
+  ;;  :infix "e"
+  ;;  "e" 'elpy-shell-send-statement
+  ;;  "E" 'elpy-shell-send-buffer
+  ;;  "p" 'elpy-shell-send-group)
+  )
 
 (setq python-indent-offset 4)
 
@@ -5646,26 +5819,23 @@ python3 -m pip install mypy flake8 pylint black
             (setq evil-shift-width python-indent-offset)))
 
 (with-eval-after-load 'python
-  (defun python-shell-completion-native-try ()
-    "Return non-nil if can trigger native completion."
-    (let ((python-shell-completion-native-enable t)
-          (python-shell-completion-native-output-timeout
-           python-shell-completion-native-try-output-timeout))
-      (python-shell-completion-native-get-completions
-       (get-buffer-process (current-buffer))
-       nil "_"))))
+  ;; REVIEW: Where did I get this from?
+  ;; (defun python-shell-completion-native-try ()
+  ;;   "Return non-nil if can trigger native completion."
+  ;;   (let ((python-shell-completion-native-enable t)
+  ;;         (python-shell-completion-native-output-timeout
+  ;;          python-shell-completion-native-try-output-timeout))
+  ;;     (python-shell-completion-native-get-completions
+  ;;      (get-buffer-process (current-buffer))
+  ;;      nil "_")))
+  )
 #+end_src
 
 *** elpy
 #+begin_src emacs-lisp :tangle yes
 (use-package elpy
   :init
-  (setq flycheck-python-mypy-executable "mypy")
-  (setq flycheck-python-flake8-executable "python3")
-  (setq flycheck-python-pylint-executable "python3")
-  (setq flycheck-python-pycompile-executable "python3")
   (setq elpy-rpc-python-command "python3")
-  (setq python-shell-interpreter "python3")
 
   ;; https://github.com/jorgenschaefer/elpy/issues/1550#issuecomment-468763310
   (setq elpy-shell-echo-output nil)
@@ -5678,7 +5848,9 @@ python3 -m pip install mypy flake8 pylint black
             (lambda ()
               (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up)))
   :config
-  (elpy-enable))
+  ;; Disabling [2020-05-23] to try out LSP.
+  ;; (elpy-enable)
+  )
 #+end_src
 
 ** JSON
@@ -6010,30 +6182,7 @@ Also start them in Org mode.
   (setq projectile-enable-caching nil)
   (setq projectile-require-project-root t)
   ;; With this, do I even need counsel-projectile?
-  (setq projectile-completion-system 'ivy)
-
-  ;; Define there here until counsel-projectile is broken.
-  ;; TODO: counsel-projectile broken:
-  ;; https://github.com/ericdanan/counsel-projectile/issues/93.
-  (general-define-key
-   :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "p"
-   "s" 'mpereira/ivy-persp-switch-project
-   ;; TODO: counsel-projectile broken: https://github.com/ericdanan/counsel-projectile/issues/93.
-   ;; "b" 'counsel-projectile-switch-to-buffer
-   "b" 'projectile-switch-to-buffer
-   "f" 'projectile-find-file
-   "g" 'rg-project
-   "G" 'rg-dwim-project-dir)
-
-  (general-define-key
-   :states '(normal)
-   :prefix mpereira/leader
-   :infix "s"
-   "h" 'mpereira/projectile-eshell
-   "H" 'projectile-run-term
-   "c" 'projectile-run-async-shell-command-in-root))
+  (setq projectile-completion-system 'ivy))
 #+end_src
 
 ** term-projectile
@@ -6167,7 +6316,10 @@ recency" functionality for =M-x= from ivy-prescient.
 (use-package company-prescient
   :after (company prescient)
   :config
-  (company-prescient-mode))
+  (company-prescient-mode)
+
+  (add-hook 'prog-mode-hook
+            (lambda () (company-prescient-mode -1))))
 #+end_src
 
 * Help
@@ -6186,6 +6338,13 @@ recency" functionality for =M-x= from ivy-prescient.
 (use-package which-key
   :config
   (which-key-mode))
+#+end_src
+
+** dash-at-point
+#+begin_src emacs-lisp :tangle yes
+(use-package dash-at-point
+  :config
+  )
 #+end_src
 
 ** command-log-mode
@@ -6468,8 +6627,8 @@ recency" functionality for =M-x= from ivy-prescient.
   (circe-set-display-handler "366" 'circe-display-ignore)
 
   ;; Logging.
-  (setq lui-logging-directory (expand-file-name
-                               "irc" mpereira/dropbox-directory))
+  (setq lui-logging-directory
+        (expand-file-name "irc" mpereira/dropbox-directory))
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
 
@@ -6528,7 +6687,7 @@ recency" functionality for =M-x= from ivy-prescient.
 * Mappings
 #+begin_src emacs-lisp :tangle yes
 (general-define-key
- :keymaps '(override) ;; Check out `general-override-mode-map'.
+ :keymaps '(override)                   ; check out `general-override-mode-map'.
  ;; Adding `nil' to the states makes these keybindings work on buffers where
  ;; they would usually not work, e.g. the *Messages* buffer or the
  ;; `undo-tree-visualize' buffer.
@@ -6548,6 +6707,7 @@ recency" functionality for =M-x= from ivy-prescient.
  "M-j" #'evil-window-down
  "M-k" #'evil-window-up
  "M-l" #'evil-window-right
+ "C-w =" #'balance-windows              ; this is the default keybinding.
  "<C-left>" #'winner-undo
  "<C-right>" #'winner-redo)
 
@@ -6566,17 +6726,20 @@ recency" functionality for =M-x= from ivy-prescient.
  :keymaps '(swiper-map
             swiper-all-map
             ivy-minibuffer-map)
- "<escape>" 'minibuffer-keyboard-quit ;; is this still needed?
+ "<escape>" 'minibuffer-keyboard-quit   ; REVIEW: is this still needed?
  "C-r" 'evil-paste-from-register)
 
-;; FIXME: isn't M-x bound in insert mode in the first place and why
-;; doesn't this binding work?
-(general-define-key
- :keymaps '(global-map)
- :states '(insert)
- "M-x" #'execute-extended-command)
+;; REVIEW: do I still need this? Isn't M-x bound in insert mode in the first
+;; place and why doesn't this binding work in some modes like
+;; `org-src-mode-map', even when specifically adding it in the keymaps?
+;;
+;; (general-define-key
+;;  :keymaps '(global-map)
+;;  :states '(insert)
+;;  "M-x" #'execute-extended-command)
 
 ;; FIXME: this doesn't work.
+;; REVIEW: do I still need this?
 ;; Movement bindings for evil-ex-search. Why doesn't `evil-ex-search-keymap'
 ;; work for this?
 (general-define-key
@@ -6586,7 +6749,7 @@ recency" functionality for =M-x= from ivy-prescient.
  "C-?" #'previous-matching-history-element
  "C-/" #'next-matching-history-element)
 
-;; FIXME: is this still needed?
+;; REVIEW: is this still needed?
 ;; Make it possible for other modes to use these bindings (e.g. company mode
 ;; uses it for navigating completions).
 (general-define-key
@@ -6625,41 +6788,35 @@ recency" functionality for =M-x= from ivy-prescient.
 (eval-after-load 'evil-ex
   '(evil-ex-define-cmd "pwd" #'mpereira/pwd))
 
-(general-define-key
- :keymaps '(global-map)
- :states '(normal visual)
- :prefix mpereira/leader
- :infix "e"
- ":" #'eval-expression)
-
 ;; "Master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; This seems to be working for now. `general-override-mode-map' might be of use
-;; in the future.
+;; REVIEW: This seems to be working for now. `general-override-mode-map' might
+;; be of use in the future.
 (general-define-key
  :states '(normal visual)
  :prefix mpereira/leader
  "," #'evil-switch-to-windows-last-buffer
  "." #'ivy-resume
  "/" #'swiper
- "<backtab>" #'counsel-descbinds
- "<tab>" #'discover-my-major
+ "<backtab>" #'discover-my-major
+ "<tab>" #'counsel-descbinds
  "=" #'quick-calc
- "B" #'mpereira/bm-counsel-find-bookmark
+ "B" #'ibuffer
  "b" #'switch-to-buffer
- "go" 'mpereira/browse-at-remote
- "gr" 'diff-hl-revert-hunk
+ "D" #'mpereira/bm-counsel-find-bookmark       ; REVIEW: rethink.
  "hs" #'mpereira/split-window-below-and-switch
- "hs" #'mpereira/split-window-below-and-switch
- "hv" #'mpereira/toggle-window-split
+ "hv" #'mpereira/toggle-window-split           ; REVIEW: rethink.
+ "vh" #'mpereira/toggle-window-split           ; REVIEW: rethink.
+ "n" #'mpereira/narrow-or-widen-dwim
  "q" #'evil-quit
- "T" #'bm-toggle
+ "T" #'bm-toggle                               ; REVIEW: rethink.
  "u" #'undo-tree-visualize
- "vs" #'mpereira/split-window-right-and-switch
+ "vs" #'mpereira/split-window-right-and-switch ; REVIEW: rethink.
  "w" #'save-buffer)
 
 ;; d -> describe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; REVIEW: "d" is too good of a key for these bindinds that I never use.
 (general-define-key
  :keymaps '(global-map)
  :states '(normal visual)
@@ -6669,6 +6826,16 @@ recency" functionality for =M-x= from ivy-prescient.
  "f" #'find-function-on-key
  "k" #'describe-key
  "m" #'describe-mode)
+
+;; e -> evaluate ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(general-define-key
+ :keymaps '(global-map)
+ :states '(normal visual)
+ :prefix mpereira/leader
+ :infix "e"
+ ":" #'eval-expression
+ "v" #'counsel-set-variable)
 
 ;; f -> find ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -6681,7 +6848,7 @@ recency" functionality for =M-x= from ivy-prescient.
  ":" #'counsel-expression-history
  "b" #'ivy-switch-buffer
  "c" #'counsel-org-clock-history
- ;; Didn't like `counsel-explorer' too much...
+ ;; Didn't like `counsel-explorer' from ivy-explorer too much...
  ;; "f" #'counsel-explorer
  "f" #'counsel-find-file
  "k" #'counsel-descbinds
@@ -6689,7 +6856,7 @@ recency" functionality for =M-x= from ivy-prescient.
  "m" #'describe-keymap
  "n" #'counsel-describe-function
  "o" #'counsel-imenu
- "p" #'package-list-packages-no-fetch
+ "p" #'package-install
  "v" #'counsel-describe-variable
  "y" #'counsel-yank-pop)
 
@@ -6718,7 +6885,9 @@ recency" functionality for =M-x= from ivy-prescient.
  "g" #'magit-dispatch
  "L" #'magit-log-all
  "l" #'magit-log-buffer-file
+ "o" #'mpereira/browse-at-remote
  "p" #'magit-push
+ "r" #'diff-hl-revert-hunk
  "s" #'magit-status
  "t" #'git-timemachine-toggle
  "w" #'magit-stage-file
@@ -6731,14 +6900,32 @@ recency" functionality for =M-x= from ivy-prescient.
  :states '(normal visual)
  :prefix mpereira/leader
  :infix "p"
- "s" #'projectile-persp-switch-project
- "b" #'counsel-projectile-switch-to-buffer
- "B" #'projectile-ibuffer
- "d" #'projectile-dired
- "f" #'counsel-projectile-find-file
- "g" #'rg-project
- "G" #'rg-dwim-project-dir
- "t" #'dired-sidebar-toggle-sidebar)
+ "B" 'mpereira/maybe-projectile-ibuffer
+ "b" 'mpereira/maybe-projectile-switch-buffer
+ "d" 'mpereira/maybe-projectile-dired
+ "D" 'mpereira/maybe-projectile-find-directory
+ "f" 'mpereira/maybe-projectile-find-file
+ "g" 'counsel-rg
+ "G" 'rg-project
+ "s" 'mpereira/counsel-projectile-perspective-switch-project
+ "t" 'dired-sidebar-toggle-sidebar)
+
+;; s -> shell ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(general-define-key
+ :states '(normal)
+ :prefix mpereira/leader
+ :infix "s"
+ ">" 'mpereira/eshell-complete-redirect-to-buffer
+ "H" 'projectile-run-term
+ "c" 'projectile-run-async-shell-command-in-root
+ "d" 'mpereira/eshell-complete-recent-directory
+ "h" 'mpereira/maybe-projectile-eshell
+ "n" (lambda ()
+       (interactive)
+       (mpereira/call-interactively-with-prefix-arg
+        '(4)
+        'eshell-show-output)))
 
 ;; t -> toggle ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -6757,14 +6944,7 @@ recency" functionality for =M-x= from ivy-prescient.
  "t" #'mpereira/narrow-or-widen-dwim
  "w" #'mpereira/narrow-or-widen-dwim)
 
-
-;; TODO: Make this not override magit's stash popup.
-;; (general-define-key
-;;  :keymaps '(global-map)
-;;  :states '(normal visual)
-;;  :infix "z"
-;;  "C" 'evil-close-folds
-;;  "O" 'evil-open-folds)
+;; z -> fold ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (general-define-key
  :keymaps '(hs-minor-mode-map)
@@ -6776,6 +6956,8 @@ recency" functionality for =M-x= from ivy-prescient.
  "3" (mpereira/make-hs-hide-level 3)
  "4" (mpereira/make-hs-hide-level 4)
  "5" (mpereira/make-hs-hide-level 5))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (general-define-key
  :keymaps '(hs-minor-mode-map)
@@ -6824,7 +7006,7 @@ FIXME: Doesn't work. Disabled for now.
 #+begin_src emacs-lisp :tangle yes
 (use-package snow
   :ensure nil
-  :disabled t
+  :disabled
   :quelpa (snow
            :fetcher github
            :repo "alphapapa/snow.el"))
@@ -6846,7 +7028,7 @@ https://www.mail-archive.com/emacs-orgmode@gnu.org/msg112359.html
   (call-interactively 'some-func))
 #+end_src
 ** After modifying =PATH=
-Run ~exec-path-from-shell-initialize~ on eshell buffers.
+Run ~mpereira/exec-path-from-shell-initialize~ on eshell buffers.
 ** Terminate init.el loading early
 #+begin_src emacs-lisp :tangle no
 (with-current-buffer " *load*"
@@ -7052,7 +7234,7 @@ return an empty string."
    '(or (ts-active :from +7 :to +100)
         (scheduled :from +7 :to +100)
         (deadline :from +7 :to +100))
-   :sort '(date))
+   :sort '(ts-active))
 
  (let ((org-agenda-custom-commands
         `(("x"
@@ -7341,6 +7523,6 @@ return an empty string."
 These need to be at the end of the file.
 
 # Local Variables:
-# before-save-hook: org-make-toc
+# before-save-hook: mpereira/configuration-org-tangle-generate-toc-and-byte-compile
 # org-adapt-indentation: nil
 # End:

@@ -4,8 +4,7 @@
           (lambda ()
             (garbage-collect)
             (setq debug-on-error nil)
-            (setq gc-cons-threshold
-                  (car (get 'gc-cons-threshold 'standard-value)))))
+            (setq gc-cons-threshold 100000000))) ;; 100MB
 
 (require 'package)
 
@@ -47,3 +46,4 @@
 (setq enable-local-variables :all)
 (org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory))
 (setq enable-local-variables t)
+(put 'list-timers 'disabled nil)
