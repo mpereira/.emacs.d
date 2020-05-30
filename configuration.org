@@ -248,6 +248,7 @@ Vanilla evil emacs literate configuration.
   - [[#persistent-scratch][persistent-scratch]]
   - [[#prevent-scratch-buffers-from-being-killed][Prevent scratch buffers from being killed]]
   - [[#display-buffer-alist-configuration][display-buffer-alist configuration]]
+  - [[#display-compilation-result-buffers-to-a-single-window-to-the-right][Display compilation result buffers to a single window to the right]]
 - [[#project-management][Project management]]
   - [[#projectile][projectile]]
   - [[#term-projectile][term-projectile]]
@@ -6235,12 +6236,14 @@ Also start them in Org mode.
 
 ** =display-buffer-alist= configuration
 #+begin_src emacs-lisp :tangle yes
+;; TODO: configure `display-buffer-fallback-action'.
 (use-package emacs
   :init
   ;; Inspiration, resources:
-  ;; - https://github.com/hlissner/doom-emacs/blob/master/modules/ui/popup/config.el
-  ;; - https://web.archive.org/web/20160409014815/https://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
   ;; - http://juanjose.garciaripoll.com/blog/arranging-emacs-windows
+  ;; - https://github.com/hlissner/doom-emacs/blob/master/modules/ui/popup/config.el
+  ;; - https://protesilaos.com/dotemacs/#h:3d8ebbb1-f749-412e-9c72-5d65f48d5957
+  ;; - https://web.archive.org/web/20160409014815/https://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
   (setq display-buffer-alist
         '(("\\* Merriam-Webster Thesaurus \\*"
            (display-buffer-below-selected))
@@ -6261,14 +6264,17 @@ Also start them in Org mode.
           ("\\(\\Wo\\)?*Man.*"
            (display-buffer-below-selected))
 
-          ("\\*\\(compilation\\|run .*\\)\\*"
-           (display-buffer-at-bottom)
+          ("\\*\\(compilation\\|run .*\\|cargo test.*\\|cargo check.*\\)\\*"
+           (display-buffer-reuse-mode-window
+            display-buffer-at-bottom)
            (window-height . 0.3)
            (mode-line-format . (" " "%b")))
 
           ("\\*\\(rg\\)\\*"
-           (display-buffer-at-bottom)
+           (display-buffer-in-side-window)
            (window-height . 0.5)
+           (window-width . 0.5)
+           (slot . 0)
            (mode-line-format . (" " "%b")))
 
           ("\\*Flycheck.*\\*"
@@ -6278,7 +6284,6 @@ Also start them in Org mode.
            (display-buffer-in-side-window)
            (window-width . 80)
            (window-height . 0.5)
-           (window-parameters . ((split-window . t)))
            (side . left)
            (slot . 0)
            (mode-line-format . (" " "%b")))
@@ -6290,6 +6295,48 @@ Also start them in Org mode.
            (side . left)
            (slot . 1)
            (mode-line-format . (" " "%b"))))))
+#+end_src
+
+** Display compilation result buffers to a single window to the right
+#+begin_src emacs-lisp :tangle yes
+(defvar-local mpereira/display-buffer-compilation-result-window nil
+  "TODO: docstring.")
+
+;; FIXME: when
+;; 1. opening a compilation buffer
+;; 2. pressing RET on an error
+;; 3. navigating to a different project/perpective
+;; 4. quitting the compilation buffer window
+;; the error buffer window doesn't get deleted.
+(defun mpereira/display-buffer-compilation-result (buffer alist)
+  "TODO: docstring."
+  (interactive)
+  (if (with-current-buffer compilation-last-buffer
+        mpereira/display-buffer-compilation-result-window)
+      (window--display-buffer buffer
+                              (with-current-buffer compilation-last-buffer
+                                mpereira/display-buffer-compilation-result-window)
+                              'reuse
+                              alist)
+    (let ((window (display-buffer-in-atom-window buffer
+                                                 alist)))
+      (with-current-buffer compilation-last-buffer
+        (setq mpereira/display-buffer-compilation-result-window window))
+      window)))
+
+(defun mpereira/compile-goto-error-window-to-the-right ()
+  "TODO: docstring."
+  (interactive)
+  (let ((display-buffer-overriding-action
+         `((mpereira/display-buffer-compilation-result)
+           (window-width . 0.5)
+           (side . right))))
+    (call-interactively #'compile-goto-error)
+    (recenter nil)))
+
+(general-define-key
+ :keymaps '(compilation-button-map)
+ "RET" #'mpereira/compile-goto-error-window-to-the-right)
 #+end_src
 
 * Project management
