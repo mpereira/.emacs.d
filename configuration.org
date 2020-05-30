@@ -4526,36 +4526,15 @@ revert back from the quelpa setup.
 ** ripgrep
 #+begin_src emacs-lisp :tangle yes
 (use-package rg
-  :after double-saber
-  ;; Original mappings at:
-  ;; https://github.com/dajva/rg.el/blob/77670a4bcdba138a0cef3fb12a20b1492dca902a/rg-result.el#L203-L221
-  ;;
-  ;; I'm overring `rg-mode-map' here, but it might make sense
-  ;; overriding "parent" keymaps like `grep-mode-map' or
-  ;; `compilation-mode-map'.
-  :general (:keymaps 'rg-mode-map
+  :general (:keymaps '(rg-mode-map)
             :states '(normal visual)
-            "C-f" 'scroll-up
-            "C-b" 'scroll-down
-            "C-j" 'rg-next-file
-            "C-k" 'rg-prev-file
             "<" 'rg-back-history
             ">" 'rg-forward-history
-            "x" 'double-saber-delete
-            "X" 'double-saber-narrow
-            "u" 'double-saber-undo
-            ;; "n" is `next-error-no-select' by default.
-            "n" nil
-            ;; digit-argument
-            "0" nil
-            ;; "h" is `describe-mode' by default.
-            "h" 'evil-backward-char
-            ;; "g" is `recompile' by default.
-            "g" nil
-            ;; "w" is `wgrep-change-to-wgrep-mode' by default.
-            "w" nil
-            ;; "l" is `rg-list-searches' by default.
-            "l" nil)
+            "C-j" 'rg-next-file
+            "C-k" 'rg-prev-file
+            "G" 'evil-goto-line
+            "gg" 'evil-goto-first-line
+            "gr" 'rg-recompile)
   :config
   (setq rg-group-result t))
 #+end_src
@@ -4569,7 +4548,30 @@ revert back from the quelpa setup.
 
 ** double-saber
 #+begin_src emacs-lisp :tangle yes
-(use-package double-saber)
+(use-package double-saber
+  :after (rg ivy)
+  :general (:keymaps '(double-saber-mode-map)
+            :states '(normal visual)
+            "C-r" 'double-saber-redo
+            "u" 'double-saber-undo
+            "D" 'double-saber-delete
+            "F" 'double-saber-narrow
+            "T" '(lambda ()
+                   (interactive)
+                   (setq rg-group-result (not rg-group-result))
+                   (rg-rerun))
+            "S" 'double-saber-sort-lines)
+  :hook ((rg-mode . (lambda ()
+                      (double-saber-mode)
+                      (setq-local double-saber-start-line 6)
+                      (setq-local double-saber-end-text "rg finished")))
+         (grep-mode . (lambda ()
+                        (double-saber-mode)
+                        (setq-local double-saber-start-line 5)
+                        (setq-local double-saber-end-text "Grep finished")))
+         (ivy-occur-grep-mode . (lambda ()
+                                  (double-saber-mode)
+                                  (setq-local double-saber-start-line 5)))))
 #+end_src
 
 ** ag
