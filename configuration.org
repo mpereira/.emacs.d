@@ -2542,6 +2542,8 @@ the beginning of the line. This fixes that."
   ;;     (setq buffer-file-name file-name)))
   )
 
+(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+
 (mpereira/org-babel-initialize)
 #+end_src
 
