@@ -34,6 +34,10 @@
 (setq use-package-always-ensure t)
 (setq use-package-always-demand t)
 
+(use-package benchmark-init
+  :config
+  (add-hook 'after-init-hook 'benchmark-init/deactivate))
+
 (use-package org
   :ensure org-plus-contrib
   :pin org
