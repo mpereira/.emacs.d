@@ -5399,6 +5399,14 @@ chmod 755 /usr/local/bin/clojure-lsp
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 #+end_src
 
+*** lsp-ivy
+#+begin_src emacs-lisp :tangle yes
+(use-package lsp-ivy
+  :after (ivy lsp)
+  :commands (lsp-ivy-workspace-symbol
+             lsp-ivy-global-workspace-symbol))
+#+end_src
+
 *** company-lsp
 #+begin_src emacs-lisp :tangle yes
 (use-package company-lsp
