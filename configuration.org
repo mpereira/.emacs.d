@@ -1989,15 +1989,6 @@ Source: https://git.io/vQKzv"
   :after evil org
   :config
   (add-hook 'org-mode-hook 'evil-org-mode)
-
-  ;; Org todo notes don't have a specific major mode, so change to insert
-  ;; state based on its buffer name.
-  ;; FIXME: doesn't seem to be working.
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (when (string= "*Org Note*" (buffer-name))
-                (evil-insert-state))))
-
   (add-hook 'evil-org-mode-hook
             (lambda ()
               (evil-org-set-key-theme '(operators
@@ -2316,6 +2307,8 @@ the same as the =ivy-posframe= one.
          :tree-type week
          :time-prompt t)))
 
+;; Start org note and capture buffers in insert state.
+(add-hook 'org-log-buffer-setup-hook #'evil-insert-state)
 (add-hook 'org-capture-mode-hook #'evil-insert-state)
 
 (setq org-refile-targets '((org-agenda-files :maxlevel . 1)))
