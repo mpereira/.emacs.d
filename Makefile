@@ -26,7 +26,7 @@ BACKUP_QUELPA_FILE	:= $(BACKUP_DIRECTORY)/.latest-backup-quelpa
 
 .PHONY: setup
 setup:
-	./setup.sh
+	bash setup.sh
 
 .PHONY: byte-recompile
 byte-recompile: clean-elc

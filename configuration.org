@@ -180,10 +180,12 @@ Vanilla evil emacs literate configuration.
     - [[#flycheck-posframe][flycheck-posframe]]
   - [[#lsp][LSP]]
     - [[#lsp-mode][lsp-mode]]
+    - [[#lsp-pyls][lsp-pyls]]
     - [[#lsp-python-ms][lsp-python-ms]]
     - [[#lsp-ui][lsp-ui]]
+    - [[#lsp-ivy][lsp-ivy]]
     - [[#company-lsp][company-lsp]]
-  - [[#company-mode][company-mode]]
+  - [[#company][company]]
   - [[#aggressive-indent][aggressive-indent]]
   - [[#lisp][LISP]]
     - [[#lispy][lispy]]
@@ -2022,7 +2024,7 @@ Source: https://git.io/vQKzv"
   (setq evil-magit-use-z-for-folds nil)
   :config
   (general-define-key
-   :keymaps 'magit-mode-map
+   :keymaps '(magit-mode-map)
    :states '(normal visual)
    "j" 'evil-next-visual-line
    "k" 'evil-previous-visual-line
@@ -2261,7 +2263,7 @@ the same as the =ivy-posframe= one.
 
 (setq org-tags-column -80)
 
-;; TODO: improve this?
+;; FIXME: don't use hard-coded color.
 (face-spec-set 'org-tag '((t :box (:color "gray30" :line-width 1))))
 
 ;; Don't indent src block content.
@@ -2368,7 +2370,7 @@ the beginning of the line. This fixes that."
  :infix "o"
  "a" #'mpereira/open-or-build-main-org-agenda
  "A" #'mpereira/open-or-build-review-org-agenda
- "c" 'org-capture
+ "c" 'counsel-org-capture
  "Ci" 'org-clock-in
  "Co" 'org-clock-out
  "Cg" 'org-clock-goto
@@ -4101,12 +4103,14 @@ fish."
                        completions)))
                  formatted-completions))))))))
 #+end_src
+
 ** load-bash-alias
 #+begin_src emacs-lisp :tangle yes
 (use-package load-bash-alias
   :config
   (setq load-bash-alias-bashrc-file "~/.aliases"))
 #+end_src
+
 * UI
 ** posframe
 Set a default border width and height for all posframe frames via
@@ -4730,12 +4734,7 @@ revert back from the quelpa setup.
 #+begin_src emacs-lisp :tangle yes
 (use-package dumb-jump
   :config
-  (setq dumb-jump-selector 'ivy)
-
-  (general-define-key
-   :states '(normal visual)
-   "C-]" 'dumb-jump-go
-   "C-}" 'dumb-jump-quick-look))
+  (setq dumb-jump-selector 'ivy))
 #+end_src
 
 ** frog-jump-buffer
@@ -4749,12 +4748,7 @@ revert back from the quelpa setup.
 
 ** link-hint
 #+begin_src emacs-lisp :tangle yes
-(use-package link-hint
-  :general (:keymaps '(global-map)
-            :states '(normal visual)
-            :prefix mpereira/leader
-            "F" #'link-hint-open-link
-            "C" #'link-hint-copy-link))
+(use-package link-hint)
 #+end_src
 
 
@@ -4884,6 +4878,7 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
   :config
   (electric-pair-mode 1)
 
+  ;; REVIEW: is it still needed?
   ;; Don't auto close brackets in org mode so that it doesn't conflict the `<s'
   ;; expansion snippet provided by `org-tempo'.
   (add-hook 'org-mode-hook
@@ -4934,11 +4929,7 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 
 ** unfill
 #+begin_src emacs-lisp :tangle yes
-(use-package unfill
-  :config
-  (general-define-key
-   :keymaps '(global-map)
-   "M-q" 'unfill-toggle))
+(use-package unfill)
 #+end_src
 
 ** string-inflection
@@ -5293,6 +5284,11 @@ Disabling on [2020-05-23 Sat] it for LSP.
 ** LSP
 Install some dependencies:
 
+https://pypi.org/project/python-language-server/
+#+begin_src bash :tangle setup.sh :results verbatim
+python3 -m pip install python-language-server 'python-language-server[all]' pyls-mypy pyls-isort pyls-black
+#+end_src
+
 #+begin_src bash :tangle setup.sh :results verbatim
 rustup component add rustfmt
 #+end_src
@@ -5315,6 +5311,11 @@ chmod 755 /usr/local/bin/clojure-lsp
   (add-hook 'rust-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
 
+  ;; FIXME: beacon is behaving weirdly on LSP buffers, showing beacon on
+  ;; incorrect lines.
+  (add-hook 'lsp-mode-hook (lambda ()
+                             (beacon-mode -1)))
+
   (setq lsp-eldoc-enable-hover nil)
   (setq lsp-enable-symbol-highlighting nil)
   (setq lsp-ui-doc-delay 0)
@@ -5323,15 +5324,17 @@ chmod 755 /usr/local/bin/clojure-lsp
   (setq lsp-ui-sideline-show-hover t)
   (setq lsp-ui-sideline-update-mode 'line)
 
+  ;; Adding `:states '(normal)` to any `lsp-mode-map' binding declarations makes
+  ;; it not work.
   (general-define-key
    :keymaps '(lsp-mode-map)
-   :states '(normal)
+   :states '(normal visual)
    "C-9" 'lsp-ui-doc-glance
    "K" 'lsp-describe-thing-at-point)
 
   (general-define-key
    :keymaps '(lsp-mode-map)
-   :states '(normal)
+   :states '(normal visual)
    :prefix "g"
    "d" 'lsp-find-definition
    "e" 'lsp-ui-peek-find-references
@@ -5344,7 +5347,7 @@ chmod 755 /usr/local/bin/clojure-lsp
 
   (general-define-key
    :keymaps '(rust-mode-map)
-   :states '(normal)
+   :states '(normal visual)
    :prefix "g"
    "r" 'lsp-rust-analyzer-rerun
    "R" 'lsp-rust-analyzer-run)
@@ -5357,56 +5360,41 @@ chmod 755 /usr/local/bin/clojure-lsp
 
   (general-define-key
    :keymaps '(lsp-ui-peek-mode-map)
+   :states '(normal visual)
    "C-j" 'lsp-ui-peek--select-next
-   "C-k" 'lsp-ui-peek--select-prev)
+   "C-k" 'lsp-ui-peek--select-prev))
+#+end_src
 
-  ;; (setq-default lsp-ui-doc-frame-parameters
-  ;;               '((left . -1)
-  ;;                 (no-focus-on-map . t)
-  ;;                 (min-width  . 0.3)
-  ;;                 (width  . 0)
-  ;;                 (min-height  . 0)
-  ;;                 (height  . 0)
-  ;;                 (internal-border-width . 1)
-  ;;                 (vertical-scroll-bars . nil)
-  ;;                 (horizontal-scroll-bars . nil)
-  ;;                 (right-fringe . 0)
-  ;;                 (menu-bar-lines . 0)
-  ;;                 (tool-bar-lines . 0)
-  ;;                 (line-spacing . 0)
-  ;;                 (unsplittable . t)
-  ;;                 (undecorated . t)
-  ;;                 (top . -1)
-  ;;                 (visibility . nil)
-  ;;                 (mouse-wheel-frame . nil)
-  ;;                 (no-other-frame . t)
-  ;;                 (inhibit-double-buffering . t)
-  ;;                 (drag-internal-border . t)
-  ;;                 (no-special-glyphs . t)
-  ;;                 (desktop-dont-save . t)))
-  )
+*** lsp-pyls
+=lsp-pyls= is included with =lsp-mode=.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package lsp-python-ms
+  :after lsp-mode
+  :init
+  (require 'lsp-pyls)
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-tramp-connection
+                                     (executable-find
+                                      (car lsp-pyls-server-command)))
+                    :major-modes '(python-mode)
+                    :remote? t
+                    :server-id 'pyls-remote)))
 #+end_src
 
 *** lsp-python-ms
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-python-ms
-  :after lsp
+  :after lsp-mode
   :init
   (setq lsp-python-ms-auto-install-server t)
   (setq lsp-python-ms-python-executable-cmd "python3")
   :config
-  (require 'lsp-pyls)
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-tramp-connection (car lsp-pyls-server-command))
-                    :major-modes '(python-mode)
-                    :remote? t
-                    :server-id 'pyls-remote))
-
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-tramp-connection lsp-python-ms-executable)
                     :major-modes '(python-mode)
                     :remote? t
-                    :server-id 'python-ms-remote)))
+                    :server-id 'mypyls-remote)))
 #+end_src
 
 *** lsp-ui
@@ -5431,12 +5419,12 @@ chmod 755 /usr/local/bin/clojure-lsp
 *** company-lsp
 #+begin_src emacs-lisp :tangle yes
 (use-package company-lsp
-  :after lsp
+  :after lsp-mode
   :config
   (push 'company-lsp company-backends))
 #+end_src
 
-** company-mode
+** company
 #+begin_src emacs-lisp :tangle yes
 (use-package company
   :config
@@ -5467,6 +5455,7 @@ chmod 755 /usr/local/bin/clojure-lsp
 
   (general-define-key
    :keymaps '(company-active-map company-posframe-active-map)
+   "C-/" 'company-filter-candidates
    "C-b" 'company-previous-page
    "C-f" 'company-next-page
    "C-j" 'company-select-next
@@ -6429,11 +6418,7 @@ Only installing this package for its functions. I get the actual "candidate
 recency" functionality for =M-x= from ivy-prescient.
 
 #+begin_src emacs-lisp :tangle yes
-(use-package amx
-  :config
-  (general-define-key
-   :keymaps '(global-map)
-   "M-X" 'amx-major-mode-commands))
+(use-package amx)
 #+end_src
 
 ** ivy
@@ -6734,15 +6719,7 @@ recency" functionality for =M-x= from ivy-prescient.
 (use-package wolfram
   :config
   (load-file (expand-file-name "wolfram-secrets.el" user-emacs-directory))
-
-  (setq wolfram-alpha-app-id mpereira/secret-wolfram-alpha-app-id)
-
-  (general-define-key
-   :keymaps '(global-map)
-   :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "e"
-   "w" 'wolfram-alpha))
+  (setq wolfram-alpha-app-id mpereira/secret-wolfram-alpha-app-id))
 #+end_src
 
 ** hackernews
@@ -6896,14 +6873,12 @@ recency" functionality for =M-x= from ivy-prescient.
  "<escape>" 'minibuffer-keyboard-quit   ; REVIEW: is this still needed?
  "C-r" 'evil-paste-from-register)
 
-;; REVIEW: do I still need this? Isn't M-x bound in insert mode in the first
-;; place and why doesn't this binding work in some modes like
+;; REVIEW: why doesn't this binding work in some modes like
 ;; `org-src-mode-map', even when specifically adding it in the keymaps?
-;;
-;; (general-define-key
-;;  :keymaps '(global-map)
-;;  :states '(insert)
-;;  "M-x" #'execute-extended-command)
+(general-define-key
+ :keymaps '(global-map)
+ :states '(insert)
+ "M-x" #'execute-extended-command)
 
 ;; FIXME: this doesn't work.
 ;; REVIEW: do I still need this?
@@ -6924,24 +6899,6 @@ recency" functionality for =M-x= from ivy-prescient.
  "C-j" nil
  "C-k" nil)
 
-;; Non-leader "master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(general-define-key
- :keymaps '(global-map)
- :states '(normal visual)
- "C-l" #'evil-ex-nohighlight
- "[c" #'diff-hl-previous-hunk
- "]c" #'diff-hl-next-hunk
- "s" #'avy-goto-char-timer)
-
-;; Non-leader "g" ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(general-define-key
- :keymaps '(global-map)
- :states '(normal visual)
- :prefix "g"
- "q" #'fill-paragraph)
-
 ;; TODO: make this not override org mode?
 ;; (general-define-key
 ;;  :keymaps '(global-map)
@@ -6954,6 +6911,31 @@ recency" functionality for =M-x= from ivy-prescient.
 
 (eval-after-load 'evil-ex
   '(evil-ex-define-cmd "pwd" #'mpereira/pwd))
+
+;; Non-leader "g" ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(general-define-key
+ :keymaps '(global-map)
+ :states '(normal visual)
+ :prefix "g"
+ "q" #'fill-paragraph)
+
+;; Non-leader "master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(general-define-key
+ :keymaps '(global-map)
+ "M-X" 'amx-major-mode-commands
+ "M-q" 'unfill-toggle
+ "C-]" 'dumb-jump-go
+ "C-}" 'dumb-jump-quick-look
+ "C-l" #'evil-ex-nohighlight)
+
+(general-define-key
+ :keymaps '(global-map)
+ :states '(normal visual)
+ "[c" #'diff-hl-previous-hunk
+ "]c" #'diff-hl-next-hunk
+ "s" #'avy-goto-char-timer)
 
 ;; "Master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -6970,14 +6952,16 @@ recency" functionality for =M-x= from ivy-prescient.
  "=" #'quick-calc
  "B" #'ibuffer
  "b" #'switch-to-buffer
+ "C" #'link-hint-copy-link
  "D" #'mpereira/bm-counsel-find-bookmark       ; REVIEW: rethink.
+ "F" #'link-hint-open-link
  "hs" #'mpereira/split-window-below-and-switch
  "hv" #'mpereira/toggle-window-split           ; REVIEW: rethink.
- "vh" #'mpereira/toggle-window-split           ; REVIEW: rethink.
  "n" #'mpereira/narrow-or-widen-dwim
  "q" #'evil-quit
  "T" #'bm-toggle                               ; REVIEW: rethink.
  "u" #'undo-tree-visualize
+ "vh" #'mpereira/toggle-window-split           ; REVIEW: rethink.
  "vs" #'mpereira/split-window-right-and-switch ; REVIEW: rethink.
  "w" #'save-buffer)
 
@@ -7002,7 +6986,8 @@ recency" functionality for =M-x= from ivy-prescient.
  :prefix mpereira/leader
  :infix "e"
  ":" #'eval-expression
- "v" #'counsel-set-variable)
+ "v" #'counsel-set-variable
+ "w" 'wolfram-alpha)
 
 ;; f -> find ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
