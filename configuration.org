@@ -1386,6 +1386,22 @@ Don't clean up recentf tramp buffers.
   (unless (file-remote-p default-directory) ad-do-it))
 #+end_src
 
+This is supposedly [[https://www.emacswiki.org/emacs/TrampMode][faster than the default]], =scp=.
+#+begin_src emacs-lisp :tangle yes
+(setq tramp-default-method "ssh")
+#+end_src
+
+Store TRAMP auto-save files locally.
+#+begin_src emacs-lisp :tangle yes
+(setq tramp-auto-save-directory
+      (expand-file-name "tramp-auto-save" user-emacs-directory))
+#+end_src
+
+A more representative name for this file.
+#+begin_src emacs-lisp :tangle yes
+(setq tramp-persistency-file-name
+      (expand-file-name "tramp-connection-history" user-emacs-directory))
+#+end_src
 Cache SSH passwords during the whole Emacs session.
 #+begin_src emacs-lisp :tangle yes
 (setq password-cache-expiry nil)
