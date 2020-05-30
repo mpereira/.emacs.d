@@ -2051,10 +2051,26 @@ Source: https://git.io/vQKzv"
 #+end_src
 
 ** evil-owl
+~evil-owl-extra-posframe-args~ is set so that the evil-owl frame looks exactly
+the same as the =ivy-posframe= one.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package evil-owl
-  :after evil
+  :after (evil ivy-posframe)
   :config
+  (setq evil-owl-max-string-length 50)
+  (setq evil-owl-display-method 'posframe)
+  ;; FIXME: this needs to be updated on theme changes.
+  (setq evil-owl-extra-posframe-args
+        `(:width 80
+          :height 20
+          :background-color ,(face-attribute 'ivy-posframe :background nil t)
+          :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
+          :internal-border-width ,ivy-posframe-border-width
+          :internal-border-color ,(face-attribute 'ivy-posframe-border
+                                                  :background
+                                                  nil
+                                                  t)))
   (evil-owl-mode))
 #+end_src
 
@@ -3938,8 +3954,55 @@ Set a default border width for all posframe frames via
 
 ** company-posframe
 #+begin_src emacs-lisp :tangle yes
+(defun plist-each (function plist)
+  "Iterate FUNCTION (a two-argument function) over PLIST."
+  (when plist
+    (funcall function (car plist) (cadr plist))
+    (plist-each function (cddr plist))))
+
 (use-package company-posframe
+  :ensure nil
+  ;; REVIEW: can this be switched back to the upstream package?
+  :quelpa (company-posframe
+           :fetcher github
+           :branch "overridable-frame-properties"
+           :repo "mpereira/company-posframe")
+  :after (company posframe ivy-posframe)
   :config
+  (setq company-tooltip-align-annotations t)
+  (setq company-posframe-show-indicator nil)
+  (setq company-posframe-quickhelp-x-offset 0)
+  (setq company-posframe-quickhelp-delay 0)
+  (setq company-posframe-quickhelp-show-header nil)
+
+  ;; FIXME: This needs to run on theme changes as well.
+  ;;
+  ;; (defvar after-load-theme-hook nil
+  ;;   "Hook run after a color theme is loaded using `load-theme'.")
+  ;; (defadvice load-theme (after run-after-load-theme-hook activate)
+  ;;   "Run `after-load-theme-hook'."
+  ;;   (run-hooks 'after-load-theme-hook))
+  ;;
+  (add-hook 'after-init-hook
+            (lambda ()
+              (setq mpereira/company-posframe-extra-frame-args `())
+
+              (setq mpereira/company-posframe-quickhelp-extra-frame-args
+                    `(:background-color ,(face-attribute 'ivy-posframe :background nil t)
+                      :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
+                      :internal-border-width ,ivy-posframe-border-width
+                      :internal-border-color ,(face-attribute 'ivy-posframe-border
+                                                              :background
+                                                              nil
+                                                              t)))
+              (plist-each (lambda (k v)
+                            (plist-put company-posframe-show-params k v))
+                          mpereira/company-posframe-extra-frame-args)
+              (plist-each (lambda (k v)
+                            (plist-put company-posframe-quickhelp-show-params k v))
+                          mpereira/company-posframe-quickhelp-extra-frame-args))
+            t)
+
   (company-posframe-mode))
 #+end_src
 
