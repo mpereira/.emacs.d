@@ -151,7 +151,6 @@ Vanilla evil emacs literate configuration.
   - [[#ripgrep][ripgrep]]
   - [[#wgrep][wgrep]]
   - [[#double-saber][double-saber]]
-  - [[#ag][ag]]
   - [[#symbol-overlay][symbol-overlay]]
   - [[#expand-region][expand-region]]
   - [[#ialign][ialign]]
@@ -4795,11 +4794,6 @@ revert back from the quelpa setup.
          (ivy-occur-grep-mode . (lambda ()
                                   (double-saber-mode)
                                   (setq-local double-saber-start-line 5)))))
-#+end_src
-
-** ag
-#+begin_src emacs-lisp :tangle yes
-(use-package ag)
 #+end_src
 
 ** symbol-overlay
