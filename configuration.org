@@ -4745,10 +4745,36 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 #+begin_src emacs-lisp :tangle yes
 (use-package blacken
   :config
+  ;; Use a `blacken-buffer' that doesn't randomly move the point to the
+  ;; beginning of the buffer.
+  ;; https://github.com/pythonic-emacs/blacken/pull/19/files
+  (defun mpereira/blacken-buffer (&optional display)
+    "Try to blacken the current buffer.
+Show black output, if black exit abnormally and DISPLAY is t."
+    (interactive (list t))
+    (let* ((original-buffer (current-buffer))
+           (tmpbuf (get-buffer-create "*blacken*"))
+           (errbuf (get-buffer-create "*blacken-error*")))
+      ;; This buffer can be left after previous black invocation.  It
+      ;; can contain error message of the previous run.
+      (dolist (buf (list tmpbuf errbuf))
+        (with-current-buffer buf
+          (erase-buffer)))
+      (condition-case err
+          (if (not (zerop (blacken-call-bin original-buffer tmpbuf errbuf)))
+              (error "Black failed, see %s buffer for details" (buffer-name errbuf))
+            (unless (eq (compare-buffer-substrings tmpbuf nil nil original-buffer nil nil) 0)
+              (with-current-buffer original-buffer (replace-buffer-contents tmpbuf)))
+            (mapc 'kill-buffer (list tmpbuf errbuf)))
+        (error (message "%s" (error-message-string err))
+               (when display
+                 (pop-to-buffer errbuf))))))
+
   (general-define-key
    :keymaps '(python-mode-map)
    :states '(normal visual)
-   "F" 'blacken-buffer)
+   :prefix mpereira/leader
+   "F" 'mpereira/blacken-buffer)
 
   (setq blacken-line-length 'fill))
 #+end_src
