@@ -5310,21 +5310,26 @@ curl https://github.com/snoe/clojure-lsp/releases/download/release-20200514T1341
 chmod 755 /usr/local/bin/clojure-lsp
 #+end_src
 
+LLVM for C/C++. You might need to configure =PATH=, =LDFLAGS=, and =CPPFLAGS=.
+#+begin_src bash :tangle setup.sh :results verbatim
+brew install llvm
+#+end_src
+
 *** lsp-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
   :config
-  (setq lsp-rust-server 'rust-analyzer)
-
+  (add-hook 'c-mode-hook 'lsp)
   (add-hook 'python-mode-hook 'lsp)
   (add-hook 'js2-mode-hook 'lsp)
   (add-hook 'rust-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
 
+  (setq lsp-rust-server 'rust-analyzer)
+
   ;; FIXME: beacon is behaving weirdly on LSP buffers, showing beacon on
   ;; incorrect lines.
-  (add-hook 'lsp-mode-hook (lambda ()
-                             (beacon-mode -1)))
+  (add-hook 'lsp-mode-hook (lambda () (beacon-mode -1)))
 
   (setq lsp-eldoc-enable-hover nil)
   (setq lsp-enable-symbol-highlighting nil)
