@@ -3587,11 +3587,21 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
 
 ** dired-subtree
 #+begin_src emacs-lisp :tangle yes
+(defun mpereira/dired-subtree-toggle ()
+  (interactive)
+  (dired-subtree-toggle)
+  (revert-buffer))
+
+(defun mpereira/dired-subtree-cycle ()
+  (interactive)
+  (dired-subtree-cycle)
+  (revert-buffer))
+
 (use-package dired-subtree
   :after dired
   :bind (:map dired-mode-map
-         ("<tab>" . dired-subtree-toggle)
-         ("<S-tab>" . dired-subtree-cycle)))
+         ("<tab>" . mpereira/dired-subtree-toggle)
+         ("<S-tab>" . mpereira/dired-subtree-cycle)))
 #+end_src
 
 ** reveal-in-osx-finder
