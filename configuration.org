@@ -281,7 +281,6 @@ Vanilla evil emacs literate configuration.
 - [[#interactions-with-websites][Interactions with websites]]
   - [[#counsel-web][counsel-web]]
   - [[#stackoverflow][stackoverflow]]
-  - [[#engine-mode][engine-mode]]
   - [[#google-this][google-this]]
   - [[#wolfram-alpha][Wolfram Alpha]]
   - [[#hackernews][hackernews]]
@@ -6685,43 +6684,6 @@ recency" functionality for =M-x= from ivy-prescient.
         (replace-match "")))))
 #+end_src
 
-** engine-mode
-#+begin_src emacs-lisp :tangle yes
-(use-package engine-mode
-  :config
-  (engine-mode t)
-
-  (defengine duckduckgo
-    "https://duckduckgo.com/?q=%s")
-
-  (defengine github
-    "https://github.com/search?ref=simplesearch&q=%s")
-
-  (defengine google
-    "https://www.google.com/search?ie=utf-8&oe=utf-8&q=%s")
-
-  (defengine google-images
-    "https://www.google.com/images?hl=en&source=hp&biw=1440&bih=795&gbv=2&aq=f&aqi=&aql=&oq=&q=%s")
-
-  (defengine google-maps
-    "https://maps.google.com/maps?q=%s")
-
-  (defengine stack-overflow
-    "https://stackoverflow.com/search?q=%s")
-
-  (defengine twitter
-    "https://twitter.com/search?q=%s")
-
-  (defengine wikipedia
-    "https://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s")
-
-  (defengine wolfram-alpha
-    "https://www.wolframalpha.com/input/?i=%s")
-
-  (defengine youtube
-    "https://www.youtube.com/results?aq=f&oq=&search_query=%s"))
-#+end_src
-
 ** google-this
 #+begin_src emacs-lisp :tangle yes
 (use-package google-this
@@ -7018,6 +6980,8 @@ recency" functionality for =M-x= from ivy-prescient.
  ;; Didn't like `counsel-explorer' from ivy-explorer too much...
  ;; "f" #'counsel-explorer
  "f" #'counsel-find-file
+ "g" #'google-this
+ "G" #'counsel-web-suggest
  "k" #'counsel-descbinds
  "l" #'counsel-find-library
  "m" #'describe-keymap
