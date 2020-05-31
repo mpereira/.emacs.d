@@ -49,7 +49,7 @@ Vanilla evil emacs literate configuration.
   - [[#make-cursor-movement-an-order-of-magnitude-faster][Make cursor movement an order of magnitude faster]]
   - [[#start-up-profiler-esup][Start-up profiler: esup]]
   - [[#explain-pause-mode][explain-pause-mode]]
-- [[#color-theme][Color theme]]
+- [[#color-themes][Color themes]]
   - [[#create-hook-for-theme-change][Create hook for theme change]]
   - [[#change-themes-when-changing-macos-light-or-dark-appearance][Change themes when changing MacOS light or dark appearance]]
 - [[#configure-mode-line][Configure Mode Line]]
@@ -462,7 +462,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 (setq mpereira/leader ",")
 
 (setq mpereira/light-theme 'doom-one-light)
-(setq mpereira/dark-theme 'doom-one)
+(setq mpereira/dark-theme 'tron-legacy)
 (setq mpereira/initial-theme mpereira/dark-theme)
 
 (setq mpereira/dropbox-directory (file-name-as-directory
@@ -1711,7 +1711,7 @@ https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doo
   (explain-pause-mode 1))
 #+end_src
 
-* Color theme
+* Color themes
 Sources:
 - https://emacsthemes.com
 - http://daylerees.github.io/
