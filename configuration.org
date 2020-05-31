@@ -58,7 +58,6 @@ Vanilla evil emacs literate configuration.
   - [[#evil][evil]]
   - [[#evil-org][evil-org]]
   - [[#evil-magit][evil-magit]]
-  - [[#evil-extra-operator][evil-extra-operator]]
   - [[#evil-exchange][evil-exchange]]
   - [[#evil-nerd-commenter][evil-nerd-commenter]]
   - [[#evil-surround][evil-surround]]
@@ -1707,7 +1706,7 @@ https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doo
     (let ((profile (button-get button 'profile)))
       (profiler-report-profile profile)))
 
-  (explain-pause-mode 1))
+  (add-hook 'after-init-hook #'explain-pause-mode))
 #+end_src
 
 * Color themes
@@ -2038,19 +2037,6 @@ Source: https://git.io/vQKzv"
    "C-S-k" 'git-rebase-move-line-up))
 #+end_src
 
-** evil-extra-operator
-REVIEW: disabled on [2020-05-28 Thu] because I don't use it and it was clashing
-with another keybinding.
-#+begin_src emacs-lisp :tangle yes
-(use-package evil-extra-operator
-  :disabled
-  :after evil
-  :init
-  (setq evil-extra-operator-eval-key "ge")
-  :config
-  (add-hook 'prog-mode-hook 'evil-extra-operator-mode))
-#+end_src
-
 ** evil-exchange
 #+begin_src emacs-lisp :tangle yes
 (use-package evil-exchange
@@ -2062,11 +2048,7 @@ with another keybinding.
 ** evil-nerd-commenter
 #+begin_src emacs-lisp :tangle yes
 (use-package evil-nerd-commenter
-  :after evil
-  :config
-  (general-define-key
-   :keymaps '(normal)
-   "gc" 'evilnc-comment-operator))
+  :after evil)
 #+end_src
 
 ** evil-surround
@@ -2096,13 +2078,7 @@ with another keybinding.
 ** evil-string-inflection
 #+begin_src emacs-lisp :tangle yes
 (use-package evil-string-inflection
-  :after evil
-  :config
-  ;; FIXME: doesn't come back to kebab case when cycling from a region.
-  ;; Check out https://github.com/strickinato/evil-briefcase.
-  (general-define-key
-   :states '(normal)
-   "g-" #'evil-operator-string-inflection))
+  :after evil)
 #+end_src
 
 ** evil-goggles
@@ -2112,10 +2088,10 @@ with another keybinding.
   :config
   (evil-goggles-mode)
 
-  ;; Optionally use diff-mode's faces; as a result, deleted text will be
-  ;; highlighed with `diff-removed` face which is typically some red color
-  ;; (as defined by the color theme) other faces such as `diff-added` will
-  ;; be used for other actions.
+  ;; Optionally use `diff-mode's faces; as a result, deleted text will be
+  ;; highlighed with `diff-removed' face which is typically some red color (as
+  ;; defined by the color theme) other faces such as `diff-added' will be used
+  ;; for other actions.
   (evil-goggles-use-diff-faces))
 #+end_src
 
@@ -2189,38 +2165,7 @@ the same as the =ivy-posframe= one.
 (use-package evil-collection
   :after evil
   :config
-  (evil-collection-init)
-
-  ;; FIXME: https://github.com/emacs-evil/evil-collection/pull/253.
-  ;; (evil-collection-define-key 'normal 'tablist-mode-map
-  ;;   (kbd "RET") 'tablist-find-entry
-  ;;   "d" 'tablist-flag-forward
-  ;;   "f" 'tablist-find-entry
-  ;;   "D" 'tablist-do-delete
-  ;;   "C" 'tablist-do-copy
-  ;;   "R" 'tablist-do-rename
-  ;;   "x" 'tablist-do-flagged-delete)
-
-  ;; (evil-collection-define-key 'normal 'tablist-minor-mode-map
-  ;;   "<"  'tablist-shrink-column
-  ;;   ">"  'tablist-enlarge-column
-  ;;   "\t" 'tablist-forward-column
-  ;;   "g%" tablist-mode-regexp-map
-  ;;   "g*" tablist-mode-mark-map
-  ;;   "g/" tablist-mode-filter-map
-  ;;   "gr" 'tablist-revert
-  ;;   ;; "k"  'tablist-do-kill-lines
-  ;;   "k"  nil
-  ;;   "m"  'tablist-mark-forward
-  ;;   "m"  'tablist-mark-forward
-  ;;   "q"  'tablist-quit
-  ;;   "s"  'tablist-sort
-  ;;   "t"  'tablist-toggle-marks
-  ;;   "U"  'tablist-unmark-all-marks
-  ;;   "u"  'tablist-unmark-forward
-  ;;   (kbd "TAB") 'tablist-forward-column
-  ;;   [backtab] 'tablist-backward-column)
-  )
+  (evil-collection-init))
 #+end_src
 
 * Org
@@ -2823,6 +2768,8 @@ giving priority to CREATED:
      (interactive)
      (org-eval-in-calendar #'(,func 1))))
 
+;; TODO: programmatically sync this with `calendar-mode-map' instead of
+;; hard-coding keybindings.
 (general-define-key
  :keymaps '(org-read-date-minibuffer-local-map)
  "q" 'minibuffer-keyboard-quit
@@ -3651,24 +3598,7 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
             '(":%s")))
     (force-mode-line-update))
 
-  (defun mpereira/handle-progress-bars-on-region (string)
-    "Fix progress bars for e.g. apt(8).
-Display progress in the mode line instead."
-
-    (string-match "\0337.*\0338" "\033720%\0338\033722%\0338")
-
-    (string= ""
-             (replace-regexp-in-string "\\\\0337.*?\\\\0338" "" "\\033720%\\0338\\033722%\\0338"))
-    (+ 2 2)
-
-    (when (string-match comint-password-prompt-regexp string)
-      (when (string-match "\0337.*\0338" string)
-        (setq string (replace-match "" t t string)))
-      (send-invisible string))
-
-
-    (send-invisible (replace-regexp-in-string "\\\\0337.*?\\\\0338" "" string)))
-
+  ;; TODO: implement this?
   ;; (advice-add #'xterm-color-filter
   ;;             :before #'mpereira/handle-progress-bars-on-region)
   )
@@ -6583,22 +6513,12 @@ recency" functionality for =M-x= from ivy-prescient.
   :ensure nil
   :quelpa (counsel-web
            :fetcher github
-           :repo "mnewt/counsel-web")
-  :config
-  (general-define-key
-   :states '(normal)
-   :prefix mpereira/leader
-   "fg" 'counsel-web-suggest)
-
-  ;; TODO: make `fg' run `counsel-web' on the selection.
-  ;; (general-define-key
-  ;;  :states '(visual)
-  ;;  :prefix mpereira/leader
-  ;;  "fg" 'mpereira/counsel-web-selection)
-  )
+           :repo "mnewt/counsel-web"))
 #+end_src
 
 ** stackoverflow
+REVIEW: do I use or need this?
+
 #+begin_src emacs-lisp :tangle yes
 (require 'json)
 
@@ -6896,6 +6816,13 @@ recency" functionality for =M-x= from ivy-prescient.
  :states '(normal visual)
  :prefix "g"
  "q" #'fill-paragraph)
+
+(general-define-key
+ :keymaps '(global-map)
+ :states '(motion)
+ :prefix "g"
+ "c" #'evilnc-comment-operator
+ "-" #'evil-operator-string-inflection)
 
 ;; Non-leader "master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
