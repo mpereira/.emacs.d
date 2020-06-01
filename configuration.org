@@ -6843,8 +6843,8 @@ REVIEW: do I use or need this?
  :keymaps '(global-map)
  :states '(motion)
  :prefix "g"
- "c" #'evilnc-comment-operator
- "-" #'evil-operator-string-inflection)
+ "-" #'evil-operator-string-inflection
+ "c" #'evilnc-comment-operator)
 
 ;; Non-leader "master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
