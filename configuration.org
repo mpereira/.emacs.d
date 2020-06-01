@@ -3865,8 +3865,30 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 #+end_src
 
 ** vterm
+Compiling the vterm module is broken since I upgraded LLVM to 10.0.0.3.
+
+#+begin_src text
+-- System libvterm not found: libvterm will be downloaded and compiled as part of the build process
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/murilo/.emacs.d/elpa/vterm-20200515.1412/build
+[  8%] Performing update step for 'libvterm'
+[ 16%] No configure step for 'libvterm'
+[ 25%] Performing build step for 'libvterm'
+LINK libvterm.la
+ld: unknown option: -platform_version
+clang-10: error: linker command failed with exit code 1 (use -v to see invocation)
+make[4]: *** [libvterm.la] Error 1
+make[3]: *** [libvterm-prefix/src/libvterm-stamp/libvterm-build] Error 2
+make[2]: *** [CMakeFiles/libvterm.dir/all] Error 2
+make[1]: *** [all] Error 2
+#+end_src
+
+Also see: [[https://github.com/Homebrew/homebrew-core/issues/52461][homebrew-core/issues/52461]].
+
 #+begin_src emacs-lisp :tangle yes
 (use-package vterm
+  :disabled
   :init
   (setq vterm-always-compile-module t))
 #+end_src
