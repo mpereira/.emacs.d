@@ -49,8 +49,8 @@ restore-latest-dependencies: $(BACKUP_DIRECTORY)
 
 .PHONY: show-backed-up-dependencies
 show-backed-up-dependencies: $(BACKUP_DIRECTORY)
-	mv $(shell cat $(BACKUP_ELPA_FILE)) elpa
-	mv $(shell cat $(BACKUP_QUELPA_FILE)) quelpa
+	ls $(shell cat $(BACKUP_ELPA_FILE))/elpa
+	ls $(shell cat $(BACKUP_QUELPA_FILE))/quelpa/build
 
 .PHONY: clean-backed-up-dependencies
 clean-backed-up-dependencies: $(BACKUP_DIRECTORY)
