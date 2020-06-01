@@ -13,6 +13,9 @@ curl https://github.com/snoe/clojure-lsp/releases/download/release-20200514T1341
      -o /usr/local/bin/clojure-lsp
 chmod 755 /usr/local/bin/clojure-lsp
 
+npm i -g typescript-language-server
+npm i -g typescript
+
 brew install llvm
 
 python3 -m pip install mypy flake8 pylint black

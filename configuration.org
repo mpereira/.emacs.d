@@ -5261,6 +5261,12 @@ curl https://github.com/snoe/clojure-lsp/releases/download/release-20200514T1341
 chmod 755 /usr/local/bin/clojure-lsp
 #+end_src
 
+[[https://github.com/theia-ide/typescript-language-server][theia-ide/typescript-language-server]] for [[https://emacs-lsp.github.io/lsp-mode/page/lsp-typescript/][JavaScript]].
+#+begin_src bash :tangle setup.sh :results verbatim
+npm i -g typescript-language-server
+npm i -g typescript
+#+end_src
+
 LLVM for C/C++. You might need to configure =PATH=, =LDFLAGS=, and =CPPFLAGS=.
 #+begin_src bash :tangle setup.sh :results verbatim
 brew install llvm
