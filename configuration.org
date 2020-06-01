@@ -1126,7 +1126,10 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
   "Show list of system processes.
 Copies the selected process's PID to the clipboard."
   (interactive)
-  (let ((ps (split-string (shell-command-to-string
+  (let ((ps-sort (lambda (name candidates)
+                   candidates))
+        (ivy-sort-functions-alist '((t . ps-sort)))
+        (ps (split-string (shell-command-to-string
                            "ps axco user,pid,%cpu,%mem,start,time,command -r")
                           "\n"
                           t)))
