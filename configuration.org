@@ -5248,15 +5248,17 @@ Disabling on [2020-05-23 Sat] it for LSP.
 ** LSP
 Install some dependencies:
 
-https://pypi.org/project/python-language-server/
+[[https://pypi.org/project/python-language-server/][- python-language-server]]
 #+begin_src bash :tangle setup.sh :results verbatim
 python3 -m pip install python-language-server 'python-language-server[all]' pyls-mypy pyls-isort pyls-black
 #+end_src
 
+- Some crates for Rust
 #+begin_src bash :tangle setup.sh :results verbatim
 rustup component add rustfmt
 #+end_src
 
+- [[https://github.com/snoe/clojure-lsp][Clojure Language Server]]
 #+begin_src bash :tangle setup.sh :results verbatim
 curl https://github.com/snoe/clojure-lsp/releases/download/release-20200514T134144/clojure-lsp \
      -L  \
