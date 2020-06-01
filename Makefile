@@ -35,6 +35,11 @@ byte-recompile: clean-elc
 $(BACKUP_DIRECTORY):
 	mkdir $(BACKUP_DIRECTORY)
 
+.PHONY: show-dependencies
+show-dependencies: $(BACKUP_DIRECTORY)
+	ls $(PROJECT_ROOT)/elpa
+	ls $(PROJECT_ROOT)/quelpa/build
+
 .PHONY: backup-dependencies
 backup-dependencies: $(BACKUP_DIRECTORY)
 	echo $(BACKUP_ELPA) > $(BACKUP_ELPA_FILE)
@@ -91,6 +96,11 @@ test:
 	echo "Opening Emacs with \$$HOME:"
 	tree -a $(TEST_HOME_EMACSD)
 	HOME="$(TEST_HOME)" $(EMACS) --debug-init 2>/dev/null
+
+.PHONY: backup-dependencies
+restore-dependencies-from-latest-test:
+	rsync -a $(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/elpa $(PROJECT_ROOT)/elpa
+	rsync -a $(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/quelpa $(PROJECT_ROOT)/quelpa
 
 custom.el:
 	touch $(CUSTOM_EL)
