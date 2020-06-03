@@ -2018,24 +2018,21 @@ Source: https://git.io/vQKzv"
 ** evil-magit
 #+begin_src emacs-lisp :tangle yes
 (use-package evil-magit
-  :after evil magit
+  :after (evil magit)
   :init
-  ;; FIXME: disabled this in an effort to see if "zz" works again in magit
-  ;; buffers.
-  (setq evil-magit-use-z-for-folds nil)
+  (setq evil-magit-use-z-for-folds t)
   :config
   (general-define-key
    :keymaps '(magit-mode-map)
    :states '(normal visual)
-   "j" 'evil-next-visual-line
-   "k" 'evil-previous-visual-line
+   "j" 'evil-next-visual-line           ; originally `evil-next-line'.
+   "k" 'evil-previous-visual-line       ; originally `evil-previous-line'.
    "C-j" 'magit-section-forward
    "C-k" 'magit-section-backward)
 
   (general-define-key
    :keymaps '(git-rebase-mode-map)
    :states '(normal)
-   "x" 'git-rebase-kill-line
    "C-S-j" 'git-rebase-move-line-down
    "C-S-k" 'git-rebase-move-line-up))
 #+end_src
