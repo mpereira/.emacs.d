@@ -2236,6 +2236,11 @@ the same as the =ivy-posframe= one.
          "* %U %^{Title}\n  %?"
          :tree-type week
          :empty-lines-after 1)
+        ("p" "Web page" entry
+         (file+datetree "~/org/cpb.org")
+         "* %(org-web-tools--org-link-for-url) :website:
+
+%U %?" :clock-in t :clock-resume t :empty-lines 1)
         ("J" "Journal for some other day" entry
          (file+olp+datetree "journal.org" "Journal")
          "* %(format-time-string \"[%Y-%m-%d \\%a %H:%M]\") %^{Title}\n  %?"
