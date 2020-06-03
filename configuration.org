@@ -5115,39 +5115,69 @@ repositories, but it seems like just trying again a few times gets it done.
 #+end_src
 
 ** gist
+The "gist list" buffer is unfortunately based on tabulated-mode instead of
+tablist-mode. The keybindings below make it behave similar to what one would
+expect from an evil mode buffer.
+
+gist.el depends on a GitHub [[https://github.com/settings/tokens][personal access token]] set in =~/.gitconfig=.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package gist
+  :after evil
+  :init
+  (evil-set-initial-state 'gist-list-mode 'normal)
+
+  (setq gist-list-format '((id "ID" 8 nil identity)
+                           (files "Files" 40 t car)
+                           (created "Created" 15 t "%D %R")
+                           (visibility "Visibility" 10 nil
+                                       (lambda (public)
+                                         (or (and public "public")
+                                             "private")))
+                           (description "Description" 0 t identity)))
   :config
+  (defun mpereira/gist-fetch-current ()
+    "TODO: docstring."
+    (interactive)
+    (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'switch-to-buffer)
+              (original-ibuffer (symbol-function 'ibuffer))
+              ((symbol-function 'ibuffer) #'(lambda (&optional other-window-p
+			                                                         name
+                                                               qualifiers
+			                                                         noselect
+                                                               shrink
+			                                                         filter-groups
+			                                                         formats)
+                                              (funcall original-ibuffer
+                                                       nil ; other-window-p
+                                                       name
+                                                       qualifiers
+                                                       noselect
+                                                       shrink
+                                                       filter-groups
+                                                       formats))))
+      (gist-fetch-current)))
+
   (general-define-key
+   :keymaps '(tabulated-list-mode-map)
    :states '(normal visual)
-   :prefix mpereira/leader
-   :infix "gi"
-   "p" 'gist-region-or-buffer-private
-   "i" 'gist-region-or-buffer
-   "l" 'gist-list)
+   "<" 'tabulated-list-narrow-current-column
+   ">" 'tabulated-list-widen-current-column
+   "gr" 'tabulated-list-revert
+   "S" 'tabulated-list-sort)
 
   (general-define-key
    :keymaps '(gist-list-menu-mode-map)
-   "g" nil
-   "k" nil)
+   "<tab>" nil                          ; originally `gist-fetch-current-noselect'.
+   "<backtab>" nil)                     ; originally `backward-button'.
 
-  ;; TODO: can we use `(evil-set-initial-state 'gist-list-menu-mode 'normal)`
-  ;; instead of most of the mappings below?
   (general-define-key
    :keymaps '(gist-list-menu-mode-map)
-   "C-j" 'next-line
-   "C-k" 'previous-line
-   "j" 'next-line
-   "k" 'previous-line
-   "C-f" 'scroll-up-command
-   "C-b" 'scroll-down-command
-   "r" 'gist-list-reload
-   "gg" 'beginning-of-buffer
-   "G" 'end-of-buffer
-   "/" 'evil-search-forward
-   "n" 'evil-search-next
-   "N" 'evil-search-previous
-   "X" 'gist-kill-current))
+   :states '(normal visual)
+   "<return>" 'mpereira/gist-fetch-current
+   "D" 'gist-kill-current
+   "go" 'gist-browse-current-url
+   "gr" 'gist-list-reload))
 #+end_src
 
 ** gitignore-mode
@@ -6794,6 +6824,9 @@ REVIEW: do I use or need this?
  "D" #'magit-diff-unstaged
  "f" #'magit-find-file
  "g" #'magit-dispatch
+ "ip" #'gist-region-or-buffer-private
+ "ii" #'gist-region-or-buffer
+ "il" #'gist-list
  "L" #'magit-log-all
  "l" #'magit-log-buffer-file
  "o" #'mpereira/browse-at-remote
