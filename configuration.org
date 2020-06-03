@@ -2218,8 +2218,8 @@ the same as the =ivy-posframe= one.
                                     "WAITING(w@/!)"
                                     "|"
                                     "SOMEDAY(s@/!)"
-                                    "CANCELLED(c@/!)"
-                                    "DONE(D!)")))
+                                    "DONE(D!)"
+                                    "CANCELLED(c@/!)")))
 
 (setq org-capture-templates
       '(("t" "Inbox" entry
