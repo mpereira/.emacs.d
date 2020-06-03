@@ -5470,6 +5470,8 @@ brew install llvm
   (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
   (add-hook 'clojure-mode-hook 'lispy-mode)
 
+  ;; REVIEW: can this be removed?
+  ;;
   ;; semantic-mode is disabled by lispy for $reasons. Sometimes it fails to also
   ;; disable this timer, which keeps printing the following error message in the
   ;; echo area:
@@ -5534,13 +5536,15 @@ brew install llvm
   (general-define-key
    :keymaps '(lispyville-mode-map)
    :states '(normal visual)
-   "W" 'mpereira/forward-sexp-begin
-   "B" 'mpereira/backward-sexp-begin
-   "E" 'mpereira/forward-sexp-end
    "(" 'lispyville-backward-up-list
    ")" 'lispyville-up-list
+   "B" 'mpereira/backward-sexp-begin
    "C-(" 'lispyville-beginning-of-defun
    "C-)" 'lispyville-end-of-defun
+   "C-j" 'mpereira/forward-sexp-begin
+   "C-k" 'mpereira/backward-sexp-begin
+   "E" 'mpereira/forward-sexp-end
+   "W" 'mpereira/forward-sexp-begin
    "{" 'lispy-knight-up
    "}" 'lispy-knight-down)
 
