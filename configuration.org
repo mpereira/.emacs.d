@@ -118,6 +118,7 @@ Vanilla evil emacs literate configuration.
   - [[#fish-completion][fish-completion]]
   - [[#load-bash-alias][load-bash-alias]]
 - [[#ui][UI]]
+  - [[#settings][Settings]]
   - [[#posframe][posframe]]
   - [[#ivy-posframe][ivy-posframe]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
@@ -4055,6 +4056,11 @@ fish."
 #+end_src
 
 * UI
+** Settings
+#+begin_src emacs-lisp :tangle yes
+(setq frame-resize-pixelwise t)
+#+end_src
+
 ** posframe
 Set a default border width and height for all posframe frames via
 ~mpereira/ivy-posframe-arghandler~.
