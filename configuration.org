@@ -96,7 +96,6 @@ Vanilla evil emacs literate configuration.
   - [[#org-autonum][org-autonum]]
   - [[#ob-async][ob-async]]
   - [[#ox-jira][ox-jira]]
-  - [[#ox-confluence][ox-confluence]]
   - [[#ox-twbs][ox-twbs]]
   - [[#ox-gfm][ox-gfm]]
   - [[#ox-slimhtml][ox-slimhtml]]
@@ -191,19 +190,15 @@ Vanilla evil emacs literate configuration.
     - [[#lispyville][lispyville]]
   - [[#emacs-lisp][Emacs Lisp]]
   - [[#java][Java]]
-    - [[#meghanada][meghanada]]
   - [[#clojure][Clojure]]
     - [[#clojure-mode][clojure-mode]]
     - [[#clj-refactor][clj-refactor]]
     - [[#inf-clojure][inf-clojure]]
     - [[#cider][cider]]
-    - [[#slamhound][slamhound]]
-    - [[#miracle][miracle]]
   - [[#go][Go]]
     - [[#go-mode][go-mode]]
   - [[#rust][Rust]]
     - [[#rust-mode][rust-mode]]
-    - [[#racer][racer]]
     - [[#flycheck-rust][flycheck-rust]]
     - [[#ob-rust][ob-rust]]
   - [[#kotlin][Kotlin]]
@@ -221,7 +216,6 @@ Vanilla evil emacs literate configuration.
   - [[#scala][Scala]]
     - [[#scala-mode][scala-mode]]
   - [[#sql][SQL]]
-  - [[#es-mode][es-mode]]
   - [[#terraform-mode][terraform-mode]]
   - [[#docker][docker]]
   - [[#dockerfile-mode][dockerfile-mode]]
@@ -232,7 +226,6 @@ Vanilla evil emacs literate configuration.
   - [[#css][css]]
   - [[#js2-refactor][js2-refactor]]
   - [[#rjsx-mode][rjsx-mode]]
-  - [[#emacs-colorpicker][emacs-colorpicker]]
 - [[#writing-prose][Writing prose]]
   - [[#flyspell][flyspell]]
   - [[#flyspell-correct-ivy][flyspell-correct-ivy]]
@@ -305,7 +298,7 @@ Vanilla evil emacs literate configuration.
   - [[#terminate-initel-loading-early][Terminate init.el loading early]]
   - [[#change-font-m-x-x-select-font][Change font: M-x x-select-font]]
   - [[#when-melpaorg-is-down][When melpa.org is down]]
-- [[#sandbox-not-tangled][Sandbox (not tangled)]]
+  - [[#overriding-a-function][Overriding a function]]
 - [[#file-local-variables][File-local variables]]
 :END:
 
@@ -2087,11 +2080,6 @@ Source: https://git.io/vQKzv"
   :after evil
   :config
   (evil-goggles-mode)
-
-  ;; Optionally use `diff-mode's faces; as a result, deleted text will be
-  ;; highlighed with `diff-removed' face which is typically some red color (as
-  ;; defined by the color theme) other faces such as `diff-added' will be used
-  ;; for other actions.
   (evil-goggles-use-diff-faces))
 #+end_src
 
@@ -3450,17 +3438,6 @@ child tree.
 (use-package ox-jira)
 #+end_src
 
-** ox-confluence
-This package lacks a file header as of [2019-06-23 Sun] and can't be installed
-by Quelpa.
-#+begin_src emacs-lisp :tangle yes
-;; (use-package ox-confluence
-;;   :ensure nil
-;;   :quelpa (ox-confluence
-;;            :url "https://raw.githubusercontent.com/emacsmirror/org/master/contrib/lisp/ox-confluence.el"
-;;            :fetcher url))
-;;
-#+end_src
 
 ** ox-twbs
 #+begin_src emacs-lisp :tangle yes
@@ -5175,13 +5152,6 @@ repositories, but it seems like just trying again a few times gets it done.
 ** browse-at-remote
 #+begin_src emacs-lisp :tangle yes
 (use-package browse-at-remote
-  :ensure nil
-  ;; FIXME: revert to official Melpa package when my PR gets merged:
-  ;; https://github.com/rmuslimov/browse-at-remote/pull/59
-  :quelpa (browse-at-remote
-           :fetcher github
-           :repo "mpereira/browse-at-remote"
-           :branch "patch-1")
   :config
   ;; Permanent SHA link.
   (setq browse-at-remote-prefer-symbolic nil)
@@ -5231,7 +5201,7 @@ repositories, but it seems like just trying again a few times gets it done.
 #+end_src
 
 *** flycheck-posframe
-Disabling on [2020-05-23 Sat] it for LSP.
+TODO: use this as a fallback for LSP.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package flycheck-posframe
@@ -5279,12 +5249,14 @@ brew install llvm
 (use-package lsp-mode
   :config
   (add-hook 'c-mode-hook 'lsp)
-  (add-hook 'python-mode-hook 'lsp)
-  (add-hook 'js2-mode-hook 'lsp)
-  (add-hook 'rust-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
+  (add-hook 'csharp-mode-hook 'lsp)
+  (add-hook 'js2-mode-hook 'lsp)
+  (add-hook 'python-mode-hook 'lsp)
+  (add-hook 'rust-mode-hook 'lsp)
 
   (setq lsp-rust-server 'rust-analyzer)
+  (setq lsp-rust-clippy-preference "on")
 
   ;; FIXME: beacon is behaving weirdly on LSP buffers, showing beacon on
   ;; incorrect lines.
@@ -5593,18 +5565,6 @@ brew install llvm
             (setq-local comment-column mpereira/fill-column-wide)))
 #+end_src
 
-*** meghanada
-#+begin_src emacs-lisp :tangle yes
-(use-package meghanada
-  :config
-  ;; (add-hook 'java-mode-hook
-  ;;           (lambda ()
-  ;;             (meghanada-mode t)
-  ;;             (setq c-basic-offset 4)
-  ;;             (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
-  )
-#+end_src
-
 ** Clojure
 *** clojure-mode
 #+begin_src emacs-lisp :tangle yes
@@ -5676,58 +5636,6 @@ If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
    "C-l" 'cider-repl-clear-buffer))
 #+end_src
 
-*** slamhound
-Currently disabled because it's only available via Marmalade.
-
-#+begin_src emacs-lisp :tangle yes
-;; (use-package slamhound
-;;   :after cider)
-#+end_src
-
-*** miracle
-#+begin_src emacs-lisp :tangle yes
-(use-package miracle
-  :ensure nil
-  :after cider
-  :quelpa (miracle
-           :fetcher github
-           :repo "Saikyun/miracle")
-  :config
-  (general-define-key
-   :keymaps 'miracle-interaction-mode-map
-   :states '(normal visual)
-   "K" 'miracle-describe
-   "gf" 'miracle-jump)
-
-  (defun mpereira/miracle-eval-sexp-at-point ()
-    "Evaluate the expression at point."
-    (interactive)
-    (save-excursion
-      (goto-char (cadr (cider-sexp-at-point 'bounds)))
-      (miracle-eval-expression-at-point)))
-
-  (general-define-key
-   :keymaps 'miracle-interaction-mode-map
-   :states '(normal)
-   :prefix mpereira/leader
-   "e(" #'miracle-eval-defun
-   "eE" #'miracle-eval-buffer
-   "en" #'miracle-eval-namespace
-   "ee" #'mpereira/miracle-eval-sexp-at-point
-   "ek" #'miracle-interrupt)
-
-  (general-define-key
-   :keymaps 'miracle-mode-map
-   :states '(insert)
-   "C-l" #'comint-clear-buffer)
-
-  (general-define-key
-   :keymaps 'miracle-interaction-mode-map
-   :states '(visual)
-   :prefix mpereira/leader
-   "ee" 'miracle-eval-region))
-#+end_src
-
 ** Go
 *** go-mode
 #+begin_src emacs-lisp :tangle yes
@@ -5751,31 +5659,7 @@ Currently disabled because it's only available via Marmalade.
 ** Rust
 *** rust-mode
 #+begin_src emacs-lisp :tangle yes
-(use-package rust-mode
-  :config
-  ;; (general-define-key
-  ;;  :keymaps '(rust-mode-map)
-  ;;  :states '(normal visual)
-  ;;  "C-9" 'racer-describe-tooltip
-  ;;  "C-K" 'racer-describe-tooltip
-  ;;  "C-]" 'racer-find-definition
-  ;;  "K" 'racer-describe)
-  )
-#+end_src
-
-*** racer
-Disabled since [2020-05-23 Sat] to try out LSP.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package racer
-  :disabled
-  :config
-  (general-define-key
-   :states '(normal)
-   :keymaps '(racer-help-mode-map)
-   "q" 'kill-current-buffer)
-
-  (add-hook 'rust-mode-hook #'racer-mode))
+(use-package rust-mode)
 #+end_src
 
 *** flycheck-rust
@@ -5806,28 +5690,8 @@ Disabled since [2020-05-23 Sat] to try out LSP.
 #+end_src
 
 ** C#
-~omnisharp-install-server~ needs to be run on a first install.
-
 #+begin_src emacs-lisp :tangle yes
-(use-package omnisharp
-  :after company
-  :disabled
-  :config
-  (remove 'company-omnisharp company-backends)
-  (add-to-list 'company-backends 'company-omnisharp))
-
-(use-package csharp-mode
-  :after company
-  :hook ((csharp-mode . omnisharp-mode)
-         (csharp-mode . flycheck-mode)
-         (csharp-mode . flycheck-mode)))
-
-(defun seq-first (sequence)
-  "Return the first element of SEQUENCE."
-  (seq-elt sequence 0))
-
-(use-package lsp-mode
-  :hook ((csharp-mode . lsp)))
+(use-package csharp-mode)
 #+end_src
 
 ** JavaScript
@@ -5862,57 +5726,28 @@ python3 -m pip install mypy flake8 pylint black
   (setq flycheck-python-pycompile-executable "python3")
   (setq python-shell-interpreter "python3")
 
-  ;; Disabling to try out LSP.
-  ;; (general-define-key
-  ;;  :keymaps '(python-mode-map)
-  ;;  :states '(normal visual)
-  ;;  "C-j" 'elpy-nav-forward-block
-  ;;  "C-k" 'elpy-nav-backward-block
-  ;;  "S-C-j" 'elpy-nav-move-line-or-region-down
-  ;;  "S-C-k" 'elpy-nav-move-line-or-region-up)
+  (general-define-key
+   :keymaps '(python-mode-map)
+   :states '(normal visual)
+   "C-j" 'elpy-nav-forward-block
+   "C-k" 'elpy-nav-backward-block
+   "S-C-j" 'elpy-nav-move-line-or-region-down
+   "S-C-k" 'elpy-nav-move-line-or-region-up)
 
-  ;; Disabling to try out LSP.
-  ;; (general-define-key
-  ;;  :keymaps '(python-mode-map)
-  ;;  :states '(normal visual)
-  ;;  "K" 'elpy-doc)
-
-  ;; Disabling to try out LSP.
-  ;; (general-define-key
-  ;;  :keymaps '(python-mode-map)
-  ;;  :states '(normal visual)
-  ;;  :prefix mpereira/leader
-  ;;  :infix "f"
-  ;;  "o" 'imenu)
-
-  ;; Disabling to try out LSP.
-  ;; (general-define-key
-  ;;  :keymaps '(python-mode-map)
-  ;;  :states '(normal visual)
-  ;;  :prefix mpereira/leader
-  ;;  :infix "e"
-  ;;  "e" 'elpy-shell-send-statement
-  ;;  "E" 'elpy-shell-send-buffer
-  ;;  "p" 'elpy-shell-send-group)
-  )
+  (general-define-key
+   :keymaps '(python-mode-map)
+   :states '(normal visual)
+   :prefix mpereira/leader
+   :infix "e"
+   "e" 'elpy-shell-send-statement
+   "E" 'elpy-shell-send-buffer
+   "p" 'elpy-shell-send-group))
 
 (setq python-indent-offset 4)
 
 (add-hook 'python-mode-hook
           (lambda ()
             (setq evil-shift-width python-indent-offset)))
-
-(with-eval-after-load 'python
-  ;; REVIEW: Where did I get this from?
-  ;; (defun python-shell-completion-native-try ()
-  ;;   "Return non-nil if can trigger native completion."
-  ;;   (let ((python-shell-completion-native-enable t)
-  ;;         (python-shell-completion-native-output-timeout
-  ;;          python-shell-completion-native-try-output-timeout))
-  ;;     (python-shell-completion-native-get-completions
-  ;;      (get-buffer-process (current-buffer))
-  ;;      nil "_")))
-  )
 #+end_src
 
 *** elpy
@@ -5930,11 +5765,7 @@ python3 -m pip install mypy flake8 pylint black
   (setq company-idle-delay-before-elpy-fucks-it-up company-idle-delay)
   (add-hook 'elpy-mode-hook
             (lambda ()
-              (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up)))
-  :config
-  ;; Disabling [2020-05-23] to try out LSP.
-  ;; (elpy-enable)
-  )
+              (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up))))
 #+end_src
 
 ** JSON
@@ -5970,13 +5801,6 @@ python3 -m pip install mypy flake8 pylint black
 (require 'sql)
 
 (add-hook 'sql-interactive-mode-hook (lambda () (toggle-truncate-lines t)))
-#+end_src
-
-** es-mode
-#+begin_src emacs-lisp :tangle yes
-(use-package es-mode
-  :config
-  (add-to-list 'auto-mode-alist '("\\.es$" . es-mode)))
 #+end_src
 
 ** terraform-mode
@@ -6058,15 +5882,6 @@ python3 -m pip install mypy flake8 pylint black
   (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode)))
 #+end_src
 
-** emacs-colorpicker
-#+begin_src emacs-lisp :tangle yes
-;; (use-package colorpicker
-;;   :ensure nil
-;;   :quelpa (emacs-colorpicker
-;;            :fetcher github
-;;            :repo "syohex/emacs-colorpicker"))
-#+end_src
-
 * Writing prose
 ** flyspell
 #+begin_src emacs-lisp :tangle yes
@@ -6128,9 +5943,6 @@ python3 -m pip install mypy flake8 pylint black
 ** olivetti
 #+begin_src emacs-lisp :tangle yes
 (use-package olivetti
-  ;; Don't add to hook until
-  ;; https://github.com/hlissner/emacs-hide-mode-line/issues/2 gets fixed.
-  ;; :hook (olivetti-mode . hide-mode-line-mode)
   :config
   (setq-default olivetti-body-width 0.5))
 #+end_src
@@ -7124,487 +6936,13 @@ Run ~mpereira/exec-path-from-shell-initialize~ on eshell buffers.
 #+end_src
 ** Change font: =M-x x-select-font=
 ** [[https://github.com/d12frosted/elpa-mirror][When melpa.org is down]]
+** Overriding a function
+https://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
 
-* Sandbox (not tangled)
-#+begin_src emacs-lisp :tangle no
-(use-package org-super-agenda)
-(use-package org-ql)
-(use-package ts)
-
-(defun format-org-element (element)
-  ;; This essentially needs to do what `org-agenda-format-item' does,
-  ;; which is a lot.  We are a long way from that, but it's a start.
-  "Return ELEMENT as a string with text-properties set by its property list.
-Its property list should be the second item in the list, as
-returned by `org-element-parse-buffer'.  If ELEMENT is nil,
-return an empty string."
-  (setq *element* element)
-  (if (not element)
-      ""
-    (let* ((properties (cadr element))
-           ;; Remove the :parent property, which so bloats the size of the
-           ;; properties list that it makes it essentially impossible to debug,
-           ;; because Emacs takes approximately forever to show it in the
-           ;; minibuffer or with `describe-text-properties'. FIXME: Shouldn't be
-           ;; necessary anymore since we're not parsing the whole buffer.
-
-           ;; Also, remove ":" from key symbols. FIXME: It would be better to
-           ;; avoid this somehow. At least, we should use a function to convert
-           ;; plists to alists, if possible.
-           (properties (cl-loop for (key val) on properties by #'cddr
-                                for symbol = (intern (cl-subseq (symbol-name key) 1))
-                                unless (member symbol '(parent))
-                                append (list symbol val)))
-           ;; TODO: --add-faces is used to add the :relative-due-date property,
-           ;; but that fact is hidden by doing it through --add-faces (which calls
-           ;; --add-scheduled-face and --add-deadline-face), and doing it in this
-           ;; form that gets the title hides it even more. Adding the relative due
-           ;; date property should probably be done explicitly and separately
-           ;; (which would also make it easier to do it independently of faces,
-           ;; etc).
-           (title (--> (org-ql-view--add-faces element)
-                       (org-element-property :raw-value it)
-                       (org-link-display-format it)))
-           (todo-keyword (-some--> (org-element-property :todo-keyword element)
-                           (org-ql-view--add-todo-face it)))
-           ;; FIXME: Figure out whether I should use
-           ;; `org-agenda-use-tag-inheritance' or `org-use-tag-inheritance',
-           ;; etc.
-           (tag-list (if org-use-tag-inheritance
-                         ;; FIXME: Note that tag inheritance cannot be used
-                         ;; here unless markers are added, otherwise we can't
-                         ;; go to the item's buffer to look for inherited tags.
-                         ;; (Or does `org-element-headline-parser' parse
-                         ;; inherited tags too? I forget...)
-                         (if-let ((marker
-                                   (or (org-element-property :org-hd-marker element)
-                                       (org-element-property :org-marker element))))
-                             (with-current-buffer (marker-buffer marker)
-                               ;; I wish `org-get-tags' used the correct buffer
-                               ;; automatically.
-                               (org-get-tags marker (not org-use-tag-inheritance)))
-                           ;; No marker found
-                           (org-element-property :tags element))
-                       (org-element-property :tags element)))
-           (tag-string (when tag-list
-                         (--> tag-list
-                              (s-join ":" it)
-                              (s-wrap it ":")
-                              (org-add-props it nil 'face 'org-tag))))
-           ;;  (category (org-element-property :category element))
-           (priority-string (-some->> (org-element-property :priority element)
-                              (char-to-string)
-                              (format "[#%s]")
-                              (org-ql-view--add-priority-face)))
-           (habit-property (org-with-point-at (org-element-property :begin element)
-                             (when (org-is-habit-p)
-                               (org-habit-parse-todo))))
-           (due-string (pcase (org-element-property :relative-due-date element)
-                         ('nil "foo")
-                         (string
-                          (format
-                           " %s "
-                           (org-add-props string nil 'face 'org-ql-view-due-date)))))
-           (string (s-join " " (-non-nil (list todo-keyword
-                                               priority-string
-                                               title
-                                               due-string
-                                               tag-string)))))
-      (remove-list-of-text-properties 0 (length string) '(line-prefix) string)
-      ;; Add all the necessary properties and faces to the whole string
-      (--> string
-           ;; FIXME: Use proper prefix
-           (concat "  " it)
-           (org-add-props it properties
-             'org-agenda-type 'search
-             'todo-state todo-keyword
-             'tags tag-list
-             'org-habit-p habit-property)))))
-
-(org-element-property :relative-due-date *element*)
-
-(defun ts-duration->seconds (duration)
-  (let ((seconds (plist-get duration :seconds))
-        (minutes (plist-get duration :minutes))
-        (hours (plist-get duration :hours))
-        (days (plist-get duration :days))
-        (years (plist-get duration :years)))
-    (+ seconds
-       (* 60 minutes)
-       (* 3600 hours)
-       (* 86400 days)
-       (* 31536000 years))))
-
-(--> (org-element-property :closed *element*)
-     (ts-parse-org-element it)
-     (ts-difference (ts-now) it)
-     (ts-human-duration it)
-     (plist-put it :hours 0)
-     (plist-put it :minutes 0)
-     (plist-put it :seconds 0)
-     (ts-duration->seconds it)
-     (ts-human-format-duration it))
-
-(comment
- (let ((org-agenda-custom-commands
-        '(("z" "Agenda"
-           ((agenda "" ((org-super-agenda-groups
-                         '((:name ""
-                            :time-grid t
-                            :date today
-                            :scheduled today
-                            :discard (:not today)
-                            :order 1)))
-                        (org-agenda-span 'day)
-                        (org-agenda-overriding-header
-                         (concat
-                          "\nToday "
-                          "(" (format-time-string "%A, %B %d" (current-time)) ")"))
-                        (org-agenda-format-date "")))
-            (agenda "" ((org-super-agenda-groups
-                         '((:name ""
-                            :time-grid t
-                            :discard (:not today)
-                            :order 2)))
-                        (org-agenda-overriding-header "\nNext 7 Days")
-                        (org-agenda-start-day "+1d")
-                        (org-agenda-span 'week)
-                        (org-agenda-start-on-weekday nil)
-                        (org-agenda-prefix-format " %i %-18c%?-12t% s")))
-
-            (search (concat "SCHEDULED>=\"<+8d>\"&SCHEDULED<=\"<+120d>\""
-                            "|"
-                            "DEADLINE>=\"<+8d>\"&DEADLINE<=\"<+120d>\""
-                            "|"
-                            "TIMESTAMP_IA>=\"<+8d>\"&TIMESTAMP_IA<=\"<+120d>\""
-                            "|"
-                            "TIMESTAMP>=\"<+8d>\"&TIMESTAMP<=\"<+120d>\""
-                            "/!")
-                    ((org-agenda-overriding-header
-                      "\nComing up\n")
-                     ;; (org-agenda-prefix-format
-                     ;;  " %-18c %(mpereira/org-agenda-tags-suffix)  ")
-                     (org-agenda-sorting-strategy '(timestamp-up))
-                     (org-agenda-remove-times-when-in-prefix nil))))))))
-
-   (org-agenda nil "z"))
-
- (let ((org-super-agenda-groups
-        '((:name "Done last week"
-           :closed :from "last sunday" :to "last saturday")
-          (:name "Done this week"
-           :closed (between "this sunday" "this saturday")))))
-   (org-ql-search (org-agenda-files)
-     '(closed)
-     :sort '(date)))
-
- (org-ql-search (org-agenda-files)
-   '(and (todo "TODO")
-         (not (descendants (todo "NEXT"))))
-   :title "Stuck Projects")
-
- (org-ql-search (org-agenda-files)
-   '(and (todo)
-         (children)
-         (not (children (todo)))))
-
- (org-ql (org-agenda-files)
-   '(ts :from -7 :to today)
-   :sort (date priority todo))
-
- (org-ql (org-agenda-files)
-   '(or (scheduled :from +7 :to +100)
-        (deadline :from +7 :to +100)
-        (ts-active :from +7 :to +100))
-   :sort '(ts))
-
- (org-ql-search (org-agenda-files)
-   '(or (ts-active :from +7 :to +100)
-        (scheduled :from +7 :to +100)
-        (deadline :from +7 :to +100))
-   :sort '(ts-active))
-
- (let ((org-agenda-custom-commands
-        `(("x"
-           "Someday"
-           ((org-ql-block
-             (org-ql (org-agenda-files) '(or (scheduled :from +7 :to +100)
-                                             (deadline :from +7 :to +100)
-                                             (ts-active :from +7 :to +100)))))))))
-   (org-agenda nil "x"))
-
- (let ((org-agenda-custom-commands
-        '(("u" "Super view"
-           ((agenda "" ((org-super-agenda-groups
-                         '((:name "Today"
-                            :date today
-                            :todo ("TODO")
-                            :time-grid t)))))
-            ;; (agenda "" ((org-agenda-span 'week)
-            ;;             (org-agenda-start-day "+1d")
-            ;;             (org-agenda-overriding-header "\nNext 7 Days")
-            ;;             (org-super-agenda-groups
-            ;;              '((:name "Next 7 Days"
-            ;;                 :date "+1d"
-            ;;                 :todo ("TODO")
-            ;;                 :time-grid t)))))
-            ;; (tags "" ((org-agenda-overriding-header "Projects")
-            ;;           (org-super-agenda-groups
-            ;;            '((:name none  ; Disable super group header
-            ;;               :children todo)
-            ;;              (:discard (:anything t))))))
-            )))))
-   (org-agenda-list))
-
- (org-ql-search (org-agenda-files)
-   '(ts :from -7 :to today)
-   :title "Recent Items"
-   :sort '(date priority todo)
-   :groups '((:auto-ts t))))
-
-(defun timestamp->time (timestamp)
-  (let* ((year (plist-get timestamp ':year-end))
-         (month (plist-get timestamp ':month-end))
-         (day (plist-get timestamp ':day-end))
-         (hour (plist-get timestamp ':hour-end))
-         (minute (plist-get timestamp ':minute-end))
-         (second 0))
-    (encode-time second minute hour day month year)))
-
-(defun timestamp->date (timestamp)
-  (let* ((year (plist-get timestamp ':year-end))
-         (month (plist-get timestamp ':month-end))
-         (day (plist-get timestamp ':day-end)))
-    (list month day year)))
-
-(defun date->timestamp (date)
-  (let* ((year (calendar-extract-year date))
-         (month (calendar-extract-month date))
-         (day (calendar-extract-day date))
-         (hour 0)
-         (minute 0)
-         (second 0))
-    (list :year-start year
-          :year-end year
-          :month-start month
-          :month-end month
-          :day-start day
-          :day-end day
-          :hour-start hour
-          :hour-end hour
-          :minute-start minute
-          :minute-end minute
-          :second-start second
-          :second-end second)))
-
-(defun date->time (date)
-  (let* ((year (calendar-extract-year date))
-         (month (calendar-extract-month date))
-         (day (calendar-extract-day date))
-         (hour 0)
-         (minute 0)
-         (second 0))
-    (encode-time second minute hour day month year)))
-
-(defun time->timestamp (raw-time)
-  (let* ((time (decode-time raw-time))
-         (year (nth 5 time))
-         (month (nth 4 time))
-         (day (nth 3 time))
-         (hour (nth 2 time))
-         (minute (nth 1 time))
-         (second (nth 0 time)))
-    (list :year-start year
-          :year-end year
-          :month-start month
-          :month-end month
-          :day-start day
-          :day-end day
-          :hour-start hour
-          :hour-end hour
-          :minute-start minute
-          :minute-end minute
-          :second-start second
-          :second-end second)))
-
-(defun time->date (raw-time)
-  (let* ((time (decode-time raw-time))
-         (year (nth 5 time))
-         (month (nth 4 time))
-         (day (nth 3 time)))
-    (list month day year)))
-
-(time->date (time-subtract (date->time (calendar-current-date))
-                           (days-to-time 2)))
-
-(defun timestamp-in-date-interval-p (date-interval timestamp)
-  (let* ((start-date (nth 0 date-interval))
-         (end-date (nth 1 date-interval)))
-    (<= (calendar-absolute-from-gregorian start-date)
-        (calendar-absolute-from-gregorian (timestamp->date timestamp))
-        (calendar-absolute-from-gregorian end-date))))
-
-;; (timestamp-in-date-interval-p (list (calendar-current-date)
-;;                                     (calendar-current-date))
-;;                               (time->timestamp (current-time)))
-
-;; (timestamp-at-day-p (time-to-number-of-days (decode-time (current-time))) (time-to-days (decode-time (timestamp->time (time->timestamp (current-time))))))
-
-(defun timestamp-filter (path start-date end-date entries)
-  (-filter (lambda (x)
-             (let* ((timestamp (get-in path x)))
-               (when timestamp
-                 (timestamp-in-date-interval-p (list start-date end-date)
-                                               timestamp))))
-           entries))
-
-(defun day-of-week (date)
-  (let ((dow (->> date
-                  (date->time)
-                  (decode-time)
-                  (nth 6))))
-    (if (= dow 0)
-        6
-      (- dow 1))))
-
-(defun beginning-of-week (date)
-  (let ((day (day-of-week date)))
-    (if (= day 0)
-        date
-      (time->date (time-subtract (date->time date)
-                                 (days-to-time day))))))
-
-(defun beginning-of-month (date)
-  (let ((day (calendar-extract-day date)))
-    (if (= day 1)
-        date
-      (time->date (time-subtract (date->time date)
-                                 (days-to-time day))))))
-
-(defun minus-days (days date)
-  (time->date (time-subtract (date->time date) (days-to-time days))))
-
-(defun closed-today (entries)
-  (timestamp-filter '(headline :closed timestamp)
-                    (calendar-current-date)
-                    (calendar-current-date)
-                    entries))
-
-(defun closed-yesterday (entries)
-  (timestamp-filter '(headline :closed timestamp)
-                    (minus-days 2 (calendar-current-date))
-                    (minus-days 1 (calendar-current-date))
-                    entries))
-
-(defun closed-this-week-before-today (entries)
-  (timestamp-filter '(headline :closed timestamp)
-                    (beginning-of-week (calendar-current-date))
-                    (minus-days 1 (calendar-current-date))
-                    entries))
-
-(defun closed-this-week-before-yesterday (entries)
-  (timestamp-filter '(headline :closed timestamp)
-                    (beginning-of-week (calendar-current-date))
-                    (minus-days 2 (calendar-current-date))
-                    entries))
-
-(defun closed-last-week (entries)
-  (let ((last-day-of-last-week (minus-days 1 (beginning-of-week (calendar-current-date)))))
-    (timestamp-filter '(headline :closed timestamp)
-                      (beginning-of-week last-day-of-last-week)
-                      last-day-of-last-week
-                      entries)))
-
-(defun closed-this-month-before-this-week (entries)
-  (timestamp-filter '(headline :closed timestamp)
-                    (beginning-of-month (calendar-current-date))
-                    (beginning-of-week (calendar-current-date))
-                    entries))
-
-(defun closed-this-month (entries)
-  (timestamp-filter '(headline :closed timestamp)
-                    (beginning-of-month (calendar-current-date))
-                    (calendar-current-date)
-                    entries))
-
-(ts-now)
-
-(defun get-in (ks coll)
-  (if ks
-      (get-in (cdr ks) (let ((k (car ks)))
-                         (cond
-                          ((plist-member coll k) (plist-get coll k))
-                          ((integerp k) (nth k coll)))))
-    coll))
-
-(comment
- (timestamp->date '(:type inactive
-                    :raw-value
-                    "[2017-11-03 Fri 15:57]"
-                    :year-start
-                    2017
-                    :month-start
-                    11
-                    :day-start
-                    3
-                    :hour-start
-                    15
-                    :minute-start
-                    57
-                    :year-end
-                    2017
-                    :month-end
-                    11
-                    :day-end
-                    3
-                    :hour-end
-                    15
-                    :minute-end
-                    57
-                    :begin
-                    15861
-                    :end
-                    15884
-                    :post-blank
-                    1))
-
-
- (let ((inhibit-read-only t))
-   (with-current-buffer (get-buffer-create "*foo*")
-     (erase-buffer)
-     (--> (org-ql (org-agenda-files)
-            (and (done))
-            :sort (date))
-          ;; (closed-today it)
-          ;; (closed-this-week-before-today it)
-          (closed-this-month-before-this-week it)
-          (car it)
-          (org-ql-view--format-element it)
-          ;; (length it)
-          ;; (nth 2 it)
-          (cl-prettyprint it))
-     (pop-to-buffer (current-buffer))))
-
- (let ((inhibit-read-only t))
-   (with-current-buffer (get-buffer-create "*org-ql-complex*")
-     (erase-buffer)
-     (--each '(("Done today" #'closed-today)
-               ("Done yesterday" #'closed-yesterday)
-               ;; ("Done this week" #'closed-this-week-before-yesterday)
-               ;; ("Done last week" #'closed-last-week)
-               ;; ("Done this month" #'closed-this-month)
-               )
-       (--> (list (car it) (funcall (get-in '(1 1) it)
-                                    (org-ql (org-agenda-files)
-                                      (done)
-                                      :sort (date))))
-            (list (car it) (--map (concat (format-org-element it) "\n")
-                                  (nth 1 it)))
-            (insert (concat (car it)
-                            "\n"
-                            (concat (apply #'concat (nth 1 it))))
-                    "\n")))
-     (pop-to-buffer (current-buffer)))))
+#+begin_src emacs-lisp
+(cl-letf (((symbol-function 'function-be-overridden) #'overriding-function))
+  ;; expressions to be evaluated with the function override.
+  )
 #+end_src
 
 * File-local variables
