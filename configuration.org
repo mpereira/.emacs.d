@@ -6996,7 +6996,7 @@ https://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
 
 * License
 
-#+begin_src text
+#+begin_src text :tangle LICENSE
 MIT License
 
 Copyright (c) 2020 Murilo Pereira
