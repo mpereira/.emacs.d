@@ -5346,9 +5346,10 @@ brew install llvm
    :prefix mpereira/leader
    "F" 'lsp-format-buffer)
 
+  ;; Binding this on visual/normal state causes the peek view to be aborted on
+  ;; keypress.
   (general-define-key
    :keymaps '(lsp-ui-peek-mode-map)
-   :states '(normal visual)
    "C-j" 'lsp-ui-peek--select-next
    "C-k" 'lsp-ui-peek--select-prev))
 #+end_src
