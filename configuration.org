@@ -6654,7 +6654,11 @@ REVIEW: do I use or need this?
             minibuffer-local-completion-map
             minibuffer-local-must-match-map
             minibuffer-local-isearch-map)
- "<escape>" #'minibuffer-keyboard-quit)
+ "<escape>" #'minibuffer-keyboard-quit
+ "<C-escape>" #'(lambda ()
+                  (interactive)
+                  (let ((evil-want-minibuffer t))
+                    (evil-initialize))))
 
 (general-define-key
  :keymaps '(swiper-map
