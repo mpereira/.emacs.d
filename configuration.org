@@ -4162,17 +4162,47 @@ Set a default border width and height for all posframe frames via
 #+end_src
 
 ** company-box
-This package fixes the positioning of the quickhelp buffers that display next to
-the company candidate list window. Without company-box, quickhelp buffers can be
-positioned "outside" the frame or on top of the company candidate list window.
+Changing themes usually breaks the =company-box= frames appearance. This setup
+fixes that.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package company-box
-  :after (company)
+  :after (company ivy-posframe)
+
   :hook (company-mode . company-box-mode)
+
   :init
-  (setq company-box-show-single-candidate t)
+  (setq company-box-doc-delay 0)
   (setq company-box-max-candidates 1000)
+  (setq company-box-show-single-candidate t)
+  (setq company-tooltip-align-annotations t)
+
+  (defun mpereira/company-box-doc-set-frame-parameters ()
+    "TODO: docstring."
+    (interactive)
+    (setq company-box-doc-frame-parameters
+          `((internal-border-width . 10)
+            (background-color . ,(face-attribute 'ivy-posframe :background nil t))
+            (foreground-color . ,(face-attribute 'ivy-posframe :foreground nil t))
+            (internal-border-width . ,ivy-posframe-border-width)
+            (internal-border-color . ,(face-attribute 'ivy-posframe-border
+                                                      :background
+                                                      nil
+                                                      t)))))
+
+  (defun mpereira/company-box-delete-frames-and-update-parameters ()
+    "TODO: docstring."
+    (interactive)
+    (delete-frame (company-box--get-frame))
+    (set-frame-parameter nil 'company-box-frame nil)
+    (delete-frame (frame-parameter nil 'company-box-doc-frame))
+    (set-frame-parameter nil 'company-box-doc-frame nil)
+    (mpereira/company-box-doc-set-frame-parameters))
+
+  ;; This `after-init-hook' hook needs to run after the one setting the theme.
+  (add-hook 'after-init-hook 'mpereira/company-box-doc-set-frame-parameters t)
+  (add-hook 'after-load-theme-hook 'mpereira/company-box-delete-frames-and-update-parameters)
+
   :config
   ;; Make company-box redraw popup on different movements than line up/down.
   ;; https://github.com/sebastiencs/company-box/issues/58#issuecomment-573317553
