@@ -1447,6 +1447,11 @@ This is supposedly [[https://www.emacswiki.org/emacs/TrampMode][faster than the 
 (setq tramp-default-method "ssh")
 #+end_src
 
+This will put in effect =PATH= changes in the remote =~/.profile=.
+#+begin_src emacs-lisp :tangle yes
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+#+end_src
+
 Store TRAMP auto-save files locally.
 #+begin_src emacs-lisp :tangle yes
 (setq tramp-auto-save-directory
