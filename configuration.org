@@ -3939,7 +3939,7 @@ Also see: [[https://github.com/Homebrew/homebrew-core/issues/52461][homebrew-cor
  :keymaps '(term-raw-map)
  :states '(normal)
  "p" 'term-paste
- "M-x" 'counsel-M-x)
+ "M-x" 'execute-extended-command)
 
 ;; REVIEW(maybe-unnecessary).
 (general-define-key
