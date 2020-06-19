@@ -106,6 +106,7 @@ Vanilla evil emacs literate configuration.
   - [[#ox-pandoc][ox-pandoc]]
 - [[#file-management][File management]]
   - [[#dired][dired]]
+  - [[#dired-plus][dired-plus]]
   - [[#dired-show-readme][dired-show-readme]]
   - [[#dired-subtree][dired-subtree]]
   - [[#reveal-in-osx-finder][reveal-in-osx-finder]]
@@ -3544,6 +3545,18 @@ child tree.
  "C-9" 'dired-hide-details-mode
  "C-j" 'dired-next-dirline
  "C-k" 'dired-prev-dirline)
+#+end_src
+
+** dired-plus
+Disabled for now. Too overwhelming when combined with =all-the-icons-dired=.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package dired-plus
+  :disabled
+  :ensure nil
+  :quelpa (dired+
+           :fetcher github
+           :repo "emacsmirror/dired-plus"))
 #+end_src
 
 ** dired-show-readme
