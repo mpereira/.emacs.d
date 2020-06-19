@@ -1127,6 +1127,22 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
   (interactive)
   (mpereira/load-theme mpereira/dark-theme))
 
+(defun mpereira/process-using-port ()
+  "Show list of processes listening on ports via TCP.
+  Copies the selected process's PID to the clipboard."
+  (interactive)
+  (let ((sort-fn (lambda (name candidates)
+                   candidates))
+        (ivy-sort-functions-alist '((t . sort-fn)))
+        (candidates (split-string (shell-command-to-string
+                                   "lsof -nP -iTCP | grep LISTEN")
+                                  "\n"
+                                  t)))
+    (ivy-read "Port: "
+              candidates
+              :action (lambda (project-path)
+                        (kill-new (cadr (split-string project-path " " t)))))))
+
 (defun mpereira/ps ()
   "Show list of system processes.
 Copies the selected process's PID to the clipboard."
