@@ -3732,36 +3732,34 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
                                     (eshell-end-of-output))))
     (with-current-buffer (get-buffer-create "*last-eshell-output*")
       (erase-buffer)
-      ;; TODO do it with `insert' and `delete-region'?
+      ;; TODO: do it with `insert' and `delete-region'?
       (yank)
-      (switch-to-buffer-other-window (current-buffer)))))
+      (goto-char (point-min))
+      (display-buffer (current-buffer)))))
 
 ;; Inspired by Prot's.
 (defun mpereira/eshell-complete-redirect-to-buffer ()
   "Complete the syntax for appending to a buffer via `eshell'."
   (interactive)
   (end-of-line)
-  (insert (concat " >>> #<" (format "%s" (ivy-switch-buffer)) ">")))
+  (insert
+   (concat " >>> #<" (read-buffer-to-switch "Redirect to buffer:") ">")))
 
 ;; I don't use `counsel-esh-history' because it doesn't take into consideration
 ;; the current input.
 (defun mpereira/eshell-history ()
   "Browse Eshell history."
   (interactive)
-  (let ((history
-         (delete-dups
-          (mapcar (lambda (str)
-                    (string-trim (substring-no-properties str)))
-                  (ring-elements eshell-history-ring))))
-        (input (let* ((beg (save-excursion (eshell-bol)))
-                      (end (save-excursion (end-of-line) (point))))
-                 (buffer-substring-no-properties beg end))))
+  (let ((candidates (delete-dups (ring-elements eshell-history-ring)))
+        (input (let ((input-start (save-excursion (eshell-bol)))
+                     (input-end (save-excursion (end-of-line) (point))))
+                 (buffer-substring-no-properties input-start input-end))))
     (ivy-read "Command: "
-              history
-              :action (lambda (x)
+              candidates
+              :action (lambda (candidate)
                         (end-of-line)
                         (eshell-kill-input)
-                        (insert x))
+                        (insert (string-trim candidate)))
               :initial-input input)))
 
 ;; eshell-mode-map needs to be configured in an `eshell-mode-hook'.
@@ -6072,6 +6070,9 @@ Also start them in Org mode.
 
           ("\\*Flycheck.*\\*"
            (display-buffer-below-selected))
+
+          ("\\*last-eshell-output\\*"
+           (display-buffer-same-window))
 
           ("\\(\\*undo-tree\\*\\)"
            (display-buffer-in-side-window)
