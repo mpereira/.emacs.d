@@ -367,7 +367,12 @@ Set it with emacs lisp.
    '(quelpa-use-package
      :fetcher github
      :repo "quelpa/quelpa-use-package"))
-  (require 'quelpa-use-package))
+
+  (require 'quelpa-use-package)
+
+  ;; This needs to be set after requiring `quelpa-use-package'.
+  ;; See https://github.com/quelpa/quelpa/pull/187#issuecomment-644709715.
+  (setq quelpa--override-version-check t))
 #+end_src
 
 * Utility libraries
