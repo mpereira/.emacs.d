@@ -123,11 +123,12 @@ Vanilla evil emacs literate configuration.
   - [[#load-bash-alias][load-bash-alias]]
 - [[#ui][UI]]
   - [[#settings][Settings]]
+  - [[#default-text-scale][default-text-scale]]
+  - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
   - [[#ivy-posframe][ivy-posframe]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
   - [[#company-box][company-box]]
-  - [[#default-text-scale][default-text-scale]]
   - [[#minibuffer-line][minibuffer-line]]
   - [[#highlight-indent-guides][highlight-indent-guides]]
   - [[#hideshow][hideshow]]
@@ -1532,13 +1533,6 @@ Reuse SSH connections. Taken from the [[https://www.gnu.org/software/emacs/manua
 ;; Show CRLF characters.
 ;; http://pragmaticemacs.com/emacs/dealing-with-dos-line-endings/
 (setq inhibit-eol-conversion t)
-
-;; Set default font size to 18.
-;; FIXME: This needs to be updated when the font size changes.
-(set-face-attribute 'default nil :family "Consolas" :height 180)
-
-(eval-after-load "ivy-posframe"
-  (setq ivy-posframe-font "Consolas-22"))
 
 ;; Enable narrowing commands.
 (put 'narrow-to-region 'disabled nil)
@@ -4101,10 +4095,31 @@ fish."
 (setq frame-resize-pixelwise t)
 #+end_src
 
-** posframe
-Set a default border width and height for all posframe frames via
-~mpereira/ivy-posframe-arghandler~.
+** default-text-scale
+#+begin_src emacs-lisp :tangle yes
+(use-package default-text-scale)
+#+end_src
 
+** Font sizes
+A ~M-x disable-theme~ followed by a ~M-x load-theme~ is required after changing
+the default font size with ~default-text-scale-increase~ and
+~default-text-scale-decrease~.
+
+TODO: make font sizes be calculated from one value and fix the scenario
+described above.
+
+#+begin_src emacs-lisp :tangle yes
+(set-face-attribute 'default nil :family "Consolas" :height 220)
+
+;; (eval-after-load "company-box" ...) doesn't seem to work for some reason.
+(add-hook 'after-init-hook (lambda ()
+                             (company-box-icons-resize 20)))
+
+(eval-after-load "ivy-posframe"
+  (setq ivy-posframe-font "Consolas-24"))
+#+end_src
+
+** posframe
 #+begin_src emacs-lisp :tangle yes
 (use-package posframe)
 #+end_src
@@ -4184,11 +4199,6 @@ Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout
   (advice-add 'company-filter-candidates :after #'company-box--change-line)
   (advice-add 'company-search-repeat-forward :after #'company-box--change-line)
   (advice-add 'company-search-repeat-backward :after #'company-box--change-line))
-#+end_src
-
-** default-text-scale
-#+begin_src emacs-lisp :tangle yes
-(use-package default-text-scale)
 #+end_src
 
 ** minibuffer-line
