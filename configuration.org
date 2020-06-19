@@ -5198,7 +5198,7 @@ python3 -m pip install python-language-server 'python-language-server[all]' pyls
 
 - Some crates for Rust
 #+begin_src bash :tangle setup.sh :results verbatim
-rustup component add rustfmt
+rustup component add rustfmt rust-src rust-docs clippy
 #+end_src
 
 - [[https://github.com/snoe/clojure-lsp][Clojure Language Server]]
@@ -5231,20 +5231,16 @@ brew install llvm
   (add-hook 'python-mode-hook 'lsp)
   (add-hook 'rust-mode-hook 'lsp)
 
-  (setq lsp-rust-server 'rust-analyzer)
+  (setq lsp-eldoc-enable-hover nil)
+  (setq lsp-enable-symbol-highlighting nil)
   (setq lsp-rust-clippy-preference "on")
+  (setq lsp-rust-server 'rust-analyzer)
+  ;; Don't show documentation in minibuffer.
+  (setq lsp-signature-auto-activate nil)
 
   ;; FIXME: beacon is behaving weirdly on LSP buffers, showing beacon on
   ;; incorrect lines.
   (add-hook 'lsp-mode-hook (lambda () (beacon-mode -1)))
-
-  (setq lsp-eldoc-enable-hover nil)
-  (setq lsp-enable-symbol-highlighting nil)
-  (setq lsp-ui-doc-delay 0)
-  (setq lsp-ui-doc-enable nil)
-  (setq lsp-ui-peek-always-show t)
-  (setq lsp-ui-sideline-show-hover t)
-  (setq lsp-ui-sideline-update-mode 'line)
 
   ;; Adding `:states '(normal)` to any `lsp-mode-map' binding declarations makes
   ;; it not work.
@@ -5327,10 +5323,17 @@ brew install llvm
 *** lsp-ui
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-ui
+  :after lsp-mode
   :init
-  ;; REVIEW: as of [2020-05-26], the WebKit tooltip doesn't look good and can't
+  (setq lsp-ui-doc-delay 0)
+  (setq lsp-ui-doc-enable nil)
+  ;; REVIEW: as of 2020-06-19, the WebKit tooltip doesn't look good and can't
   ;; seem to be configurable.
+  ;; Check https://gitter.im/emacs-lsp/lsp-mode?at=5eecdb086c06cd1bf4413b8e.
   (setq lsp-ui-doc-use-webkit nil)
+  (setq lsp-ui-peek-always-show t)
+  (setq lsp-ui-sideline-show-hover t)
+  (setq lsp-ui-sideline-update-mode 'line)
   :config
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 #+end_src
@@ -5338,7 +5341,7 @@ brew install llvm
 *** lsp-ivy
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-ivy
-  :after (ivy lsp)
+  :after (ivy lsp-mode)
   :commands (lsp-ivy-workspace-symbol
              lsp-ivy-global-workspace-symbol))
 #+end_src
