@@ -124,6 +124,7 @@ Vanilla evil emacs literate configuration.
   - [[#load-bash-alias][load-bash-alias]]
 - [[#ui][UI]]
   - [[#settings][Settings]]
+  - [[#make-profiler-report-columns-wider][Make profiler report columns wider]]
   - [[#default-text-scale][default-text-scale]]
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
@@ -4131,6 +4132,13 @@ fish."
 (setq frame-resize-pixelwise t)
 #+end_src
 
+** Make profiler report columns wider
+#+begin_src emacs-lisp :tangle yes
+(with-eval-after-load "profiler"
+  (setf (caar profiler-report-cpu-line-format) 80
+        (caar profiler-report-memory-line-format) 80))
+#+end_src
+
 ** default-text-scale
 #+begin_src emacs-lisp :tangle yes
 (use-package default-text-scale)
@@ -5211,6 +5219,7 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
    "y" 'flycheck-copy-errors-as-kill)
 
   (setq flycheck-display-errors-delay 0.3)
+  (setq-default flycheck-emacs-lisp-load-path 'inherit)
 
   (add-hook 'prog-mode-hook #'flycheck-mode)
 
@@ -6073,10 +6082,11 @@ Also start them in Org mode.
           ("\\(\\Wo\\)?*Man.*"
            (display-buffer-below-selected))
 
-          ("\\*\\(compilation\\|run .*\\|cargo test.*\\|cargo check.*\\)\\*"
-           (display-buffer-reuse-mode-window
-            display-buffer-at-bottom)
-           (window-height . 0.3)
+          ("\\*\\(compilation\\|run .*\\|cargo test.*\\|cargo check.*\\|Async Shell Command\\)\\*"
+           (display-buffer-in-side-window)
+           (window-width . 100)
+           (side . right)
+           (slot . 0)
            (mode-line-format . (" " "%b")))
 
           ("\\*\\(rg\\)\\*"
@@ -6198,14 +6208,30 @@ Existing functions in projectile, counsel, ffip, etc. were too slow.
   :after projectile)
 #+end_src
 
+** ibuffer
+#+begin_src emacs-lisp :tangle yes
+(use-package ibuffer
+  :general (:keymaps '(ibuffer-mode-map)
+            :states '(normal)
+            "o" 'ibuffer-toggle-sorting-mode
+            "," nil)
+  :config
+  (setq ibuffer-formats '((mark modified read-only locked " "
+                                (name 40 40 :left :elide)
+                                " "
+                                (size 9 -1 :right)
+                                " "
+                                (mode 16 16 :left :elide)
+                                " " filename-and-process)
+                          (mark " "
+                                (name 16 -1)
+                                " " filename))))
+#+end_src
+
 ** ibuffer-projectile
 #+begin_src emacs-lisp :tangle yes
 (use-package ibuffer-projectile
-  :after projectile
-  :general (:keymaps 'ibuffer-mode-map
-            :states '(normal)
-            "o" 'ibuffer-toggle-sorting-mode
-            "," nil))
+  :after projectile)
 #+end_src
 
 ** perspective
