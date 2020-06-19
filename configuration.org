@@ -4406,7 +4406,7 @@ This mode affects performance for some functions
                      (ivy-switch-buffer-transformer
                       (:width 0.2))
                      (ivy-rich-switch-buffer-major-mode
-                      (:width 12 :face warning))
+                      (:width 18 :face warning))
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-indicators
@@ -4430,7 +4430,7 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-indicators
                       (:width 4 :face error :align right))
                      (ivy-rich-switch-buffer-major-mode
-                      (:width 12 :face warning))
+                      (:width 18 :face warning))
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
@@ -4451,7 +4451,7 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-indicators
                       (:width 4 :face error :align right))
                      (ivy-rich-switch-buffer-major-mode
-                      (:width 12 :face warning))
+                      (:width 18 :face warning))
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
@@ -4472,7 +4472,7 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-indicators
                       (:width 4 :face error :align right))
                      (ivy-rich-switch-buffer-major-mode
-                      (:width 12 :face warning))
+                      (:width 18 :face warning))
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
@@ -4493,7 +4493,7 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-indicators
                       (:width 4 :face error :align right))
                      (ivy-rich-switch-buffer-major-mode
-                      (:width 12 :face warning))
+                      (:width 18 :face warning))
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
@@ -4519,7 +4519,7 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-indicators
                       (:width 4 :face error :align right))
                      (ivy-rich-switch-buffer-major-mode
-                      (:width 12 :face warning))
+                      (:width 18 :face warning))
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
