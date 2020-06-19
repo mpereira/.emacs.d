@@ -46,6 +46,9 @@ Vanilla evil emacs literate configuration.
 - [[#options][Options]]
 - [[#performance][Performance]]
   - [[#increase-the-amount-of-data-read-from-processes][Increase the amount of data read from processes]]
+  - [[#dont-save-minibuffer-winner-mode-state][Don't save minibuffer winner-mode state]]
+  - [[#dont-show-buffer-remote-path-in-minibuffer][Don't show buffer remote path in minibuffer]]
+  - [[#prevent-garbage-collecting-when-opening-the-minibuffer][Prevent garbage collecting when opening the minibuffer]]
   - [[#make-cursor-movement-an-order-of-magnitude-faster][Make cursor movement an order of magnitude faster]]
   - [[#start-up-profiler-esup][Start-up profiler: esup]]
   - [[#explain-pause-mode][explain-pause-mode]]
@@ -245,8 +248,10 @@ Vanilla evil emacs literate configuration.
   - [[#display-buffer-alist-configuration][display-buffer-alist configuration]]
   - [[#display-compilation-result-buffers-to-a-single-window-to-the-right][Display compilation result buffers to a single window to the right]]
 - [[#project-management][Project management]]
+  - [[#a-fast-non-projectile-based-project-file-finder][A fast non-Projectile-based project file finder]]
   - [[#projectile][projectile]]
   - [[#term-projectile][term-projectile]]
+  - [[#ibuffer][ibuffer]]
   - [[#ibuffer-projectile][ibuffer-projectile]]
   - [[#perspective][perspective]]
   - [[#counsel][counsel]]
@@ -954,7 +959,7 @@ in any structured movement package is mind-boggling to me."
         (interactive)
         (if (projectile-project-p)
             (counsel-projectile-find-file)
-          (ffip)))
+          (mpereira/project-fd)))
 
       (defun mpereira/maybe-projectile-find-directory ()
         (interactive)
@@ -1669,6 +1674,37 @@ Reuse SSH connections. Taken from the [[https://www.gnu.org/software/emacs/manua
 https://emacs-lsp.github.io/lsp-mode/page/performance/
 #+begin_src emacs-lisp :tangle yes
 (setq read-process-output-max (* 1024 1024)) ; 1mb.
+#+end_src
+
+** Don't save minibuffer winner-mode state
+Winner mode adds this hook by default.
+
+#+begin_src emacs-lisp :tangle yes
+(remove-hook 'minibuffer-setup-hook 'winner-save-unconditionally)
+#+end_src
+
+** Don't show buffer remote path in minibuffer
+#+begin_src emacs-lisp :tangle yes
+(with-eval-after-load "ivy-rich"
+  (setq ivy-rich-parse-remote-buffer nil))
+#+end_src
+
+** Prevent garbage collecting when opening the minibuffer
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/gc-cons-set-maximum ()
+  (setq gc-cons-threshold mpereira/gc-cons-threshold-maximum)
+  (setq gc-cons-percentage mpereira/gc-cons-percentage-maximum))
+
+(defun mpereira/gc-cons-set-normal ()
+  ;; Defer it so that commands launched immediately after will enjoy the
+  ;; benefits.
+  (run-at-time
+   1 nil (lambda ()
+           (setq gc-cons-threshold mpereira/gc-cons-threshold-normal)
+           (setq gc-cons-percentage mpereira/gc-cons-percentage-normal))))
+
+(add-hook 'minibuffer-setup-hook #'mpereira/gc-cons-set-maximum)
+(add-hook 'minibuffer-exit-hook #'mpereira/gc-cons-set-normal)
 #+end_src
 
 ** Make cursor movement an order of magnitude faster
@@ -3520,18 +3556,28 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
 
 ** dired-subtree
 #+begin_src emacs-lisp :tangle yes
-(defun mpereira/dired-subtree-toggle ()
-  (interactive)
-  (dired-subtree-toggle)
-  (revert-buffer))
+(use-package dired-subtree
+  :after dired)
+#+end_src
 
-(defun mpereira/dired-subtree-cycle ()
-  (interactive)
-  (dired-subtree-cycle)
-  (revert-buffer))
+Make =dired-subtree= work with =all-the-icons-dired= by reverting the buffer on
+cycling so that icons are rendered. Disabled by default for now because it
+impacts performance heavily in large directories.
 
+#+begin_src emacs-lisp :tangle yes
 (use-package dired-subtree
   :after dired
+  :init
+  (defun mpereira/dired-subtree-toggle ()
+    (interactive)
+    (dired-subtree-toggle)
+    (revert-buffer))
+
+  (defun mpereira/dired-subtree-cycle ()
+    (interactive)
+    (dired-subtree-cycle)
+    (revert-buffer))
+
   :bind (:map dired-mode-map
          ("<tab>" . mpereira/dired-subtree-toggle)
          ("<S-tab>" . mpereira/dired-subtree-cycle)))
@@ -6049,14 +6095,42 @@ Also start them in Org mode.
 #+end_src
 
 * Project management
+** A fast non-Projectile-based project file finder
+Existing functions in projectile, counsel, ffip, etc. were too slow.
+
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/project-fd ()
+  "TODO: docstring"
+  (interactive)
+  (if-let ((fd-executable (executable-find "fd" t)))
+      (let* ((default-directory (ffip-project-root))
+             (candidates (split-string
+                          (shell-command-to-string
+                           (concat fd-executable " . --color never"))
+                          "\n"
+                          t)))
+        (ivy-read "File: "
+                  candidates
+                  :action (lambda (candidate)
+                            (find-file candidate))))
+    (message "Coudn't find `fd` in PATH")))
+#+end_src
+
 ** projectile
 #+begin_src emacs-lisp :tangle yes
 (use-package projectile
   :config
   (projectile-mode t)
 
-  (setq projectile-enable-caching nil)
+  (setq projectile-enable-caching t)
   (setq projectile-require-project-root t)
+  (setq projectile-dynamic-mode-line nil)
+
+  ;; Prevent projectile from automatically creating projects when visiting
+  ;; files. For example, navigating to the definition of a function from a
+  ;; dependency will add the dependency directory as a project.
+  (setq projectile-track-known-projects-automatically nil)
+
   ;; With this, do I even need counsel-projectile?
   (setq projectile-completion-system 'ivy))
 #+end_src
@@ -6129,7 +6203,11 @@ Also start them in Org mode.
 
 ** find-file-in-project
 #+begin_src emacs-lisp :tangle yes
-(use-package find-file-in-project)
+(use-package find-file-in-project
+  :config
+  ;; ffip adds `ffap-guess-file-name-at-point' automatically and it is crazy
+  ;; slow on TRAMP buffers.
+  (remove-hook 'file-name-at-point-functions 'ffap-guess-file-name-at-point))
 #+end_src
 
 * Commands
@@ -6178,6 +6256,9 @@ recency" functionality for =M-x= from ivy-prescient.
 #+end_src
 
 ** ivy-prescient
+This seems to affect performance when there are lots of candidates, mostly via
+~ivy-prescient-sort-function~.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package ivy-prescient
   :after (ivy counsel amx prescient)
