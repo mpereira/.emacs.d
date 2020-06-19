@@ -14,12 +14,6 @@
                          ("gnu" . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 
-;; TODO: move this to `mpereira/activate-backup-archives'.
-;; (setq package-archives
-;;       '(("melpa" . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/melpa/")
-;;         ("org"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/org/")
-;;         ("gnu"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/")))
-
 (unless package-archive-contents
   (package-refresh-contents))
 
@@ -43,7 +37,5 @@
   :mode (("\\.\\(org\\|org_archive\\)$" . org-mode)))
 
 ;; Prevent annoying local variable prompts.
-(setq enable-local-variables :all)
-(org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory))
-(setq enable-local-variables t)
-(put 'list-timers 'disabled nil)
+(let ((enable-local-variables :all))
+  (org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory)))

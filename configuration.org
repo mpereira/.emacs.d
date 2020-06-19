@@ -115,6 +115,7 @@ Vanilla evil emacs literate configuration.
   - [[#term][term]]
   - [[#eterm-256color][eterm-256color]]
   - [[#configure-xterm-color][Configure xterm-color]]
+  - [[#bash-completion][bash-completion]]
   - [[#fish-completion][fish-completion]]
   - [[#load-bash-alias][load-bash-alias]]
 - [[#ui][UI]]
@@ -122,11 +123,10 @@ Vanilla evil emacs literate configuration.
   - [[#posframe][posframe]]
   - [[#ivy-posframe][ivy-posframe]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
-  - [[#company-posframe][company-posframe]]
   - [[#company-box][company-box]]
   - [[#default-text-scale][default-text-scale]]
   - [[#minibuffer-line][minibuffer-line]]
-  - [[#highlight-indent-guide][highlight-indent-guide]]
+  - [[#highlight-indent-guides][highlight-indent-guides]]
   - [[#hideshow][hideshow]]
   - [[#beacon][beacon]]
   - [[#rainbow-delimiters][rainbow-delimiters]]
@@ -663,8 +663,6 @@ on the internet here.
        (print ,result-symbol)
        (message "************************************************************")
        ,result-symbol)))
-
-(defalias 'remove-from-list 'object-remove-from-list)
 
 (defun mpereira/hide-trailing-whitespace ()
   (interactive)
@@ -2368,7 +2366,8 @@ the beginning of the line. This fixes that."
  :prefix mpereira/leader
  ;; Originally bound to `save-buffer' via the global keymap.
  "w" 'mpereira/maybe-org-edit-src-save
- ;; Originally bound to `org-edit-src-exit'.
+ ;; Originally bound to `org-edit-src-abort'.
+ ;; FIXME: doesn't seem to be working?
  "q" 'evil-quit)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3450,7 +3449,6 @@ child tree.
 (use-package ox-jira)
 #+end_src
 
-
 ** ox-twbs
 #+begin_src emacs-lisp :tangle yes
 (use-package ox-twbs)
@@ -3486,9 +3484,9 @@ child tree.
 (setq dired-listing-switches "-AFlv --group-directories-first")
 (setq find-ls-option ;; applies to `find-name-dired'
       '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
-;;; activate this for case-insensitive names:
-;; (setq find-name-arg "-iname")
+
 (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+
 (dired-async-mode 1)
 
 (require 'wdired)
@@ -3551,21 +3549,17 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
   :config
   (add-hook 'eshell-mode-hook 'with-editor-export-editor)
   (add-hook 'term-exec-hook 'with-editor-export-editor)
-  (add-hook 'shell-mode-hook 'with-editor-export-editor))
+  (add-hook 'shell-mode-hook 'with-editor-export-editor)
+
+  (add-hook 'with-editor-mode-hook 'evil-insert-state))
 #+end_src
 
 ** xterm-color
+REVIEW(maybe-unnecessary)
+
 #+begin_src emacs-lisp :tangle yes
 (use-package xterm-color
   :config
-  ;; Subprocesses of Emacs do not have direct access to the terminal, so unless
-  ;; told otherwise they should only assume a dumb terminal. We are careful to
-  ;; do it late (after `term-setup-hook'), although the new multi-tty code does
-  ;; not use $TERM any more there anyway.
-  ;; FIXME: is this needed?
-  ;; (add-hook 'emacs-startup-hook (lambda ()
-  ;;                                 (setenv "TERM" "xterm-256color")))
-
   (setq comint-output-filter-functions (remove 'ansi-color-process-output
                                                comint-output-filter-functions))
 
@@ -3631,12 +3625,6 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
 ;; `find` and `chmod` behave differently on eshell than unix shells. Prefer unix
 ;; behavior.
 (setq eshell-prefer-lisp-functions nil)
-
-;; Visual commands are commands which require a proper terminal. eshell will run
-;; them in a term buffer when you invoke them.
-(setq eshell-visual-commands
-      '("htop" "top" "bash" "zsh" "fish" "glances" "watch"))
-(setq eshell-visual-subcommands '())
 
 (defun eshell/clear ()
   "Clears buffer while preserving input."
@@ -3735,13 +3723,10 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
    "0" 'eshell-bol
    "C-j" 'eshell-next-prompt
    "C-k" 'eshell-previous-prompt)
-
+  
   (general-define-key
    :states '(insert)
    :keymaps '(eshell-mode-map)
-   ;; Uppercase TAB here doesn't work for some reason.
-   ;; Overrides `eshell-pcomplete' because it doesn't work with ivy.
-   "<tab>" 'completion-at-point
    ;; TODO: `eshell-{previous,next}-matching-input-from-input' only work with
    ;; prefix inputs, like "git". They don't do fuzzy matching.
    ;;
@@ -3754,9 +3739,10 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
    ;; https://github.com/ksonney/spacemacs/commit/297945a45696e235c6983a78acdf05b5f0e015ca
    "C-l" 'mpereira/eshell-clear)
 
-  ;; FIXME: workaround for a bug. When an eshell buffer is created the
-  ;; `eshell-mode-map' mappings are not set up, even through `eshell-mode-map'
-  ;; is correctly defined. Going to normal state sets them up for some reason.
+  ;; REVIEW(maybe-unnecessary): workaround for a bug. When an eshell buffer is
+  ;; created the `eshell-mode-map' mappings are not set up, even through
+  ;; `eshell-mode-map' is correctly defined. Going to normal state sets them up
+  ;; for some reason.
   (evil-normal-state)
   (evil-insert-state)
   (forward-char))
@@ -3810,18 +3796,8 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
                  'face 'eshell-prompt)
      " ")))
 
-;; Unused (for now?)
-(setq mpereira/eshell-prompt-string
-      (let ((prompt (mpereira/eshell-prompt))
-            (inhibit-read-only t))
-        (set-text-properties 0 (length prompt) nil prompt)
-        prompt))
-
 (setq eshell-prompt-function 'mpereira/eshell-prompt)
 (setq eshell-prompt-regexp "^[$#] ")
-
-;; This causes the prompt to not be protected.
-;; (setq eshell-highlight-prompt nil)
 
 ;; Make eshell append to history after each command.
 ;; https://emacs.stackexchange.com/questions/18564/merge-history-from-multiple-eshells
@@ -3837,7 +3813,7 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 
 ;; Shared history.
 ;; https://github.com/Ambrevar/dotfiles/blob/25e2ed350b898c3fc2df3148630b5778a3db4ee7/.emacs.d/lisp/init-eshell.el#L205
-;; TODO: make this per project.
+;; TODO: make this per project?
 (defvar mpereira/eshell-history-global-ring nil
   "The history ring shared across Eshell sessions.")
 
@@ -3889,41 +3865,32 @@ Also see: [[https://github.com/Homebrew/homebrew-core/issues/52461][homebrew-cor
 ;; Infinite buffer.
 (setq term-buffer-maximum-size 0)
 
-;; Emacs 26 has this defaulted to `t', which causes the point to not be movable
-;; from the process mark.
+;; This defaults to `t' which causes the point to not be movable from the
+;; process mark.
 (setq term-char-mode-point-at-process-mark nil)
 
+;; REVIEW(maybe-unnecessary).
 (general-define-key
  :keymaps '(term-raw-map)
  :states '(normal)
  "p" 'term-paste
  "M-x" 'counsel-M-x)
 
+;; REVIEW(maybe-unnecessary).
 (general-define-key
  :keymaps '(term-raw-map)
  :states '(insert)
  "M-v" 'term-paste)
 
+;; REVIEW(maybe-unnecessary).
 (general-define-key
- ;; TODO: are both necessary? C-c C-c wasn't working just with `term-raw-map' so
- ;; I added `term-mode-map' and re-evaluated, started working in a term buffer.
+ ;; Are both necessary? C-c C-c wasn't working just with `term-raw-map' so I
+ ;; added `term-mode-map' and re-evaluated, started working in a term buffer.
  :keymaps '(term-raw-map term-mode-map)
  :prefix "C-c"
- ;; https://github.com/noctuid/general.el
- ;; #how-do-i-prevent-key-sequence-starts-with-non-prefix-key-errors
+ ;; https://github.com/noctuid/general.el#how-do-i-prevent-key-sequence-starts-with-non-prefix-key-errors
  "" nil
  "C-c" #'term-interrupt-subjob)
-
-;; FIXME: some eshell commands create term buffers. Make those not be killed.
-;; Kill term buffers when term process exits.
-;; (defadvice term-sentinel (around my-advice-term-sentinel (proc msg))
-;;   (if (memq (process-status proc) '(signal exit))
-;;       (let ((buffer (process-buffer proc)))
-;;         ad-do-it
-;;         (kill-buffer buffer))
-;;     ad-do-it))
-
-;; (ad-activate 'term-sentinel)
 
 (add-hook 'term-mode-hook #'mpereira/hide-trailing-whitespace)
 #+end_src
@@ -3936,6 +3903,8 @@ Also see: [[https://github.com/Homebrew/homebrew-core/issues/52461][homebrew-cor
 #+end_src
 
 ** Configure xterm-color
+REVIEW(maybe-unnecessary).
+
 #+begin_src emacs-lisp :tangle yes
 (setenv "TERM" "xterm-256color")
 
@@ -3949,21 +3918,32 @@ Also see: [[https://github.com/Homebrew/homebrew-core/issues/52461][homebrew-cor
                                              eshell-output-filter-functions))
 #+end_src
 
-** fish-completion
+** bash-completion
+Disabled because it [[https://github.com/szermatt/emacs-bash-completion/issues/24][doesn't work in Eshell buffers]].
+
 #+begin_src emacs-lisp :tangle yes
-;; Doesn't work in eshell buffers.
-;; https://github.com/szermatt/emacs-bash-completion/issues/24
 (use-package bash-completion
+  :disabled
+  :init
+  (setq bash-completion-use-separate-processes nil)
   :config
   (bash-completion-setup))
+#+end_src
 
+** fish-completion
+Disabling this for now because it breaks path completion. The issue below says
+that the issue is fixed on recent versions of emacs-fish-completion, but it
+doesn't really seem to be.
+https://gitlab.com/ambrevar/emacs-fish-completion/issues/3.
+
+I wrote the above a while ago. Maybe it's fixed now?
+
+This doesn't work on remote Eshell buffers even when fish is installed on the
+remote machines.
+
+#+begin_src emacs-lisp :tangle yes
 (use-package fish-completion
-  ;; Disabling this for now because it breaks path completion.
-  ;; The issue below says that the issue is fixed on recent versions of
-  ;; emacs-fish-completion, but it doesn't really seem to be.
-  ;; https://gitlab.com/ambrevar/emacs-fish-completion/issues/3.
   :disabled
-  :after exec-path-from-shell
   :config
   (if (executable-find "fish")
       (global-fish-completion-mode)
@@ -3971,19 +3951,22 @@ Also see: [[https://github.com/Homebrew/homebrew-core/issues/52461][homebrew-cor
 
   (setq fish-completion-fallback-on-bash-p t)
 
+  ;; TODO: implement this.
   ;; WIP: Adds support for showing completion descriptions.
-  (defun mpereira/fish-completion-complete (raw-prompt)
+  ;; https://github.com/emacs-helm/helm-fish-completion/blob/master/helm-fish-completion.el
+  (defun mpereira/fish-completion-complete (input)
     "Complete RAW-PROMPT (any string) using the fish shell.
 
 If `fish-completion-fallback-on-bash-p' is non-nil and if the `bash-completion'
 package is available, fall back on bash in case no completion was found with
 fish."
+    (interactive)
     (while
         (pcomplete-here
          (let ((completions
                 (let* (;; Keep spaces at the end with OMIT-NULLS=nil in
                        ;; `split-string'.
-                       (tokens* (split-string raw-prompt
+                       (tokens* (split-string input
                                               split-string-default-separators
                                               nil))
                        ;; The first non-empty `car' is the command. Discard
@@ -3996,7 +3979,7 @@ fish."
                        ;; common cases involving subcommands. See
                        ;; https://github.com/fish-shell/fish-shell/issues/4093.
                        (prompt (if (not (member (car tokens) '("sudo" "env")))
-                                   raw-prompt
+                                   input
                                  (setq tokens (cdr tokens))
                                  (while (and tokens
                                              (or (string-match "^-.*" (car tokens))
@@ -4079,30 +4062,10 @@ Set a default border width and height for all posframe frames via
 #+begin_src emacs-lisp :tangle yes
 (use-package ivy-posframe
   :after (ivy posframe)
-
   :custom
   (ivy-posframe-height-alist '((t . 20)))
   (ivy-posframe-display-functions-alist '((swiper . ivy-display-function-fallback)
                                           (t . ivy-posframe-display-at-frame-center)))
-
-  :init
-  (setq mpereira/ivy-posframe-override-frame-plist '(:internal-border-width 8
-                                                     :min-width 150
-                                                     :height 0))
-
-  (defun mpereira/ivy-posframe-arghandler (buffer-or-buffer-name arg-name value)
-    "Make ivy-posframe frames have a fixed internal border width and height."
-    (let (buffer-name
-          (ivy-posframe-buffer-name " *ivy-posframe-buffer*"))
-      (if (bufferp buffer-or-buffer-name)
-          (setq buffer-name (buffer-name buffer-or-buffer-name))
-        (setq buffer-name buffer-or-buffer-name))
-      (if (string= ivy-posframe-buffer-name buffer-name)
-          (or (plist-get mpereira/ivy-posframe-override-frame-plist arg-name) value)
-        value)))
-
-  (setq posframe-arghandler #'mpereira/ivy-posframe-arghandler)
-
   :config
   (ivy-posframe-mode))
 #+end_src
@@ -4118,64 +4081,17 @@ Set a default border width and height for all posframe frames via
   (too-long-lines-mode))
 #+end_src
 
-** company-posframe
-#+begin_src emacs-lisp :tangle yes
-(defun plist-each (function plist)
-  "Iterate FUNCTION (a two-argument function) over PLIST."
-  (when plist
-    (funcall function (car plist) (cadr plist))
-    (plist-each function (cddr plist))))
-
-(use-package company-posframe
-  :ensure nil
-  ;; REVIEW: can this be switched back to the upstream package?
-  :quelpa (company-posframe
-           :fetcher github
-           :branch "overridable-frame-properties"
-           :repo "mpereira/company-posframe")
-  :after (company posframe ivy-posframe)
-  :config
-  (setq company-tooltip-align-annotations t)
-  (setq company-posframe-show-indicator nil)
-  (setq company-posframe-quickhelp-x-offset 0)
-  (setq company-posframe-quickhelp-delay 0)
-  (setq company-posframe-quickhelp-show-header nil)
-
-  (defun mpereira/update-company-posframe-args ()
-    (interactive)
-    (setq mpereira/company-posframe-extra-frame-args `())
-
-    (setq mpereira/company-posframe-quickhelp-extra-frame-args
-          `(:background-color ,(face-attribute 'ivy-posframe :background nil t)
-            :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
-            :internal-border-width ,ivy-posframe-border-width
-            :internal-border-color ,(face-attribute 'ivy-posframe-border
-                                                    :background
-                                                    nil
-                                                    t)))
-    (plist-each (lambda (k v)
-                  (plist-put company-posframe-show-params k v))
-                mpereira/company-posframe-extra-frame-args)
-    (plist-each (lambda (k v)
-                  (plist-put company-posframe-quickhelp-show-params k v))
-                mpereira/company-posframe-quickhelp-extra-frame-args))
-
-  (add-hook 'after-init-hook 'mpereira/update-company-posframe-args)
-  (add-hook 'after-load-theme-hook 'mpereira/update-company-posframe-args)
-
-  (company-posframe-mode))
-#+end_src
-
 ** company-box
 Changing themes usually breaks the =company-box= frames appearance. This setup
 fixes that.
 
+Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout-Parameters.html#Layout-Parameters][Layout Parameters]] documentation for configuring
+=company-box-frame-parameters= below.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package company-box
   :after (company ivy-posframe)
-
   :hook (company-mode . company-box-mode)
-
   :init
   (setq company-box-doc-delay 0)
   (setq company-box-max-candidates 1000)
@@ -4240,7 +4156,9 @@ fixes that.
   (minibuffer-line-mode t))
 #+end_src
 
-** highlight-indent-guide
+** highlight-indent-guides
+Mode not enabled by default.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package highlight-indent-guides
   :config
@@ -4355,23 +4273,17 @@ Run =M-x all-the-icons-install-fonts= after installing.
 #+end_src
 
 ** emojify
-Not enabled globally by default for now.
+Mode not enabled by default.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package emojify)
 #+end_src
 
 ** ivy-rich
-REVIEW: waiting for https://github.com/Yevgnen/ivy-rich/pull/84 to be merged to
-revert back from the quelpa setup.
+This mode affects performance for some functions
 
 #+begin_src emacs-lisp :tangle yes
 (use-package ivy-rich
-  :ensure nil
-  :quelpa (ivy-rich
-           :fetcher github
-           :branch "ivy-display-transformers-alist-fix"
-           :repo "mpereira/ivy-rich")
   :after ivy
   :init
   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
@@ -4674,11 +4586,6 @@ revert back from the quelpa setup.
 #+end_src
 
 ** all-the-icons-ivy-rich
-- [2020-05-22 Fri]: I couldn't run Emacs from a clean install today due to
-  [[https://github.com/seagle0128/all-the-icons-ivy-rich/issues/11][all-the-icons-ivy-rich/issues/11]]. Disabled for now.
-- [2020-05-27 Wed]: I opened a [[https://github.com/Yevgnen/ivy-rich/pull/84][PR upstream]] and set up my ivy-rich fork.
-  Re-enabled.
-
 #+begin_src emacs-lisp :tangle yes
 (use-package all-the-icons-ivy-rich
   :after (ivy-rich all-the-icons)
@@ -4736,11 +4643,16 @@ revert back from the quelpa setup.
 (use-package link-hint)
 #+end_src
 
-
 * Text search and manipulation
 ** swiper
 #+begin_src emacs-lisp :tangle yes
 (use-package swiper
+  :ensure nil
+  ;; FIXME(waiting-pr): https://github.com/abo-abo/swiper/pull/2618
+  :quelpa (swiper
+           :fetcher github
+           :branch "recognize-remote-executables-emacs-27-1"
+           :repo "mpereira/swiper")
   :custom
   (swiper-action-recenter t))
 #+end_src
@@ -4758,6 +4670,7 @@ revert back from the quelpa setup.
             "gg" 'evil-goto-first-line
             "gr" 'rg-recompile)
   :config
+  (setq rg-executable "rg")
   (setq rg-group-result t))
 #+end_src
 
@@ -4799,8 +4712,6 @@ revert back from the quelpa setup.
 ** symbol-overlay
 #+begin_src emacs-lisp :tangle yes
 (use-package symbol-overlay)
-
-;; TODO: consider binding "*" to `symbol-overlay-put'?
 #+end_src
 
 ** expand-region
@@ -4861,17 +4772,7 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 #+begin_src emacs-lisp :tangle yes
 (use-package elec-pair
   :config
-  (electric-pair-mode 1)
-
-  ;; REVIEW: is it still needed?
-  ;; Don't auto close brackets in org mode so that it doesn't conflict the `<s'
-  ;; expansion snippet provided by `org-tempo'.
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (setq-local electric-pair-inhibit-predicate
-                          `(lambda (c)
-                             (if (char-equal c ?<)
-                                 t (,electric-pair-inhibit-predicate c)))))))
+  (electric-pair-mode 1))
 #+end_src
 
 ** undo-tree
@@ -4923,56 +4824,10 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 #+end_src
 
 ** format-all
+Keep an eye on [[https://github.com/lassik/emacs-format-all-the-code/issues/47][LSP support]].
+
 #+begin_src emacs-lisp :tangle yes
-(use-package format-all
-  :config
-  ;; (define-format-all-formatter mpereira/sh-formatter
-  ;;   (:executable "shfmt")
-  ;;   (:install (macos ""))
-  ;;   (:modes sh-mode)
-  ;;   (:format (format-all--buffer-easy
-  ;;             executable
-  ;;             "-sr"
-  ;;             "-i" "2"
-  ;;             "-ln" (cl-case (and (boundp 'sh-shell) (symbol-value 'sh-shell))
-  ;;                     (bash "bash")
-  ;;                     (mksh "mksh")
-  ;;                     (t "posix")))))
-
-  ;; (define-format-all-formatter mpereira/yaml-formatter
-  ;;   (:executable "prettier")
-  ;;   (:install (macos ""))
-  ;;   (:modes yaml-mode)
-  ;;   (:format (format-all--buffer-easy executable "--parser" "yaml")))
-
-  (defconst format-all--system-type
-    (cl-case system-type
-      (windows-nt 'windows)
-      (cygwin     'windows)
-      (darwin     'macos)
-      (gnu/linux  'linux)
-      (berkeley-unix
-       (save-match-data
-         (let ((case-fold-search t))
-           (cond ((string-match "freebsd" system-configuration) 'freebsd)
-                 ((string-match "openbsd" system-configuration) 'openbsd)
-                 ((string-match "netbsd"  system-configuration) 'netbsd))))))
-    "Current operating system according to the format-all package.")
-
-  (defun format-all--resolve-system (choices)
-    "Get first choice matching `format-all--system-type' from CHOICES."
-    (cl-dolist (choice choices)
-      (cond ((atom choice)
-             (cl-return choice))
-            ((eql format-all--system-type (car choice))
-             (cl-return (cadr choice))))))
-
-  ;; (define-format-all-formatter mpereira/clang-formatter
-  ;;   (:executable "clang-format")
-  ;;   (:install (macos ""))
-  ;;   (:modes java-mode)
-  ;;   (:format (format-all--buffer-easy "clang-format" "-style" "chromium")))
-  )
+(use-package format-all)
 #+end_src
 
 ** blacken
@@ -5015,10 +4870,7 @@ Show black output, if black exit abnormally and DISPLAY is t."
 
 ** prettier
 #+begin_src emacs-lisp :tangle yes
-(use-package prettier-js
-  :config
-  (add-hook 'js2-mode-hook 'prettier-js-mode)
-  (add-hook 'web-mode-hook 'prettier-js-mode))
+(use-package prettier-js)
 #+end_src
 
 * git
@@ -5026,12 +4878,12 @@ Show black output, if black exit abnormally and DISPLAY is t."
 #+begin_src emacs-lisp :tangle yes
 (use-package magit
   :config
-  (add-hook 'with-editor-mode-hook 'evil-insert-state)
-
-  (setq magit-diff-refine-hunk t)
+  (setq magit-diff-refine-hunk 'all)
   (setq magit-prefer-remote-upstream t)
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
-  ;; FIXME: not working?
+
+  (add-hook 'magit-status-mode-hook #'olivetti-mode)
+
   ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
   (setq magit-list-refs-sortby "-creatordate")
 
@@ -5059,11 +4911,7 @@ Show black output, if black exit abnormally and DISPLAY is t."
    ">" #'magit-go-forward
    "zb" #'evil-scroll-line-to-bottom
    "zt" #'evil-scroll-line-to-top
-   "zz" #'evil-scroll-line-to-center)
-
-  ;; This makes magit slow when there are a lot of buffers. See:
-  ;; https://github.com/magit/magit/issues/2687#issuecomment-224845496
-  (add-hook 'magit-update-uncommitted-buffer-hook 'vc-refresh-state))
+   "zz" #'evil-scroll-line-to-center))
 #+end_src
 
 ** forge
@@ -5283,7 +5131,7 @@ TODO: use this as a fallback for LSP.
 #+begin_src emacs-lisp :tangle yes
 (use-package flycheck-posframe
   :disabled
-  :after flycheck
+  :after (flycheck posframe)
   :config
   (flycheck-posframe-configure-pretty-defaults)
   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
@@ -5463,13 +5311,12 @@ brew install llvm
 
   (add-hook 'after-init-hook 'global-company-mode)
 
-  (setq company-require-match 'never)
   (setq company-idle-delay nil)
+  (setq company-require-match 'never)
+  (setq company-tooltip-align-annotations t)
   (setq company-transformers '(company-sort-by-backend-importance))
   (setq company-frontends '(;; Show tooltip even for single candidate.
-                            company-pseudo-tooltip-frontend
-                            company-echo-metadata-frontend))
-
+                            company-pseudo-tooltip-frontend))
 
   (general-define-key
    :states '(insert)
@@ -5839,6 +5686,7 @@ python3 -m pip install mypy flake8 pylint black
 *** elpy
 #+begin_src emacs-lisp :tangle yes
 (use-package elpy
+  :after company
   :init
   (setq elpy-rpc-python-command "python3")
 
@@ -6289,6 +6137,8 @@ Also start them in Org mode.
 Only installing this package for its functions. I get the actual "candidate
 recency" functionality for =M-x= from ivy-prescient.
 
+=counsel= also depends on this.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package amx)
 #+end_src
@@ -6340,10 +6190,7 @@ recency" functionality for =M-x= from ivy-prescient.
 (use-package company-prescient
   :after (company prescient)
   :config
-  (company-prescient-mode)
-
-  (add-hook 'prog-mode-hook
-            (lambda () (company-prescient-mode -1))))
+  (company-prescient-mode))
 #+end_src
 
 * Help
