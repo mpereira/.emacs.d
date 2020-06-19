@@ -1844,111 +1844,118 @@ This doesn't seem to be working.
 (with-eval-after-load "projectile"
   (with-eval-after-load "eshell"
     (with-eval-after-load "magit"
-      (defconst mpereira/mode-line-projectile
-        '(:eval
-          (let ((face 'bold))
-            (when (projectile-project-name)
+      (with-eval-after-load "lsp-mode"
+        (defconst mpereira/mode-line-projectile
+          '(:eval
+            (let ((face 'bold))
+              (when (projectile-project-name)
+                (concat
+                 (propertize " " 'face face)
+                 (propertize (format "%s" (projectile-project-name)) 'face face)
+                 (propertize " " 'face face))))))
+
+        (defconst mpereira/mode-line-vc
+          '(:eval
+            (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
+              (let* ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
+                     (truncated-branch (s-truncate 20 branch "…"))
+                     (face 'magit-mode-line-process))
+                (concat
+                 (propertize " " 'face face)
+                 (propertize (format "%s" truncated-branch) 'face face)
+                 (propertize " " 'face face))))))
+
+        (defconst mpereira/mode-line-buffer
+          '(:eval
+            (let ((modified-or-ro-symbol (cond
+                                          ((and buffer-file-name
+                                                (buffer-modified-p))
+                                           "~")
+                                          (buffer-read-only ":RO")
+                                          (t "")))
+                  ;; Not using %b because it sometimes prepends the directory
+                  ;; name.
+                  (buffer-name* (file-name-nondirectory (buffer-name)))
+                  (directory-face 'italic)
+                  (buffer-name-face 'bold)
+                  (modified-or-ro-symbol-face 'font-lock-comment-face)
+                  (directory (if (and buffer-file-name
+                                      (projectile-project-p))
+                                 (mpereira/short-directory-path
+                                  (mpereira/buffer-project-directory
+                                   (projectile-project-root)
+                                   default-directory)
+                                  mpereira/mode-line-max-directory-length)
+                               "")))
               (concat
-               (propertize " " 'face face)
-               (propertize (format "%s" (projectile-project-name)) 'face face)
-               (propertize " " 'face face))))))
+               (propertize " " 'face buffer-name-face)
+               (propertize (format "%s" directory) 'face directory-face)
+               (propertize (format "%s" buffer-name*) 'face buffer-name-face)
+               (propertize modified-or-ro-symbol 'face modified-or-ro-symbol-face)
+               (propertize " " 'face buffer-name-face)))))
 
-      (defconst mpereira/mode-line-vc
-        '(:eval
-          (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
-            (let* ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
-                   (truncated-branch (s-truncate 20 branch "…"))
-                   (face 'magit-mode-line-process))
-              (concat
-               (propertize " " 'face face)
-               (propertize (format "%s" truncated-branch) 'face face)
-               (propertize " " 'face face))))))
+        (defconst mpereira/mode-line-major-mode
+          '(:eval
+            (propertize " %m  " 'face 'font-lock-comment-face)))
 
-      (defconst mpereira/mode-line-buffer
-        '(:eval
-          (let ((modified-or-ro-symbol (cond
-                                        ((and buffer-file-name
-                                              (buffer-modified-p))
-                                         "~")
-                                        (buffer-read-only ":RO")
-                                        (t "")))
-                ;; Not using %b because it sometimes prepends the directory
-                ;; name.
-                (buffer-name* (file-name-nondirectory (buffer-name)))
-                (directory-face 'italic)
-                (buffer-name-face 'bold)
-                (modified-or-ro-symbol-face 'font-lock-comment-face)
-                (directory (if (and buffer-file-name
-                                    (projectile-project-p))
-                               (mpereira/short-directory-path
-                                (mpereira/buffer-project-directory
-                                 (projectile-project-root)
-                                 default-directory)
-                                mpereira/mode-line-max-directory-length)
-                             "")))
-            (concat
-             (propertize " " 'face buffer-name-face)
-             (propertize (format "%s" directory) 'face directory-face)
-             (propertize (format "%s" buffer-name*) 'face buffer-name-face)
-             (propertize modified-or-ro-symbol 'face modified-or-ro-symbol-face)
-             (propertize " " 'face buffer-name-face)))))
+        (defconst mpereira/mode-line-buffer-position
+          '(:eval
+            (unless eshell-mode
+              (propertize " %p %l,%c " 'face 'font-lock-comment-face))))
 
-      (defconst mpereira/mode-line-major-mode
-        '(:eval
-          (propertize " %m  " 'face 'font-lock-comment-face)))
-
-      (defconst mpereira/mode-line-buffer-position
-        '(:eval
-          (unless eshell-mode
-            (propertize " %p %l,%c " 'face 'font-lock-comment-face))))
-
-      (defun mpereira/flycheck-lighter (state)
-        "Return flycheck information for the given error type STATE.
+        (defun mpereira/flycheck-lighter (state)
+          "Return flycheck information for the given error type STATE.
 
 Source: https://git.io/vQKzv"
-        (let* ((counts (flycheck-count-errors flycheck-current-errors))
-               (errorp (flycheck-has-current-errors-p state))
-               (err (or (cdr (assq state counts)) "?"))
-               (running (eq 'running flycheck-last-status-change)))
-          (if errorp (format "•%s" err))))
+          (let* ((counts (flycheck-count-errors flycheck-current-errors))
+                 (errorp (flycheck-has-current-errors-p state))
+                 (err (or (cdr (assq state counts)) "?"))
+                 (running (eq 'running flycheck-last-status-change)))
+            (if errorp (format "•%s" err))))
 
-      (defconst mpereira/flycheck
-        '(:eval
-          (when (and (bound-and-true-p flycheck-mode)
-                     (or flycheck-current-errors
-                         (eq 'running flycheck-last-status-change)))
-            (concat
-             (cl-loop for state in '((error . "#FB4933")
-                                     (warning . "#FABD2F")
-                                     (info . "#83A598"))
-                      as lighter = (mpereira/flycheck-lighter (car state))
-                      when lighter
-                      concat (propertize lighter 'face `(:foreground
-                                                         ,(cdr state))))
-             " "))))
+        (defconst mpereira/flycheck
+          '(:eval
+            (when (and (bound-and-true-p flycheck-mode)
+                       (or flycheck-current-errors
+                           (eq 'running flycheck-last-status-change)))
+              (concat
+               (cl-loop for state in '((error . "#FB4933")
+                                       (warning . "#FABD2F")
+                                       (info . "#83A598"))
+                        as lighter = (mpereira/flycheck-lighter (car state))
+                        when lighter
+                        concat (propertize lighter 'face `(:foreground
+                                                           ,(cdr state))))
+               " "))))
 
-      (setq-default mode-line-format (list mpereira/mode-line-projectile
-                                           mpereira/mode-line-vc
-                                           mpereira/mode-line-buffer
-                                           mpereira/flycheck
-                                           mpereira/mode-line-major-mode
-                                           mpereira/mode-line-buffer-position
-                                           mode-line-misc-info
-                                           mode-line-end-spaces))
+        (defconst mpereira/lsp
+          '(:eval
+            (when (and (bound-and-true-p lsp-mode))
+              (lsp-mode-line))))
 
-      (defun mpereira/set-mode-line-padding ()
-        (dolist (face '(mode-line mode-line-inactive))
-          (let ((background (face-attribute face :background)))
-            (set-face-attribute face nil :box `(:line-width 5
-                                                :color ,background)))))
+        (setq-default mode-line-format (list mpereira/mode-line-projectile
+                                             mpereira/mode-line-vc
+                                             mpereira/mode-line-buffer
+                                             mpereira/flycheck
+                                             mpereira/lsp
+                                             mpereira/mode-line-major-mode
+                                             mpereira/mode-line-buffer-position
+                                             mode-line-misc-info
+                                             mode-line-end-spaces))
 
-      (mpereira/set-mode-line-padding)
+        (defun mpereira/set-mode-line-padding ()
+          (dolist (face '(mode-line mode-line-inactive))
+            (let ((background (face-attribute face :background)))
+              (set-face-attribute face nil :box `(:line-width 5
+                                                  :color ,background)))))
 
-      ;; Set modeline padding after running `counsel-load-theme'.
-      (advice-add 'counsel-load-theme-action
-                  :after
-                  (lambda (&rest _)
-                    (mpereira/set-mode-line-padding))))))
+        (mpereira/set-mode-line-padding)
+
+        ;; Set modeline padding after running `counsel-load-theme'.
+        (advice-add 'counsel-load-theme-action
+                    :after
+                    (lambda (&rest _)
+                      (mpereira/set-mode-line-padding)))))))
 #+end_src
 
 * Configure Header Line
