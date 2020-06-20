@@ -1447,7 +1447,7 @@ I have a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-
 (require 'tramp)
 #+end_src
 
-;; Disable version control on tramp buffers to avoid freezes.
+Disable version control on tramp buffers to avoid freezes.
 #+begin_src emacs-lisp :tangle yes
 (setq vc-ignore-dir-regexp
       (format "\\(%s\\)\\|\\(%s\\)"
@@ -1494,7 +1494,10 @@ Cache SSH passwords during the whole Emacs session.
 #+end_src
 
 Reuse SSH connections. Taken from the [[https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html][TRAMP FAQ]].
-#+begin_src emacs-lisp :tangle yes
+
+Not tangled for now because it seems to affect remote LSP buffers under
+=rust-analyzer=.
+#+begin_src emacs-lisp :tangle no
 (customize-set-variable 'tramp-ssh-controlmaster-options
                         (concat
                          "-o ControlPath=/tmp/ssh-tramp-%%r@%%h:%%p "
