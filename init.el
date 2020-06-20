@@ -1,15 +1,14 @@
+;; -*- lexical-binding: t; -*-
+
 (setq debug-on-error t)
 
 (setq mpereira/gc-cons-percentage-original gc-cons-percentage)
 (setq mpereira/gc-cons-threshold-original gc-cons-threshold)
 
-(eval-when-compile
-  (require 'cl))
-
-(lexical-let ((gc-cons-percentage-initial 0.2)
-              (gc-cons-percentage-normal 0.1)
-              (gc-cons-threshold-initial most-positive-fixnum)
-              (gc-cons-threshold-normal (* 512 1024 1024)))
+(let ((gc-cons-percentage-initial 0.2)
+      (gc-cons-percentage-normal 0.1)
+      (gc-cons-threshold-initial most-positive-fixnum)
+      (gc-cons-threshold-normal (* 512 1024 1024)))
   (setq gc-cons-threshold gc-cons-threshold-initial)
   (setq gc-cons-percentage gc-cons-percentage-initial)
   (add-hook 'after-init-hook
