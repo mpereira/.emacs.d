@@ -5425,8 +5425,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 #+begin_src emacs-lisp :tangle yes
 (use-package company
   :config
-  (setq company-global-modes '(not eshell-mode
-                                   comint-mode
+  (setq company-global-modes '(not comint-mode
                                    message-mode
                                    help-mode))
 
