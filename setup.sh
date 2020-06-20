@@ -5,6 +5,10 @@ set -euxo pipefail
 
 python3 -m pip install python-language-server 'python-language-server[all]' pyls-mypy pyls-isort pyls-black
 
+curl -L https://github.com/rust-analyzer/rust-analyzer/releases/download/2020-06-01/rust-analyzer-mac \
+     -o /usr/local/bin/rust-analyzer \
+  && chmod +x /usr/local/bin/rust-analyzer
+
 rustup component add rustfmt rust-src rust-docs clippy
 
 curl https://github.com/snoe/clojure-lsp/releases/download/release-20200514T134144/clojure-lsp \
