@@ -5326,7 +5326,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
   (setq lsp-rust-analyzer-display-parameter-hints t)
   (setq lsp-rust-clippy-preference "on")
   (setq lsp-rust-server 'rust-analyzer)
-  (setq lsp-rust-analyzer-inlay-face mpereira/lsp-rust-analyzer-inlay-face)
+  (setq lsp-rust-analyzer-inlay-face 'mpereira/lsp-rust-analyzer-inlay-face)
   ;; FIXME: beacon is behaving weirdly on LSP buffers, showing beacon on
   ;; incorrect lines.
   (add-hook 'lsp-mode-hook (lambda () (beacon-mode -1)))
