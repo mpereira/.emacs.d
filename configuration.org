@@ -5300,22 +5300,24 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
   :ensure nil
   :quelpa (lsp-mode
            :fetcher github
-           :repo "mpereira/lsp-mode"
-           :branch "configurable-rust-analyzer-inlay-face")
+           :repo "emacs-lsp/lsp-mode"
+           :branch "master")
   :config
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
   (add-hook 'csharp-mode-hook 'lsp)
   (add-hook 'js2-mode-hook 'lsp)
   (add-hook 'python-mode-hook 'lsp)
-  (add-hook 'rust-mode-hook 'lsp)
+  (add-hook 'rust-mode-hook (lambda ()
+                              (lsp)
+                              (lsp-rust-analyzer-inlay-hints-mode)))
 
   (setq lsp-eldoc-enable-hover nil)
   (setq lsp-enable-symbol-highlighting nil)
   ;; Don't show documentation in minibuffer.
   (setq lsp-signature-auto-activate nil)
 
-  (defface mpereira/lsp-rust-analyzer-inlay-face '((t (:inherit org-headline-done
+  (defface mpereira/lsp-rust-analyzer-inlay-face '((t (:inherit org-done
                                                        :slant italic)))
     "TODO: docstring.")
 
