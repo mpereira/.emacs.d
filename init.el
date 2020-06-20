@@ -1,28 +1,28 @@
 (setq debug-on-error t)
 
-(setq mpereira/gc-cons-threshold-original gc-cons-threshold)
 (setq mpereira/gc-cons-percentage-original gc-cons-percentage)
+(setq mpereira/gc-cons-threshold-original gc-cons-threshold)
 
-(lexical-let ((original-gc-cons-threshold gc-cons-threshold)
-              (original-gc-cons-percentage gc-cons-percentage)
-              (normal-gc-cons-threshold (* 512 1024 1024))
-              (normal-gc-cons-percentage 0.1)
-              (initial-gc-cons-threshold most-positive-fixnum)
-              (initial-gc-cons-percentage 0.2))
-  (setq gc-cons-threshold initial-gc-cons-threshold)
-  (setq gc-cons-percentage initial-gc-cons-percentage)
+(eval-when-compile
+  (require 'cl))
+
+(lexical-let ((gc-cons-percentage-initial 0.2)
+              (gc-cons-percentage-normal 0.1)
+              (gc-cons-threshold-initial most-positive-fixnum)
+              (gc-cons-threshold-normal (* 512 1024 1024)))
+  (setq gc-cons-threshold gc-cons-threshold-initial)
+  (setq gc-cons-percentage gc-cons-percentage-initial)
   (add-hook 'after-init-hook
             (lambda ()
               (garbage-collect)
-
-              (setq debug-on-error nil)
-
-              (setq mpereira/gc-cons-threshold-normal normal-gc-cons-threshold)
+              (setq mpereira/gc-cons-percentage-maximum gc-cons-percentage-normal)
+              (setq mpereira/gc-cons-percentage-normal gc-cons-percentage-normal)
               (setq mpereira/gc-cons-threshold-maximum #x40000000)
-              (setq mpereira/gc-cons-percentage-normal normal-gc-cons-percentage)
-              (setq mpereira/gc-cons-percentage-maximum normal-gc-cons-percentage)
+              (setq mpereira/gc-cons-threshold-normal gc-cons-threshold-normal)
+              (setq gc-cons-threshold gc-cons-threshold-normal)
+              (setq gc-cons-percentage gc-cons-percentage-normal)
+              (setq debug-on-error nil))))
 
-              (setq gc-cons-threshold normal-gc-cons-threshold))))
 (require 'package)
 
 (package-initialize)

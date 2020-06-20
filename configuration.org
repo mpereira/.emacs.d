@@ -1704,6 +1704,12 @@ Winner mode adds this hook by default.
 #+end_src
 
 ** Prevent garbage collecting when opening the minibuffer
+The following are set in [[file:init.el][init.el]]:
+- =mpereira/gc-cons-percentage-maximum=
+- =mpereira/gc-cons-percentage-normal=
+- =mpereira/gc-cons-threshold-maximum=
+- =mpereira/gc-cons-threshold-normal=
+
 #+begin_src emacs-lisp :tangle yes
 (defun mpereira/gc-cons-set-maximum ()
   (setq gc-cons-threshold mpereira/gc-cons-threshold-maximum)
