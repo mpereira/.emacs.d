@@ -5280,8 +5280,15 @@ brew install llvm
 #+end_src
 
 *** lsp-mode
+REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mode/pull/1826][#1826]] is released.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
+  :ensure nil
+  :quelpa (lsp-mode
+           :fetcher github
+           :repo "mpereira/lsp-mode"
+           :branch "configurable-rust-analyzer-inlay-face")
   :config
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
