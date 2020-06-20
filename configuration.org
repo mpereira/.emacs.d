@@ -3837,7 +3837,6 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 (add-hook 'eshell-mode-hook 'mpereira/initialize-eshell)
 
 ;; Disable a few possibly-global modes.
-(add-hook 'eshell-mode-hook (lambda () (company-mode -1)) t)
 (add-hook 'eshell-mode-hook (lambda () (undo-tree-mode -1)) t)
 
 (defun mpereira/remote-p ()
