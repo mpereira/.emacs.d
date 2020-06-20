@@ -5299,11 +5299,19 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 
   (setq lsp-eldoc-enable-hover nil)
   (setq lsp-enable-symbol-highlighting nil)
-  (setq lsp-rust-clippy-preference "on")
-  (setq lsp-rust-server 'rust-analyzer)
   ;; Don't show documentation in minibuffer.
   (setq lsp-signature-auto-activate nil)
 
+  (defface mpereira/lsp-rust-analyzer-inlay-face '((t (:inherit org-headline-done
+                                                       :slant italic)))
+    "TODO: docstring.")
+
+  (setq lsp-rust-analyzer-server-display-inlay-hints t)
+  (setq lsp-rust-analyzer-display-chaining-hints t)
+  (setq lsp-rust-analyzer-display-parameter-hints t)
+  (setq lsp-rust-clippy-preference "on")
+  (setq lsp-rust-server 'rust-analyzer)
+  (setq lsp-rust-analyzer-inlay-face mpereira/lsp-rust-analyzer-inlay-face)
   ;; FIXME: beacon is behaving weirdly on LSP buffers, showing beacon on
   ;; incorrect lines.
   (add-hook 'lsp-mode-hook (lambda () (beacon-mode -1)))
