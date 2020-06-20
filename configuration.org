@@ -189,7 +189,6 @@ Vanilla evil emacs literate configuration.
     - [[#lsp-python-ms][lsp-python-ms]]
     - [[#lsp-ui][lsp-ui]]
     - [[#lsp-ivy][lsp-ivy]]
-    - [[#company-lsp][company-lsp]]
   - [[#company][company]]
   - [[#aggressive-indent][aggressive-indent]]
   - [[#lisp][LISP]]
@@ -5401,13 +5400,6 @@ brew install llvm
              lsp-ivy-global-workspace-symbol))
 #+end_src
 
-*** company-lsp
-#+begin_src emacs-lisp :tangle yes
-(use-package company-lsp
-  :after lsp-mode
-  :config
-  (push 'company-lsp company-backends))
-#+end_src
 
 ** company
 #+begin_src emacs-lisp :tangle yes
