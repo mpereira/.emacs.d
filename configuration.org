@@ -3605,6 +3605,7 @@ impacts performance heavily in large directories.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package dired-subtree
+  :disabled
   :after dired
   :init
   (defun mpereira/dired-subtree-toggle ()
