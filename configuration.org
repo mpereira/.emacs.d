@@ -464,8 +464,8 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 
 (setq mpereira/leader ",")
 
-(setq mpereira/light-theme 'doom-one-light)
-(setq mpereira/dark-theme 'tron-legacy)
+(setq mpereira/light-theme 'doom-nord-light)
+(setq mpereira/dark-theme 'vscode-dark-plus)
 (setq mpereira/initial-theme mpereira/dark-theme)
 
 (setq mpereira/dropbox-directory (file-name-as-directory
@@ -1831,6 +1831,7 @@ My favorite light themes:
   :quelpa (chocolate-theme
            :fetcher github
            :repo "SavchenkoValeriy/emacs-chocolate-theme"))
+(use-package vscode-dark-plus-theme)
 
 (add-hook 'after-init-hook
           (lambda ()
