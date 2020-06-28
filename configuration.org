@@ -41,14 +41,14 @@ Vanilla evil emacs literate configuration.
   - [[#miscellaneous][Miscellaneous]]
 - [[#toggle-buffer-maximize][Toggle buffer maximize]]
 - [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
-- [[#asynchronous-undo-tree-history-save][Asynchronous undo-tree history save]]
-- [[#asynchronous-org-babel-tangle-org-toc-generation-and-byte-recompilation][Asynchronous Org Babel tangle, Org TOC generation and byte recompilation]]
 - [[#tramp][Tramp]]
   - [[#counsel-tramp][counsel-tramp]]
 - [[#server][Server]]
 - [[#options][Options]]
 - [[#performance][Performance]]
   - [[#increase-the-amount-of-data-read-from-processes][Increase the amount of data read from processes]]
+  - [[#asynchronous-undo-tree-history-save][Asynchronous undo-tree history save]]
+  - [[#asynchronous-org-babel-tangling-and-byte-recompilation][Asynchronous Org Babel tangling and byte recompilation]]
   - [[#dont-save-minibuffer-winner-mode-state][Don't save minibuffer winner-mode state]]
   - [[#dont-show-buffer-remote-path-in-minibuffer][Don't show buffer remote path in minibuffer]]
   - [[#prevent-garbage-collecting-when-opening-the-minibuffer][Prevent garbage collecting when opening the minibuffer]]
@@ -1394,98 +1394,6 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 (add-hook 'emacs-lisp-mode-hook #'mpereira/enable-autoreload-for-dir-locals)
 #+end_src
 
-* Asynchronous =undo-tree= history save
-I found that ~undo-tree-save-history-from-hook~, which =undo-tree= calls via the
-~write-file-functions~ hook (called on every file save), took 1-2 seconds on any
-non-trivial org mode buffers. This was a special nuisance when making small
-changes in small indirect buffers.
-
-The following replaces ~undo-tree-save-history-from-hook~ with an asynchronous
-version.
-
-#+begin_src emacs-lisp :tangle yes
-(defun mpereira/undo-tree-async-save-history ()
-  "TODO: docstring."
-  (interactive)
-  (let ((file-name (buffer-file-name)))
-    (async-start
-     `(lambda ()
-        ,(async-inject-variables "\\`load-path\\'")
-        (with-output-to-string
-          (require 'undo-tree)
-          (find-file ,file-name)
-          (undo-tree-save-history-from-hook)))
-     `(lambda (output)
-        (let ((inhibit-message t))
-          (message (format "undo-tree history saved asynchronously for %s%s"
-                           ,file-name
-                           (if (string= "" output)
-                               ""
-                             (format ": %s" output)))))))
-    ;; Hooks added to `write-file-functions' need to return non-nil so that the
-    ;; file is written.
-    nil))
-
-(with-eval-after-load "undo-tree"
-  (remove-hook 'write-file-functions #'undo-tree-save-history-from-hook)
-  (add-hook 'write-file-functions #'mpereira/undo-tree-async-save-history))
-#+end_src
-
-* Asynchronous Org Babel tangle, Org TOC generation and byte recompilation
-I have a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html#Specifying-File-Variables][file-local]] ~before-save-hook~ set at the end of the file for this.
-
-#+begin_src org
-# Local Variables:
-# before-save-hook: mpereira/configuration-org-tangle-generate-toc-and-byte-compile
-# End:
-#+end_src
-
-#+begin_src emacs-lisp :tangle yes
-(setq mpereira/configuration-org-file-name (expand-file-name "configuration.org" user-emacs-directory) )
-(setq mpereira/configuration-el-file-name (expand-file-name "configuration.el" user-emacs-directory) )
-
-(defun mpereira/configuration-org-tangle-generate-toc-and-byte-compile ()
-  "TODO: docstring."
-  (interactive)
-  (let ((configuration-org-file-name mpereira/configuration-org-file-name)
-        (configuration-el-file-name mpereira/configuration-el-file-name)
-        (org-babel-initialize 'mpereira/org-babel-initialize))
-    (async-start
-     `(lambda ()
-        ,(async-inject-variables "\\`load-path\\'")
-
-        (defalias 'org-babel-initialize
-          ,(symbol-function org-babel-initialize))
-
-        (with-output-to-string
-          (require 'org)
-          (require 'ob-tangle)
-          (require 'org-make-toc)
-          (org-babel-initialize)
-          (find-file ,configuration-org-file-name)
-          ;; Prevent `org-make-toc' from trigering "reload file from disk?"
-          ;; prompt.
-          (auto-revert-mode -1)
-          ;; Generating the TOC before tangling because it seems that it doesn't
-          ;; run after tangling.
-          (org-make-toc)
-          (org-babel-tangle)))
-     `(lambda (result)
-        (let ((inhibit-message t))
-          ;; Don't pop up the *Compile-Log* buffer.
-          (setq byte-compile-warnings nil)
-          (byte-compile-file ,configuration-el-file-name)
-          (message (format (concat "`org-babel-tangle' and `org-make-toc' called "
-                                   "asynchronously for %s. "
-                                   "%s was also byte-compiled%s")
-                           ,configuration-org-file-name
-                           ,configuration-el-file-name
-                           (if (string= "" result)
-                               ""
-
-                             (format ". output: %s" result)))))))))
-#+end_src
-
 * Tramp
 #+begin_src emacs-lisp :tangle yes
 (require 'tramp)
@@ -1736,6 +1644,169 @@ https://emacs-lsp.github.io/lsp-mode/page/performance/
 #+begin_src emacs-lisp :tangle yes
 (setq read-process-output-max (* 1024 1024)) ; 1mb.
 #+end_src
+
+** Asynchronous =undo-tree= history save
+I found that ~undo-tree-save-history-from-hook~, which =undo-tree= calls via the
+~write-file-functions~ hook (called on every file save), took 1-2 seconds on any
+non-trivial org mode buffers. This was a special nuisance when making small
+changes in small indirect buffers.
+
+The following replaces ~undo-tree-save-history-from-hook~ with an asynchronous
+version.
+
+#+begin_src emacs-lisp :tangle yes
+(defvar async-undo-tree-save-history-cached-load-path
+  (file-name-directory (locate-library "undo-tree")))
+
+(defun async-undo-tree-save-history ()
+  "TODO: docstring."
+  (interactive)
+  (let ((file-name (buffer-file-name)))
+    (async-start
+     `(lambda ()
+        (if (stringp ,file-name)
+            (list 'ok
+                  (list :output (with-output-to-string
+                                  (add-to-list
+                                   'load-path
+                                   ,async-undo-tree-save-history-cached-load-path)
+                                  (require 'undo-tree)
+                                  (find-file ,file-name)
+                                  (undo-tree-save-history-from-hook))
+                        :messages (with-current-buffer "*Messages*"
+                                    (buffer-string))))
+          (list 'err
+                (list :output "File name must be string"
+                      :messages (with-current-buffer "*Messages*"
+                                  (buffer-string))))))
+     `(lambda (result)
+        (let ((outcome (car result))
+              (messages (plist-get (cadr result) :messages))
+              (output (plist-get (cadr result) :output))
+              (inhibit-message t))
+          (message
+           (cond
+            ((eq 'ok outcome)
+             "undo-tree history saved asynchronously for %s%s%s")
+            ((eq 'err outcome)
+             "error saving undo-tree history asynchronously for %s%s%s")
+            (:else
+             "unexpected result from asynchronous undo-tree history save %s%s%s"))
+           ,file-name
+           (if (string= "" output)
+               ""
+             (format "\noutput:\n%s" output))
+           (if (string= "" messages)
+               ""
+             (format "\nmessages:\n%s" messages))))))
+    nil))
+
+;; Hooks added to `write-file-functions' need to return non-nil so that the file
+;; is written.
+
+(with-eval-after-load "undo-tree"
+  (remove-hook 'write-file-functions #'undo-tree-save-history-from-hook)
+  (add-hook 'after-save-hook #'async-undo-tree-save-history))
+#+end_src
+
+** Asynchronous Org Babel tangling and byte recompilation
+ I have a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html#Specifying-File-Variables][file-local]] expression set at the end of the file for this.
+
+ #+begin_src org
+ # Local Variables:
+ # eval: (add-hook 'before-save-hook 'async-literate-org-queue-run)
+ # End:
+ #+end_src
+
+ #+begin_src emacs-lisp :tangle yes
+ (defcustom async-literate-org-org-file-name
+   (expand-file-name "configuration.org" user-emacs-directory)
+   "TODO: docstring.")
+
+ (defcustom async-literate-org-el-file-name
+   (expand-file-name "configuration.el" user-emacs-directory)
+   "TODO: docstring.")
+
+ (defvar async-literate-org-cached-load-path
+   (list (file-name-directory (locate-library "org"))
+         (file-name-directory (locate-library "ob-tangle"))))
+
+ (comment
+  (remove-hook 'before-save-hook 'org-make-toc)
+  (queue-push 'async-literate-org-requests 'run)
+  (remove-hook 'before-save-hook 'async-literate-org-queue-run))
+
+ (defcustom async-literate-org-interval-seconds 20
+   "TODO: docstring."
+   :group 'async-literate-org
+   :type 'integer)
+
+ (defcustom async-literate-org-queue-size-limit 3
+   "TODO: docstring."
+   :group 'async-literate-org
+   :type 'integer)
+
+ (defvar async-literate-org-requests nil)
+
+ (comment
+  async-literate-org-requests
+  (queue-pop 'async-literate-org-requests))
+
+ (defvar async-literate-org-timer nil)
+
+ (defun async-literate-org-disable ()
+   (interactive)
+   (and (timerp async-literate-org-timer)
+        (cancel-timer async-literate-org-timer)))
+
+ (defun async-literate-org-enable ()
+   (interactive)
+   (async-literate-org-disable)
+   (setq async-literate-org-timer
+         (run-with-timer
+          nil
+          async-literate-org-interval-seconds
+          (lambda ()
+            (when-let ((request (queue-pop 'async-literate-org-requests)))
+              (message "Starting `async-literate-org-tangle-and-byte-compile' run")
+              (async-literate-org-tangle-and-byte-compile))))))
+
+ (defun async-literate-org-queue-run ()
+   (interactive)
+   (queue-push 'async-literate-org-requests
+               'run
+               async-literate-org-queue-size-limit))
+
+ (defun async-literate-org-tangle-and-byte-compile ()
+   "TODO: docstring."
+   (interactive)
+   (let ((configuration-org-file-name async-literate-org-org-file-name)
+         (async-literate-org-el-file-name async-literate-org-el-file-name)
+         (org-babel-initialize 'mpereira/org-babel-initialize))
+     (async-start
+      `(lambda ()
+         (nconc load-path ,async-literate-org-cached-load-path)
+
+         (defalias 'org-babel-initialize
+           ,(symbol-function org-babel-initialize))
+
+         (with-output-to-string
+           (require 'org)
+           (require 'ob-tangle)
+           (org-babel-initialize)
+           (find-file ,configuration-org-file-name)
+           (org-babel-tangle)
+           (byte-compile-file ,async-literate-org-el-file-name)))
+      `(lambda (result)
+         (let ((inhibit-message t))
+           (message (format (concat "`org-babel-tangle' and `byte-compile-file' called "
+                                    "asynchronously for %s%s")
+                            ,configuration-org-file-name
+                            (if (string= "" result)
+                                ""
+
+                              (format ". output: %s" result)))))))))
+ #+end_src
 
 ** Don't save minibuffer winner-mode state
 Winner mode adds this hook by default.
@@ -7173,6 +7244,7 @@ SOFTWARE.
 These need to be at the end of the file.
 
 # Local Variables:
-# before-save-hook: mpereira/configuration-org-tangle-generate-toc-and-byte-compile
 # org-adapt-indentation: nil
+# eval: (add-hook 'before-save-hook 'async-literate-org-queue-run)
+# eval: (add-hook 'before-save-hook 'org-make-toc)
 # End:
