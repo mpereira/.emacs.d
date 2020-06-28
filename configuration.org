@@ -5155,6 +5155,10 @@ Show black output, if black exit abnormally and DISPLAY is t."
 #+end_src
 
 * git
+Git operations via SSH require SSH keys to be added to the =ssh-agent=. At least
+in my macOS system, SSH keys with [[https://www.ssh.com/ssh/add#adding-default-keys][default names]] are added automatically added to
+the agent.
+
 ** magit
 #+begin_src emacs-lisp :tangle yes
 (use-package magit
@@ -5210,7 +5214,7 @@ repositories, but it seems like just trying again a few times gets it done.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package forge
-  :after (ghub magit)
+  :after (magit)
   :init
   (setq ghub-use-workaround-for-emacs-bug nil)
 
