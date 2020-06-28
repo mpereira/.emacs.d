@@ -907,6 +907,19 @@ in any structured movement package is mind-boggling to me."
         (and after-perspective-creation-function
              (funcall after-perspective-creation-function perspective-name))))))
 
+(defun mpereira/projectile-switch-project-action (project-path)
+  "TODO: PROJECT-PATH docstring."
+  (let ((perspective-name (funcall
+                           projectile-project-name-function
+                           project-path)))
+    (mpereira/perspective-switch perspective-name
+                                 (lambda (perspective-name)
+                                   (if (file-remote-p project-path)
+                                       (let ((default-directory project-path))
+                                         (mpereira/maybe-projectile-dired))
+                                     (counsel-projectile-switch-project-action-dired
+                                      project-path))))))
+
 (defun mpereira/counsel-projectile-perspective-switch-project (&optional default-action)
   "TODO: docstring."
   (interactive)
@@ -914,15 +927,8 @@ in any structured movement package is mind-boggling to me."
             (projectile-relevant-known-projects)
             :preselect (and (projectile-project-p)
                             (abbreviate-file-name (projectile-project-root)))
-            :action (lambda (project-path)
-                      (let ((perspective-name (funcall
-                                               projectile-project-name-function
-                                               project-path)))
-                        (mpereira/perspective-switch
-                         perspective-name
-                         (lambda (perspective-name)
-                           (counsel-projectile-switch-project-action
-                            project-path)))))
+            :action (or default-action
+                        'mpereira/projectile-switch-project-action)
             :require-match t
             :sort counsel-projectile-sort-projects
             :caller 'counsel-projectile-switch-project))
@@ -6331,7 +6337,7 @@ Existing functions in projectile, counsel, ffip, etc. were too slow.
 (use-package counsel-projectile
   :after (counsel projectile)
   :config
-  (setq projectile-switch-project-action 'counsel-projectile-find-file))
+  (setq projectile-switch-project-action 'counsel-projectile-switch-project-action-dired))
 #+end_src
 
 ** find-file-in-project
