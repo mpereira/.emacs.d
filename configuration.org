@@ -2583,6 +2583,14 @@ the beginning of the line. This fixes that."
  :keymaps '(org-mode-map)
  :states '(normal visual)
  :prefix mpereira/leader
+ "c" (lambda ()
+       (interactive)
+       (org-clone-subtree-with-time-shift 1)))
+
+(general-define-key
+ :keymaps '(org-mode-map)
+ :states '(normal visual)
+ :prefix mpereira/leader
  :infix "f"
  "o" 'counsel-org-goto)
 
