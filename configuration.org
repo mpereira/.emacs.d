@@ -37,6 +37,8 @@ Vanilla evil emacs literate configuration.
   - [[#archive-org-subtrees-under-the-same-hierarchy-as-the-original-in-the-archive-files][Archive org subtrees under the same hierarchy as the original in the archive files]]
   - [[#provide-counsel-symbol-at-point][Provide counsel-symbol-at-point]]
 - [[#helper-functions][Helper functions]]
+  - [[#standard-library-type-of-things][Standard library type of things]]
+  - [[#miscellaneous][Miscellaneous]]
 - [[#toggle-buffer-maximize][Toggle buffer maximize]]
 - [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
 - [[#asynchronous-undo-tree-history-save][Asynchronous undo-tree history save]]
@@ -668,11 +670,41 @@ on the internet here.
 #+end_src
 
 * Helper functions
+** Standard library type of things
 #+begin_src emacs-lisp :tangle yes
 (defmacro comment (&rest body)
   "Comment out one or more s-expressions."
   nil)
 
+(defun plist-each (function plist)
+  "Iterate FUNCTION (a two-argument function) over PLIST."
+  (when plist
+    (funcall function (car plist) (cadr plist))
+    (plist-each function (cddr plist))))
+
+(defun queue-push (queue-sym element &optional bounded-limit)
+  "TODO: docstring."
+  (when (or (not bounded-limit)
+            (< (length (symbol-value queue-sym))
+               bounded-limit))
+    (add-to-list queue-sym element t (lambda (a b) nil))))
+
+(defun queue-pop (queue-sym)
+  "TODO: docstring."
+  (let* ((queue (symbol-value queue-sym))
+         (popped-element (car queue)))
+    (when popped-element
+      (set queue-sym (cdr queue)))
+    popped-element))
+
+(defun mpereira/unadvice (sym)
+  "Remove all advices from symbol SYM."
+  (interactive "aFunction symbol: ")
+  (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+#+end_src
+
+** Miscellaneous
+#+begin_src emacs-lisp :tangle yes
 (defmacro print-and-return (&rest body)
   "TODO: docstring."
   (let ((result-symbol (make-symbol "result")))
@@ -1216,11 +1248,6 @@ Mode:     %s"
     (kill-new output)
     (message output)
     output))
-
-(defun mpereira/unadvice (sym)
-  "Remove all advices from symbol SYM."
-  (interactive "aFunction symbol: ")
-  (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
 
 (defun mpereira/buffer-project-directory (project-root-directory
                                           buffer-directory
