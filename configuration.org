@@ -135,6 +135,7 @@ Vanilla evil emacs literate configuration.
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
   - [[#ivy-posframe][ivy-posframe]]
+  - [[#flycheck-posframe][flycheck-posframe]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
   - [[#company-box][company-box]]
   - [[#minibuffer-line][minibuffer-line]]
@@ -4326,6 +4327,27 @@ described above.
   (ivy-posframe-mode))
 #+end_src
 
+** flycheck-posframe
+#+begin_src emacs-lisp :tangle yes
+(use-package flycheck-posframe
+  :after (flycheck posframe company)
+  :config
+  (setq flycheck-posframe-border-width 15)
+
+  (add-to-list 'flycheck-posframe-inhibit-functions
+               '(lambda (&rest _)
+                  (bound-and-true-p company-backend)))
+
+  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
+
+  (custom-set-faces
+   '(flycheck-posframe-background-face ((t (:inherit ivy-posframe))))
+   '(flycheck-posframe-border-face ((t (:foreground "orange"))))
+   '(flycheck-posframe-error-face ((t (:foreground "red"))))
+   '(flycheck-posframe-info-face ((t (:foreground "white"))))
+   '(flycheck-posframe-warning-face ((t (:foreground "skyblue"))))))
+#+end_src
+
 ** too-long-lines-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package too-long-lines-mode
@@ -5582,6 +5604,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
   ;; Check https://gitter.im/emacs-lsp/lsp-mode?at=5eecdb086c06cd1bf4413b8e.
   (setq lsp-ui-doc-use-webkit nil)
   (setq lsp-ui-peek-always-show t)
+  (setq lsp-ui-sideline-enable nil)     ; trying out flycheck-inline instead.
   (setq lsp-ui-sideline-show-hover t)
   (setq lsp-ui-sideline-update-mode 'line)
   :config
