@@ -25,7 +25,8 @@ Vanilla evil emacs literate configuration.
   - [[#thingatpt][thingatpt+]]
   - [[#help-fns][help-fns+]]
   - [[#ts][ts]]
-- [[#package-management-foundational][Package management, foundational]]
+  - [[#elx][elx]]
+- [[#foundational][Foundational]]
   - [[#general][general]]
   - [[#paradox][paradox]]
   - [[#exec-path-from-shell][exec-path-from-shell]]
@@ -428,7 +429,17 @@ Set it with emacs lisp.
            :repo "alphapapa/ts.el"))
 #+end_src
 
-* Package management, foundational
+** elx
+#+begin_src emacs-lisp :tangle yes
+(use-package elx
+  :ensure nil
+  :quelpa (elx
+           :fetcher github
+           :branch "dont-break-if-no-licensee"
+           :repo "mpereira/elx"))
+#+end_src
+
+* Foundational
 ** general
 #+begin_src emacs-lisp :tangle yes
 (use-package general)
