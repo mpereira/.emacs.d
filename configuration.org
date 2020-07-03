@@ -5335,14 +5335,6 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
       (gist-fetch-current)))
 
   (general-define-key
-   :keymaps '(tabulated-list-mode-map)
-   :states '(normal visual)
-   "<" 'tabulated-list-narrow-current-column
-   ">" 'tabulated-list-widen-current-column
-   "gr" 'tabulated-list-revert
-   "S" 'tabulated-list-sort)
-
-  (general-define-key
    :keymaps '(gist-list-menu-mode-map)
    "<tab>" nil                          ; originally `gist-fetch-current-noselect'.
    "<backtab>" nil)                     ; originally `backward-button'.
@@ -7218,6 +7210,21 @@ REVIEW: do I use or need this?
  :states '(normal visual)
  :keymaps '(helpful-mode-map deadgrep-mode-map)
  "q" #'mpereira/kill-buffer-and-maybe-window)
+
+(general-define-key
+ :keymaps '(tabulated-list-mode-map)
+ :states '(normal visual)
+ "<" 'tabulated-list-narrow-current-column
+ ">" 'tabulated-list-widen-current-column
+ "gr" 'tabulated-list-revert
+ "S" 'tabulated-list-sort)
+
+(general-define-key
+ :keymaps '(tablist-mode-map)
+ :states '(normal visual)
+ "W" 'tablist-forward-column
+ "B" 'tablist-backward-column
+ "S" 'tablist-sort)
 
 (with-eval-after-load "evil-collection"
   (add-hook 'evil-collection-setup
