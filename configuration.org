@@ -680,6 +680,11 @@ on the internet here.
   "Comment out one or more s-expressions."
   nil)
 
+(defun eshell-p (buffer)
+  "Return t if BUFFER is an Eshell buffer."
+  (with-current-buffer buffer
+    (eq major-mode 'eshell-mode)))
+
 (defun plist-each (function plist)
   "Iterate FUNCTION (a two-argument function) over PLIST."
   (when plist
@@ -1067,10 +1072,12 @@ in any structured movement package is mind-boggling to me."
 (defun mpereira/pwd ()
   "TODO: docstring"
   (interactive)
-  (let ((path (buffer-file-name)))
-    (kill-new path)
-    (message path)
-    path))
+  (let ((pwd (if (eshell-p (current-buffer))
+                 (eshell/pwd)
+               (buffer-file-name))))
+    (kill-new pwd)
+    (message pwd)
+    pwd))
 
 (defun mpereira/make-hs-hide-level (n)
   "TODO: docstring"
