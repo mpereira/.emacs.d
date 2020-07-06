@@ -1721,11 +1721,13 @@ version.
 #+end_src
 
 ** Asynchronous Org Babel tangling and byte recompilation
- I have a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html#Specifying-File-Variables][file-local]] expression set at the end of the file for this.
+ I have a [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html#Specifying-File-Variables][file-local]] expression set at the end of the file for this. Note that
+ the fourth argument to ~add-hook~ is important so that the hook is only
+ installed for this file.
 
  #+begin_src org
  # Local Variables:
- # eval: (add-hook 'before-save-hook 'async-literate-org-queue-run)
+ # eval: (add-hook 'before-save-hook 'async-literate-org-queue-run nil t)
  # End:
  #+end_src
 
@@ -7318,6 +7320,6 @@ These need to be at the end of the file.
 
 # Local Variables:
 # org-adapt-indentation: nil
-# eval: (add-hook 'before-save-hook 'async-literate-org-queue-run)
-# eval: (add-hook 'before-save-hook 'org-make-toc)
+# eval: (add-hook 'before-save-hook 'async-literate-org-queue-run nil t)
+# eval: (add-hook 'before-save-hook 'org-make-toc nil t)
 # End:
