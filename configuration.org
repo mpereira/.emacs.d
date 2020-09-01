@@ -45,6 +45,7 @@ Vanilla evil emacs literate configuration.
   - [[#counsel-tramp][counsel-tramp]]
 - [[#server][Server]]
 - [[#options][Options]]
+  - [[#file-backups][File backups]]
 - [[#performance][Performance]]
   - [[#increase-the-amount-of-data-read-from-processes][Increase the amount of data read from processes]]
   - [[#asynchronous-undo-tree-history-save][Asynchronous undo-tree history save]]
@@ -93,6 +94,8 @@ Vanilla evil emacs literate configuration.
     - [[#main-agenda][Main agenda]]
     - [[#review-agenda][Review agenda]]
     - [[#common][Common]]
+  - [[#shrface][shrface]]
+  - [[#outshine][outshine]]
   - [[#counsel-org-clock][counsel-org-clock]]
   - [[#org-web-tools][org-web-tools]]
   - [[#org-expiry][org-expiry]]
@@ -112,6 +115,7 @@ Vanilla evil emacs literate configuration.
   - [[#ox-pandoc][ox-pandoc]]
 - [[#file-management][File management]]
   - [[#dired][dired]]
+  - [[#dired-ranger][dired-ranger]]
   - [[#dired-plus][dired-plus]]
   - [[#dired-show-readme][dired-show-readme]]
   - [[#dired-subtree][dired-subtree]]
@@ -130,7 +134,7 @@ Vanilla evil emacs literate configuration.
   - [[#load-bash-alias][load-bash-alias]]
 - [[#ui][UI]]
   - [[#settings][Settings]]
-  - [[#make-profiler-report-columns-wider][Make profiler report columns wider]]
+    - [[#make-profiler-report-columns-wider][Make profiler report columns wider]]
   - [[#default-text-scale][default-text-scale]]
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
@@ -192,6 +196,7 @@ Vanilla evil emacs literate configuration.
     - [[#flycheck-posframe][flycheck-posframe]]
   - [[#lsp][LSP]]
     - [[#lsp-mode][lsp-mode]]
+    - [[#lsp-pyright][lsp-pyright]]
     - [[#lsp-pyls][lsp-pyls]]
     - [[#lsp-python-ms][lsp-python-ms]]
     - [[#lsp-ui][lsp-ui]]
@@ -231,6 +236,8 @@ Vanilla evil emacs literate configuration.
   - [[#sql][SQL]]
   - [[#terraform-mode][terraform-mode]]
   - [[#docker][docker]]
+  - [[#bazel-mode][bazel-mode]]
+  - [[#groovy-mode][groovy-mode]]
   - [[#dockerfile-mode][dockerfile-mode]]
   - [[#literate-calc-mode][literate-calc-mode]]
 - [[#web-development][Web development]]
@@ -299,6 +306,7 @@ Vanilla evil emacs literate configuration.
   - [[#circe][circe]]
   - [[#mingus][mingus]]
   - [[#osascripts][osascripts]]
+  - [[#emacs-audit][emacs-audit]]
 - [[#mappings][Mappings]]
 - [[#fun][Fun]]
   - [[#fireplace][fireplace]]
@@ -368,18 +376,21 @@ Set it with emacs lisp.
 
 * quelpa and quelpa-use-package
 #+begin_src emacs-lisp :tangle yes
-(use-package quelpa
-  :config
-  (quelpa
-   '(quelpa-use-package
-     :fetcher github
-     :repo "quelpa/quelpa-use-package"))
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
 
-  (require 'quelpa-use-package)
+(quelpa '(quelpa-use-package
+          :fetcher github
+          :repo "quelpa/quelpa-use-package"))
 
-  ;; This needs to be set after requiring `quelpa-use-package'.
-  ;; See https://github.com/quelpa/quelpa/pull/187#issuecomment-644709715.
-  (setq quelpa--override-version-check t))
+(require 'quelpa-use-package)
+
+;; This needs to be set after requiring `quelpa-use-package'.
+;; See https://github.com/quelpa/quelpa/pull/187#issuecomment-644709715.
+(setq quelpa--override-version-check t)
 #+end_src
 
 * Utility libraries
@@ -481,7 +492,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 
 (setq mpereira/leader ",")
 
-(setq mpereira/light-theme 'doom-tomorrow-day)
+(setq mpereira/light-theme 'doom-nord-light)
 (setq mpereira/dark-theme 'doom-tomorrow-night)
 (setq mpereira/initial-theme mpereira/dark-theme)
 
@@ -706,7 +717,7 @@ on the internet here.
       (set queue-sym (cdr queue)))
     popped-element))
 
-(defun mpereira/unadvice (sym)
+(defun unadvice (sym)
   "Remove all advices from symbol SYM."
   (interactive "aFunction symbol: ")
   (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
@@ -754,6 +765,14 @@ on the internet here.
          (t
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
+
+(defun mpereira/pp-macroexpand-all ()
+  "TODO: docstring."
+  (interactive)
+  (let ((form (macroexpand-all (sexp-at-point))))
+    (with-current-buffer-window " *mpereira/pp-macroexpand-all*" nil nil
+      (pp form)
+      (emacs-lisp-mode))))
 
 (require 'thingatpt)
 (require 'thingatpt+)
@@ -959,18 +978,27 @@ in any structured movement package is mind-boggling to me."
         (and after-perspective-creation-function
              (funcall after-perspective-creation-function perspective-name))))))
 
-(defun mpereira/projectile-switch-project-action (project-path)
-  "TODO: PROJECT-PATH docstring."
+(defun mpereira/projectile-default-project-name (project-root)
+  "TODO: PROJECT-ROOT docstring."
+  (let* ((default-directory project-root)
+         (suffix (if (file-remote-p project-root)
+                     (format " @ %s" (mpereira/remote-host))
+                   "")))
+    (concat (file-name-nondirectory (directory-file-name default-directory))
+            suffix)))
+
+(defun mpereira/projectile-switch-project-action (project-root)
+  "TODO: PROJECT-ROOT docstring."
   (let ((perspective-name (funcall
                            projectile-project-name-function
-                           project-path)))
+                           project-root)))
     (mpereira/perspective-switch perspective-name
                                  (lambda (perspective-name)
-                                   (if (file-remote-p project-path)
-                                       (let ((default-directory project-path))
+                                   (if (file-remote-p project-root)
+                                       (let ((default-directory project-root))
                                          (mpereira/maybe-projectile-dired))
                                      (counsel-projectile-switch-project-action-dired
-                                      project-path))))))
+                                      project-root))))))
 
 (defun mpereira/counsel-projectile-perspective-switch-project (&optional default-action)
   "TODO: docstring."
@@ -978,12 +1006,16 @@ in any structured movement package is mind-boggling to me."
   (ivy-read (projectile-prepend-project-name "Switch to project: ")
             (projectile-relevant-known-projects)
             :preselect (and (projectile-project-p)
-                            (abbreviate-file-name (projectile-project-root)))
+                            (projectile-project-root))
             :action (or default-action
                         'mpereira/projectile-switch-project-action)
             :require-match t
-            :sort counsel-projectile-sort-projects
-            :caller 'counsel-projectile-switch-project))
+            :sort 'ivy-prescient-sort-function
+            :caller 'mpereira/counsel-projectile-perspective-switch-project))
+
+(with-eval-after-load "ivy"
+  (ivy-configure 'mpereira/counsel-projectile-perspective-switch-project
+    :display-transformer-fn 'mpereira/projectile-default-project-name))
 
 (with-eval-after-load "find-file-in-project"
   (defun mpereira/find-directory ()
@@ -1022,7 +1054,7 @@ in any structured movement package is mind-boggling to me."
         (interactive)
         (if (projectile-project-p)
             (counsel-projectile-find-file)
-          (mpereira/project-fd)))
+          (mpereira/remote-project-fd)))
 
       (defun mpereira/maybe-projectile-find-directory ()
         (interactive)
@@ -1037,9 +1069,10 @@ in any structured movement package is mind-boggling to me."
   (setq display-line-numbers nil))
 
 (defun mpereira/maybe-enable-aggressive-indent-mode ()
-  (when (not
-         (or (cl-member-if #'derived-mode-p aggressive-indent-excluded-modes)
-             buffer-read-only))
+  "TODO: docstring."
+  (when (not (or (cl-member-if #'derived-mode-p aggressive-indent-excluded-modes)
+                 (-contains? aggressive-indent-excluded-buffers (buffer-name))
+                 buffer-read-only))
     (aggressive-indent-mode)))
 
 (defun mpereira/lock-screen ()
@@ -1406,6 +1439,9 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 #+end_src
 
 * Tramp
+:PROPERTIES:
+:CREATED:  [2020-08-17 Mon 20:18]
+:END:
 #+begin_src emacs-lisp :tangle yes
 (require 'tramp)
 #+end_src
@@ -1424,14 +1460,21 @@ Don't clean up recentf tramp buffers.
 #+end_src
 
 [[https://github.com/syl20bnr/spacemacs/issues/11381#issuecomment-481239700][Make Emacs not crazy slow under TRAMP]].
+
+Yes, this is [[https://github.com/bbatsov/projectile/issues/1232#issuecomment-683449873][still needed]].
 #+begin_src emacs-lisp :tangle yes
 (defadvice projectile-project-root (around ignore-remote first activate)
-  (unless (file-remote-p default-directory) ad-do-it))
+  (unless (file-remote-p default-directory 'no-identification) ad-do-it))
 #+end_src
 
 This is supposedly [[https://www.emacswiki.org/emacs/TrampMode][faster than the default]], =scp=.
 #+begin_src emacs-lisp :tangle yes
 (setq tramp-default-method "ssh")
+#+end_src
+
+SSH controlmaster settings are set in =~/.ssh/config=.
+#+begin_src emacs-lisp :tangle yes
+(setq tramp-use-ssh-controlmaster-options nil)
 #+end_src
 
 This will put in effect =PATH= changes in the remote =~/.profile=.
@@ -1460,6 +1503,9 @@ Reuse SSH connections. Taken from the [[https://www.gnu.org/software/emacs/manua
 
 Not tangled for now because it seems to affect remote LSP buffers under
 =rust-analyzer=.
+
+[2020-08-17 Mon] Tangling this again to see if it helps with TRAMP slowness and
+freezes.
 #+begin_src emacs-lisp :tangle no
 (customize-set-variable 'tramp-ssh-controlmaster-options
                         (concat
@@ -1486,30 +1532,11 @@ Not tangled for now because it seems to affect remote LSP buffers under
 (setq custom-file mpereira/custom-file)
 (load custom-file 'noerror)
 
-(setq confirm-kill-emacs 'y-or-n-p)
+;; Avoid loading old bytecode instead of newer source.
+(setq load-prefer-newer t)
 
 ;; Automatically scroll compilation buffers to the bottom.
 (setq compilation-scroll-output t)
-
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
-(blink-cursor-mode -1)
-
-;; Don't show UI-based dialogs from mouse events.
-(setq use-dialog-box nil)
-
-;; Save session state.
-;; (desktop-save-mode 1)
-;; (setq desktop-restore-frames nil)
-;;
-;; (defun mpereira/save-desktop ()
-;;   "Write the desktop save file to ~/.emacs.d."
-;;   (desktop-save user-emacs-directory))
-;;
-;; (if (not (boundp 'mpereira/save-desktop-timer))
-;;     (setq mpereira/save-desktop-timer
-;;           (run-with-idle-timer 600 t 'mpereira/save-desktop)))
 
 ;; Show CRLF characters.
 ;; http://pragmaticemacs.com/emacs/dealing-with-dos-line-endings/
@@ -1518,8 +1545,8 @@ Not tangled for now because it seems to affect remote LSP buffers under
 ;; Enable narrowing commands.
 (put 'narrow-to-region 'disabled nil)
 
-;; Start in full-screen.
-(add-hook 'after-init-hook #'toggle-frame-fullscreen)
+;; Don't complain when calling `list-timers'.
+(put 'list-timers 'disabled nil)
 
 ;; Show matching parens.
 (setq show-paren-delay 0)
@@ -1537,26 +1564,8 @@ Not tangled for now because it seems to affect remote LSP buffers under
 ;; Provide undo/redo commands for window changes.
 (winner-mode t)
 
-;; Don't create backup~ files.
-(setq make-backup-files nil)
-
-;; Don't create #autosave# files.
-(setq auto-save-default nil)
-
 ;; Don't lock files.
 (setq create-lockfiles nil)
-
-;; Shh...
-(setq inhibit-startup-echo-area-message t)
-(setq inhibit-startup-screen t)
-(setq initial-scratch-message nil)
-(setq ring-bell-function 'ignore)
-
-;; Minimal titlebar for macOS.
-(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-(add-to-list 'default-frame-alist '(ns-appearance . dark))
-(setq ns-use-proxy-icon nil)
-(setq frame-title-format nil)
 
 ;; Make Finder's "Open with Emacs" create a buffer in the existing Emacs frame.
 (setq ns-pop-up-frames nil)
@@ -1568,14 +1577,9 @@ Not tangled for now because it seems to affect remote LSP buffers under
 (setq mac-control-modifier 'control)
 (setq ns-function-modifier 'hyper)
 
-;; Make cursor the width of the character it is under e.g. full width of a TAB.
-(setq x-stretch-cursor t)
-
 ;; By default Emacs thinks a sentence is a full-stop followed by 2 spaces. Make
 ;; it a full-stop and 1 space.
 (setq sentence-end-double-space nil)
-
-(fset 'yes-or-no-p 'y-or-n-p)
 
 ;; Switch to help buffer when it's opened.
 (setq help-window-select t)
@@ -1638,15 +1642,19 @@ Not tangled for now because it seems to affect remote LSP buffers under
       apropos-do-all t
       mouse-yank-at-point t
       require-final-newline t
-      save-place-file (concat user-emacs-directory "places")
-      backup-directory-alist `(("." . ,(concat user-emacs-directory "file-backups"))))
-
-;; Delete trailing whitespace on save.
-(add-hook 'before-save-hook #'delete-trailing-whitespace)
+      save-place-file (concat user-emacs-directory "places"))
 
 (setq display-time-world-list '(("Europe/Berlin" "Hamburg")
                                 ("America/Sao_Paulo" "São Paulo")
                                 ("America/Los_Angeles" "San Francisco")))
+#+end_src
+** File backups
+=make-backup-files= and =auto-save-default= are set to =t= by default.
+
+#+begin_src emacs-lisp :tangle yes
+(setq backup-directory-alist `(("." . ,(concat user-emacs-directory "file-backups"))))
+(setq tramp-backup-directory-alist `(("." . ,(concat user-emacs-directory "remote-file-backups"))))
+(setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-saves") t)))
 #+end_src
 
 * Performance
@@ -1666,51 +1674,55 @@ The following replaces ~undo-tree-save-history-from-hook~ with an asynchronous
 version.
 
 #+begin_src emacs-lisp :tangle yes
+(use-package undo-tree)
+
 (defvar async-undo-tree-save-history-cached-load-path
-  (file-name-directory (locate-library "undo-tree")))
+  (when-let ((undo-tree-library (locate-library "undo-tree")))
+    (file-name-directory undo-tree-library)))
 
 (defun async-undo-tree-save-history ()
   "TODO: docstring."
   (interactive)
-  (let ((file-name (buffer-file-name)))
-    (async-start
-     `(lambda ()
-        (if (stringp ,file-name)
-            (list 'ok
-                  (list :output (with-output-to-string
-                                  (add-to-list
-                                   'load-path
-                                   ,async-undo-tree-save-history-cached-load-path)
-                                  (require 'undo-tree)
-                                  (find-file ,file-name)
-                                  (undo-tree-save-history-from-hook))
+  (when async-undo-tree-save-history-cached-load-path
+    (let ((file-name (buffer-file-name)))
+      (async-start
+       `(lambda ()
+          (if (stringp ,file-name)
+              (list 'ok
+                    (list :output (with-output-to-string
+                                    (add-to-list
+                                     'load-path
+                                     ,async-undo-tree-save-history-cached-load-path)
+                                    (require 'undo-tree)
+                                    (find-file ,file-name)
+                                    (undo-tree-save-history-from-hook))
+                          :messages (with-current-buffer "*Messages*"
+                                      (buffer-string))))
+            (list 'err
+                  (list :output "File name must be string"
                         :messages (with-current-buffer "*Messages*"
-                                    (buffer-string))))
-          (list 'err
-                (list :output "File name must be string"
-                      :messages (with-current-buffer "*Messages*"
-                                  (buffer-string))))))
-     `(lambda (result)
-        (let ((outcome (car result))
-              (messages (plist-get (cadr result) :messages))
-              (output (plist-get (cadr result) :output))
-              (inhibit-message t))
-          (message
-           (cond
-            ((eq 'ok outcome)
-             "undo-tree history saved asynchronously for %s%s%s")
-            ((eq 'err outcome)
-             "error saving undo-tree history asynchronously for %s%s%s")
-            (:else
-             "unexpected result from asynchronous undo-tree history save %s%s%s"))
-           ,file-name
-           (if (string= "" output)
-               ""
-             (format "\noutput:\n%s" output))
-           (if (string= "" messages)
-               ""
-             (format "\nmessages:\n%s" messages))))))
-    nil))
+                                    (buffer-string))))))
+       `(lambda (result)
+          (let ((outcome (car result))
+                (messages (plist-get (cadr result) :messages))
+                (output (plist-get (cadr result) :output))
+                (inhibit-message t))
+            (message
+             (cond
+              ((eq 'ok outcome)
+               "undo-tree history saved asynchronously for %s%s%s")
+              ((eq 'err outcome)
+               "error saving undo-tree history asynchronously for %s%s%s")
+              (:else
+               "unexpected result from asynchronous undo-tree history save %s%s%s"))
+             ,file-name
+             (if (string= "" output)
+                 ""
+               (format "\noutput:\n%s" output))
+             (if (string= "" messages)
+                 ""
+               (format "\nmessages:\n%s" messages))))))
+      nil)))
 
 ;; Hooks added to `write-file-functions' need to return non-nil so that the file
 ;; is written.
@@ -1743,11 +1755,6 @@ version.
  (defvar async-literate-org-cached-load-path
    (list (file-name-directory (locate-library "org"))
          (file-name-directory (locate-library "ob-tangle"))))
-
- (comment
-  (remove-hook 'before-save-hook 'org-make-toc)
-  (queue-push 'async-literate-org-requests 'run)
-  (remove-hook 'before-save-hook 'async-literate-org-queue-run))
 
  (defcustom async-literate-org-interval-seconds 20
    "TODO: docstring."
@@ -1902,6 +1909,7 @@ https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doo
 ** explain-pause-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package explain-pause-mode
+  :disabled
   :ensure nil
   :quelpa (explain-pause-mode
            :fetcher github
@@ -1940,10 +1948,11 @@ My favorite light themes:
 1. =modus-operandi=
 2. =doom-one-light=
 3. =doom-acario-light=
-4. =github=
-5. =material-light=
-6. =twilight-bright=
-7. =espresso=
+4. =doom-nord-light=
+5. =github=
+6. =material-light=
+7. =twilight-bright=
+8. =espresso=
 
 #+begin_src emacs-lisp :tangle yes
 (setq custom-safe-themes t) ;; Don't ask whether custom themes are safe.
@@ -1962,13 +1971,13 @@ My favorite light themes:
 (use-package modus-operandi-theme
   :ensure nil
   :defer t
-  :quelpa (modus-themes
+  :quelpa (modus-operandi-theme
            :fetcher gitlab
            :repo "protesilaos/modus-themes"))
 (use-package modus-vivendi-theme
   :ensure nil
   :defer t
-  :quelpa (modus-themes
+  :quelpa (modus-vivendi-theme
            :fetcher gitlab
            :repo "protesilaos/modus-themes"))
 (use-package tron-legacy-theme
@@ -1986,9 +1995,8 @@ My favorite light themes:
 (use-package vscode-dark-plus-theme)
 
 (add-hook 'after-init-hook
-          (lambda ()
-            (mpereira/load-theme mpereira/initial-theme))
-          t)
+          (lambda () (mpereira/load-theme mpereira/initial-theme))
+          'append)
 #+end_src
 
 ** Create hook for theme change
@@ -2177,25 +2185,6 @@ Source: https://git.io/vQKzv"
   :config
   (evil-mode t)
 
-  ;; Make `v$' not include the newline character.
-  ;; Resources:
-  ;; - https://github.com/emacs-evil/evil/issues/897
-  ;; - `evil-end-of-line-or-visual-line'
-  ;; - `evil-end-of-line'
-  ;; - `end-of-visual-line'
-  (general-define-key
-   :states '(motion)
-   "$" '(lambda ()
-          (interactive)
-          (evil-end-of-line)))
-
-  (general-define-key
-   :keymaps '(evil-ex-search-keymap minibuffer-local-map)
-   "C-k" #'previous-line-or-history-element
-   "C-j" #'next-line-or-history-element)
-
-  (evil-ex-define-cmd "bdelete" #'kill-this-buffer)
-
   ;; Don't create a kill entry on every visual movement.
   ;; More details: https://emacs.stackexchange.com/a/15054:
   (fset 'evil-visual-update-x-selection 'ignore))
@@ -2211,22 +2200,7 @@ Source: https://git.io/vQKzv"
             (lambda ()
               (evil-org-set-key-theme '(operators
                                         navigation
-                                        textobjects))
-              ;; Make `v$' not include the newline character.
-              ;; Resources:
-              ;; - https://github.com/emacs-evil/evil/issues/897
-              ;; - `evil-end-of-line-or-visual-line'
-              ;; - `evil-end-of-line'
-              ;; - `end-of-visual-line'
-              ;;
-              ;; This needs to run right after `evil-org-mode' is loaded and
-              ;; `evil-org-set-key-theme' is run.
-              (general-define-key
-               :keymaps '(evil-org-mode-map)
-               :states '(motion)
-               "$" '(lambda ()
-                      (interactive)
-                      (evil-end-of-line))))))
+                                        textobjects)))))
 #+end_src
 
 ** evil-magit
@@ -2234,21 +2208,7 @@ Source: https://git.io/vQKzv"
 (use-package evil-magit
   :after (evil magit)
   :init
-  (setq evil-magit-use-z-for-folds t)
-  :config
-  (general-define-key
-   :keymaps '(magit-mode-map)
-   :states '(normal visual)
-   "j" 'evil-next-visual-line           ; originally `evil-next-line'.
-   "k" 'evil-previous-visual-line       ; originally `evil-previous-line'.
-   "C-j" 'magit-section-forward
-   "C-k" 'magit-section-backward)
-
-  (general-define-key
-   :keymaps '(git-rebase-mode-map)
-   :states '(normal)
-   "C-S-j" 'git-rebase-move-line-down
-   "C-S-k" 'git-rebase-move-line-up))
+  (setq evil-magit-use-z-for-folds t))
 #+end_src
 
 ** evil-exchange
@@ -2417,7 +2377,7 @@ the same as the =ivy-posframe= one.
 (setq org-tags-column -80)
 
 ;; FIXME: don't use hard-coded color.
-(face-spec-set 'org-tag '((t :box (:color "gray30" :line-width 1))))
+;; (face-spec-set 'org-tag '((t :box (:color "gray30" :line-width 1))))
 
 ;; Don't indent src block content.
 (setq org-edit-src-content-indentation 0)
@@ -2585,6 +2545,15 @@ the beginning of the line. This fixes that."
  ;; Originally bound to `org-edit-src-abort'.
  ;; FIXME: doesn't seem to be working?
  "q" 'evil-quit)
+
+;; org capture buffer ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(general-define-key
+ :states '(normal visual)
+ :keymaps '(org-capture-mode-map)
+ :prefix mpereira/leader
+ ;; Originally bound to `save-buffer' via the global keymap.
+ "or" 'org-capture-refile)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -2897,6 +2866,9 @@ giving priority to CREATED:
 
 ;; Full screen org-agenda.
 (setq org-agenda-window-setup 'only-window)
+
+(add-hook 'org-agenda-finalize-hook #'olivetti-mode)
+
 ;; Don't destroy window splits.
 (setq org-agenda-restore-windows-after-quit t)
 ;; Show only the current instance of a repeating timestamp.
@@ -3515,6 +3487,46 @@ configuration and point position."
      (t (mpereira/kill-buffer-and-maybe-window)))))
 #+end_src
 
+** shrface
+#+begin_src emacs-lisp :tangle yes
+(use-package shrface
+  :config
+  (shrface-basic)
+  (shrface-trial)
+  (with-eval-after-load 'eww
+    (add-hook 'eww-after-render-hook 'shrface-mode)))
+#+end_src
+
+** outshine
+#+begin_src emacs-lisp :tangle yes
+(use-package outorg
+  :ensure nil
+  :quelpa (outorg
+           :fetcher github
+           :repo "alphapapa/outorg")
+  :config
+  (defun mpereira/outorg-edit-as-org ()
+    "TODO: docstring."
+    (interactive)
+    (let ((byte-compile-warnings '(not obsolete)))
+      (outorg-edit-as-org)))
+
+  (defun mpereira/outorg-copy-edits-and-exit ()
+    "TODO: docstring."
+    (interactive)
+    (if (string= outorg-edit-buffer-name (buffer-name))
+        (outorg-copy-edits-and-exit)
+      (message "Not in the %s buffer" outorg-edit-buffer-name))))
+
+(use-package outshine
+  :ensure nil
+  :quelpa (outshine
+           :fetcher github
+           :repo "alphapapa/outshine")
+  :config
+  (add-hook 'emacs-lisp-mode-hook 'outshine-mode))
+#+end_src
+
 ** counsel-org-clock
 #+begin_src emacs-lisp :tangle yes
 (use-package counsel-org-clock
@@ -3703,9 +3715,8 @@ child tree.
 #+begin_src emacs-lisp :tangle yes
 (setq dired-recursive-copies 'always)
 (setq dired-recursive-deletes 'always)
-(setq dired-isearch-filenames 'dwim)
 (setq delete-by-moving-to-trash t)
-(setq dired-listing-switches "-AFlv --group-directories-first")
+(setq dired-listing-switches "-AFhlv --group-directories-first")
 (setq find-ls-option ;; applies to `find-name-dired'
       '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
 
@@ -3723,9 +3734,17 @@ child tree.
  :keymaps '(dired-mode-map)
  :states '(normal visual)
  "(" 'dired-subtree-up
+ ";" nil ; originally the first keystroke for encryption-related bindings.
  "C-9" 'dired-hide-details-mode
  "C-j" 'dired-next-dirline
- "C-k" 'dired-prev-dirline)
+ "C-k" 'dired-prev-dirline
+ "M-c" 'dired-ranger-copy
+ "M-v" 'dired-ranger-paste)
+#+end_src
+
+** dired-ranger
+#+begin_src emacs-lisp :tangle yes
+(use-package dired-ranger)
 #+end_src
 
 ** dired-plus
@@ -3849,6 +3868,7 @@ REVIEW(maybe-unnecessary)
 (require 'eshell)
 (require 'em-dirs) ;; for `eshell/pwd'.
 (require 'em-smart)
+(require 'em-tramp)
 
 ;; Don't display the "Welcome to the Emacs shell" banner.
 (setq eshell-banner-message "")
@@ -3942,7 +3962,19 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
                         (end-of-line)
                         (eshell-kill-input)
                         (insert (string-trim candidate)))
+              :caller 'mpereira/eshell-history
               :initial-input input)))
+
+;; FIXME: this needs to be manually evaluated after init. Why?
+(with-eval-after-load "ivy"
+  (ivy-set-display-transformer
+   'mpereira/eshell-history
+   (lambda (candidate)
+     (->> candidate
+          ;; Don't display multiline commands.
+          (s-replace "\n" "; ")
+          ;; Limit command width to ivy-posframe frame width.
+          (s-truncate ivy-posframe-width)))))
 
 ;; eshell-mode-map needs to be configured in an `eshell-mode-hook'.
 ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2016-02/msg01532.html
@@ -3980,6 +4012,7 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
    ;; TODO: when on an empty prompt and going up and back down (or down and back
    ;; up), make it so that the prompt is empty again instead of cycling back to
    ;; the first input.
+   "<tab>" 'completion-at-point
    "C-k" 'eshell-previous-matching-input-from-input
    "C-j" 'eshell-next-matching-input-from-input
    "C-/" 'mpereira/eshell-history
@@ -4004,7 +4037,8 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 
 (defun mpereira/remote-user ()
   "Return remote user name."
-  (tramp-file-name-user (tramp-dissect-file-name default-directory)))
+  (or (tramp-file-name-user (tramp-dissect-file-name default-directory))
+      (eshell/whoami)))
 
 (defun mpereira/remote-host ()
   "Return remote host."
@@ -4293,14 +4327,43 @@ fish."
 * UI
 ** Settings
 #+begin_src emacs-lisp :tangle yes
+(setq confirm-kill-emacs 'y-or-n-p)
+(fset 'yes-or-no-p 'y-or-n-p)
+
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+(blink-cursor-mode -1)
 (setq frame-resize-pixelwise t)
+
+;; Don't show UI-based dialogs from mouse events.
+(setq use-dialog-box nil)
+
+;; Shh...
+(setq inhibit-startup-echo-area-message t)
+(setq inhibit-startup-screen t)
+(setq initial-scratch-message nil)
+(setq ring-bell-function 'ignore)
+
+;; Make cursor the width of the character it is under e.g. full width of a TAB.
+(setq x-stretch-cursor t)
+
+;; Minimal titlebar for macOS.
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
+(setq ns-use-proxy-icon nil)
+(setq frame-title-format nil)
+
+;; Start in full-screen.
+(add-hook 'after-init-hook #'toggle-frame-fullscreen)
 #+end_src
 
-** Make profiler report columns wider
+*** Make profiler report columns wider
 #+begin_src emacs-lisp :tangle yes
-(with-eval-after-load "profiler"
-  (setf (caar profiler-report-cpu-line-format) 80
-        (caar profiler-report-memory-line-format) 80))
+(use-package profiler
+  :config
+  (setf (caar profiler-report-cpu-line-format) 100
+        (caar profiler-report-memory-line-format) 100))
 #+end_src
 
 ** default-text-scale
@@ -4317,14 +4380,86 @@ TODO: make font sizes be calculated from one value and fix the scenario
 described above.
 
 #+begin_src emacs-lisp :tangle yes
-(set-face-attribute 'default nil :family "Consolas" :height 220)
+(setq mpereira/font-family "Hack")
+(setq mpereira/font-size-external-monitor 190)
+(setq mpereira/font-size-external-monitor-posframe-width-multiplier 0.4)
+(setq mpereira/font-size-laptop 170)
+(setq mpereira/font-size-laptop-posframe-width-multiplier 0.5)
+(setq mpereira/font-size-posframe-minimum-width 100)
 
-;; (eval-after-load "company-box" ...) doesn't seem to work for some reason.
-(add-hook 'after-init-hook (lambda ()
-                             (company-box-icons-resize 20)))
+(setq mpereira/font-size-initial mpereira/font-size-external-monitor)
 
-(eval-after-load "ivy-posframe"
-  (setq ivy-posframe-font "Consolas-24"))
+(defun mpereira/font-size-handle-change (new-font-size)
+  (interactive)
+  (let* ((default-font-family (face-attribute 'default :family))
+         (company-box-icon-size-pixels (truncate (/ new-font-size 10)))
+         (ivy-posframe-width-multiplier 0.3)
+         (ivy-posframe-font-size-multiplier 1.2)
+         (ivy-posframe-font-size (truncate (* ivy-posframe-font-size-multiplier
+                                              (/ new-font-size 10)))))
+    (with-eval-after-load "ivy-posframe"
+      (setq ivy-posframe-font (format "%s %s"
+                                      default-font-family
+                                      ivy-posframe-font-size))
+      (setq ivy-posframe-width (truncate (* ivy-posframe-width-multiplier
+                                            (frame-text-cols)))))
+    (with-eval-after-load "company-box"
+      ;; FIXME: no effect?
+      (company-box-icons-resize company-box-icon-size-pixels))))
+
+(defun mpereira/font-size-change (change-fn)
+  (interactive)
+  (let* ((previous-default-font-size (face-attribute 'default :height))
+         (_ (funcall change-fn previous-default-font-size))
+         (increased-default-font-size (face-attribute 'default :height)))
+    (mpereira/font-size-handle-change increased-default-font-size)))
+
+(defun mpereira/font-size-increase ()
+  (interactive)
+  (mpereira/font-size-change (lambda (actual-font-size)
+                               (default-text-scale-increase))))
+
+(defun mpereira/font-size-decrease ()
+  (interactive)
+  (mpereira/font-size-change (lambda (actual-font-size)
+                               (default-text-scale-decrease))))
+
+(defun mpereira/font-size-set (desired-font-size)
+  (interactive)
+  (mpereira/font-size-change
+   (lambda (actual-font-size)
+     (let ((delta (- desired-font-size actual-font-size)))
+       (default-text-scale-increment delta)))))
+
+(defun mpereira/font-size-set-preset (font-size posframe-width-multiplier)
+  (mpereira/font-size-set font-size)
+  (with-eval-after-load "ivy-posframe"
+    (setq ivy-posframe-width
+          (max mpereira/font-size-posframe-minimum-width
+               (truncate (* posframe-width-multiplier (frame-text-cols))))))
+  (counsel-load-theme-action (symbol-name (car custom-enabled-themes))))
+
+(defun mpereira/font-size-set-external-monitor ()
+  (interactive)
+  (mpereira/font-size-set-preset
+   mpereira/font-size-external-monitor
+   mpereira/font-size-external-monitor-posframe-width-multiplier))
+
+(defun mpereira/font-size-set-laptop ()
+  (interactive)
+  (mpereira/font-size-set-preset
+   mpereira/font-size-laptop
+   mpereira/font-size-laptop-posframe-width-multiplier))
+
+(defun mpereira/font-initialize ()
+  (interactive)
+  (set-face-attribute 'default nil
+                      :family mpereira/font-family
+                      :height mpereira/font-size-initial)
+  (mpereira/font-size-handle-change mpereira/font-size-initial))
+
+(add-hook 'after-init-hook #'mpereira/font-initialize 'append)
+(add-hook 'after-init-hook #'mpereira/font-size-set-external-monitor 'append)
 #+end_src
 
 ** posframe
@@ -4337,7 +4472,7 @@ described above.
 (use-package ivy-posframe
   :after (ivy posframe)
   :custom
-  (ivy-posframe-height-alist '((t . 20)))
+  (ivy-posframe-border-width 5)
   (ivy-posframe-display-functions-alist '((swiper . ivy-display-function-fallback)
                                           (t . ivy-posframe-display-at-frame-center)))
   :config
@@ -4396,6 +4531,32 @@ Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout
   (defun mpereira/company-box-doc-set-frame-parameters ()
     "TODO: docstring."
     (interactive)
+    (setq company-box-frame-parameters
+          '((left . -1)
+            (no-accept-focus . t)
+            (no-focus-on-map . t)
+            (min-width . 0)
+            (width . 0)
+            (min-height . 0)
+            (height . 0)
+            (internal-border-width . 1)
+            (vertical-scroll-bars)
+            (horizontal-scroll-bars)
+            (left-fringe . 0)
+            (right-fringe . 0)
+            (menu-bar-lines . 0)
+            (tool-bar-lines . 0)
+            (line-spacing . 0)
+            (undecorated . t)
+            (top . -1)
+            (visibility)
+            (mouse-wheel-frame)
+            (no-other-frame . t)
+            (cursor-type)
+            (drag-internal-border . t)
+            (left-fringe . 0)
+            (right-fringe . 0)
+            (no-special-glyphs . t)))
     (setq company-box-doc-frame-parameters
           `((internal-border-width . 10)
             (background-color . ,(face-attribute 'ivy-posframe :background nil t))
@@ -4505,7 +4666,8 @@ Mode not enabled by default.
   (global-diff-hl-mode t)
   (diff-hl-flydiff-mode t)
 
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  ;; FIXME(slow).
+  ;; (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
 
   (set-face-foreground 'diff-hl-insert "diff-nonexistent")
   (set-face-background 'diff-hl-insert "green4")
@@ -5034,6 +5196,14 @@ I can't get this to plan nice with `company-mode`, so I'm disabling it.
 (use-package yasnippet-snippets
   :disabled
   :after yasnippet)
+
+(use-package doom-snippets
+  :disabled
+  :ensure nil
+  :after yasnippet
+  :quelpa (doom-snippets
+           :fetcher github
+           :repo "hlissner/doom-snippets"))
 #+end_src
 
 ** Add yasnippet support for all company backends
@@ -5175,6 +5345,8 @@ the agent.
   (setq magit-diff-refine-hunk 'all)
   (setq magit-prefer-remote-upstream t)
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+  ;; ediff starts by default in a new frame. Don't do that.
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
   (add-hook 'magit-status-mode-hook #'olivetti-mode)
 
@@ -5226,6 +5398,29 @@ repositories, but it seems like just trying again a few times gets it done.
   :after (magit)
   :init
   (setq ghub-use-workaround-for-emacs-bug nil)
+  :config
+  (general-define-key
+   :keymaps '(forge-post-mode-map
+              forge-topic-mode-map
+              forge-post-section-map
+              forge-issue-section-map
+              forge-issues-section-map
+              forge-pullreq-section-map
+              forge-topic-list-mode-map
+              forge-issue-list-mode-map
+              forge-pullreqs-section-map
+              forge-pullreq-list-mode-map
+              forge-forge-repo-section-map
+              forge-notifications-mode-map
+              forge-topic-state-section-map
+              forge-topic-marks-section-map
+              forge-topic-title-section-map
+              forge-repository-list-mode-map
+              forge-topic-labels-section-map
+              forge-topic-assignees-section-map
+              forge-topic-review-requests-section-map)
+   :states '(normal visual)
+   "yb" 'forge-copy-url-at-point-as-kill)
 
   (general-define-key
    :keymaps '(forge-post-mode-map
@@ -5402,6 +5597,18 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
   (setq flycheck-display-errors-delay 0.3)
   (setq-default flycheck-emacs-lisp-load-path 'inherit)
 
+  (setq flycheck-error-list-format
+        `[("File" 12)
+          ("Line" 5 flycheck-error-list-entry-< :right-align t)
+          ("Col" 3 nil :right-align t)
+          ("Level" 25 flycheck-error-list-entry-level-<)
+          ("ID" 5 t)
+          (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)])
+  (setq flycheck--error-list-msg-offset (+ (-sum (mapcar (lambda (x) (nth-value 1 x))
+                                                         flycheck-error-list-format))
+                                           (- (length flycheck-error-list-format)
+                                              2)))
+
   (add-hook 'prog-mode-hook #'flycheck-mode)
 
   (defun mpereira/disable-emacs-lisp-checkdoc-checker ()
@@ -5428,8 +5635,16 @@ TODO: use this as a fallback for LSP.
 Install some dependencies:
 
 [[https://pypi.org/project/python-language-server/][- python-language-server]]
+
+=future= has to be installed explicitly. See [[https://github.com/tomv564/pyls-mypy/issues/37][pyls-mypy#37]].
 #+begin_src bash :tangle setup.sh :results verbatim
-python3 -m pip install python-language-server 'python-language-server[all]' pyls-mypy pyls-isort pyls-black
+python3 -m pip install \
+        python-language-server \
+        'python-language-server[all]' \
+        pyls-mypy \
+        future \
+        pyls-isort \
+        pyls-black
 #+end_src
 
 - [[https://github.com/rust-analyzer/rust-analyzer/releases][Rust Analyzer]]
@@ -5463,8 +5678,14 @@ chmod 755 /usr/local/bin/clojure-lsp
 
 [[https://github.com/theia-ide/typescript-language-server][theia-ide/typescript-language-server]] for [[https://emacs-lsp.github.io/lsp-mode/page/lsp-typescript/][JavaScript]].
 #+begin_src bash :tangle setup.sh :results verbatim
-npm i -g typescript-language-server
-npm i -g typescript
+npm i -g typescript-language-server \
+         typescript \
+         pyright
+#+end_src
+
+[[https://github.com/microsoft/pyright][pyright]] for [[https://github.com/emacs-lsp/lsp-pyright][Python]].
+#+begin_src bash :tangle setup.sh :results verbatim
+npm i -g pyright
 #+end_src
 
 LLVM for C/C++. You might need to configure =PATH=, =LDFLAGS=, and =CPPFLAGS=.
@@ -5477,11 +5698,11 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
-  :ensure nil
-  :quelpa (lsp-mode
-           :fetcher github
-           :repo "emacs-lsp/lsp-mode"
-           :branch "master")
+  ;; :ensure nil
+  ;; :quelpa (lsp-mode
+  ;;          :fetcher github
+  ;;          :repo "emacs-lsp/lsp-mode"
+  ;;          :branch "master")
   :config
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
@@ -5492,6 +5713,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
                               (lsp)
                               (lsp-rust-analyzer-inlay-hints-mode)))
 
+  (setq lsp-log-io t)
   (setq lsp-eldoc-enable-hover nil)
   (setq lsp-enable-symbol-highlighting nil)
   ;; Don't show documentation in minibuffer.
@@ -5573,6 +5795,40 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
    "C-k" 'lsp-ui-peek--select-prev))
 #+end_src
 
+*** lsp-pyright
+
+#+begin_src emacs-lisp :tangle yes
+(use-package lsp-pyright
+  :after lsp-mode
+  :init
+  (require 'lsp-pyright)
+  :config
+  (setq lsp-pyright-diagnostic-mode "workspace")
+
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-tramp-connection (lambda ()
+                                            (cons "pyright-langserver"
+                                                  lsp-pyright-langserver-command-args)))
+    :major-modes '(python-mode)
+    :remote? t
+    :server-id 'pyright-remote
+    :multi-root t
+    :priority 3
+    :initialization-options (lambda () (ht-merge (lsp-configuration-section "pyright")
+                                                 (lsp-configuration-section "python")))
+    :initialized-fn (lambda (workspace)
+                      (with-lsp-workspace workspace
+                        (lsp--set-configuration
+                         (ht-merge (lsp-configuration-section "pyright")
+                                   (lsp-configuration-section "python")))))
+    :download-server-fn (lambda (_client callback error-callback _update?)
+                          (lsp-package-ensure 'pyright callback error-callback))
+    :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
+                                   ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
+                                   ("pyright/endProgress" 'lsp-pyright--end-progress-callback)))))
+#+end_src
+
 *** lsp-pyls
 =lsp-pyls= is included with =lsp-mode=.
 
@@ -5586,6 +5842,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
                                      (executable-find
                                       (car lsp-pyls-server-command)))
                     :major-modes '(python-mode)
+                    :priority -1                    
                     :remote? t
                     :server-id 'pyls-remote)))
 #+end_src
@@ -5637,7 +5894,8 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 #+begin_src emacs-lisp :tangle yes
 (use-package company
   :config
-  (setq company-global-modes '(not comint-mode
+  (setq company-global-modes '(not eshell-mode
+                                   comint-mode
                                    message-mode
                                    help-mode))
 
@@ -5646,22 +5904,25 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
   (setq company-idle-delay nil)
   (setq company-require-match 'never)
   (setq company-tooltip-align-annotations t)
+  ;; Prescient will prepend `company-prescient-transformer' to this.
   (setq company-transformers '(company-sort-by-backend-importance))
-  (setq company-frontends '(;; Show tooltip even for single candidate.
-                            company-pseudo-tooltip-frontend))
+  ;; company-box will set this to a single item list containing
+  ;; `company-box-frontend'.
+  (setq company-frontends '(company-pseudo-tooltip-frontend))
 
   (general-define-key
+   :keymaps '(company-mode-map)
    :states '(insert)
-   "TAB" 'company-complete
+   "<tab>" 'company-complete
    "<backtab>" 'counsel-company)
 
   (general-define-key
    :keymaps '(company-search-map)
    "ESC" 'company-search-abort
-   "TAB" 'company-search-abort)
+   "<tab>" 'company-search-abort)
 
   (general-define-key
-   :keymaps '(company-active-map company-posframe-active-map)
+   :keymaps '(company-active-map)
    "C-/" 'company-filter-candidates
    "C-b" 'company-previous-page
    "C-f" 'company-next-page
@@ -5676,9 +5937,11 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 #+begin_src emacs-lisp :tangle yes
 (use-package aggressive-indent
   :config
+  (setq aggressive-indent-excluded-buffers nil)
+  (add-to-list 'aggressive-indent-excluded-buffers "*outorg-edit-buffer*")
   (add-to-list 'aggressive-indent-excluded-modes 'sql-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'makefile-bsdmake-mode)
-  (add-to-list 'aggressive-indent-excluded-modes 'python-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'org-mode)
   (add-hook 'prog-mode-hook #'mpereira/maybe-enable-aggressive-indent-mode))
 #+end_src
 
@@ -5797,6 +6060,12 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
   :config
   (eros-mode 1))
 
+(defun mpereira/eval-buffer ()
+  "Evaluate buffer and show confirmation message."
+  (interactive)
+  (eval-buffer)
+  (message "%s" (buffer-name)))
+
 (general-define-key
  :keymaps '(emacs-lisp-mode-map)
  :states '(normal)
@@ -5805,7 +6074,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
  "d" #'edebug-defun
  "e" #'mpereira/eval-thing-at-or-around-point
  "(" #'eval-defun
- "E" #'eval-buffer)
+ "E" #'mpereira/eval-buffer)
 
 (general-define-key
  :keymaps '(emacs-lisp-mode-map)
@@ -6043,8 +6312,12 @@ python3 -m pip install mypy flake8 pylint black
 #+end_src
 
 *** json-navigator
+Seems to be broken under latest Emacs 28: =Lisp error: (void-variable
+hierarchy--make)=.
+
 #+begin_src emacs-lisp :tangle yes
-(use-package json-navigator)
+(use-package json-navigator
+  :disabled)
 #+end_src
 
 *** json-snatcher
@@ -6079,6 +6352,16 @@ python3 -m pip install mypy flake8 pylint black
 ** docker
 #+begin_src emacs-lisp :tangle yes
 (use-package docker)
+#+end_src
+
+** bazel-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package bazel-mode)
+#+end_src
+
+** groovy-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package groovy-mode)
 #+end_src
 
 ** dockerfile-mode
@@ -6212,7 +6495,7 @@ python3 -m pip install mypy flake8 pylint black
 #+begin_src emacs-lisp :tangle yes
 (use-package olivetti
   :config
-  (setq-default olivetti-body-width 0.5))
+  (setq-default olivetti-body-width 100))
 #+end_src
 
 * Buffer management
@@ -6288,8 +6571,22 @@ Also start them in Org mode.
   ;; - https://protesilaos.com/dotemacs/#h:3d8ebbb1-f749-412e-9c72-5d65f48d5957
   ;; - https://web.archive.org/web/20160409014815/https://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
   (setq display-buffer-alist
-        '(("\\* Merriam-Webster Thesaurus \\*"
+        '(;; ("\\*emacs-audit: package-list\\*"
+          ;;  (display-buffer-in-side-window)
+          ;;  (window-height . 1.0)
+          ;;  (window-width . 1.0)
+          ;;  (slot . 0)
+          ;;  (mode-line-format . (" " "%b")))
+
+          ("\\* Merriam-Webster Thesaurus \\*"
            (display-buffer-below-selected))
+
+          ("\\*mpereira/pp-macroexpand-all\\*"
+           (display-buffer-in-side-window)
+           (window-height . 0.5)
+           (window-width . 0.5)
+           (slot . 0)
+           (mode-line-format . (" " "%b")))
 
           ("\\*hackernews top stories\\*"
            (display-buffer-in-side-window)
@@ -6391,7 +6688,7 @@ Also start them in Org mode.
 Existing functions in projectile, counsel, ffip, etc. were too slow.
 
 #+begin_src emacs-lisp :tangle yes
-(defun mpereira/project-fd ()
+(defun mpereira/remote-project-fd ()
   "TODO: docstring"
   (interactive)
   (if-let ((fd-executable (executable-find "fd" t)))
@@ -6506,6 +6803,7 @@ Existing functions in projectile, counsel, ffip, etc. were too slow.
 (use-package counsel-projectile
   :after (counsel projectile)
   :config
+  (setq projectile-project-name-function 'mpereira/projectile-default-project-name)
   (setq projectile-switch-project-action 'counsel-projectile-switch-project-action-dired))
 #+end_src
 
@@ -6889,7 +7187,100 @@ REVIEW: do I use or need this?
            :repo "leoliu/osascripts"))
 #+end_src
 
+** emacs-audit
+#+begin_src emacs-lisp :tangle yes
+(use-package emacs-audit
+  :ensure nil
+  :quelpa (emacs-audit
+           :fetcher file
+           :path "/Users/murilo/git/emacs-audit/elisp/emacs-audit.el"))
+
+(defun mpereira/org-ascii--box-string (s info)
+  "Return string S with a partial box to its left.
+INFO is a plist used as a communication channel."
+  s)
+
+;; FIXME: causes "Lisp nesting exceeds ‘max-lisp-eval-depth’" for some reason.
+(defun mpereira/org-ascii-export-as-ascii (&rest args)
+  "TODO: docstring."
+  (interactive)
+  (cl-letf (((symbol-function #'org-ascii--box-string) #'mpereira/org-ascii--box-string))
+    (apply 'org-ascii-export-as-ascii args)))
+
+(comment
+ (emacs-audit--with-command
+  command
+  command)
+ (quelpa-upgrade
+  '(emacs-audit
+    :fetcher file
+    :path "/Users/murilo/git/emacs-audit/elisp/emacs-audit.el")))
+#+end_src
+
 * Mappings
+#+begin_src emacs-lisp :tangle yes
+;; Resources:
+;; - https://github.com/emacs-evil/evil/issues/897
+;; - `evil-end-of-line-or-visual-line'
+;; - `evil-end-of-line'
+;; - `end-of-visual-line'
+(defun mpereira/evil-make-$-not-include-newline (keymap)
+  "Make `$' not include the newline character."
+  (general-define-key
+   :keymaps `(,keymap)
+   :states '(motion)
+   "$" '(lambda ()
+          (interactive)
+          (evil-end-of-line))))
+
+(use-package emacs
+  :after (evil-org)
+  :config
+  (add-hook 'evil-org-mode-hook
+            (lambda ()
+              (mpereira/evil-make-$-not-include-newline 'evil-org-mode-map))))
+
+(use-package emacs
+  :after (evil)
+  :config
+  (mpereira/evil-make-$-not-include-newline 'global)
+
+  (general-define-key
+   :keymaps '(evil-ex-search-keymap minibuffer-local-map)
+   "C-k" #'previous-line-or-history-element
+   "C-j" #'next-line-or-history-element)
+
+  (evil-ex-define-cmd "bdelete" #'kill-this-buffer))
+
+(use-package emacs
+  :after (evil-collection)
+  :config
+  (general-define-key
+   :keymaps '(image-mode-map)
+   :states '(normal)
+   ;; Originally `image-previous-frame'.
+   "," nil))
+
+(use-package emacs
+  :after (evil-magit)
+  :config
+  (general-define-key
+   :keymaps '(magit-mode-map)
+   :states '(normal visual)
+   "j" 'evil-next-visual-line           ; originally `evil-next-line'.
+   "k" 'evil-previous-visual-line       ; originally `evil-previous-line'.
+   "(" 'magit-section-up
+   "TAB" 'magit-section-cycle
+   "C-j" 'magit-section-forward-sibling
+   "C-k" 'magit-section-backward-sibling)
+
+  (general-define-key
+   :keymaps '(git-rebase-mode-map)
+   :states '(normal)
+   "C-S-j" 'git-rebase-move-line-down
+   "C-S-k" 'git-rebase-move-line-up))
+#+end_src
+
 #+begin_src emacs-lisp :tangle yes
 (general-define-key
  :keymaps '(override)                   ; check out `general-override-mode-map'.
@@ -6897,8 +7288,8 @@ REVIEW: do I use or need this?
  ;; they would usually not work, e.g. the *Messages* buffer or the
  ;; `undo-tree-visualize' buffer.
  :states '(normal visual insert nil)
- "M-+" #'default-text-scale-increase
- "M--" #'default-text-scale-decrease
+ "M-+" #'mpereira/font-size-increase
+ "M--" #'mpereira/font-size-decrease
  "M-=" #'default-text-scale-reset
  "M-F" #'toggle-frame-fullscreen
  "M-H" 'buf-move-left
@@ -7019,6 +7410,7 @@ REVIEW: do I use or need this?
  "," #'evil-switch-to-windows-last-buffer
  "." #'ivy-resume
  "/" #'swiper
+ "|" #'olivetti-mode
  "<backtab>" #'discover-my-major
  "<tab>" #'counsel-descbinds
  "=" #'quick-calc
@@ -7169,9 +7561,9 @@ REVIEW: do I use or need this?
  "n" #'mpereira/narrow-or-widen-dwim
  "o" #'mpereira/hs-toggle-all
  "q" #'toggle-debug-on-quit
- "r" #'dired-toggle-read-only
+ "r" #'toggle-read-only
  "t" #'mpereira/narrow-or-widen-dwim
- "w" #'mpereira/narrow-or-widen-dwim)
+ "w" #'delete-trailing-whitespace)
 
 ;; z -> fold ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

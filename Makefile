@@ -1,6 +1,7 @@
 # EMACS_VERSION := 26.3
 # EMACS := /Applications/Emacs-$(EMACS_VERSION).app/Contents/MacOS/Emacs
-EMACS := emacs
+EMACS						:= emacs
+COPY_DIRECTORY	:= rsync -rhqr
 
 PROJECT_ROOT				:= $(shell pwd)
 TEST_RUNS_DIRECTORY := $(PROJECT_ROOT)/test-runs
@@ -28,9 +29,33 @@ BACKUP_QUELPA_FILE	:= $(BACKUP_DIRECTORY)/.latest-backup-quelpa
 setup:
 	bash setup.sh
 
+.PHONY: test-minimal-emacs
+test-minimal-emacs:
+	mkdir -p $(TEST_HOME_EMACSD)
+	cp minimal-init.el $(TEST_HOME_EMACSD)
+	echo "git diff:"
+	git diff
+	echo
+	echo "Opening minimal Emacs with \$$HOME: $(TEST_HOME_EMACSD)"
+	HOME="$(TEST_HOME)" $(EMACS) -q -l $(PROJECT_ROOT)/minimal-init.el 2>/dev/null
+
+.PHONY: minimal-emacs
+minimal-emacs:
+	emacs -q -l $(PROJECT_ROOT)/minimal-init.el 2>/dev/null
+
+.PHONY: make-org-toc
+make-org-toc:
+	$(EMACS) --batch --eval '(make-org-toc)'
+
 .PHONY: byte-recompile
 byte-recompile: clean-elc
 	$(EMACS) --batch --eval '(byte-recompile-directory "$(PROJECT_ROOT)" 0 t)'
+
+.PHONY: start-from-scratch
+start-from-scratch: clean-elc clean-custom.el clean-hidden-cache backup-dependencies clean-dependencies
+	$(EMACS) --debug-init 2>/dev/null &
+
+# EMACS_PID="$(shell ps -o ppid $$PPID | cut -f1 -d' ')" && kill $$EMACS_PID
 
 $(BACKUP_DIRECTORY):
 	mkdir $(BACKUP_DIRECTORY)
@@ -81,6 +106,12 @@ test-revert-elpa:
 test-quick: clean-elc clean-custom.el clean-hidden-cache
 	$(EMACS) --debug-init 2>/dev/null
 
+# Run this from the main Emacs instance.
+.PHONY: test-override-dependencies-from-current
+test-override-dependencies-from-current: # backup-dependencies clean-dependencies
+	$(COPY_DIRECTORY) "$(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/elpa" $(PROJECT_ROOT)
+	$(COPY_DIRECTORY) "$(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/quelpa" $(PROJECT_ROOT)
+
 .PHONY: test
 test:
 	mkdir -p $(TEST_HOME_EMACSD)
@@ -99,8 +130,8 @@ test:
 
 .PHONY: backup-dependencies
 restore-dependencies-from-latest-test:
-	rsync -a $(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/elpa $(PROJECT_ROOT)/elpa
-	rsync -a $(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/quelpa $(PROJECT_ROOT)/quelpa
+	$(COPY_DIRECTORY) $(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/elpa $(PROJECT_ROOT)/elpa
+	$(COPY_DIRECTORY) $(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/quelpa $(PROJECT_ROOT)/quelpa
 
 custom.el:
 	touch $(CUSTOM_EL)
