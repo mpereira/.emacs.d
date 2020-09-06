@@ -4453,9 +4453,9 @@ described above.
 
 (defun mpereira/font-initialize ()
   (interactive)
-  (set-face-attribute 'default nil
-                      :family mpereira/font-family
-                      :height mpereira/font-size-initial)
+  (when (x-list-fonts "Hack")
+    (set-face-attribute 'default nil :family mpereira/font-family))
+  (set-face-attribute 'default nil :height mpereira/font-size-initial)
   (mpereira/font-size-handle-change mpereira/font-size-initial))
 
 (add-hook 'after-init-hook #'mpereira/font-initialize 'append)
