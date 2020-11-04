@@ -1855,16 +1855,18 @@ This seems to cause garbage collection when exiting the minibuffer though...
 
 #+begin_src emacs-lisp :tangle yes
 (defun mpereira/gc-cons-set-maximum ()
-  (setq gc-cons-threshold mpereira/gc-cons-threshold-maximum)
-  (setq gc-cons-percentage mpereira/gc-cons-percentage-maximum))
+  (when (fboundp 'mpereira/gc-cons-threshold-maximum)
+    (setq gc-cons-threshold mpereira/gc-cons-threshold-maximum)
+    (setq gc-cons-percentage mpereira/gc-cons-percentage-maximum)))
 
 (defun mpereira/gc-cons-set-normal ()
   ;; Defer it so that commands launched immediately after will enjoy the
   ;; benefits.
-  (run-at-time
-   1 nil (lambda ()
-           (setq gc-cons-threshold mpereira/gc-cons-threshold-normal)
-           (setq gc-cons-percentage mpereira/gc-cons-percentage-normal))))
+  (when (fboundp 'mpereira/gc-cons-threshold-maximum)
+    (run-at-time
+     1 nil (lambda ()
+             (setq gc-cons-threshold mpereira/gc-cons-threshold-normal)
+             (setq gc-cons-percentage mpereira/gc-cons-percentage-normal)))))
 
 (add-hook 'minibuffer-setup-hook #'mpereira/gc-cons-set-maximum)
 (add-hook 'minibuffer-exit-hook #'mpereira/gc-cons-set-normal)
