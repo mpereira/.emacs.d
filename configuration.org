@@ -2537,8 +2537,9 @@ the beginning of the line. This fixes that."
  "C-n" 'org-babel-next-src-block
  ;; TODO: remove temporary keybinding.
  "C-p" 'org-babel-previous-src-block
- "C-S-j" 'org-move-subtree-down
- "C-S-k" 'org-move-subtree-up)
+ ;; TODO: add binding for `org-down-element'. Lisp analogous:
+ ;; `lispyville-next-opening'.
+ )
 
 ;; org source blocks ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
