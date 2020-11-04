@@ -459,7 +459,9 @@ Set it with emacs lisp.
 * Foundational
 ** general
 #+begin_src emacs-lisp :tangle yes
-(use-package general)
+(use-package general
+  :custom
+  (use-package-hook-name-suffix . nil))
 #+end_src
 
 ** paradox
@@ -4521,7 +4523,7 @@ Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout
 #+begin_src emacs-lisp :tangle yes
 (use-package company-box
   :after (company ivy-posframe)
-  :hook (company-mode . company-box-mode)
+  :hook (company-mode-hook . company-box-mode)
   :init
   (setq company-box-doc-delay 0)
   (setq company-box-max-candidates 1000)
@@ -5148,17 +5150,17 @@ This mode affects performance for some functions
                    (setq rg-group-result (not rg-group-result))
                    (rg-rerun))
             "S" 'double-saber-sort-lines)
-  :hook ((rg-mode . (lambda ()
-                      (double-saber-mode)
-                      (setq-local double-saber-start-line 6)
-                      (setq-local double-saber-end-text "rg finished")))
-         (grep-mode . (lambda ()
-                        (double-saber-mode)
-                        (setq-local double-saber-start-line 5)
-                        (setq-local double-saber-end-text "Grep finished")))
-         (ivy-occur-grep-mode . (lambda ()
-                                  (double-saber-mode)
-                                  (setq-local double-saber-start-line 5)))))
+  :hook ((rg-mode-hook . (lambda ()
+                           (double-saber-mode)
+                           (setq-local double-saber-start-line 6)
+                           (setq-local double-saber-end-text "rg finished")))
+         (grep-mode-hook . (lambda ()
+                             (double-saber-mode)
+                             (setq-local double-saber-start-line 5)
+                             (setq-local double-saber-end-text "Grep finished")))
+         (ivy-occur-grep-mode-hook . (lambda ()
+                                       (double-saber-mode)
+                                       (setq-local double-saber-start-line 5)))))
 #+end_src
 
 ** symbol-overlay
