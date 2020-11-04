@@ -4794,12 +4794,11 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-size
                       (:width 7))
                      (ivy-rich-switch-buffer-path
-                      (:width (lambda (x)
+                      (:width (lambda (candidate)
                                 (ivy-rich-switch-buffer-shorten-path
-                                 x (ivy-rich-minibuffer-width 0.2))))))
-           :predicate (lambda
-                        (cand)
-                        (get-buffer cand))
+                                 candidate (ivy-rich-minibuffer-width 0.2))))))
+           :predicate (lambda (candidate)
+                        (get-buffer candidate))
            :delimiter "	")
           ivy-switch-buffer-other-window
           (:columns ((all-the-icons-ivy-rich-buffer-icon)
@@ -4815,12 +4814,11 @@ This mode affects performance for some functions
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
                       (:width (lambda
-                                (x)
+                                (candidate)
                                 (ivy-rich-switch-buffer-shorten-path
-                                 x (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda
-                        (cand)
-                        (get-buffer cand))
+                                 candidate (ivy-rich-minibuffer-width 0.3))))))
+           :predicate (lambda (candidate)
+                        (get-buffer candidate))
            :delimiter "	")
           counsel-switch-buffer
           (:columns ((all-the-icons-ivy-rich-buffer-icon)
@@ -4835,13 +4833,11 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
-                      (:width (lambda
-                                (x)
+                      (:width (lambda (candidate)
                                 (ivy-rich-switch-buffer-shorten-path
-                                 x (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda
-                        (cand)
-                        (get-buffer cand))
+                                 candidate (ivy-rich-minibuffer-width 0.3))))))
+           :predicate (lambda (candidate)
+                        (get-buffer candidate))
            :delimiter "	")
           counsel-projectile-switch-to-buffer
           (:columns ((all-the-icons-ivy-rich-buffer-icon)
@@ -4856,13 +4852,11 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
-                      (:width (lambda
-                                (x)
+                      (:width (lambda (candidate)
                                 (ivy-rich-switch-buffer-shorten-path
-                                 x (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda
-                        (cand)
-                        (get-buffer cand))
+                                 candidate (ivy-rich-minibuffer-width 0.3))))))
+           :predicate (lambda (candidate)
+                        (get-buffer candidate))
            :delimiter "	")
           counsel-switch-buffer-other-window
           (:columns ((all-the-icons-ivy-rich-buffer-icon)
@@ -4877,13 +4871,11 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
-                      (:width (lambda
-                                (x)
+                      (:width (lambda (candidate)
                                 (ivy-rich-switch-buffer-shorten-path
-                                 x (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda
-                        (cand)
-                        (get-buffer cand))
+                                 candidate (ivy-rich-minibuffer-width 0.3))))))
+           :predicate (lambda (candidate)
+                        (get-buffer candidate))
            :delimiter "	")
           package-install
           (:columns ((ivy-rich-candidate (:width 30))
@@ -4903,13 +4895,11 @@ This mode affects performance for some functions
                      (ivy-rich-switch-buffer-project
                       (:width 15 :face success))
                      (ivy-rich-switch-buffer-path
-                      (:width (lambda
-                                (x)
+                      (:width (lambda (candidate)
                                 (ivy-rich-switch-buffer-shorten-path
-                                 x (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda
-                        (cand)
-                        (get-buffer cand))
+                                 candidate (ivy-rich-minibuffer-width 0.3))))))
+           :predicate (lambda (candidate)
+                        (get-buffer candidate))
            :delimiter "	")
           counsel-M-x
           (:columns ((all-the-icons-ivy-rich-function-icon)
@@ -4924,11 +4914,13 @@ This mode affects performance for some functions
                      (ivy-rich-counsel-function-docstring
                       (:face font-lock-doc-face))))
           counsel-describe-variable
-          (:columns ((all-the-icons-ivy-rich-variable-icon)
+          (:columns ((all-the-icons-ivy-rich-variable-icon
+                      (:width 0.01))
                      (counsel-describe-variable-transformer
-                      (:width 50))
+                      (:width 0.29))
                      (ivy-rich-counsel-variable-docstring
-                      (:face font-lock-doc-face))))
+                      (:width 0.5
+                       :face font-lock-doc-face))))
           counsel-set-variable
           (:columns ((all-the-icons-ivy-rich-variable-icon)
                      (counsel-describe-variable-transformer
