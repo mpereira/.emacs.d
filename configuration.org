@@ -5407,6 +5407,12 @@ the agent.
    :states '(normal visual)
    "q" #'magit-mode-bury-buffer)
 
+  ;; Originally `magit-log-refresh'. Disabling it so that `evil-window-bottom'
+  ;; gets called instead. Narrowing to normal and visual states doesn't work.
+  (general-define-key
+   :keymaps '(magit-status-mode-map)
+   "L" nil)
+
   (general-define-key
    :keymaps '(magit-mode-map)
    :states '(normal visual)
