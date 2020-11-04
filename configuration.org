@@ -7823,7 +7823,7 @@ INFO is a plist used as a communication channel."
  "D" 'mpereira/maybe-projectile-find-directory
  "f" 'mpereira/maybe-projectile-find-file
  "g" 'counsel-rg
- "G" 'rg-project
+ "G" 'rg
  "s" 'mpereira/counsel-projectile-perspective-switch-project
  "t" 'dired-sidebar-toggle-sidebar)
 
