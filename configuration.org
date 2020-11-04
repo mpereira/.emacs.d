@@ -2188,6 +2188,7 @@ Source: https://git.io/vQKzv"
 
   :config
   (add-hook 'after-init-hook 'evil-normalize-keymaps)
+
   (evil-mode t)
 
   ;; Don't create a kill entry on every visual movement.
@@ -2887,8 +2888,10 @@ giving priority to CREATED:
 
 ;; Don't destroy window splits.
 (setq org-agenda-restore-windows-after-quit t)
+
 ;; Show only the current instance of a repeating timestamp.
 (setq org-agenda-repeating-timestamp-show-all nil)
+
 ;; Don't look for free-form time string in headline.
 (setq org-agenda-search-headline-for-time nil)
 
@@ -4026,7 +4029,7 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
    "0" 'eshell-bol
    "C-j" 'eshell-next-prompt
    "C-k" 'eshell-previous-prompt)
-  
+
   (general-define-key
    :states '(insert)
    :keymaps '(eshell-mode-map)
@@ -5859,7 +5862,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
                                      (executable-find
                                       (car lsp-pyls-server-command)))
                     :major-modes '(python-mode)
-                    :priority -1                    
+                    :priority -1
                     :remote? t
                     :server-id 'pyls-remote)))
 #+end_src
