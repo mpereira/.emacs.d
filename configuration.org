@@ -7378,7 +7378,7 @@ REVIEW: do I use or need this?
   :ensure nil
   :quelpa (emacs-audit
            :fetcher file
-           :path "/Users/murilo/git/emacs-audit/elisp/emacs-audit.el"))
+           :path (expand-file-name "~/git/emacs-audit/elisp/emacs-audit.el")))
 
 (defun mpereira/org-ascii--box-string (s info)
   "Return string S with a partial box to its left.
