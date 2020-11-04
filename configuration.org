@@ -187,6 +187,7 @@ Vanilla evil emacs literate configuration.
   - [[#magit][magit]]
   - [[#forge][forge]]
   - [[#magit-todos][magit-todos]]
+  - [[#a-vscode-git-lens-type-of-thing][A VSCode git lens type of thing]]
   - [[#gist][gist]]
   - [[#gitignore-mode][gitignore-mode]]
   - [[#magit-delta][magit-delta]]
@@ -5539,6 +5540,102 @@ repositories, but it seems like just trying again a few times gets it done.
                   (magit-todos-update))))))
 #+end_src
 
+** A VSCode git lens type of thing
+#+begin_src emacs-lisp :tangle yes
+(use-package hydra)
+
+(use-package hydra-posframe
+  :ensure nil
+  :custom
+  (hydra-posframe-border-width 10)
+
+  (hydra-posframe-poshandler 'posframe-poshandler-point-bottom-left-corner-upward)
+  :quelpa (hydra-posframe
+           :fetcher github
+           :repo "Ladicle/hydra-posframe")
+  :config
+  (hydra-posframe-mode)
+
+  (custom-set-faces
+   '(hydra-posframe-face ((t (:inherit ivy-posframe))))
+   '(hydra-posframe-border-face ((t (:inherit ivy-posframe-border))))))
+
+(use-package git-messenger
+  :custom
+  (git-messenger:show-detail t)
+  (git-messenger:use-magit-popup t)
+
+  :config
+  (general-define-key
+   :keymaps '(git-messenger-map)
+   "(" 'git-messenger:show-parent)
+
+  (defhydra git-messenger-hydra (:color blue)
+    ("d" git-messenger:popup-show "Show diff")
+    ("y" git-messenger:copy-commit-id "Yank SHA")
+    ("m" git-messenger:copy-message "Yank message")
+    ("(" (catch 'git-messenger-loop (git-messenger:show-parent)) "Go to parent")
+    ("q" git-messenger:popup-close "Quit"))
+
+  (defun mpereira/git-messenger-format-message (vcs commit-id commit-author message)
+    (if (eq vcs 'git)
+        (let ((date (git-messenger:commit-date commit-id))
+              (colon (propertize ":" 'face 'font-lock-comment-face)))
+          (concat
+           (format "%s%s %s \n%s%s %s\n%s  %s %s \n"
+                   (propertize "Commit" 'face 'font-lock-keyword-face) colon
+                   (propertize (substring commit-id 0 8) 'face 'font-lock-comment-face)
+                   (propertize "Author" 'face 'font-lock-keyword-face) colon
+                   (propertize commit-author 'face 'font-lock-string-face)
+                   (propertize "Date" 'face 'font-lock-keyword-face) colon
+                   (propertize date 'face 'font-lock-string-face))
+           (propertize (make-string 38 ?─) 'face 'font-lock-comment-face)
+           message))
+      (git-messenger:format-detail vcs commit-id commit-author message)))
+
+  ;; FIXME: going to parent isn't working.
+  (defun mpereira/git-messenger-show ()
+    "TODO: docstring."
+    (interactive)
+    (let* ((vcs (git-messenger:find-vcs))
+           (file (buffer-file-name (buffer-base-buffer)))
+           (line (line-number-at-pos))
+           (commit-info (git-messenger:commit-info-at-line vcs file line))
+           (commit-id (car commit-info))
+           (commit-author (cdr commit-info))
+           (commit-message (git-messenger:commit-message vcs commit-id))
+           (detailed-message (if (git-messenger:show-detail-p commit-id)
+                                 (mpereira/git-messenger-format-message
+                                  vcs commit-id commit-author commit-message)
+                               commit-message)))
+      (setq git-messenger:vcs vcs
+            git-messenger:last-message commit-message
+            git-messenger:last-commit-id commit-id)
+      (run-hook-with-args 'git-messenger:before-popup-hook detailed-message)
+      (git-messenger-hydra/body)
+      (cond ((and (fboundp 'posframe-workable-p) (posframe-workable-p))
+             (let ((buffer-name "*git-messenger*"))
+               ;; TODO: reuse frame.
+               (posframe-show buffer-name
+                              :string detailed-message
+                              :left-fringe 8
+                              :right-fringe 8
+                              :background-color (face-attribute 'ivy-posframe :background nil t)
+                              :foreground-color (face-attribute 'ivy-posframe :foreground nil t)
+                              :internal-border-color (face-attribute 'ivy-posframe-border
+                                                                     :background
+                                                                     nil
+                                                                     t)
+                              :internal-border-width ivy-posframe-border-width)
+               (unwind-protect
+                   (push (read-event) unread-command-events)
+                 (posframe-delete buffer-name))))
+            (t (message "%s" detailed-message)))
+      (run-hook-with-args 'git-messenger:after-popup-hook detailed-message))
+    (advice-add #'git-messenger:popup-close :override #'ignore)
+    (advice-add #'git-messenger:popup-message :override #'mpereira/git-messenger-show)))
+#+end_src
+
 ** gist
 The "gist list" buffer is unfortunately based on tabulated-mode instead of
 tablist-mode. The keybindings below make it behave similar to what one would
@@ -7493,6 +7590,7 @@ INFO is a plist used as a communication channel."
  "M-k" #'evil-window-up
  "M-l" #'evil-window-right
  "C-w =" #'balance-windows              ; this is the default keybinding.
+ "C-0" #'mpereira/git-messenger-show
  "<C-left>" #'winner-undo
  "<C-right>" #'winner-redo)
 
