@@ -2358,6 +2358,12 @@ the same as the =ivy-posframe= one.
 (require 'org-protocol)
 (require 'org-tempo)
 
+(add-hook 'org-mode-hook
+          (lambda ()
+            (setq-local electric-pair-inhibit-predicate
+                        `(lambda (c)
+                           (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
 ;; Pretty ellipsis.
 (setq org-ellipsis "…")
 
