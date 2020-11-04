@@ -1206,23 +1206,15 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
       (insert-kbd-macro name)
       (kill-new (buffer-substring-no-properties (point-min) (point-max))))))
 
-(defun mpereira/load-theme (theme)
-  "TODO: docstring. THEME."
-  (interactive)
-  (counsel-load-theme-action (symbol-name theme))
-  (when org-bullets-mode
-    (org-bullets-mode -1)
-    (org-bullets-mode 1)))
-
 (defun mpereira/load-light-theme ()
   "TODO: docstring."
   (interactive)
-  (mpereira/load-theme mpereira/light-theme))
+  (counsel-load-theme-action (symbol-name mpereira/light-theme)))
 
 (defun mpereira/load-dark-theme ()
   "TODO: docstring."
   (interactive)
-  (mpereira/load-theme mpereira/dark-theme))
+  (counsel-load-theme-action (symbol-name mpereira/dark-theme)))
 
 (defun mpereira/process-using-port ()
   "Show list of processes listening on ports via TCP.
@@ -2001,7 +1993,7 @@ My favorite light themes:
 (use-package vscode-dark-plus-theme)
 
 (add-hook 'after-init-hook
-          (lambda () (mpereira/load-theme mpereira/initial-theme))
+          (lambda () (counsel-load-theme-action (symbol-name mpereira/initial-theme)))
           'append)
 #+end_src
 
@@ -2139,8 +2131,8 @@ Source: https://git.io/vQKzv"
 
         (mpereira/set-mode-line-padding)
 
-        ;; Set modeline padding after running `counsel-load-theme'.
-        (advice-add 'counsel-load-theme-action
+        ;; Set modeline padding after running `load-theme'.
+        (advice-add 'load-theme
                     :after
                     (lambda (&rest _)
                       (mpereira/set-mode-line-padding)))))))
