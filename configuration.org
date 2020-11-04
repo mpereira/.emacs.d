@@ -4586,8 +4586,12 @@ fixes that.
 Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout-Parameters.html#Layout-Parameters][Layout Parameters]] documentation for configuring
 =company-box-frame-parameters= below.
 
+Since I upgraded Emacs to contain the frame border fix for macOS, company-box
+has been causing Emacs to die sporadically. Disabling it until I fix this.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package company-box
+  :disabled
   :after (company ivy-posframe)
   :hook (company-mode-hook . company-box-mode)
   :init
