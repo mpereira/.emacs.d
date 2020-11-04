@@ -494,7 +494,7 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 
 (setq mpereira/leader ",")
 
-(setq mpereira/light-theme 'doom-nord-light)
+(setq mpereira/light-theme 'doom-acario-light)
 (setq mpereira/dark-theme 'doom-tomorrow-night)
 (setq mpereira/initial-theme mpereira/dark-theme)
 
