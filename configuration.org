@@ -5734,7 +5734,8 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
   (add-hook 'python-mode-hook 'lsp)
   (add-hook 'rust-mode-hook (lambda ()
                               (lsp)
-                              (lsp-rust-analyzer-inlay-hints-mode)))
+                              (when lsp-mode
+                                (lsp-rust-analyzer-inlay-hints-mode))))
 
   (setq lsp-log-io t)
   (setq lsp-eldoc-enable-hover nil)
