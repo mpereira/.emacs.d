@@ -192,9 +192,7 @@ Vanilla evil emacs literate configuration.
   - [[#git-timemachine][git-timemachine]]
   - [[#browse-at-remote][browse-at-remote]]
 - [[#software-development][Software development]]
-  - [[#flycheck][Flycheck]]
-    - [[#flycheck][flycheck]]
-    - [[#flycheck-posframe][flycheck-posframe]]
+  - [[#flycheck][flycheck]]
   - [[#lsp][LSP]]
     - [[#lsp-mode][lsp-mode]]
     - [[#lsp-pyright][lsp-pyright]]
@@ -4505,7 +4503,7 @@ described above.
 (use-package ivy-posframe
   :after (ivy posframe)
   :custom
-  (ivy-posframe-border-width 5)
+  (ivy-posframe-border-width 1)
   (ivy-posframe-display-functions-alist '((swiper . ivy-display-function-fallback)
                                           (t . ivy-posframe-display-at-frame-center)))
   :config
@@ -4517,20 +4515,20 @@ described above.
 (use-package flycheck-posframe
   :after (flycheck posframe company)
   :config
-  (setq flycheck-posframe-border-width 15)
+  (setq flycheck-posframe-border-width 1)
 
   (add-to-list 'flycheck-posframe-inhibit-functions
                '(lambda (&rest _)
                   (bound-and-true-p company-backend)))
 
+  (flycheck-posframe-configure-pretty-defaults)
   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
 
-  (custom-set-faces
-   '(flycheck-posframe-background-face ((t (:inherit ivy-posframe))))
-   '(flycheck-posframe-border-face ((t (:foreground "orange"))))
-   '(flycheck-posframe-error-face ((t (:foreground "red"))))
-   '(flycheck-posframe-info-face ((t (:foreground "white"))))
-   '(flycheck-posframe-warning-face ((t (:foreground "skyblue"))))))
+  (set-face-attribute 'flycheck-posframe-background-face nil :inherit 'ivy-posframe)
+  (set-face-attribute 'flycheck-posframe-border-face nil :inherit 'ivy-posframe-border)
+  (set-face-attribute 'flycheck-posframe-warning-face nil :inherit 'flycheck-warning-list-warning)
+  (set-face-attribute 'flycheck-posframe-error-face nil :inherit 'flycheck-error-list-error)
+  (set-face-attribute 'flycheck-posframe-info-face nil :inherit 'flycheck-error-list-info))
 #+end_src
 
 ** too-long-lines-mode
@@ -5653,18 +5651,6 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
     (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
 
   (add-hook 'org-src-mode-hook #'mpereira/disable-emacs-lisp-checkdoc-checker))
-#+end_src
-
-*** flycheck-posframe
-TODO: use this as a fallback for LSP.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package flycheck-posframe
-  :disabled
-  :after (flycheck posframe)
-  :config
-  (flycheck-posframe-configure-pretty-defaults)
-  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
 #+end_src
 
 ** LSP
