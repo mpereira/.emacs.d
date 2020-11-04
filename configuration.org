@@ -7048,6 +7048,9 @@ reason or another.
 #+begin_src emacs-lisp :tangle yes
 (use-package counsel
   :after (ivy swiper)
+  :custom
+  (counsel-yank-pop-preselect-last t)
+  (counsel-yank-pop-separator "\n----\n")
   :config
   (counsel-mode 1)
 
@@ -7124,6 +7127,9 @@ recency" functionality for =M-x= from ivy-prescient.
   (ivy-use-selectable-prompt t)
   (ivy-height 20)
   (ivy-wrap t)
+  (ivy-height-alist '((counsel-evil-registers . 10)
+                      (counsel-yank-pop . 10)
+                      (counsel-git-log . 8)))
 
   :config
   (ivy-mode t))
