@@ -2101,13 +2101,12 @@ Source: https://git.io/vQKzv"
                        (or flycheck-current-errors
                            (eq 'running flycheck-last-status-change)))
               (concat
-               (cl-loop for state in '((error . "#FB4933")
-                                       (warning . "#FABD2F")
-                                       (info . "#83A598"))
+               (cl-loop for state in '((error . compilation-error)
+                                       (warning . compilation-warning)
+                                       (info . compilation-info))
                         as lighter = (mpereira/flycheck-lighter (car state))
                         when lighter
-                        concat (propertize lighter 'face `(:foreground
-                                                           ,(cdr state))))
+                        concat (propertize lighter 'face (cdr state)))
                " "))))
 
         (defconst mpereira/lsp
