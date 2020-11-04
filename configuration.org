@@ -7043,8 +7043,12 @@ recency" functionality for =M-x= from ivy-prescient.
 This seems to affect performance when there are lots of candidates, mostly via
 ~ivy-prescient-sort-function~.
 
+Disabled for now because it seems to be [[https://github.com/raxod502/prescient.el/issues/65][broken and unmaintained]] (as of
+[2020-09-06 Sun]).
+
 #+begin_src emacs-lisp :tangle yes
 (use-package ivy-prescient
+  :disabled
   :after (ivy counsel amx prescient)
   :config
   (ivy-prescient-mode))
