@@ -85,6 +85,7 @@ Vanilla evil emacs literate configuration.
     - [[#org-babel][org-babel]]
     - [[#prevent-oo-evil-open-belowabove-from-scrolling-window][Prevent o/O (evil-open-below/above) from scrolling window]]
   - [[#align-all-tags-in-the-buffer-on-tag-changes][Align all tags in the buffer on tag changes]]
+  - [[#paste-images-in-the-clipboard-directly-into-org-buffers][Paste images in the clipboard directly into org buffers]]
   - [[#sort-org-entries-by-multiple-properties][Sort org entries by multiple properties]]
   - [[#org-clock][Org clock]]
   - [[#org-gcal][org-gcal]]
@@ -2731,6 +2732,22 @@ https://github.com/emacs-evil/evil/issues/1068
     (org-align-tags t)))
 
 (add-hook 'org-after-tags-change-hook #'mpereira/org-align-all-tags)
+#+end_src
+
+** Paste images in the clipboard directly into org buffers
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/org-paste-clipboard-image ()
+  "TODO: docstring."
+  (interactive)
+  (if (executable-find "pngpaste")
+      (let ((image-file (concat temporary-file-directory
+                                (make-temp-name "org-image-paste-")
+                                ".png")))
+        (call-process-shell-command (concat "pngpaste " image-file))
+        (insert (concat  "#+CAPTION: " (read-string "Caption: ") "\n"))
+        (insert (format "[[file:%s]]" image-file))
+        (org-display-inline-images))
+    (message "Requires pngpaste in PATH")))
 #+end_src
 
 ** Sort org entries by multiple properties
