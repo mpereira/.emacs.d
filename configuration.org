@@ -1064,7 +1064,7 @@ in any structured movement package is mind-boggling to me."
         (interactive)
         (if (projectile-project-p)
             (counsel-projectile-find-file)
-          (mpereira/remote-project-fd)))
+          (fast-project-find-file)))
 
       (defun mpereira/maybe-projectile-find-directory ()
         (interactive)
@@ -2065,14 +2065,14 @@ This doesn't seem to be working.
                   (directory-face 'italic)
                   (buffer-name-face 'bold)
                   (modified-or-ro-symbol-face 'font-lock-comment-face)
-                  (directory (if (and buffer-file-name
-                                      (projectile-project-p))
-                                 (mpereira/short-directory-path
-                                  (mpereira/buffer-project-directory
-                                   (projectile-project-root)
-                                   default-directory)
-                                  mpereira/mode-line-max-directory-length)
-                               "")))
+                  (directory (let ((project-root (fast-project-find-file-project-root)))
+                               (if (and buffer-file-name project-root)
+                                   (mpereira/short-directory-path
+                                    (mpereira/buffer-project-directory
+                                     project-root
+                                     default-directory)
+                                    mpereira/mode-line-max-directory-length)
+                                 ""))))
               (concat
                (propertize " " 'face buffer-name-face)
                (propertize (format "%s" directory) 'face directory-face)
