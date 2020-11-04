@@ -5926,6 +5926,13 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 
   (add-hook 'after-init-hook 'global-company-mode)
 
+  (setq company-backends '((company-capf company-tabnine)
+                           company-cmake
+                           company-clang
+                           company-files
+                           (company-dabbrev-code company-gtags company-etags company-keywords)
+                           company-dabbrev))
+
   (setq company-idle-delay nil)
   (setq company-require-match 'never)
   (setq company-tooltip-align-annotations t)
