@@ -6733,6 +6733,19 @@ Also start them in Org mode.
           ("\\* Merriam-Webster Thesaurus \\*"
            (display-buffer-below-selected))
 
+          ;; File-specific magit-log buffer.
+          ;; magit-log(branch-name -- path/to/file.ext): project-name
+          ("magit-log(.+): .+"
+           (display-buffer-below-selected))
+
+          ;; Clicking on a revision in a file-specific magit-log buffer.
+          ;; magit-revision: project-name
+          ("magit-revision: .+"
+           (display-buffer-same-window))
+
+          ("\\*compilation\\*"
+           (display-buffer-below-selected))
+
           ("\\*mpereira/pp-macroexpand-all\\*"
            (display-buffer-in-side-window)
            (window-height . 0.5)
