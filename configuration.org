@@ -509,6 +509,10 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 ;; Empirically, 2 seconds seems to be good enough.
 (setq mpereira/org-gcal-request-timeout 2)
 
+(setq mpereira/magit-status-width 120)
+
+(setq mpereira/org-agenda-width 120)
+
 (setq mpereira/fill-column 80)
 (setq mpereira/fill-column-wide 120)
 
@@ -2869,8 +2873,6 @@ giving priority to CREATED:
 ;; Full screen org-agenda.
 (setq org-agenda-window-setup 'only-window)
 
-(add-hook 'org-agenda-finalize-hook #'olivetti-mode)
-
 ;; Don't destroy window splits.
 (setq org-agenda-restore-windows-after-quit t)
 ;; Show only the current instance of a repeating timestamp.
@@ -2878,7 +2880,7 @@ giving priority to CREATED:
 ;; Don't look for free-form time string in headline.
 (setq org-agenda-search-headline-for-time nil)
 
-(setq org-agenda-tags-column -120)
+(setq org-agenda-tags-column (* -1 mpereira/org-agenda-width))
 
 (setq org-agenda-format-date 'mpereira/org-agenda-format-date)
 
@@ -3334,8 +3336,12 @@ lines in the block (excluding the line with
                                       (list
                                        "c" "Main agenda"
                                        settings
-                                       '((org-agenda-block-separator ?\-))))))
+                                       `((org-agenda-block-separator
+                                          ,(s-repeat mpereira/org-agenda-width "-")))))))
     (org-agenda nil "c")
+    (with-current-buffer (get-buffer mpereira/main-org-agenda-buffer-name)
+      (setq-local olivetti-body-width mpereira/org-agenda-width)
+      (olivetti-mode))
     (setq mpereira/main-org-agenda-last-built (ts-now))))
 
 (defun mpereira/open-or-build-main-org-agenda ()
@@ -3418,8 +3424,12 @@ otherwise."
                                       (list
                                        "c" "Review agenda"
                                        settings
-                                       '((org-agenda-block-separator ?\-))))))
+                                       `((org-agenda-block-separator
+                                          ,(s-repeat mpereira/org-agenda-width "-")))))))
     (org-agenda nil "c")
+    (with-current-buffer (get-buffer mpereira/review-org-agenda-buffer-name)
+      (setq-local olivetti-body-width mpereira/org-agenda-width)
+      (olivetti-mode))
     (setq mpereira/review-org-agenda-last-built (ts-now))))
 
 (defun mpereira/open-or-build-review-org-agenda ()
@@ -5350,10 +5360,14 @@ the agent.
   ;; ediff starts by default in a new frame. Don't do that.
   (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
-  (add-hook 'magit-status-mode-hook #'olivetti-mode)
-
   ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
   (setq magit-list-refs-sortby "-creatordate")
+
+
+  (add-hook 'magit-status-mode-hook
+            (lambda ()
+              (setq-local olivetti-body-width mpereira/magit-status-width)
+              (olivetti-mode)))
 
   (setq magit-blame-styles '((headings
                               (heading-format . "%-20a %C %s\n"))
