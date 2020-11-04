@@ -2182,6 +2182,7 @@ Source: https://git.io/vQKzv"
   (setq evil-move-beyond-eol nil)
 
   :config
+  (add-hook 'after-init-hook 'evil-normalize-keymaps)
   (evil-mode t)
 
   ;; Don't create a kill entry on every visual movement.
