@@ -5918,10 +5918,11 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 #+begin_src emacs-lisp :tangle yes
 (use-package company
   :config
-  (setq company-global-modes '(not eshell-mode
-                                   comint-mode
+  (setq company-global-modes '(not comint-mode
+                                   eshell-mode
+                                   help-mode
                                    message-mode
-                                   help-mode))
+                                   org-mode))
 
   (add-hook 'after-init-hook 'global-company-mode)
 
