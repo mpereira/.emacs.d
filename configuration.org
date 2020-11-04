@@ -7724,6 +7724,8 @@ INFO is a plist used as a communication channel."
 
 ;; d -> describe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; And ",dd" for dired!
+
 ;; REVIEW: "d" is too good of a key for these bindinds that I never use.
 (general-define-key
  :keymaps '(global-map)
@@ -7731,6 +7733,7 @@ INFO is a plist used as a communication channel."
  :prefix mpereira/leader
  :infix "d"
  "b" #'describe-buffer
+ "d" #'dired-jump
  "f" #'find-function-on-key
  "k" #'describe-key
  "m" #'describe-mode)
