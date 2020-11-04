@@ -2422,7 +2422,7 @@ the same as the =ivy-posframe= one.
                                     "CANCELLED(c@/!)")))
 
 (setq org-capture-templates
-      '(("t" "Inbox" entry
+      '(("t" "To-do" entry
          (file "inbox.org")
          "* TODO %i%?")
         ("c" "Calendar" entry
@@ -3246,7 +3246,9 @@ lines in the block (excluding the line with
     (let* ((blank-line-re "^\\s-*$")
            (content-line-count (if (looking-at-p blank-line-re) 0 1))
            (start-pos (point))
-           (block-re (format "%c\\{10,\\}" org-agenda-block-separator)))
+           (block-re (if (stringp org-agenda-block-separator)
+                         org-agenda-block-separator
+                       (format "%c\\{10,\\}" org-agenda-block-separator))))
       (while (and (not (eobp)) (forward-line))
         (cond
          ((looking-at-p block-re)
@@ -3384,7 +3386,8 @@ otherwise."
     (setq mpereira/main-org-agenda-previous-window-configuration
           (current-window-configuration))
     (setq mpereira/main-org-agenda-previous-point (point))
-    (if (bufferp org-agenda-buffer)
+    (if (and (bufferp org-agenda-buffer)
+             mpereira/main-org-agenda-last-built)
         (progn
           (switch-to-buffer org-agenda-buffer)
           (delete-other-windows)
