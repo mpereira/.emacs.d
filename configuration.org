@@ -5368,14 +5368,15 @@ the agent.
 (use-package magit
   :config
   (setq magit-diff-refine-hunk 'all)
-  (setq magit-prefer-remote-upstream t)
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
-  ;; ediff starts by default in a new frame. Don't do that.
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq magit-prefer-remote-upstream t)
+  (setq magit-refresh-verbose t)
 
   ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
   (setq magit-list-refs-sortby "-creatordate")
 
+  ;; ediff starts by default in a new frame. Don't do that.
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
   (add-hook 'magit-status-mode-hook
             (lambda ()
