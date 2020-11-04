@@ -2374,6 +2374,8 @@ the same as the =ivy-posframe= one.
 
 (setq org-log-done 'time)
 
+(setq org-image-actual-width 640)
+
 ;; When this is set to `nil':
 ;; - `org-insert-heading' will insert a heading *before* the current heading.
 ;; - `org-insert-heading-after-current' will insert a heading *after* the
@@ -5608,8 +5610,7 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
 #+end_src
 
 * Software development
-** Flycheck
-*** flycheck
+** flycheck
 #+begin_src emacs-lisp :tangle yes
 (use-package flycheck
   :config
