@@ -2334,7 +2334,8 @@ the same as the =ivy-posframe= one.
                                                     nil
                                                     t))))
 
-  (add-hook 'after-init-hook 'mpereira/update-evil-owl-posframe-args)
+  ;; This needs to run after the initial theme load.
+  (add-hook 'after-init-hook 'mpereira/update-evil-owl-posframe-args 'append)
   (add-hook 'after-load-theme-hook 'mpereira/update-evil-owl-posframe-args)
 
   (evil-owl-mode))
@@ -4412,14 +4413,23 @@ A ~M-x disable-theme~ followed by a ~M-x load-theme~ is required after changing
 the default font size with ~default-text-scale-increase~ and
 ~default-text-scale-decrease~.
 
-TODO: make font sizes be calculated from one value and fix the scenario
-described above.
+I tried using ~frame-text-cols~ to get the frame width in characters, but it
+seems that its return value only changes after there has been some user
+interaction with the frame (like switching buffers), even after the font size
+has been changed programmatically. Because of this, I fell back to using
+
+#+begin_src emacs-lisp
+(/ (frame-text-width)
+   (frame-char-width))
+#+end_src
+
+to get the actual frame width in characters.
 
 #+begin_src emacs-lisp :tangle yes
 (setq mpereira/font-family "Hack")
 (setq mpereira/font-size-external-monitor 190)
-(setq mpereira/font-size-external-monitor-posframe-width-multiplier 0.4)
-(setq mpereira/font-size-laptop 170)
+(setq mpereira/font-size-external-monitor-posframe-width-multiplier 0.3)
+(setq mpereira/font-size-laptop 150)
 (setq mpereira/font-size-laptop-posframe-width-multiplier 0.5)
 (setq mpereira/font-size-posframe-minimum-width 100)
 
@@ -4429,16 +4439,25 @@ described above.
   (interactive)
   (let* ((default-font-family (face-attribute 'default :family))
          (company-box-icon-size-pixels (truncate (/ new-font-size 10)))
-         (ivy-posframe-width-multiplier 0.3)
+         (frame-column-width (/ (frame-text-width)
+                                (frame-char-width)))
+         (ivy-posframe-width-multiplier 0.5)
          (ivy-posframe-font-size-multiplier 1.2)
          (ivy-posframe-font-size (truncate (* ivy-posframe-font-size-multiplier
                                               (/ new-font-size 10)))))
     (with-eval-after-load "ivy-posframe"
+      (message (format "setting ivy-posframe-font to '%s'"
+                       (format "%s %s"
+                               default-font-family
+                               ivy-posframe-font-size)))
       (setq ivy-posframe-font (format "%s %s"
                                       default-font-family
                                       ivy-posframe-font-size))
+      (message (format "setting ivy-posframe-width to '%d'"
+                       (truncate (* ivy-posframe-width-multiplier
+                                    frame-column-width))))
       (setq ivy-posframe-width (truncate (* ivy-posframe-width-multiplier
-                                            (frame-text-cols)))))
+                                            frame-column-width))))
     (with-eval-after-load "company-box"
       ;; FIXME: no effect?
       (company-box-icons-resize company-box-icon-size-pixels))))
@@ -4446,9 +4465,19 @@ described above.
 (defun mpereira/font-size-change (change-fn)
   (interactive)
   (let* ((previous-default-font-size (face-attribute 'default :height))
+         (_ (message "frame-column-width before: %d" (/ (frame-text-width)
+                                                        (frame-char-width))))
          (_ (funcall change-fn previous-default-font-size))
+         (_ (message "frame-column-width after: %d" (/ (frame-text-width)
+                                                       (frame-char-width))))
          (increased-default-font-size (face-attribute 'default :height)))
     (mpereira/font-size-handle-change increased-default-font-size)))
+
+(add-hook 'after-setting-font-hook
+          (lambda ()
+            (message "frame-column-width after after-setting-font-hook: %d"
+                     (/ (frame-text-width)
+                        (frame-char-width)))))
 
 (defun mpereira/font-size-increase ()
   (interactive)
@@ -4467,25 +4496,28 @@ described above.
      (let ((delta (- desired-font-size actual-font-size)))
        (default-text-scale-increment delta)))))
 
-(defun mpereira/font-size-set-preset (font-size posframe-width-multiplier)
+(defun mpereira/font-size-set-preset (font-size
+                                      posframe-width-multiplier
+                                      reload-theme?)
   (mpereira/font-size-set font-size)
-  (with-eval-after-load "ivy-posframe"
-    (setq ivy-posframe-width
-          (max mpereira/font-size-posframe-minimum-width
-               (truncate (* posframe-width-multiplier (frame-text-cols))))))
-  (counsel-load-theme-action (symbol-name (car custom-enabled-themes))))
+  (when reload-theme?
+    (when-let ((current-theme (car custom-enabled-themes)))
+      (disable-theme (symbol-name (car custom-enabled-themes)))
+      (load-theme current-theme))))
 
 (defun mpereira/font-size-set-external-monitor ()
   (interactive)
   (mpereira/font-size-set-preset
    mpereira/font-size-external-monitor
-   mpereira/font-size-external-monitor-posframe-width-multiplier))
+   mpereira/font-size-external-monitor-posframe-width-multiplier
+   (called-interactively-p 'any)))
 
 (defun mpereira/font-size-set-laptop ()
   (interactive)
   (mpereira/font-size-set-preset
    mpereira/font-size-laptop
-   mpereira/font-size-laptop-posframe-width-multiplier))
+   mpereira/font-size-laptop-posframe-width-multiplier
+   (called-interactively-p 'any)))
 
 (defun mpereira/font-initialize ()
   (interactive)
@@ -4564,38 +4596,14 @@ Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout
   (setq company-box-show-single-candidate t)
   (setq company-tooltip-align-annotations t)
 
-  (defun mpereira/company-box-doc-set-frame-parameters ()
+  (setq company-box-doc-frame-parameters
+        `((internal-border-width . ,ivy-posframe-border-width)))
+
+  (defun mpereira/company-box-doc-sync-frame-with-current-theme ()
     "TODO: docstring."
     (interactive)
-    (setq company-box-frame-parameters
-          '((left . -1)
-            (no-accept-focus . t)
-            (no-focus-on-map . t)
-            (min-width . 0)
-            (width . 0)
-            (min-height . 0)
-            (height . 0)
-            (internal-border-width . 1)
-            (vertical-scroll-bars)
-            (horizontal-scroll-bars)
-            (left-fringe . 0)
-            (right-fringe . 0)
-            (menu-bar-lines . 0)
-            (tool-bar-lines . 0)
-            (line-spacing . 0)
-            (undecorated . t)
-            (top . -1)
-            (visibility)
-            (mouse-wheel-frame)
-            (no-other-frame . t)
-            (cursor-type)
-            (drag-internal-border . t)
-            (left-fringe . 0)
-            (right-fringe . 0)
-            (no-special-glyphs . t)))
     (setq company-box-doc-frame-parameters
-          `((internal-border-width . 10)
-            (background-color . ,(face-attribute 'ivy-posframe :background nil t))
+          `((background-color . ,(face-attribute 'ivy-posframe :background nil t))
             (foreground-color . ,(face-attribute 'ivy-posframe :foreground nil t))
             (internal-border-width . ,ivy-posframe-border-width)
             (internal-border-color . ,(face-attribute 'ivy-posframe-border
@@ -4603,28 +4611,27 @@ Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout
                                                       nil
                                                       t)))))
 
-  (defun mpereira/company-box-delete-frames-and-update-parameters ()
+  (defun mpereira/company-box-update-frames-and-parameters ()
     "TODO: docstring."
     (interactive)
-    (delete-frame (company-box--get-frame))
-    (set-frame-parameter nil 'company-box-frame nil)
-    (delete-frame (frame-parameter nil 'company-box-doc-frame))
-    (set-frame-parameter nil 'company-box-doc-frame nil)
-    (mpereira/company-box-doc-set-frame-parameters))
+    (mpereira/company-box-doc-sync-frame-with-current-theme)
+    (company-box--set-frame (company-box--make-frame (company-box--get-buffer)))
+    (frame-local-setq company-box-doc-frame
+                      (company-box-doc--make-frame (company-box--get-buffer
+                                                    "doc"))))
 
-  ;; This `after-init-hook' hook needs to run after the one setting the theme.
-  (add-hook 'after-init-hook 'mpereira/company-box-doc-set-frame-parameters t)
-  (add-hook 'after-load-theme-hook 'mpereira/company-box-delete-frames-and-update-parameters)
-
-  :config
-  ;; Make company-box redraw popup on different movements than line up/down.
-  ;; https://github.com/sebastiencs/company-box/issues/58#issuecomment-573317553
-  (advice-add 'company-next-page :after #'company-box--change-line)
-  (advice-add 'company-previous-page :after #'company-box--change-line)
-  (advice-add 'company-search-candidates :after #'company-box--change-line)
-  (advice-add 'company-filter-candidates :after #'company-box--change-line)
-  (advice-add 'company-search-repeat-forward :after #'company-box--change-line)
-  (advice-add 'company-search-repeat-backward :after #'company-box--change-line))
+  ;; FIXME: this is causing the company-box frame to have a small,
+  ;; non-expandable width.
+  ;; (add-hook 'after-init-hook
+  ;;           (lambda (&optional _)
+  ;;             ;; This needs to run after the hook that sets the initial theme.
+  ;;             (mpereira/company-box-doc-sync-frame-with-current-theme)
+  ;;             ;; Adding this hook only after Emacs startup so that the initial
+  ;;             ;; theme setting doesn't trigger it. It was causing the
+  ;;             ;; company-box frame width to be truncated, for some reason.
+  ;;             (add-hook 'after-load-theme-hook 'mpereira/company-box-update-frames-and-parameters))
+  ;;           'append)
+  )
 #+end_src
 
 ** minibuffer-line
