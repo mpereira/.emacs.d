@@ -1,6 +1,4 @@
-# EMACS_VERSION := 26.3
-# EMACS := /Applications/Emacs-$(EMACS_VERSION).app/Contents/MacOS/Emacs
-EMACS						:= emacs
+EMACS						:= $(shell readlink -f $(shell which emacs))
 COPY_DIRECTORY	:= rsync -rhqr
 
 PROJECT_ROOT				:= $(shell pwd)
