@@ -294,6 +294,7 @@ Vanilla evil emacs literate configuration.
   - [[#grip-mode][grip-mode]]
 - [[#interactions-with-websites][Interactions with websites]]
   - [[#counsel-web][counsel-web]]
+  - [[#elfeed][elfeed]]
   - [[#stackoverflow][stackoverflow]]
   - [[#google-this][google-this]]
   - [[#wolfram-alpha][Wolfram Alpha]]
@@ -7153,6 +7154,13 @@ This seems to affect performance when there are lots of candidates, mostly via
   :quelpa (counsel-web
            :fetcher github
            :repo "mnewt/counsel-web"))
+#+end_src
+
+** elfeed
+#+begin_src emacs-lisp :tangle yes
+(use-package elfeed
+  :custom
+  (elfeed-feeds '("https://aphyr.com/posts.atom")))
 #+end_src
 
 ** stackoverflow
