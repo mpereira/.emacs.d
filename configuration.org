@@ -2195,6 +2195,12 @@ Source: https://git.io/vQKzv"
 (use-package evil-org
   :after evil org
   :config
+  ;; evil-org unconditionally remaps `evil-quit' to `org-edit-src-abort' which I
+  ;; don't like because it results in `evil-quit' keybinding invocations to not
+  ;; quit the window.
+  (when (command-remapping 'evil-quit nil org-src-mode-map)
+    (define-key org-src-mode-map [remap evil-quit] nil))
+
   (add-hook 'org-mode-hook 'evil-org-mode)
   (add-hook 'evil-org-mode-hook
             (lambda ()
