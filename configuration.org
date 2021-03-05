@@ -1,17 +1,51 @@
-#+TITLE: mpereira's emacs configuration
+#+TITLE: mpereira's Emacs configuration
 #+AUTHOR: Murilo Pereira <murilo@murilopereira.com>
 
 :PROPERTIES:
 :TOC:      ignore
 :END:
 
-Vanilla evil emacs literate configuration.
+This is my vanilla, [[https://github.com/emacs-evil/evil][Evil]], literate Emacs configuration. It enables most of my
+computing needs, since most of the time I'm on a computer I'm on Emacs.
+
+It can be found at https://github.com/mpereira/.emacs.d.
+
+If you'd like to know more about my relationship with Emacs, check out this
+thing I wrote: /[[https://www.murilopereira.com/how-to-open-a-file-in-emacs/][How to open a file in Emacs]]: a short story about Lisp,
+technology, and human progress/.
+
+One day I'll include some screenshots here.
+
+* Installing Emacs
+
+I mostly use GUI Emacs on macOS. For work I use TUI Emacs on Ubuntu via SSH. On
+macOS I install the excellent [[https://github.com/daviderestivo/homebrew-emacs-head][homebrew-emacs-head]] package created by [[https://github.com/daviderestivo][Davide
+Restivo]]:
+
+#+begin_src bash
+brew install emacs-head@28 \
+     --with-cocoa \
+     --with-imagemagick \
+     --with-modern-icon-pen \
+     --with-native-comp \
+     --with-no-frame-refocus \
+     --with-pdumper \
+     --with-xwidgets
+#+end_src
+
+On Ubuntu I install [[https://github.com/alexmurray][Alex Murray]]'s [[https://github.com/alexmurray/emacs-snap][GNU Emacs Snap package]] based on the
+"latest/edge" channel, which comes with =native-comp= and works great:
+
+#+begin_src bash
+sudo snap install emacs --edge --classic
+#+end_src
 
 * Table of Contents
 :PROPERTIES:
 :TOC:      :include all :depth 3
 :END:
 :CONTENTS:
+- [[#installing-emacs][Installing Emacs]]
 - [[#table-of-contents][Table of Contents]]
 - [[#dependencies][Dependencies]]
 - [[#silent-exports-for-emacs-lisp-org-babel-code-blocks][Silent exports for emacs lisp org babel code blocks]]
