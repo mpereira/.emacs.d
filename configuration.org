@@ -10,6 +10,9 @@ computing needs, since most of the time I'm on a computer I'm on Emacs.
 
 It can be found at https://github.com/mpereira/.emacs.d.
 
+I wouldn't recommend others to use this configuration as-is. I'm sure there are
+sections, snippets, or settings that might be interesting, though.
+
 If you'd like to know more about my relationship with Emacs, check out this
 thing I wrote: /[[https://www.murilopereira.com/how-to-open-a-file-in-emacs/][How to open a file in Emacs]]: a short story about Lisp,
 technology, and human progress/.
@@ -74,6 +77,7 @@ sudo snap install emacs --edge --classic
   - [[#standard-library-type-of-things][Standard library type of things]]
   - [[#miscellaneous][Miscellaneous]]
 - [[#toggle-buffer-maximize][Toggle buffer maximize]]
+- [[#native-compilation][Native compilation]]
 - [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
 - [[#tramp][Tramp]]
   - [[#counsel-tramp][counsel-tramp]]
@@ -95,13 +99,12 @@ sudo snap install emacs --edge --classic
   - [[#explain-pause-mode][explain-pause-mode]]
 - [[#color-themes][Color themes]]
   - [[#create-hook-for-theme-change][Create hook for theme change]]
-  - [[#change-themes-when-changing-macos-light-or-dark-appearance][Change themes when changing MacOS light or dark appearance]]
+  - [[#change-themes-when-changing-macos-light-or-dark-appearance][Change themes when changing macOS light or dark appearance]]
 - [[#configure-mode-line][Configure Mode Line]]
 - [[#configure-header-line][Configure Header Line]]
 - [[#vi-emulation][Vi emulation]]
   - [[#evil][evil]]
   - [[#evil-org][evil-org]]
-  - [[#evil-magit][evil-magit]]
   - [[#evil-exchange][evil-exchange]]
   - [[#evil-nerd-commenter][evil-nerd-commenter]]
   - [[#evil-surround][evil-surround]]
@@ -115,9 +118,6 @@ sudo snap install emacs --edge --classic
 - [[#org][Org]]
   - [[#org-mode][org-mode]]
   - [[#org-babel][Org Babel]]
-    - [[#verb][verb]]
-    - [[#org-babel][org-babel]]
-    - [[#prevent-oo-evil-open-belowabove-from-scrolling-window][Prevent o/O (evil-open-below/above) from scrolling window]]
   - [[#align-all-tags-in-the-buffer-on-tag-changes][Align all tags in the buffer on tag changes]]
   - [[#paste-images-in-the-clipboard-directly-into-org-buffers][Paste images in the clipboard directly into org buffers]]
   - [[#sort-org-entries-by-multiple-properties][Sort org entries by multiple properties]]
@@ -125,13 +125,10 @@ sudo snap install emacs --edge --classic
   - [[#org-gcal][org-gcal]]
   - [[#org-agenda][Org agenda]]
   - [[#my-custom-persistent-cached-org-agendas][My custom persistent (cached) org agendas]]
-    - [[#agenda-library][Agenda library]]
-    - [[#main-agenda][Main agenda]]
-    - [[#review-agenda][Review agenda]]
-    - [[#common][Common]]
   - [[#shrface][shrface]]
   - [[#outshine][outshine]]
   - [[#counsel-org-clock][counsel-org-clock]]
+  - [[#org-download][org-download]]
   - [[#org-web-tools][org-web-tools]]
   - [[#org-expiry][org-expiry]]
   - [[#org-bullets][org-bullets]]
@@ -169,12 +166,12 @@ sudo snap install emacs --edge --classic
   - [[#load-bash-alias][load-bash-alias]]
 - [[#ui][UI]]
   - [[#settings][Settings]]
-    - [[#make-profiler-report-columns-wider][Make profiler report columns wider]]
   - [[#default-text-scale][default-text-scale]]
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
   - [[#ivy-posframe][ivy-posframe]]
   - [[#flycheck-posframe][flycheck-posframe]]
+  - [[#so-long][so-long]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
   - [[#company-box][company-box]]
   - [[#minibuffer-line][minibuffer-line]]
@@ -189,7 +186,6 @@ sudo snap install emacs --edge --classic
   - [[#all-the-icons-dired][all-the-icons-dired]]
   - [[#emojify][emojify]]
   - [[#ivy-rich][ivy-rich]]
-    - [[#run-ivy-rich-mode-only-after-loading-all-the-icons-ivy-rich][Run ivy-rich-mode only after loading all-the-icons-ivy-rich]]
   - [[#all-the-icons-ivy-rich][all-the-icons-ivy-rich]]
 - [[#movement][Movement]]
   - [[#bm][bm]]
@@ -202,6 +198,7 @@ sudo snap install emacs --edge --classic
   - [[#swiper][swiper]]
   - [[#ripgrep][ripgrep]]
   - [[#wgrep][wgrep]]
+  - [[#string-edit][string-edit]]
   - [[#double-saber][double-saber]]
   - [[#symbol-overlay][symbol-overlay]]
   - [[#expand-region][expand-region]]
@@ -219,6 +216,7 @@ sudo snap install emacs --edge --classic
   - [[#prettier][prettier]]
 - [[#git][git]]
   - [[#magit][magit]]
+  - [[#libegit2-and-magit-libjit][libegit2 and magit-libjit]]
   - [[#forge][forge]]
   - [[#magit-todos][magit-todos]]
   - [[#a-vscode-git-lens-type-of-thing][A VSCode git lens type of thing]]
@@ -230,44 +228,22 @@ sudo snap install emacs --edge --classic
 - [[#software-development][Software development]]
   - [[#flycheck][flycheck]]
   - [[#lsp][LSP]]
-    - [[#lsp-mode][lsp-mode]]
-    - [[#lsp-pyright][lsp-pyright]]
-    - [[#lsp-pyls][lsp-pyls]]
-    - [[#lsp-python-ms][lsp-python-ms]]
-    - [[#lsp-ui][lsp-ui]]
-    - [[#lsp-ivy][lsp-ivy]]
   - [[#company][company]]
   - [[#aggressive-indent][aggressive-indent]]
   - [[#lisp][LISP]]
-    - [[#lispy][lispy]]
-    - [[#lispyville][lispyville]]
   - [[#emacs-lisp][Emacs Lisp]]
   - [[#java][Java]]
   - [[#clojure][Clojure]]
-    - [[#clojure-mode][clojure-mode]]
-    - [[#clj-refactor][clj-refactor]]
-    - [[#inf-clojure][inf-clojure]]
-    - [[#cider][cider]]
   - [[#go][Go]]
-    - [[#go-mode][go-mode]]
   - [[#rust][Rust]]
-    - [[#rust-mode][rust-mode]]
-    - [[#flycheck-rust][flycheck-rust]]
-    - [[#ob-rust][ob-rust]]
   - [[#kotlin][Kotlin]]
-    - [[#kotlin-mode][kotlin-mode]]
-    - [[#flycheck-kotlin][flycheck-kotlin]]
   - [[#c][C#]]
   - [[#javascript][JavaScript]]
+  - [[#typescript][TypeScript]]
   - [[#shell-script][Shell script]]
   - [[#python][Python]]
-    - [[#elpy][elpy]]
   - [[#json][JSON]]
-    - [[#json-mode][json-mode]]
-    - [[#json-navigator][json-navigator]]
-    - [[#json-snatcher][json-snatcher]]
   - [[#scala][Scala]]
-    - [[#scala-mode][scala-mode]]
   - [[#sql][SQL]]
   - [[#terraform-mode][terraform-mode]]
   - [[#docker][docker]]
@@ -281,7 +257,11 @@ sudo snap install emacs --edge --classic
   - [[#css][css]]
   - [[#js2-refactor][js2-refactor]]
   - [[#rjsx-mode][rjsx-mode]]
+- [[#multimedia][Multimedia]]
+  - [[#pdf-tools][pdf-tools]]
+  - [[#screenshot][screenshot]]
 - [[#writing-prose][Writing prose]]
+  - [[#grammarly][Grammarly]]
   - [[#flyspell][flyspell]]
   - [[#flyspell-correct-ivy][flyspell-correct-ivy]]
   - [[#mw-thesaurus][mw-thesaurus]]
@@ -329,6 +309,8 @@ sudo snap install emacs --edge --classic
   - [[#grip-mode][grip-mode]]
 - [[#interactions-with-websites][Interactions with websites]]
   - [[#counsel-web][counsel-web]]
+  - [[#emacs-webkit][emacs-webkit]]
+  - [[#xwwp-follow-link][xwwp-follow-link]]
   - [[#elfeed][elfeed]]
   - [[#stackoverflow][stackoverflow]]
   - [[#google-this][google-this]]
@@ -351,8 +333,6 @@ sudo snap install emacs --edge --classic
   - [[#org-mode-file-links-to-search-patterns-cant-start-with-open-parens][org mode file links to search patterns can't start with open parens]]
   - [[#expression-can-be-used-only-once-per-org-agenda-prefix-format][EXPRESSION can be used only once per org-agenda-prefix-format]]
   - [[#emulate-c-u-universal-argument][Emulate C-u (universal-argument)]]
-    - [[#for-raw-prefix-arg-interactive-p][For raw prefix arg (interactive "P")]]
-    - [[#otherwise][Otherwise]]
   - [[#after-modifying-path][After modifying PATH]]
   - [[#terminate-initel-loading-early][Terminate init.el loading early]]
   - [[#change-font-m-x-x-select-font][Change font: M-x x-select-font]]
@@ -530,8 +510,8 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
 
 (setq mpereira/leader ",")
 
-(setq mpereira/light-theme 'doom-acario-light)
-(setq mpereira/dark-theme 'doom-tomorrow-night)
+(setq mpereira/light-theme 'doom-homage-white)
+(setq mpereira/dark-theme 'doom-homage-black)
 (setq mpereira/initial-theme mpereira/dark-theme)
 
 (setq mpereira/dropbox-directory (file-name-as-directory
@@ -1227,7 +1207,7 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
         (t (narrow-to-defun))))
 
 (defun mpereira/uuid ()
-  "Return a UUID."
+  "Return a UUID and make it the latest kill in the kill ring."
   (interactive)
   (kill-new (format "%04x%04x-%04x-%04x-%04x-%06x%06x"
                     (random (expt 16 4))
@@ -1410,6 +1390,18 @@ no duplicate or conflicting entries."
              ((symbol-function #'org-current-effective-time)
               #'(lambda () my-current-time)))
     (org-todo arg)))
+
+(defun iso8601-date-string ()
+  "TODO: docstring."
+  (interactive)
+  (let* ((time-zone-part (format-time-string "%z"))
+         (iso8601-date-string (concat
+                               (format-time-string "%Y-%m-%dT%T")
+                               (substring time-zone-part 0 3)
+                               ":"
+                               (substring time-zone-part 3 5))))
+    (message iso8601-date-string)
+    (kill-new iso8601-date-string)))
 #+end_src
 
 * Toggle buffer maximize
@@ -1447,6 +1439,13 @@ configuration."
         (call-interactively 'olivetti-mode)))))
 #+end_src
 
+* Native compilation
+#+begin_src emacs-lisp :tangle yes
+(use-package emacs
+  :custom
+  (comp-async-report-warnings-errors nil))
+#+end_src
+
 * Reload directory local variables when saving .dir-locals.el files
 Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 
@@ -1478,9 +1477,6 @@ Taken from [[https://emacs.stackexchange.com/a/13096][Stack Overflow]].
 #+end_src
 
 * Tramp
-:PROPERTIES:
-:CREATED:  [2020-08-17 Mon 20:18]
-:END:
 #+begin_src emacs-lisp :tangle yes
 (require 'tramp)
 #+end_src
@@ -1570,6 +1566,9 @@ freezes.
 ;; Don't append customizations to init.el.
 (setq custom-file mpereira/custom-file)
 (load custom-file 'noerror)
+
+;; Don't ask whether custom themes are safe.
+(setq custom-safe-themes t)
 
 ;; Avoid loading old bytecode instead of newer source.
 (setq load-prefer-newer t)
@@ -1996,8 +1995,6 @@ My favorite light themes:
 8. =espresso=
 
 #+begin_src emacs-lisp :tangle yes
-(setq custom-safe-themes t) ;; Don't ask whether custom themes are safe.
-
 (use-package material-theme :defer t)
 (use-package monokai-theme :defer t)
 (use-package github-theme :defer t)
@@ -2005,22 +2002,11 @@ My favorite light themes:
 (use-package nimbus-theme :defer t)
 (use-package espresso-theme :defer t)
 (use-package twilight-bright-theme :defer t)
+(use-package modus-themes :defer t)
 (use-package doom-themes
   :defer t
   :config
   (doom-themes-org-config))
-(use-package modus-operandi-theme
-  :ensure nil
-  :defer t
-  :quelpa (modus-operandi-theme
-           :fetcher gitlab
-           :repo "protesilaos/modus-themes"))
-(use-package modus-vivendi-theme
-  :ensure nil
-  :defer t
-  :quelpa (modus-vivendi-theme
-           :fetcher gitlab
-           :repo "protesilaos/modus-themes"))
 (use-package tron-legacy-theme
   :ensure nil
   :defer t
@@ -2051,7 +2037,7 @@ My favorite light themes:
   (run-hooks 'after-load-theme-hook))
 #+end_src
 
-** Change themes when changing MacOS light or dark appearance
+** Change themes when changing macOS light or dark appearance
 This doesn't seem to be working.
 
 #+begin_src emacs-lisp :tangle yes
@@ -2071,11 +2057,13 @@ This doesn't seem to be working.
         (defconst mpereira/mode-line-projectile
           '(:eval
             (let ((face 'bold))
-              (when (projectile-project-name)
-                (concat
-                 (propertize " " 'face face)
-                 (propertize (format "%s" (projectile-project-name)) 'face face)
-                 (propertize " " 'face face))))))
+              (if (mpereira/remote-p)
+                  "-"
+                (when-let (project-name (projectile-project-name))
+                  (concat
+                   (propertize " " 'face face)
+                   (propertize (format "%s" project-name) 'face face)
+                   (propertize " " 'face face)))))))
 
         (defconst mpereira/mode-line-vc
           '(:eval
@@ -2102,14 +2090,16 @@ This doesn't seem to be working.
                   (directory-face 'italic)
                   (buffer-name-face 'bold)
                   (modified-or-ro-symbol-face 'font-lock-comment-face)
-                  (directory (let ((project-root (fast-project-find-file-project-root)))
-                               (if (and buffer-file-name project-root)
-                                   (mpereira/short-directory-path
-                                    (mpereira/buffer-project-directory
-                                     project-root
-                                     default-directory)
-                                    mpereira/mode-line-max-directory-length)
-                                 ""))))
+                  (directory (if (mpereira/remote-p)
+                                 ""
+                               (let ((project-root (fast-project-find-file-project-root)))
+                                 (if (and buffer-file-name project-root)
+                                     (mpereira/short-directory-path
+                                      (mpereira/buffer-project-directory
+                                       project-root
+                                       default-directory)
+                                      mpereira/mode-line-max-directory-length)
+                                   "")))))
               (concat
                (propertize " " 'face buffer-name-face)
                (propertize (format "%s" directory) 'face directory-face)
@@ -2150,16 +2140,10 @@ Source: https://git.io/vQKzv"
                         concat (propertize lighter 'face (cdr state)))
                " "))))
 
-        (defconst mpereira/lsp
-          '(:eval
-            (when (and (bound-and-true-p lsp-mode))
-              (lsp-mode-line))))
-
         (setq-default mode-line-format (list mpereira/mode-line-projectile
                                              mpereira/mode-line-vc
                                              mpereira/mode-line-buffer
                                              mpereira/flycheck
-                                             mpereira/lsp
                                              mpereira/mode-line-major-mode
                                              mpereira/mode-line-buffer-position
                                              mode-line-misc-info
@@ -2211,7 +2195,12 @@ Source: https://git.io/vQKzv"
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
 
+  ;; FIXME: this correctly causes '*' to match on whole symbols (e.g., on a
+  ;; Clojure file pressing '*' on 'foo.bar' matches the whole thing, instead of
+  ;; just 'foo' or 'bar', BUT, it won't match 'foo.bar' in something like
+  ;; '(foo.bar/baz)', which I don't like.
   (setq-default evil-symbol-word-search t)
+
   (setq-default evil-shift-width 2)
   (setq evil-jumps-cross-buffers nil)
   (setq evil-want-Y-yank-to-eol t)
@@ -2219,7 +2208,7 @@ Source: https://git.io/vQKzv"
   (setq evil-search-module 'evil-search)
 
   ;; Prevent the cursor from moving beyond the end of line.
-  (setq evil-move-cursor-back t)
+  (setq evil-move-cursor-back nil)
   (setq evil-move-beyond-eol nil)
 
   :config
@@ -2249,14 +2238,6 @@ Source: https://git.io/vQKzv"
               (evil-org-set-key-theme '(operators
                                         navigation
                                         textobjects)))))
-#+end_src
-
-** evil-magit
-#+begin_src emacs-lisp :tangle yes
-(use-package evil-magit
-  :after (evil magit)
-  :init
-  (setq evil-magit-use-z-for-folds t))
 #+end_src
 
 ** evil-exchange
@@ -2383,7 +2364,9 @@ the same as the =ivy-posframe= one.
 (use-package evil-collection
   :after evil
   :config
-  (evil-collection-init))
+  (condition-case err
+      (evil-collection-init)
+    (error (message "Error initializing evil-collection-init: %S" err))))
 #+end_src
 
 * Org
@@ -2436,6 +2419,9 @@ the same as the =ivy-posframe= one.
 ;; FIXME: don't use hard-coded color.
 ;; (face-spec-set 'org-tag '((t :box (:color "gray30" :line-width 1))))
 
+;; Don't ask when trying to edit a src block with an existing buffer.
+(setq org-src-ask-before-returning-to-edit-buffer nil)
+
 ;; Don't indent src block content.
 (setq org-edit-src-content-indentation 0)
 
@@ -2453,6 +2439,7 @@ the same as the =ivy-posframe= one.
 
 (setq org-todo-keywords '((sequence "TODO(t!)"
                                     "DOING(d!)"
+                                    "NEXT(n!)"
                                     "WAITING(w@/!)"
                                     "|"
                                     "SOMEDAY(s@/!)"
@@ -2654,8 +2641,13 @@ the beginning of the line. This fixes that."
  :infix "o"
  "!" 'org-time-stamp-inactive
  "." 'org-time-stamp
+ "/" 'org-search-view
+ "\\" '(lambda ()
+         (interactive)
+         (mpereira/call-interactively-with-prefix-arg
+          '(4)
+          'org-tags-sparse-tree))
  "|" 'org-columns
- "\\" 'org-columns
  "Cc" 'org-clock-cancel
  "Cd" 'org-clock-display
  "Ci" 'org-clock-in
@@ -2939,6 +2931,7 @@ giving priority to CREATED:
                              mpereira/org-gcal-directory))
 
 ;; Full screen org-agenda.
+;; NOTE: this also makes stuff like `org-search-view' full screen.
 (setq org-agenda-window-setup 'only-window)
 
 ;; Don't destroy window splits.
@@ -3619,6 +3612,18 @@ configuration and point position."
   (setq counsel-org-clock-default-action 'clock-in))
 #+end_src
 
+** org-download
+It's very convenient to capture a screenshot to the clipboard with macOS
+(=Shift-Cmd-5=) and then paste it into an Org buffer with
+=org-download-clipboard=.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package org-download
+  :custom
+  (org-download-screenshot-method "screencapture -i %s")
+  (org-download-image-dir (concat mpereira/org-directory "/download")))
+#+end_src
+
 ** org-web-tools
 ~org-web-tools-insert-web-page-as-entry~ is so useful. I use it to capture
 websites into my to-read list.
@@ -3801,6 +3806,7 @@ child tree.
 (setq dired-recursive-copies 'always)
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
+;; This depends on GNU ls? From coreutils.
 (setq dired-listing-switches "-AFhlv --group-directories-first")
 (setq find-ls-option ;; applies to `find-name-dired'
       '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
@@ -4195,11 +4201,8 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 #+end_src
 
 ** vterm
-=vterm= is currently broken on macOS: https://github.com/akermu/emacs-libvterm/issues/433
-
 #+begin_src emacs-lisp :tangle yes
 (use-package vterm
-  :disabled
   ;; Disabling hl-line-mode in vterm buffers because typing causes the highlight
   ;; to flicker.
   :hook (vterm-mode-hook . mpereira/hl-line-mode-disable)
@@ -4209,6 +4212,7 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
   (general-define-key
    :states '(normal visual)
    :keymaps '(vterm-mode-map)
+   ;; REVIEW(necessary?)
    "C-l" nil))
 #+end_src
 
@@ -4465,7 +4469,7 @@ to get the actual frame width in characters.
 #+begin_src emacs-lisp :tangle yes
 (setq mpereira/font-family "Hack")
 (setq mpereira/font-size-external-monitor 190)
-(setq mpereira/font-size-external-monitor-posframe-width-multiplier 0.3)
+(setq mpereira/font-size-external-monitor-posframe-width-multiplier 0.1)
 (setq mpereira/font-size-laptop 150)
 (setq mpereira/font-size-laptop-posframe-width-multiplier 0.5)
 (setq mpereira/font-size-posframe-minimum-width 100)
@@ -4475,7 +4479,6 @@ to get the actual frame width in characters.
 (defun mpereira/font-size-handle-change (new-font-size)
   (interactive)
   (let* ((default-font-family (face-attribute 'default :family))
-         (company-box-icon-size-pixels (truncate (/ new-font-size 10)))
          (frame-column-width (/ (frame-text-width)
                                 (frame-char-width)))
          (ivy-posframe-width-multiplier 0.5)
@@ -4495,9 +4498,9 @@ to get the actual frame width in characters.
                                     frame-column-width))))
       (setq ivy-posframe-width (truncate (* ivy-posframe-width-multiplier
                                             frame-column-width))))
+    (setq mpereira/company-box-icon-size-pixels (truncate (/ new-font-size 10)))
     (with-eval-after-load "company-box"
-      ;; FIXME: no effect?
-      (company-box-icons-resize company-box-icon-size-pixels))))
+      (company-box-icons-resize mpereira/company-box-icon-size-pixels))))
 
 (defun mpereira/font-size-change (change-fn)
   (interactive)
@@ -4588,6 +4591,9 @@ to get the actual frame width in characters.
 #+begin_src emacs-lisp :tangle yes
 (use-package flycheck-posframe
   :after (flycheck posframe company)
+  ;; REVIEW(workaround@2021-03-05):
+  ;; https://github.com/alexmurray/flycheck-posframe/issues/27.
+  :hook (post-command-hook . flycheck-posframe-hide-posframe)
   :config
   (setq flycheck-posframe-border-width 1)
 
@@ -4603,6 +4609,13 @@ to get the actual frame width in characters.
   (set-face-attribute 'flycheck-posframe-warning-face nil :inherit 'flycheck-warning-list-warning)
   (set-face-attribute 'flycheck-posframe-error-face nil :inherit 'flycheck-error-list-error)
   (set-face-attribute 'flycheck-posframe-info-face nil :inherit 'flycheck-error-list-info))
+#+end_src
+
+** so-long
+#+begin_src emacs-lisp :tangle yes
+(use-package so-long
+  :config
+  (global-so-long-mode))
 #+end_src
 
 ** too-long-lines-mode
@@ -4628,7 +4641,6 @@ has been causing Emacs to die sporadically. Disabling it until I fix this.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package company-box
-  :disabled
   :after (company ivy-posframe)
   :hook (company-mode-hook . company-box-mode)
   :init
@@ -4728,8 +4740,12 @@ Mode not enabled by default.
 #+end_src
 
 ** beacon
+Disabling beacon because it makes some modes really slow:
+- magit-diff buffers
+
 #+begin_src emacs-lisp :tangle yes
 (use-package beacon
+  :disabled
   :config
   (add-to-list 'beacon-dont-blink-major-modes 'eshell-mode)
   (beacon-mode 1)
@@ -5175,12 +5191,6 @@ This mode affects performance for some functions
 ** swiper
 #+begin_src emacs-lisp :tangle yes
 (use-package swiper
-  :ensure nil
-  ;; FIXME(waiting-pr): https://github.com/abo-abo/swiper/pull/2618
-  :quelpa (swiper
-           :fetcher github
-           :branch "recognize-remote-executables-emacs-27-1"
-           :repo "mpereira/swiper")
   :custom
   (swiper-action-recenter t))
 #+end_src
@@ -5207,6 +5217,11 @@ This mode affects performance for some functions
 (use-package wgrep
   :config
   (setq wgrep-auto-save-buffer t))
+#+end_src
+
+** string-edit
+#+begin_src emacs-lisp :tangle yes
+(use-package string-edit)
 #+end_src
 
 ** double-saber
@@ -5423,16 +5438,21 @@ the agent.
   (setq magit-prefer-remote-upstream t)
   (setq magit-refresh-verbose t)
 
+  (add-to-list 'magit-no-confirm 'stage-all-changes)
+
   ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
   (setq magit-list-refs-sortby "-creatordate")
 
   ;; ediff starts by default in a new frame. Don't do that.
   (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
-  (add-hook 'magit-status-mode-hook
-            (lambda ()
-              (setq-local olivetti-body-width mpereira/magit-status-width)
-              (olivetti-mode)))
+  (defun mpereira/magit-center-buffer-contents ()
+    (interactive)
+    (setq-local olivetti-body-width mpereira/magit-status-width)
+    (olivetti-mode))
+
+  (add-hook 'magit-status-mode-hook 'mpereira/magit-center-buffer-contents)
+  (add-hook 'magit-log-mode-hook 'mpereira/magit-center-buffer-contents)
 
   (setq magit-blame-styles '((headings
                               (heading-format . "%-20a %C %s\n"))
@@ -5465,6 +5485,24 @@ the agent.
    "zb" #'evil-scroll-line-to-bottom
    "zt" #'evil-scroll-line-to-top
    "zz" #'evil-scroll-line-to-center))
+#+end_src
+
+** libegit2 and magit-libjit
+
+I was using my fork until the [[https://github.com/magit/libegit2/pull/89][PR]] making it work on macOS got merged, but decided
+to disable it since the project doesn't appear to be in active development.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package libgit
+  :disabled
+  :ensure nil
+  :quelpa (libgit
+           :fetcher github
+           :repo "mpereira/libegit2"))
+
+(use-package magit-libgit
+  :disabled
+  :after (magit libgit))
 #+end_src
 
 ** forge
@@ -5793,7 +5831,7 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
           ("Level" 25 flycheck-error-list-entry-level-<)
           ("ID" 5 t)
           (,(flycheck-error-list-make-last-column "Message" 'Checker) 0 t)])
-  (setq flycheck--error-list-msg-offset (+ (-sum (mapcar (lambda (x) (nth-value 1 x))
+  (setq flycheck--error-list-msg-offset (+ (-sum (mapcar (lambda (x) (nth 1 x))
                                                          flycheck-error-list-format))
                                            (- (length flycheck-error-list-format)
                                               2)))
@@ -5811,75 +5849,45 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
 ** LSP
 Install some dependencies:
 
-[[https://pypi.org/project/python-language-server/][- python-language-server]]
-
-=future= has to be installed explicitly. See [[https://github.com/tomv564/pyls-mypy/issues/37][pyls-mypy#37]].
-#+begin_src bash :tangle setup.sh :results verbatim
-python3 -m pip install \
-        python-language-server \
-        'python-language-server[all]' \
-        pyls-mypy \
-        future \
-        pyls-isort \
-        pyls-black
-#+end_src
-
 - [[https://github.com/rust-analyzer/rust-analyzer/releases][Rust Analyzer]]
+  #+begin_src bash :tangle setup.sh :results verbatim
+  curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-mac \
+       -o /usr/local/bin/rust-analyzer \
+    && chmod +x /usr/local/bin/rust-analyzer
+  #+end_src
 
-The Rust Analyzer APIs seem to be unstable for updates and might break =lsp-rust=.
-
-Rust Analyzer =2020-06-01= seems to be the latest release which is compatible
-with my current =lsp-rust= in =lsp-mode-20200620.2149= with regards to being
-able to run =lsp-rust-analyzer-run=.
-
-With regards to TRAMP buffers being able to connect to Rust Analyzer, version
-=2020-06-15= works.
-#+begin_src bash :tangle setup.sh :results verbatim
-curl -L https://github.com/rust-analyzer/rust-analyzer/releases/download/2020-06-01/rust-analyzer-mac \
-     -o /usr/local/bin/rust-analyzer \
-  && chmod +x /usr/local/bin/rust-analyzer
-#+end_src
-
-- Some crates for Rust
-#+begin_src bash :tangle setup.sh :results verbatim
-rustup component add rustfmt rust-src rust-docs clippy
-#+end_src
+  - Some crates for Rust
+  #+begin_src bash :tangle setup.sh :results verbatim
+  rustup component add rustfmt rust-src rust-docs clippy
+  #+end_src
 
 - [[https://github.com/snoe/clojure-lsp][Clojure Language Server]]
-#+begin_src bash :tangle setup.sh :results verbatim
-curl https://github.com/snoe/clojure-lsp/releases/download/release-20200514T134144/clojure-lsp \
-     -L  \
-     -o /usr/local/bin/clojure-lsp
-chmod 755 /usr/local/bin/clojure-lsp
-#+end_src
+  #+begin_src bash :tangle setup.sh :results verbatim
+  wget https://github.com/clojure-lsp/clojure-lsp/releases/latest/download/clojure-lsp-native-macos-amd64.zip
+  unzip clojure-lsp-native-macos-amd64.zip
+  mv clojure-lsp /usr/local/bin
+  rm -rf clojure-lsp-native-macos-amd64.zip
+  #+end_src
 
-[[https://github.com/theia-ide/typescript-language-server][theia-ide/typescript-language-server]] for [[https://emacs-lsp.github.io/lsp-mode/page/lsp-typescript/][JavaScript]].
-#+begin_src bash :tangle setup.sh :results verbatim
-npm i -g typescript-language-server \
-         typescript \
-         pyright
-#+end_src
+[[https://github.com/theia-ide/typescript-language-server][- theia-ide/typescript-language-server]] for [[https://emacs-lsp.github.io/lsp-mode/page/lsp-typescript/][JavaScript]].
+  #+begin_src bash :tangle setup.sh :results verbatim
+  npm i -g typescript-language-server \
+          typescript \
+  #+end_src
 
-[[https://github.com/microsoft/pyright][pyright]] for [[https://github.com/emacs-lsp/lsp-pyright][Python]].
-#+begin_src bash :tangle setup.sh :results verbatim
-npm i -g pyright
-#+end_src
+- [[https://github.com/microsoft/pyright][pyright]] for [[https://github.com/emacs-lsp/lsp-pyright][Python]].
+  #+begin_src bash :tangle setup.sh :results verbatim
+  npm i -g pyright
+  #+end_src
 
-LLVM for C/C++. You might need to configure =PATH=, =LDFLAGS=, and =CPPFLAGS=.
-#+begin_src bash :tangle setup.sh :results verbatim
-brew install llvm
-#+end_src
+- LLVM for C/C++. You might need to configure =PATH=, =LDFLAGS=, and =CPPFLAGS=.
+  #+begin_src bash :tangle setup.sh :results verbatim
+  brew install llvm
+  #+end_src
 
 *** lsp-mode
-REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mode/pull/1826][#1826]] is released.
-
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
-  ;; :ensure nil
-  ;; :quelpa (lsp-mode
-  ;;          :fetcher github
-  ;;          :repo "emacs-lsp/lsp-mode"
-  ;;          :branch "master")
   :config
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
@@ -5891,7 +5899,9 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
                               (when lsp-mode
                                 (lsp-rust-analyzer-inlay-hints-mode))))
 
-  (setq lsp-log-io t)
+  ;; Only enable this for debugging. It makes LSP buffers really slow.
+  ;; (setq lsp-log-io t)
+
   (setq lsp-eldoc-enable-hover nil)
   (setq lsp-enable-symbol-highlighting nil)
   ;; Don't show documentation in minibuffer.
@@ -5907,13 +5917,14 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
   (setq lsp-rust-clippy-preference "on")
   (setq lsp-rust-server 'rust-analyzer)
   (setq lsp-rust-analyzer-inlay-face 'mpereira/lsp-rust-analyzer-inlay-face)
+  (setq lsp-headerline-breadcrumb-enable nil)
 
   (with-eval-after-load "lsp-rust"
     (lsp-register-client
      (make-lsp-client
       :new-connection (lsp-tramp-connection
-                       (executable-find (car lsp-rust-analyzer-server-command)))
-      :major-modes '(rust-mode rustic-mode)
+                       (executable-find (car lsp-rust-analyzer-server-command) t))
+      :major-modes '(rust-mode)
       :priority (if (eq lsp-rust-server 'rust-analyzer) 1 -1)
       :remote? t
       :initialization-options 'lsp-rust-analyzer--make-init-options
@@ -5923,17 +5934,17 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
       :ignore-messages nil
       :server-id 'rust-analyzer-remote)))
 
-  ;; FIXME: beacon is behaving weirdly on LSP buffers, showing beacon on
-  ;; incorrect lines.
-  (add-hook 'lsp-mode-hook (lambda () (beacon-mode -1)))
-
-  ;; Adding `:states '(normal)` to any `lsp-mode-map' binding declarations makes
-  ;; it not work.
   (general-define-key
    :keymaps '(lsp-mode-map)
    :states '(normal visual)
    "C-9" 'lsp-ui-doc-glance
    "K" 'lsp-describe-thing-at-point)
+
+  (general-define-key
+   :keymaps '(lsp-ui-doc-frame-mode-map)
+   :states '(normal visual)
+   "q" 'lsp-ui-doc-unfocus-frame
+   "C-9" 'lsp-ui-doc-unfocus-frame)
 
   (general-define-key
    :keymaps '(lsp-mode-map)
@@ -5973,6 +5984,29 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
    "C-k" 'lsp-ui-peek--select-prev))
 #+end_src
 
+*** lsp-ui
+#+begin_src emacs-lisp :tangle yes
+(use-package lsp-ui
+  :after lsp-mode
+  :init
+  (setq lsp-ui-doc-delay 0)
+  (setq lsp-ui-doc-enable nil)
+  ;; REVIEW: as of 2020-06-19, the WebKit tooltip doesn't look good and can't
+  ;; seem to be configurable. Check
+  ;; https://gitter.im/emacs-lsp/lsp-mode?at=5eecdb086c06cd1bf4413b8e.
+  ;;
+  ;; FIXME: as of 2020-09-14, the WebKit tooltip doesn't show at all (lsp-ui
+  ;; 7.0.1).
+  (setq lsp-ui-doc-use-webkit t)
+  (setq lsp-ui-doc-position 'at-point)
+  (setq lsp-ui-peek-always-show t)
+  (setq lsp-ui-sideline-enable nil)     ; trying out flycheck-inline instead.
+  (setq lsp-ui-sideline-show-hover t)
+  (setq lsp-ui-sideline-update-mode 'line)
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+#+end_src
+
 *** lsp-pyright
 
 #+begin_src emacs-lisp :tangle yes
@@ -5993,8 +6027,9 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
     :server-id 'pyright-remote
     :multi-root t
     :priority 3
-    :initialization-options (lambda () (ht-merge (lsp-configuration-section "pyright")
-                                                 (lsp-configuration-section "python")))
+    :initialization-options (lambda ()
+                              (ht-merge (lsp-configuration-section "python")
+                                        (lsp-configuration-section "pyright")))
     :initialized-fn (lambda (workspace)
                       (with-lsp-workspace workspace
                         (lsp--set-configuration
@@ -6002,9 +6037,10 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
                                    (lsp-configuration-section "python")))))
     :download-server-fn (lambda (_client callback error-callback _update?)
                           (lsp-package-ensure 'pyright callback error-callback))
-    :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
-                                   ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
-                                   ("pyright/endProgress" 'lsp-pyright--end-progress-callback)))))
+    :notification-handlers (lsp-ht
+                            ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
+                            ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
+                            ("pyright/endProgress" 'lsp-pyright--end-progress-callback)))))
 #+end_src
 
 *** lsp-pyls
@@ -6040,25 +6076,6 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
                     :server-id 'mypyls-remote)))
 #+end_src
 
-*** lsp-ui
-#+begin_src emacs-lisp :tangle yes
-(use-package lsp-ui
-  :after lsp-mode
-  :init
-  (setq lsp-ui-doc-delay 0)
-  (setq lsp-ui-doc-enable nil)
-  ;; REVIEW: as of 2020-06-19, the WebKit tooltip doesn't look good and can't
-  ;; seem to be configurable.
-  ;; Check https://gitter.im/emacs-lsp/lsp-mode?at=5eecdb086c06cd1bf4413b8e.
-  (setq lsp-ui-doc-use-webkit nil)
-  (setq lsp-ui-peek-always-show t)
-  (setq lsp-ui-sideline-enable nil)     ; trying out flycheck-inline instead.
-  (setq lsp-ui-sideline-show-hover t)
-  (setq lsp-ui-sideline-update-mode 'line)
-  :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
-#+end_src
-
 *** lsp-ivy
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-ivy
@@ -6070,6 +6087,11 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 
 ** company
 #+begin_src emacs-lisp :tangle yes
+(use-package company-tabnine
+  :disabled
+  :config
+  (require 'company-tabnine))
+
 (use-package company
   :config
   (setq company-global-modes '(not comint-mode
@@ -6080,7 +6102,7 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 
   (add-hook 'after-init-hook 'global-company-mode)
 
-  (setq company-backends '((company-capf company-tabnine)
+  (setq company-backends '(company-capf
                            company-cmake
                            company-clang
                            company-files
@@ -6104,17 +6126,15 @@ REVIEW(temporary-fork): use my fork until [[https://github.com/emacs-lsp/lsp-mod
 
   (general-define-key
    :keymaps '(company-search-map)
-   "ESC" 'company-search-abort
    "<tab>" 'company-search-abort)
 
+  ;; NOTE: these are an increment over the mappings already set by
+  ;; evil-collection.
   (general-define-key
    :keymaps '(company-active-map)
    "C-/" 'company-filter-candidates
    "C-b" 'company-previous-page
    "C-f" 'company-next-page
-   "C-j" 'company-select-next
-   "C-k" 'company-select-previous
-   "ESC" 'company-abort
    "RET" 'company-complete-selection
    "TAB" 'company-abort))
 #+end_src
@@ -6421,6 +6441,13 @@ If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
 (setq js-indent-level 2)
 #+end_src
 
+** TypeScript
+#+begin_src emacs-lisp :tangle yes
+(use-package typescript-mode
+  :custom (typescript-indent-level 2)
+  :hook (typescript-mode-hook . lsp))
+#+end_src
+
 ** Shell script
 #+begin_src emacs-lisp :tangle yes
 (add-hook 'sh-mode-hook
@@ -6619,7 +6646,59 @@ hierarchy--make)=.
   (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode)))
 #+end_src
 
+* Multimedia
+** pdf-tools
+#+begin_src emacs-lisp :tangle yes
+(use-package pdf-tools
+  :disabled
+  :config
+  (pdf-tools-install))
+
+(use-package pdf-continuous-scroll-mode
+  :disabled
+  :ensure nil
+  :hook ((pdf-view-mode-hook . pdf-continuous-scroll-mode))
+  :general (:states '(normal)
+            :keymaps '(pdf-continuous-scroll-mode-map)
+            "j" 'pdf-continuous-scroll-forward
+            "k" 'pdf-continuous-scroll-backward
+            "C-f" 'pdf-continuous-next-page
+            "C-b" 'pdf-continuous-previous-page)
+  :quelpa (pdf-continuous-scroll-mode
+           :fetcher github
+           :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
+#+end_src
+
+** screenshot
+This doesn't work on macOS because there's no =x-export-frames=.
+
+#+begin_src emacs-lisp :tangle yes
+(use-package screenshot
+  :ensure nil
+  :quelpa (screenshot
+           :fetcher github
+           :repo "tecosaur/screenshot"))
+#+end_src
+
 * Writing prose
+** Grammarly
+This currently makes buffers slow and [[https://github.com/emacs-grammarly/flycheck-grammarly/issues/3][doesn't work]].
+
+#+begin_src emacs-lisp :tangle yes
+(use-package grammarly
+  :disabled)
+
+(use-package flycheck-grammarly
+  :disabled)
+
+(use-package emacs-grammarly
+  :disabled
+  :ensure nil
+  :quelpa (emacs-grammarly
+           :fetcher github
+           :repo "mmagnus/emacs-grammarly"))
+#+end_src
+
 ** flyspell
 #+begin_src emacs-lisp :tangle yes
 (use-package flyspell
@@ -6647,6 +6726,22 @@ hierarchy--make)=.
 ** mw-thesaurus
 #+begin_src emacs-lisp :tangle yes
 (use-package request)
+
+(defun mpereira/thesaurus-lookup-at-point ()
+  (interactive)
+  (let* ((response (mw-thesaurus-lookup-at-point))
+         (process (get-buffer-process (request-response--buffer response)))
+         (current-sentinel (process-sentinel process)))
+    ;; FIXME: how to compose process sentinels?
+    (set-process-sentinel process
+                          (lambda (&rest args)
+                            (funcall 'current-sentinel args)
+                            (when olivetti-mode
+                              (message "dere")
+                              (with-current-buffer mw-thesaurus-buffer-name
+                                (message "guise")
+                                (olivetti-mode)))))
+    ))
 
 (use-package mw-thesaurus
   :general
@@ -6764,7 +6859,19 @@ Also start them in Org mode.
           ;;  (slot . 0)
           ;;  (mode-line-format . (" " "%b")))
 
+          ("\\*Org Agenda\\*"
+           (display-buffer-same-window))
+
+          ("\\*docker-\\(containers\\|images\\|networks\\|volumes\\)\\*"
+           (display-buffer-below-selected))
+
+          ("\\* docker container \\(logs\\|inspect\\) .+ \\*"
+           (display-buffer-same-window))
+
           ("\\* Merriam-Webster Thesaurus \\*"
+           (display-buffer-below-selected))
+
+          ("\\*cider-\\(doc\\|error\\)\\*"
            (display-buffer-below-selected))
 
           ;; File-specific magit-log buffer.
@@ -7114,13 +7221,7 @@ reason or another.
 ** persp-projectile
 #+begin_src emacs-lisp :tangle yes
 (use-package persp-projectile
-  :after perspective projectile
-  :config
-  (general-define-key
-   :states '(normal)
-   :prefix mpereira/leader
-   :infix "p"
-   "p" 'persp-switch-last))
+  :after perspective projectile)
 #+end_src
 
 ** counsel-projectile
@@ -7232,9 +7333,7 @@ Disabled for now because it seems to be [[https://github.com/raxod502/prescient.
 
 ** dash-at-point
 #+begin_src emacs-lisp :tangle yes
-(use-package dash-at-point
-  :config
-  )
+(use-package dash-at-point)
 #+end_src
 
 ** command-log-mode
@@ -7310,11 +7409,37 @@ Disabled for now because it seems to be [[https://github.com/raxod502/prescient.
            :repo "mnewt/counsel-web"))
 #+end_src
 
+** emacs-webkit
+Doesn't work with macOS [[https://github.com/akirakyle/emacs-webkit/issues/9][yet]].
+
+#+begin_src emacs-lisp :tangle no
+(use-package webkit
+  :ensure nil
+  :quelpa (webkit
+           :fetcher github
+           :repo "akirakyle/emacs-webkit"))
+#+end_src
+
+** xwwp-follow-link
+#+begin_src emacs-lisp :tangle no
+(use-package xwwp
+  :custom
+  (xwwp-follow-link-completion-system 'ivy)
+  :general (:states '(normal)
+            :keymaps '(xwidget-webkit-mode-map)
+            "f" 'xwwp-follow-link))
+
+(use-package xwwp-follow-link-ivy)
+#+end_src
+
 ** elfeed
 #+begin_src emacs-lisp :tangle yes
 (use-package elfeed
   :custom
-  (elfeed-feeds '("https://aphyr.com/posts.atom")))
+  (elfeed-feeds '("https://adamwiggins.com/feed.rss"
+                  "https://aphyr.com/posts.atom"
+                  "https://feeds.transistor.fm/on-the-metal-0294649e-ec23-4eab-975a-9eb13fd94e06"
+                  "https://stopa.io/feed.rss")))
 #+end_src
 
 ** stackoverflow
@@ -7527,12 +7652,16 @@ REVIEW: do I use or need this?
 #+end_src
 
 ** emacs-audit
-#+begin_src emacs-lisp :tangle yes
-(use-package emacs-audit
-  :ensure nil
-  :quelpa (emacs-audit
-           :fetcher file
-           :path (expand-file-name "~/git/emacs-audit/elisp/emacs-audit.el")))
+Not tangled because it breaks on =make test= and running on different hosts.
+
+#+begin_src emacs-lisp :tangle no
+(condition-case err
+    (use-package emacs-audit
+      :ensure nil
+      :quelpa (emacs-audit
+               :fetcher file
+               :path "~/git/emacs-audit/elisp/emacs-audit.el"))
+  (error (message "Error: %S" err)))
 
 (defun mpereira/org-ascii--box-string (s info)
   "Return string S with a partial box to its left.
@@ -7601,7 +7730,6 @@ INFO is a plist used as a communication channel."
    "," nil))
 
 (use-package emacs
-  :after (evil-magit)
   :config
   (general-define-key
    :keymaps '(magit-mode-map)
@@ -7771,7 +7899,9 @@ INFO is a plist used as a communication channel."
 
 ;; d -> describe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; And ",dd" for dired!
+;; Mnemonic transgressions:
+;; - ",dd" for `dired-jump'
+;; - ",do" for `docker'
 
 ;; REVIEW: "d" is too good of a key for these bindinds that I never use.
 (general-define-key
@@ -7783,7 +7913,8 @@ INFO is a plist used as a communication channel."
  "d" #'dired-jump
  "f" #'find-function-on-key
  "k" #'describe-key
- "m" #'describe-mode)
+ "m" #'describe-mode
+ "o" #'docker)
 
 ;; e -> evaluate ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -7804,7 +7935,7 @@ INFO is a plist used as a communication channel."
  :prefix mpereira/leader
  :infix "f"
  ";" #'counsel-minibuffer-history
- ":" #'counsel-expression-history
+ ":" #'counsel-command-history
  "b" #'ivy-switch-buffer
  "c" #'counsel-org-clock-history
  ;; Didn't like `counsel-explorer' from ivy-explorer too much...
@@ -7869,8 +8000,9 @@ INFO is a plist used as a communication channel."
  "d" 'mpereira/maybe-projectile-dired
  "D" 'mpereira/maybe-projectile-find-directory
  "f" 'mpereira/maybe-projectile-find-file
- "g" 'counsel-rg
- "G" 'rg
+ "G" 'counsel-rg
+ "g" 'rg
+ "p" 'persp-switch-last
  "s" 'mpereira/counsel-projectile-perspective-switch-project
  "t" 'dired-sidebar-toggle-sidebar)
 

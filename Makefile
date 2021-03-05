@@ -106,7 +106,7 @@ test-quick: clean-elc clean-custom.el clean-hidden-cache
 
 # Run this from the main Emacs instance.
 .PHONY: test-override-dependencies-from-current
-test-override-dependencies-from-current: # backup-dependencies clean-dependencies
+test-override-dependencies-from-current: backup-dependencies clean-dependencies
 	$(COPY_DIRECTORY) "$(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/elpa" $(PROJECT_ROOT)
 	$(COPY_DIRECTORY) "$(shell find $(TEST_RUNS_DIRECTORY) -maxdepth 1 | sort -nr | head -1)/.emacs.d/quelpa" $(PROJECT_ROOT)
 
@@ -165,9 +165,9 @@ clean-elpa:
 clean-quelpa:
 	rm -rf quelpa
 
-.PHONY: clean-hidden-cache
-clean-hidden-cache:
-	rm -rf .cache
+.PHONY: clean-caches
+clean-cache:
+	rm -rf .cache eln-cache projectile.cache
 
 .PHONY: clean-dependencies
 clean-dependencies: clean-elpa clean-quelpa

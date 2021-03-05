@@ -40,15 +40,8 @@
 (eval-when-compile
   (require 'use-package))
 
-;; FIXME: Fix for opening Emacs 27.1.
-;; (setq load-prefer-newer nil)
-
 (setq use-package-always-ensure t)
 (setq use-package-always-demand t)
-
-(use-package benchmark-init
-  :config
-  (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
 (use-package org
   :ensure org-plus-contrib
@@ -58,4 +51,5 @@
 ;; Prevent annoying local variable prompts.
 (let ((enable-local-variables :all))
   (org-babel-load-file (expand-file-name "configuration.org" user-emacs-directory)))
+
 (put 'list-threads 'disabled nil)
