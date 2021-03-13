@@ -6933,6 +6933,9 @@ Also start them in Org mode.
           ("\\*last-eshell-output\\*"
            (display-buffer-same-window))
 
+          ("\\*Diff\\*"
+           (display-buffer-same-window))
+
           ("\\(\\*undo-tree\\*\\)"
            (display-buffer-in-side-window)
            (window-width . 80)
