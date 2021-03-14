@@ -6347,6 +6347,7 @@ Install some dependencies:
   :config
   (setq cider-prompt-for-symbol nil)
   (setq cider-repl-display-help-banner nil)
+  (setq cider-repl-pop-to-buffer-on-connect nil)
 
   (general-define-key
    :keymaps 'cider-mode-map
