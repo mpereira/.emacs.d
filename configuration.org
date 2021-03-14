@@ -4769,8 +4769,11 @@ Disabling beacon because it makes some modes really slow:
 #+end_src
 
 ** diff-hl
+Disabling for now because it was making buffers slow.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package diff-hl
+  :disabled
   :config
   (global-diff-hl-mode t)
   (diff-hl-flydiff-mode t)
