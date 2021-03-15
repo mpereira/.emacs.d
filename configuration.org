@@ -257,6 +257,8 @@ sudo snap install emacs --edge --classic
   - [[#css][css]]
   - [[#js2-refactor][js2-refactor]]
   - [[#rjsx-mode][rjsx-mode]]
+- [[#infrastructure][Infrastructure]]
+  - [[#kubel][kubel]]
 - [[#multimedia][Multimedia]]
   - [[#pdf-tools][pdf-tools]]
   - [[#screenshot][screenshot]]
@@ -6664,6 +6666,14 @@ hierarchy--make)=.
   (add-to-list 'aggressive-indent-excluded-modes 'js-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'js2-mode)
   (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode)))
+#+end_src
+
+* Infrastructure
+** kubel
+#+begin_src emacs-lisp :tangle yes
+(use-package kubel)
+
+(use-package kubel-evil)
 #+end_src
 
 * Multimedia
