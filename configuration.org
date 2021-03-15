@@ -2487,9 +2487,10 @@ the same as the =ivy-posframe= one.
 
 (setq org-refile-targets '((mpereira/org-refile-files :maxlevel . 1)))
 
-(setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
 (setq org-refile-allow-creating-parent-nodes 'confirm)
+(setq org-refile-use-cache t)
+(setq org-refile-use-outline-path 'file)
 
 ;; `org-reverse-note-order' set to true along with the two following hooks gets
 ;; us two things after refiling:
