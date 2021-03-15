@@ -1609,11 +1609,12 @@ freezes.
 (setq ns-pop-up-frames nil)
 
 ;; macOS modifiers.
-(setq mac-command-modifier 'meta)
-;; Setting "Option" to nil allows me to type umlauts with "Option+u".
-(setq mac-option-modifier nil)
-(setq mac-control-modifier 'control)
-(setq ns-function-modifier 'hyper)
+(when (display-graphic-p)
+  (setq mac-command-modifier 'meta)
+  ;; Setting "Option" to nil allows me to type umlauts with "Option+u".
+  (setq mac-option-modifier nil)
+  (setq mac-control-modifier 'control)
+  (setq ns-function-modifier 'hyper))
 
 ;; By default Emacs thinks a sentence is a full-stop followed by 2 spaces. Make
 ;; it a full-stop and 1 space.
@@ -4213,6 +4214,7 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 ** vterm
 #+begin_src emacs-lisp :tangle yes
 (use-package vterm
+  :if (executable-find "cmake")
   ;; Disabling hl-line-mode in vterm buffers because typing causes the highlight
   ;; to flicker.
   :hook (vterm-mode-hook . mpereira/hl-line-mode-disable)
@@ -4600,6 +4602,7 @@ to get the actual frame width in characters.
 ** flycheck-posframe
 #+begin_src emacs-lisp :tangle yes
 (use-package flycheck-posframe
+  :if (display-graphic-p)
   :after (flycheck posframe company)
   ;; REVIEW(workaround@2021-03-05):
   ;; https://github.com/alexmurray/flycheck-posframe/issues/27.
@@ -6691,6 +6694,7 @@ This doesn't work on macOS because there's no =x-export-frames=.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package screenshot
+  :if (display-graphic-p)
   :ensure nil
   :quelpa (screenshot
            :fetcher github
@@ -7745,6 +7749,27 @@ INFO is a plist used as a communication channel."
    "C-j" #'next-line-or-history-element)
 
   (evil-ex-define-cmd "bdelete" #'kill-this-buffer))
+
+;; TUI Emacs.
+(use-package emacs
+  :if (not (display-graphic-p))
+  :config
+  (define-key input-decode-map "\e[1;5A" [C-up])
+  (define-key input-decode-map "\e[1;5B" [C-down])
+  (define-key input-decode-map "\e[1;5C" [C-right])
+  (define-key input-decode-map "\e[1;5D" [C-left])
+
+  ;; NOTE: for some reason TAB is mapped to `evil-jump-forward' in terminal
+  ;; mode?
+  (general-define-key
+   :keymaps '(org-mode-map)
+   :states '(normal)
+   "TAB" 'org-cycle)
+
+  (general-define-key
+   :keymaps '(eshell-mode-map)
+   :states '(insert)
+   "C-_" 'mpereira/eshell-history))
 
 (use-package emacs
   :after (evil-collection)
