@@ -6882,6 +6882,12 @@ Also start them in Org mode.
           ("\\*docker-\\(containers\\|images\\|networks\\|volumes\\)\\*"
            (display-buffer-below-selected))
 
+          ("\\*kubel (.+\\*"
+           (display-buffer-same-window))
+
+          ("\\*kubel -.+\\*"
+           (display-buffer-below-selected))
+
           ("\\* docker container \\(logs\\|inspect\\) .+ \\*"
            (display-buffer-same-window))
 
