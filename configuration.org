@@ -6193,10 +6193,10 @@ Install some dependencies:
   ;; https://github.com/abo-abo/lispy/issues/473 for more context.
   (advice-add 'semantic-idle-scheduler-function :around #'ignore)
 
-  ;; Disable most lispy mappings.
-  (setq lispy-mode-map lispy-mode-map-base)
-  (setcdr (assq 'lispy-mode minor-mode-map-alist)
-          lispy-mode-map)
+  ;; Disable all non-evil lispy mappings.
+  ;; NOTE: setting `lispy-key-theme' to nil during :init or :custom doesn't work
+  ;; to achieve this.
+  (lispy-set-key-theme nil)
 
   ;; `lispy-fill' doesn't handle filling comments really well. Override it.
   (general-define-key
