@@ -259,6 +259,7 @@ sudo snap install emacs --edge --classic
   - [[#rjsx-mode][rjsx-mode]]
 - [[#infrastructure][Infrastructure]]
   - [[#kubel][kubel]]
+  - [[#nginx-mode][nginx-mode]]
 - [[#multimedia][Multimedia]]
   - [[#pdf-tools][pdf-tools]]
   - [[#screenshot][screenshot]]
@@ -6676,6 +6677,10 @@ hierarchy--make)=.
 (use-package kubel-evil)
 #+end_src
 
+** nginx-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package nginx-mode)
+#+end_src
 * Multimedia
 ** pdf-tools
 #+begin_src emacs-lisp :tangle yes
