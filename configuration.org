@@ -2823,6 +2823,16 @@ Example: | todo  | int |
                       (cl-position-if (lambda (x) (string= x todo)) todo-seq)))
                   org-todo-keywords))))
 
+(defun mpereira/todo-to-int-fixed (todo)
+  "TODO: TODO docstring."
+  (cdr (assoc todo '((DOING . 0)
+                     (NEXT . 1)
+                     (WAITING . 2)
+                     (TODO . 3)
+                     (SOMEDAY . 4)
+                     (DONE . 5)
+                     (CANCELLED . 6)))))
+
 (defun mpereira/escape-string (s)
   "Makes strings safe to be printed with `message'."
   (s-replace-all '(("%" . "%%")) s))
@@ -2857,8 +2867,8 @@ giving priority to CREATED:
   (interactive)
   (let* ((todo-max (apply #'max (mapcar #'length org-todo-keywords)))
          (todo (org-entry-get (point) "TODO"))
-         (todo-int (if (and todo (mpereira/todo-to-int todo))
-                       (mpereira/todo-to-int todo)
+         (todo-int (if (and todo (mpereira/todo-to-int-fixed (intern todo)))
+                       (mpereira/todo-to-int-fixed (intern todo))
                      todo-max))
          (priority (org-entry-get (point) "PRIORITY"))
          (priority-int (if priority (string-to-char priority) org-default-priority))
