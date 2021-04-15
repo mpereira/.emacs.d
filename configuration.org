@@ -6358,6 +6358,11 @@ Install some dependencies:
 (use-package inf-clojure)
 #+end_src
 
+*** zprint-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package zprint-mode)
+#+end_src
+
 *** cider
 #+begin_src emacs-lisp :tangle yes
 (use-package cider
