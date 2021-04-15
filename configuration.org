@@ -6696,6 +6696,7 @@ hierarchy--make)=.
 #+begin_src emacs-lisp :tangle yes
 (use-package nginx-mode)
 #+end_src
+
 * Multimedia
 ** pdf-tools
 #+begin_src emacs-lisp :tangle yes
@@ -6928,7 +6929,7 @@ Also start them in Org mode.
           ("\\* Merriam-Webster Thesaurus \\*"
            (display-buffer-below-selected))
 
-          ("\\*cider-\\(doc\\|error\\)\\*"
+          ("\\*cider-\\(doc\\|error\\|inspect\\|test-report\\)\\*"
            (display-buffer-below-selected))
 
           ;; File-specific magit-log buffer.
