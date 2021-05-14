@@ -37,7 +37,15 @@ brew install emacs-head@28 \
 #+end_src
 
 On Ubuntu I install [[https://github.com/alexmurray][Alex Murray]]'s [[https://github.com/alexmurray/emacs-snap][GNU Emacs Snap package]] based on the
-"latest/edge" channel, which comes with =native-comp= and works great:
+"latest/edge" channel, which comes with =native-comp= and works great.
+
+First make sure libgccjit is installed:
+
+#+begin_src bash
+sudo apt install libgccjit-10-dev
+#+end_src
+
+Then install the Emacs snap:
 
 #+begin_src bash
 sudo snap install emacs --edge --classic
