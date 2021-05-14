@@ -4503,7 +4503,7 @@ to get the actual frame width in characters.
 
 #+begin_src emacs-lisp :tangle yes
 (setq mpereira/font-family "Hack")
-(setq mpereira/font-size-external-monitor 190)
+(setq mpereira/font-size-external-monitor 170)
 (setq mpereira/font-size-external-monitor-posframe-width-multiplier 0.1)
 (setq mpereira/font-size-laptop 150)
 (setq mpereira/font-size-laptop-posframe-width-multiplier 0.5)
