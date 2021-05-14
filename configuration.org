@@ -219,6 +219,7 @@ sudo snap install emacs --edge --classic
   - [[#move-text][move-text]]
   - [[#unfill][unfill]]
   - [[#string-inflection][string-inflection]]
+  - [[#string-edit][string-edit]]
   - [[#format-all][format-all]]
   - [[#blacken][blacken]]
   - [[#prettier][prettier]]
@@ -248,6 +249,7 @@ sudo snap install emacs --edge --classic
   - [[#c][C#]]
   - [[#javascript][JavaScript]]
   - [[#typescript][TypeScript]]
+  - [[#graphql][GraphQL]]
   - [[#shell-script][Shell script]]
   - [[#python][Python]]
   - [[#json][JSON]]
@@ -5411,6 +5413,11 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 (use-package string-inflection)
 #+end_src
 
+** string-edit
+#+begin_src emacs-lisp :tangle yes
+(use-package string-edit)
+#+end_src
+
 ** format-all
 Keep an eye on [[https://github.com/lassik/emacs-format-all-the-code/issues/47][LSP support]].
 
@@ -6492,6 +6499,11 @@ If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
 (use-package typescript-mode
   :custom (typescript-indent-level 2)
   :hook (typescript-mode-hook . lsp))
+#+end_src
+
+** GraphQL
+#+begin_src emacs-lisp :tangle yes
+(use-package graphql-mode)
 #+end_src
 
 ** Shell script
