@@ -1456,7 +1456,7 @@ configuration."
 #+begin_src emacs-lisp :tangle yes
 (use-package emacs
   :custom
-  (comp-async-report-warnings-errors nil))
+  (native-comp-async-report-warnings-errors nil))
 #+end_src
 
 * Reload directory local variables when saving .dir-locals.el files
