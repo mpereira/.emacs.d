@@ -6013,13 +6013,14 @@ Install some dependencies:
    :keymaps '(lsp-mode-map)
    :states '(normal visual)
    :prefix "g"
-   "a" 'lsp-ui-sideline-apply-code-actions
-   "A" 'lsp-execute-code-action
+   "a" 'lsp-execute-code-action
+   "A" 'lsp-ui-sideline-apply-code-actions
    "d" 'lsp-find-definition
    "E" 'lsp-find-references
    "e" 'lsp-ui-peek-find-references
-   "s" 'lsp-ivy-workspace-symbol
-   "S" 'lsp-ivy-global-workspace-symbol)
+   "r" 'lsp-rename
+   "S" 'lsp-ivy-global-workspace-symbol
+   "s" 'lsp-ivy-workspace-symbol)
 
   ;; REVIEW: fix for lsp-ui-sideline not aligning correctly to the right side.
   ;; https://github.com/emacs-lsp/lsp-ui/issues/285#issuecomment-493092398
