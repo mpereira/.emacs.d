@@ -5937,6 +5937,10 @@ Install some dependencies:
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
   :config
+  ;; NOTE: lsp-mode enables eldoc-mode by default, which adds a command in
+  ;; `pre-command-hook' and another in `post-command-hook', which I don't want.
+  (add-hook 'lsp-mode-hook (lambda ()
+                             (eldoc-mode -1)))
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'clojure-mode-hook 'lsp)
   (add-hook 'csharp-mode-hook 'lsp)
@@ -5950,10 +5954,22 @@ Install some dependencies:
   ;; Only enable this for debugging. It makes LSP buffers really slow.
   ;; (setq lsp-log-io t)
 
-  (setq lsp-eldoc-enable-hover nil)
   (setq lsp-enable-symbol-highlighting nil)
-  ;; Don't show documentation in minibuffer.
+  (setq lsp-headerline-breadcrumb-enable nil)
+
+  (setq lsp-ui-peek-show-directory nil)
+
+  ;; FIXME: why doesn't this cause all files to be expanded in the peek view?
+  (defun mpereira/lsp-ui-peek--expand-buffer (files)
+    (list (caar files)))
+
+  (setq lsp-ui-peek-expand-function 'mpereira/lsp-ui-peek--expand-buffer)
+  ;; NOTE: original value is `lsp-ui-peek--expand-buffer'
+
+  ;; Don't show any documentation in minibuffer.
+  (setq lsp-eldoc-enable-hover nil)
   (setq lsp-signature-auto-activate nil)
+  (setq lsp-signature-render-documentation nil)
 
   (defface mpereira/lsp-rust-analyzer-inlay-face '((t (:inherit org-done
                                                        :slant italic)))
@@ -5965,7 +5981,6 @@ Install some dependencies:
   (setq lsp-rust-clippy-preference "on")
   (setq lsp-rust-server 'rust-analyzer)
   (setq lsp-rust-analyzer-inlay-face 'mpereira/lsp-rust-analyzer-inlay-face)
-  (setq lsp-headerline-breadcrumb-enable nil)
 
   (with-eval-after-load "lsp-rust"
     (lsp-register-client
