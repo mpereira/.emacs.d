@@ -6644,7 +6644,7 @@ hierarchy--make)=.
 
 ** bazel-mode
 #+begin_src emacs-lisp :tangle yes
-(use-package bazel-mode)
+(use-package bazel)
 #+end_src
 
 ** groovy-mode
