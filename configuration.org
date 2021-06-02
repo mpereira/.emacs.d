@@ -2055,8 +2055,6 @@ My favorite light themes:
 #+end_src
 
 ** Change themes when changing macOS light or dark appearance
-This doesn't seem to be working.
-
 #+begin_src emacs-lisp :tangle yes
 (add-hook 'ns-system-appearance-change-functions
           (lambda (appearance)
