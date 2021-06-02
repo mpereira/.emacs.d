@@ -5819,11 +5819,7 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
 ** magit-delta
 #+begin_src emacs-lisp :tangle yes
 (use-package magit-delta
-  ;; NOTE: not enabling magit-delta because it makes creating buffers that show
-  ;; diffs pretty slow. Profiler shows `magit-git-wash' taking lots of cycles.
-  ;;
-  ;; :hook (magit-mode-hook . magit-delta-mode)
-  )
+  :hook (magit-mode-hook . magit-delta-mode))
 #+end_src
 
 ** git-timemachine
