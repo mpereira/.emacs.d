@@ -1950,7 +1950,10 @@ https://emacs.stackexchange.com/questions/28736/emacs-pointcursor-movement-lag/2
 https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doom_emacs/fp392eh/
 #+begin_src emacs-lisp :tangle yes
 (setq fast-but-imprecise-scrolling 't)
-(setq jit-lock-defer-time 0)
+;; NOTE: setting this to `0' like it was recommended in the article above seems
+;; to cause fontification to happen in real time, which can be pretty slow in
+;; large buffers. Giving it a delay seems to be better.
+(setq jit-lock-defer-time 0.25)
 #+end_src
 
 ** Start-up profiler: esup
