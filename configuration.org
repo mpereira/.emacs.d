@@ -6071,8 +6071,12 @@ Install some dependencies:
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 #+end_src
 
-*** lsp-pyright
+*** dap-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package dap-mode)
+#+end_src
 
+*** lsp-pyright
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-pyright
   :after lsp-mode
