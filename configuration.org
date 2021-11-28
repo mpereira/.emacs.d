@@ -150,7 +150,6 @@ sudo snap install emacs --edge --classic
   - [[#ox-jira][ox-jira]]
   - [[#ox-twbs][ox-twbs]]
   - [[#ox-gfm][ox-gfm]]
-  - [[#ox-slimhtml][ox-slimhtml]]
   - [[#ox-hugo][ox-hugo]]
   - [[#ox-pandoc][ox-pandoc]]
 - [[#file-management][File management]]
@@ -3818,11 +3817,6 @@ child tree.
 ** ox-gfm
 #+begin_src emacs-lisp :tangle yes
 (use-package ox-gfm)
-#+end_src
-
-** ox-slimhtml
-#+begin_src emacs-lisp :tangle yes
-(use-package ox-slimhtml)
 #+end_src
 
 ** ox-hugo
