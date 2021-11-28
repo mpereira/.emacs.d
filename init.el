@@ -26,8 +26,8 @@
 
 (package-initialize)
 
-(setq package-archives '(("org" . "https://orgmode.org/elpa/")
-                         ("gnu" . "https://elpa.gnu.org/packages/")
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")
                          ("melpa" . "https://melpa.org/packages/")))
 
 (unless package-archive-contents
@@ -45,7 +45,7 @@
 
 (use-package org
   :ensure org-plus-contrib
-  :pin org
+  :pin nongnu
   :mode (("\\.\\(org\\|org_archive\\)$" . org-mode)))
 
 ;; Prevent annoying local variable prompts.
