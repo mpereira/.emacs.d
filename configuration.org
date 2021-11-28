@@ -5805,9 +5805,9 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
    "gr" 'gist-list-reload))
 #+end_src
 
-** gitignore-mode
+** git-modes
 #+begin_src emacs-lisp :tangle yes
-(use-package gitignore-mode)
+(use-package git-modes)
 #+end_src
 
 ** magit-delta
