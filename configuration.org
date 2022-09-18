@@ -5592,18 +5592,6 @@ to disable it since the project doesn't appear to be in active development.
 #+end_src
 
 ** forge
-Sometimes I have trouble pulling topics/notifications through forge. I just
-([2019-03-18 Mon]) did something that fixed it:
-1. Removed related forge GitHub [[https://github.com/settings/tokens][personal access token]]
-2. Disabled =ghub-use-workaround-for-emacs-bug=
-3. Tried again
-
-Step #2 seems to have caused that GitHub authentication is done through 2-factor
-instead of credentials.
-
-I still sometimes see "502 Bad gateway /graphql" errors when trying to pull
-repositories, but it seems like just trying again a few times gets it done.
-
 #+begin_src emacs-lisp :tangle yes
 (use-package forge
   :after (magit)
