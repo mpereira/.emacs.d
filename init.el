@@ -44,9 +44,10 @@
 (setq use-package-always-demand t)
 
 (use-package org
-  :ensure org-plus-contrib
   :pin nongnu
   :mode (("\\.\\(org\\|org_archive\\)$" . org-mode)))
+
+(use-package org-contrib)
 
 ;; Prevent annoying local variable prompts.
 (let ((enable-local-variables :all))
