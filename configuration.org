@@ -134,10 +134,10 @@ sudo snap install emacs --edge --classic
   - [[#my-custom-persistent-cached-org-agendas][My custom persistent (cached) org agendas]]
   - [[#shrface][shrface]]
   - [[#outshine][outshine]]
-  - [[#counsel-org-clock][counsel-org-clock]]
   - [[#org-download][org-download]]
   - [[#org-web-tools][org-web-tools]]
   - [[#org-insert-link-dwim][org-insert-link-dwim]]
+  - [[#org-id][org-id]]
   - [[#org-expiry][org-expiry]]
   - [[#org-bullets][org-bullets]]
   - [[#org-make-toc][org-make-toc]]
@@ -3655,6 +3655,20 @@ From [[https://xenodium.com/emacs-dwim-do-what-i-mean/][Emacs DWIM: do what ✨I
                                                           'title))))))))
           (t
            (call-interactively 'org-insert-link)))))
+#+end_src
+
+** org-id
+Add a unique =ID= property to headings when they are created.
+
+#+begin_src emacs-lisp :tangle yes
+(add-hook 'org-insert-heading-hook 'org-id-get-create)
+#+end_src
+
+Have =org-store-link= copy an org-id reference link instead of a file reference
+link.
+
+#+begin_src emacs-lisp :tangle yes
+(setq org-id-link-to-org-use-id 'create-if-interactive)
 #+end_src
 
 ** org-expiry
