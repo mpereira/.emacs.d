@@ -531,9 +531,11 @@ Check [[https://github.com/mpereira/dotfiles/blob/master/.profile][mpereira/dotf
 (setq mpereira/dark-theme 'doom-monokai-classic)
 (setq mpereira/initial-theme mpereira/dark-theme)
 
-(setq mpereira/dropbox-directory (file-name-as-directory
-                                  (expand-file-name "~/Dropbox")))
-(setq mpereira/org-directory (expand-file-name "org" mpereira/dropbox-directory))
+(setq mpereira/cloud-synced-directory
+      (file-name-as-directory
+       (expand-file-name
+        "~/Library/Mobile Documents/com~apple~CloudDocs/")))
+(setq mpereira/org-directory (expand-file-name "org" mpereira/cloud-synced-directory))
 
 (setq mpereira/org-calendar-file (expand-file-name "gcal/calendar.org"
                                                    mpereira/org-directory))
@@ -2323,7 +2325,7 @@ the same as the =ivy-posframe= one.
 * Org
 ** org-mode
 #+begin_src emacs-lisp :tangle yes
-(setq org-directory (expand-file-name "org" mpereira/dropbox-directory))
+(setq org-directory (expand-file-name "org" mpereira/cloud-synced-directory))
 
 (setq org-modules '(org-habit
                     org-info
@@ -7736,7 +7738,7 @@ REVIEW: do I use or need this?
 
   ;; Logging.
   (setq lui-logging-directory
-        (expand-file-name "irc" mpereira/dropbox-directory))
+        (expand-file-name "irc" mpereira/cloud-synced-directory))
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
 
