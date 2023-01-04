@@ -231,7 +231,6 @@ sudo snap install emacs --edge --classic
   - [[#a-vscode-git-lens-type-of-thing][A VSCode git lens type of thing]]
   - [[#gist][gist]]
   - [[#gitignore-mode][gitignore-mode]]
-  - [[#magit-delta][magit-delta]]
   - [[#git-timemachine][git-timemachine]]
   - [[#browse-at-remote][browse-at-remote]]
 - [[#software-development][Software development]]
@@ -5899,12 +5898,6 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
 ** git-modes
 #+begin_src emacs-lisp :tangle yes
 (use-package git-modes)
-#+end_src
-
-** magit-delta
-#+begin_src emacs-lisp :tangle yes
-(use-package magit-delta
-  :hook (magit-mode-hook . magit-delta-mode))
 #+end_src
 
 ** git-timemachine
