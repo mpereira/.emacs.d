@@ -5578,6 +5578,7 @@ the agent.
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
   (setq magit-prefer-remote-upstream t)
   (setq magit-refresh-verbose t)
+  (setq magit-bury-buffer-function 'magit-restore-window-configuration)
 
   (add-to-list 'magit-no-confirm 'stage-all-changes)
 
