@@ -8069,7 +8069,16 @@ INFO is a plist used as a communication channel."
  :states '(normal visual)
  "[c" #'diff-hl-previous-hunk
  "]c" #'diff-hl-next-hunk
- "s" #'avy-goto-char-timer)
+ ;; NOTE(2023-01-03): not using "s" for this due to conflicts with other modes
+ ;; (e.g., `magit-stage' in diff hunks).
+ ;;
+ ;; Using 'M-s' instead.
+ "s" nil)
+
+(general-define-key
+ :keymaps '(global-map)
+ :states '(normal visual)
+ "M-s" #'avy-goto-char-timer)
 
 ;; "Master" bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
