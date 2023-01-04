@@ -812,6 +812,24 @@ on the internet here.
           (rename-file filename new-name t)
           (set-visited-file-name new-name t t)))))))
 
+;; https://zck.org/emacs-move-file
+(defun mpereira/move-file-and-buffer (new-location)
+  "Write this file to NEW-LOCATION, and delete the old one."
+  (interactive (list (expand-file-name
+                      (read-file-name "Move file to: "
+                                      default-directory
+                                      (expand-file-name (file-name-nondirectory (buffer-name))
+                                                        default-directory)))))
+  (if (file-regular-p new-location)
+      (when (file-exists-p new-location)
+        (delete-file new-location))
+    (let ((old-location (expand-file-name (buffer-file-name))))
+      (write-file new-location t)
+      (when (and old-location
+                 (file-exists-p new-location)
+                 (not (string-equal old-location new-location)))
+        (delete-file old-location)))))
+
 (defun mpereira/pp-macroexpand-all ()
   "TODO: docstring."
   (interactive)
