@@ -4639,15 +4639,20 @@ to get the actual frame width in characters.
 
 (setq mpereira/font-size-initial mpereira/font-size-external-monitor)
 
+(defun mpereira/font-size-normalize (font-size)
+  (- font-size (mod font-size 2)))
+
 (defun mpereira/font-size-handle-change (new-font-size)
   (interactive)
   (let* ((default-font-family (face-attribute 'default :family))
          (frame-column-width (/ (frame-text-width)
                                 (frame-char-width)))
          (ivy-posframe-width-multiplier 0.5)
-         (ivy-posframe-font-size-multiplier 1.2)
-         (ivy-posframe-font-size (truncate (* ivy-posframe-font-size-multiplier
-                                              (/ new-font-size 10)))))
+         (ivy-posframe-font-size-multiplier 1.1)
+         (ivy-posframe-font-size (mpereira/font-size-normalize
+                                  (truncate
+                                   (* ivy-posframe-font-size-multiplier
+                                      (/ new-font-size 10))))))
     (with-eval-after-load "ivy-posframe"
       (message (format "setting ivy-posframe-font to '%s'"
                        (format "%s %s"
@@ -4661,7 +4666,8 @@ to get the actual frame width in characters.
                                     frame-column-width))))
       (setq ivy-posframe-width (truncate (* ivy-posframe-width-multiplier
                                             frame-column-width))))
-    (setq mpereira/company-box-icon-size-pixels (truncate (/ new-font-size 10)))
+    (setq mpereira/company-box-icon-size-pixels (mpereira/font-size-normalize
+                                                 (truncate (/ new-font-size 10))))
     (with-eval-after-load "company-box"
       (company-box-icons-resize mpereira/company-box-icon-size-pixels))))
 
@@ -4697,7 +4703,7 @@ to get the actual frame width in characters.
   (mpereira/font-size-change
    (lambda (actual-font-size)
      (let ((delta (- desired-font-size actual-font-size)))
-       (default-text-scale-increment delta)))))
+       (default-text-scale-increment (mpereira/font-size-normalize delta))))))
 
 (defun mpereira/font-size-set-preset (font-size
                                       posframe-width-multiplier
