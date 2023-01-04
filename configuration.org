@@ -3617,10 +3617,32 @@ It's very convenient to capture a screenshot to the clipboard with macOS
 =org-download-clipboard=.
 
 #+begin_src emacs-lisp :tangle yes
+(defun filesystem-friendly-file-path (s)
+  "Sanitizes string to be filesystem friendly."
+  (replace-regexp-in-string "[^[:alpha:]_-]" "_" s))
+
 (use-package org-download
   :custom
   (org-download-screenshot-method "screencapture -i %s")
-  (org-download-image-dir (concat mpereira/org-directory "/download")))
+  (org-download-image-dir (concat mpereira/org-directory "/download"))
+  :config
+  ;; MONKEYPATCH(org-download).
+  (defun org-download-get-heading (lvl)
+    "Return the heading of the current entry's LVL level parent."
+    (save-excursion
+      (let ((cur-lvl (org-current-level)))
+        (if cur-lvl
+            (progn
+              (unless (= cur-lvl 1)
+                (org-up-heading-all (- (1- (org-current-level)) lvl)))
+              (let ((heading (nth 4 (org-heading-components))))
+                (if heading
+                    (filesystem-friendly-file-path
+                     (replace-regexp-in-string
+                      " " "_"
+                      heading))
+                  "")))
+          "")))))
 #+end_src
 
 ** org-web-tools
