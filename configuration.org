@@ -2509,19 +2509,6 @@ the beginning of the line. This fixes that."
   (org-insert-heading))
 
 (general-define-key
- :states '(normal visual)
- :prefix mpereira/leader
- :infix "o"
- "a" #'mpereira/open-or-build-main-org-agenda
- "A" #'mpereira/open-or-build-review-org-agenda
- "c" 'counsel-org-capture
- "Ci" 'org-clock-in
- "Co" 'org-clock-out
- "Cg" 'org-clock-goto
- "D" 'org-check-deadlines
- "l" 'org-store-link)
-
-(general-define-key
  :keymaps '(org-mode-map)
  :states '(visual)
  "C-n" 'evil-multiedit-match-and-next
@@ -2617,6 +2604,19 @@ the beginning of the line. This fixes that."
  "M-q" 'mpereira/org-unfill-toggle)
 
 (general-define-key
+ :states '(normal visual)
+ :prefix mpereira/leader
+ :infix "o"
+ "a" #'mpereira/open-or-build-main-org-agenda
+ "A" #'mpereira/open-or-build-review-org-agenda
+ "c" 'counsel-org-capture
+ "Ci" 'org-clock-in
+ "Co" 'org-clock-out
+ "Cg" 'org-clock-goto
+ "D" 'org-check-deadlines
+ "l" 'org-store-link)
+
+(general-define-key
  :keymaps '(org-mode-map)
  :states '(normal visual)
  :prefix mpereira/leader
@@ -2645,9 +2645,9 @@ the beginning of the line. This fixes that."
  "B" 'outline-show-branches
  "f" 'org-attach
  "i" 'org-insert-link
- "k" 'org-cut-subtree
+ "d" 'org-cut-subtree
  "n" 'org-add-note
- "p" 'org-set-property
+ "p" 'org-insert-link ; "p" for "paste".
  "P" 'org-priority
  "r" 'org-refile
  "X" (lambda ()
@@ -2668,7 +2668,8 @@ the beginning of the line. This fixes that."
  "u" 'org-toggle-link-display
  "w" 'org-web-tools-insert-web-page-as-entry
  "x" 'org-export-dispatch
- "y" 'org-copy-subtree)
+ "y" 'org-store-link
+ "Y" 'org-copy-subtree)
 
 (general-define-key
  :keymaps '(org-columns-map)
@@ -6536,7 +6537,7 @@ If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
    "tr" #'cider-test-rerun-test
    "tT" #'cider-test-run-ns-tests
    "tR" #'cider-test-rerun-failed-tests
-   "pt" #'cider-test-run-project-tests)
+   "tp" #'cider-test-run-project-tests)
 
   (general-define-key
    :keymaps 'cider-mode-map
@@ -8239,9 +8240,9 @@ INFO is a plist used as a communication channel."
  "f" 'mpereira/maybe-projectile-find-file
  "G" 'counsel-rg
  "g" 'rg
- "p" 'persp-switch-last
+ "p" 'dired-sidebar-toggle-sidebar
  "s" 'mpereira/counsel-projectile-perspective-switch-project
- "t" 'dired-sidebar-toggle-sidebar)
+ "t" 'persp-switch-last)
 
 ;; s -> shell ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
