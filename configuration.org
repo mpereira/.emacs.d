@@ -230,7 +230,7 @@ sudo snap install emacs --edge --classic
   - [[#magit-todos][magit-todos]]
   - [[#a-vscode-git-lens-type-of-thing][A VSCode git lens type of thing]]
   - [[#gist][gist]]
-  - [[#gitignore-mode][gitignore-mode]]
+  - [[#git-modes][git-modes]]
   - [[#git-timemachine][git-timemachine]]
   - [[#browse-at-remote][browse-at-remote]]
 - [[#software-development][Software development]]
