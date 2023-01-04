@@ -2041,17 +2041,6 @@ My favorite light themes:
                    (propertize (format "%s" project-name) 'face face)
                    (propertize " " 'face face)))))))
 
-        (defconst mpereira/mode-line-vc
-          '(:eval
-            (when (and (stringp vc-mode) (string-match "Git[:-]" vc-mode))
-              (let* ((branch (replace-regexp-in-string "^ Git[:-]" "" vc-mode))
-                     (truncated-branch (s-truncate 20 branch "…"))
-                     (face 'magit-mode-line-process))
-                (concat
-                 (propertize " " 'face face)
-                 (propertize (format "%s" truncated-branch) 'face face)
-                 (propertize " " 'face face))))))
-
         (defconst mpereira/mode-line-buffer
           '(:eval
             (let ((modified-or-ro-symbol (cond
@@ -2117,7 +2106,6 @@ Source: https://git.io/vQKzv"
                " "))))
 
         (setq-default mode-line-format (list mpereira/mode-line-projectile
-                                             mpereira/mode-line-vc
                                              mpereira/mode-line-buffer
                                              mpereira/flycheck
                                              mpereira/mode-line-major-mode
