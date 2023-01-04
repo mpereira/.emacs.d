@@ -553,6 +553,11 @@ Check [[https://github.com/mpereira/dotfiles/blob/master/.profile][mpereira/dotf
 
 (setq mpereira/eshell-prompt-max-directory-length 50)
 (setq mpereira/mode-line-max-directory-length 15)
+
+(setq mpereira/is-gnu-bash
+      (with-temp-buffer
+        (call-process insert-directory-program nil t nil "--version")
+        (string-match-p "GNU" (buffer-string))))
 #+end_src
 
 * Redefinitions, advices
@@ -3863,8 +3868,11 @@ child tree.
 (setq dired-recursive-copies 'always)
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
-;; This depends on GNU ls? From coreutils.
-(setq dired-listing-switches "-AFhlv --group-directories-first")
+
+(if mpereira/is-gnu-bash
+    (setq dired-listing-switches "-AFhlv --group-directories-first")
+  (setq dired-listing-switches "-alh"))
+
 (setq find-ls-option ;; applies to `find-name-dired'
       '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
 
