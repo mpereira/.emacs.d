@@ -500,8 +500,10 @@ Set it with emacs lisp.
 #+end_src
 
 ** exec-path-from-shell
-This needs to be loaded before code that depends on PATH modifications, e.g.
+This needs to be loaded before code that depends on =PATH= modifications, e.g.
 ~executable-find~.
+
+Check [[https://github.com/mpereira/dotfiles/blob/master/.profile][mpereira/dotfiles .profile]] for =PATH= modifications.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package exec-path-from-shell
@@ -509,6 +511,12 @@ This needs to be loaded before code that depends on PATH modifications, e.g.
   (dolist (shell-variable '("SSH_AUTH_SOCK"
                             "SSH_AGENT_PID"))
     (add-to-list 'exec-path-from-shell-variables shell-variable))
+
+  ;; Removing the "-l" flag so that it doesn't try to source /etc/profile. For
+  ;; whatever reason it causes the paths from `/usr/libexec/path_helper' to be
+  ;; at the head of `$PATH'.
+  (setq exec-path-from-shell-arguments '("-i"))
+
   (exec-path-from-shell-initialize))
 #+end_src
 
