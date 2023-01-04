@@ -2271,6 +2271,10 @@ Source: https://git.io/vQKzv"
   :config
   (setq evil-multiedit-follow-matches t)
 
+  ;; ;; This is so that C-n and C-p don't get mapped to `evil-multiedit-next' and
+  ;; ;; `evil-multiedit-prev' respectively.
+  ;; (setq evil-multiedit-dwim-motion-keys t)
+
   (general-define-key
    :states '(normal)
    "C-RET" 'evil-multiedit-toggle-marker-here
@@ -2291,7 +2295,8 @@ Source: https://git.io/vQKzv"
    "C-S-n" 'evil-multiedit-match-all)
 
   (general-define-key
-   :keymaps '(evil-multiedit-state-map)
+   :states '(normal insert)
+   :keymaps '(evil-multiedit-mode-map)
    "RET" 'evil-multiedit-toggle-or-restrict-region
    "C-n" 'evil-multiedit-match-symbol-and-next
    "C-p" 'evil-multiedit-match-symbol-and-prev
