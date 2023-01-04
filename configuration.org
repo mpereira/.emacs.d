@@ -3604,13 +3604,6 @@ configuration and point position."
   (add-hook 'emacs-lisp-mode-hook 'outshine-mode))
 #+end_src
 
-** counsel-org-clock
-#+begin_src emacs-lisp :tangle yes
-(use-package counsel-org-clock
-  :config
-  (setq counsel-org-clock-default-action 'clock-in))
-#+end_src
-
 ** org-download
 It's very convenient to capture a screenshot to the clipboard with macOS
 (=Shift-Cmd-5=) and then paste it into an Org buffer with
