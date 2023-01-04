@@ -281,6 +281,7 @@ sudo snap install emacs --edge --classic
 - [[#distraction-free-editing][Distraction-free editing]]
   - [[#hide-mode-line][hide-mode-line]]
   - [[#olivetti][olivetti]]
+  - [[#writeroom-mode][writeroom-mode]]
 - [[#buffer-management][Buffer management]]
   - [[#transpose-frame][transpose-frame]]
   - [[#buffer-expose][buffer-expose]]
@@ -6903,6 +6904,11 @@ This currently makes buffers slow and [[https://github.com/emacs-grammarly/flych
 (use-package olivetti
   :config
   (setq-default olivetti-body-width 100))
+#+end_src
+
+** writeroom-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package writeroom-mode)
 #+end_src
 
 * Buffer management
