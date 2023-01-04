@@ -154,6 +154,7 @@ sudo snap install emacs --edge --classic
   - [[#ox-pandoc][ox-pandoc]]
 - [[#file-management][File management]]
   - [[#dired][dired]]
+  - [[#dired-quick-sort][dired-quick-sort]]
   - [[#dired-ranger][dired-ranger]]
   - [[#dired-plus][dired-plus]]
   - [[#dired-show-readme][dired-show-readme]]
@@ -3865,6 +3866,18 @@ child tree.
  "C-k" 'dired-prev-dirline
  "M-c" 'dired-ranger-copy
  "M-v" 'dired-ranger-paste)
+#+end_src
+
+** dired-quick-sort
+#+begin_src emacs-lisp :tangle yes
+(use-package dired-quick-sort
+  :general (:keymaps '(dired-mode-map)
+            :states '(normal visual)
+            ;; NOTE: "s" isn't used, and the default "S" is overriden by
+            ;; evil-collection probably.
+            "s" #'hydra-dired-quick-sort/body)
+  :config
+  (dired-quick-sort-setup))
 #+end_src
 
 ** dired-ranger
