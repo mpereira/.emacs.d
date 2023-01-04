@@ -2371,6 +2371,9 @@ the same as the =ivy-posframe= one.
 
 (setq org-log-done 'time)
 
+;; Indent content at the outline level.
+(setq org-adapt-indentation t)
+
 (setq org-image-actual-width 640)
 
 ;; When this is set to `nil':
