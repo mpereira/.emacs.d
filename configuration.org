@@ -7419,6 +7419,7 @@ reason or another.
            :repo "nex3/perspective-el")
   :init
   (setq persp-show-modestring nil)
+  (setq persp-suppress-no-prefix-key-warning t)
   :config
   (persp-mode t))
 #+end_src
