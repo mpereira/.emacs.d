@@ -1727,6 +1727,10 @@ freezes.
 ;; Make TABs be displayed with a width of 2.
 (setq-default tab-width 2)
 
+;; Force packages relying on this general indentation variable (e.g., lsp-mode)
+;; to indent with 2 spaces.
+(setq-default standard-indent 2)
+
 ;; Week start on monday.
 (setq calendar-week-start-day 1)
 
