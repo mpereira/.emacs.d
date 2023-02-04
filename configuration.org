@@ -6083,65 +6083,27 @@ Install some dependencies:
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
   :config
-  ;; NOTE: lsp-mode enables eldoc-mode by default, which adds a command in
-  ;; `pre-command-hook' and another in `post-command-hook', which I don't want.
-  (add-hook 'lsp-mode-hook (lambda ()
-                             (eldoc-mode -1)))
-  (add-hook 'c-mode-hook 'lsp)
-  (add-hook 'clojure-mode-hook 'lsp)
-  (add-hook 'csharp-mode-hook 'lsp)
-  (add-hook 'js2-mode-hook 'lsp)
-  (add-hook 'python-mode-hook 'lsp)
-  (add-hook 'rust-mode-hook (lambda ()
-                              (lsp)
-                              (when lsp-mode
-                                (lsp-rust-analyzer-inlay-hints-mode))))
+  (setq mpereira/lsp-disabled-modes '(emacs-lisp-mode
+                                      lisp-data-mode))
+
+  (defun mpereira/maybe-enable-lsp ()
+    "TODO: docstring."
+    (interactive)
+    (when (not (-contains? mpereira/lsp-disabled-modes major-mode))
+      (lsp)))
+
+  (add-hook 'prog-mode-hook #'mpereira/maybe-enable-lsp)
 
   ;; Only enable this for debugging. It makes LSP buffers really slow.
   ;; (setq lsp-log-io t)
 
   (setq lsp-enable-symbol-highlighting nil)
+
   (setq lsp-headerline-breadcrumb-enable nil)
 
-  (setq lsp-ui-peek-show-directory nil)
+  (setq lsp-lens-enable nil)
 
-  ;; FIXME: why doesn't this cause all files to be expanded in the peek view?
-  (defun mpereira/lsp-ui-peek--expand-buffer (files)
-    (list (caar files)))
-
-  (setq lsp-ui-peek-expand-function 'mpereira/lsp-ui-peek--expand-buffer)
-  ;; NOTE: original value is `lsp-ui-peek--expand-buffer'
-
-  ;; Don't show any documentation in minibuffer.
   (setq lsp-eldoc-enable-hover nil)
-  (setq lsp-signature-auto-activate nil)
-  (setq lsp-signature-render-documentation nil)
-
-  (defface mpereira/lsp-rust-analyzer-inlay-face '((t (:inherit org-done
-                                                       :slant italic)))
-    "TODO: docstring.")
-
-  (setq lsp-rust-analyzer-server-display-inlay-hints t)
-  (setq lsp-rust-analyzer-display-chaining-hints t)
-  (setq lsp-rust-analyzer-display-parameter-hints t)
-  (setq lsp-rust-clippy-preference "on")
-  (setq lsp-rust-server 'rust-analyzer)
-  (setq lsp-rust-analyzer-inlay-face 'mpereira/lsp-rust-analyzer-inlay-face)
-
-  (with-eval-after-load "lsp-rust"
-    (lsp-register-client
-     (make-lsp-client
-      :new-connection (lsp-tramp-connection
-                       (executable-find (car lsp-rust-analyzer-server-command) t))
-      :major-modes '(rust-mode)
-      :priority (if (eq lsp-rust-server 'rust-analyzer) 1 -1)
-      :remote? t
-      :initialization-options 'lsp-rust-analyzer--make-init-options
-      :notification-handlers (ht<-alist lsp-rust-notification-handlers)
-      :action-handlers (ht<-alist lsp-rust-action-handlers)
-      :library-folders-fn (lambda (_workspace) lsp-rust-library-directories)
-      :ignore-messages nil
-      :server-id 'rust-analyzer-remote)))
 
   (general-define-key
    :keymaps '(lsp-mode-map)
@@ -6163,15 +6125,12 @@ Install some dependencies:
    "A" 'lsp-ui-sideline-apply-code-actions
    "d" 'lsp-find-definition
    "E" 'lsp-find-references
+   "F" 'lsp-format-buffer
    "e" 'lsp-ui-peek-find-references
    "r" 'lsp-rename
    "S" 'lsp-ivy-global-workspace-symbol
-   "s" 'lsp-ivy-workspace-symbol)
-
-  ;; REVIEW: fix for lsp-ui-sideline not aligning correctly to the right side.
-  ;; https://github.com/emacs-lsp/lsp-ui/issues/285#issuecomment-493092398
-  (custom-set-faces
-   '(markdown-code-face ((t (:inherit consolas)))))
+   "s" 'lsp-ivy-workspace-symbol
+   "n" 'lsp-organize-imports)
 
   (general-define-key
    :keymaps '(rust-mode-map)
@@ -6200,18 +6159,19 @@ Install some dependencies:
   :after lsp-mode
   :init
   (setq lsp-ui-doc-delay 0)
-  (setq lsp-ui-doc-enable nil)
-  ;; REVIEW: as of 2020-06-19, the WebKit tooltip doesn't look good and can't
-  ;; seem to be configurable. Check
-  ;; https://gitter.im/emacs-lsp/lsp-mode?at=5eecdb086c06cd1bf4413b8e.
-  ;;
-  ;; FIXME: as of 2020-09-14, the WebKit tooltip doesn't show at all (lsp-ui
-  ;; 7.0.1).
+  (setq lsp-ui-doc-enable t)
   (setq lsp-ui-doc-use-webkit t)
   (setq lsp-ui-doc-position 'at-point)
+
   (setq lsp-ui-peek-always-show t)
-  (setq lsp-ui-sideline-enable nil)     ; trying out flycheck-inline instead.
-  (setq lsp-ui-sideline-show-hover t)
+  (setq lsp-ui-peek-list-width 40)
+  (setq lsp-ui-peek-show-directory nil)
+  ;; Expand all peek folds.
+  (setq lsp-ui-peek-expand-function (lambda (xs) (mapcar #'car xs)))
+
+  (setq lsp-ui-sideline-enable t)
+  (setq lsp-ui-sideline-show-diagnostics t)
+  (setq lsp-ui-sideline-show-hover nil)
   (setq lsp-ui-sideline-update-mode 'line)
   :config
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
