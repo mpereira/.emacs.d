@@ -180,7 +180,6 @@ sudo snap install emacs --edge --classic
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
   - [[#ivy-posframe][ivy-posframe]]
-  - [[#flycheck-posframe][flycheck-posframe]]
   - [[#so-long][so-long]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
   - [[#company-box][company-box]]
@@ -4768,31 +4767,6 @@ to get the actual frame width in characters.
                                           (t . ivy-posframe-display-at-frame-center)))
   :config
   (ivy-posframe-mode))
-#+end_src
-
-** flycheck-posframe
-#+begin_src emacs-lisp :tangle yes
-(use-package flycheck-posframe
-  :if (display-graphic-p)
-  :after (flycheck posframe company)
-  ;; REVIEW(workaround@2021-03-05):
-  ;; https://github.com/alexmurray/flycheck-posframe/issues/27.
-  :hook (post-command-hook . flycheck-posframe-hide-posframe)
-  :config
-  (setq flycheck-posframe-border-width 1)
-
-  (add-to-list 'flycheck-posframe-inhibit-functions
-               '(lambda (&rest _)
-                  (bound-and-true-p company-backend)))
-
-  (flycheck-posframe-configure-pretty-defaults)
-  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
-
-  (set-face-attribute 'flycheck-posframe-background-face nil :inherit 'ivy-posframe)
-  (set-face-attribute 'flycheck-posframe-border-face nil :inherit 'ivy-posframe-border)
-  (set-face-attribute 'flycheck-posframe-warning-face nil :inherit 'flycheck-warning-list-warning)
-  (set-face-attribute 'flycheck-posframe-error-face nil :inherit 'flycheck-error-list-error)
-  (set-face-attribute 'flycheck-posframe-info-face nil :inherit 'flycheck-error-list-info))
 #+end_src
 
 ** so-long
