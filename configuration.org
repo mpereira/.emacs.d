@@ -81,6 +81,7 @@ sudo snap install emacs --edge --classic
   - [[#improve-lisp-code-indentation][Improve Lisp code indentation]]
   - [[#archive-org-subtrees-under-the-same-hierarchy-as-the-original-in-the-archive-files][Archive org subtrees under the same hierarchy as the original in the archive files]]
   - [[#provide-counsel-symbol-at-point][Provide counsel-symbol-at-point]]
+  - [[#make-align-regexp-not-use-tabs][Make align-regexp not use tabs]]
 - [[#helper-functions][Helper functions]]
   - [[#standard-library-type-of-things][Standard library type of things]]
   - [[#miscellaneous][Miscellaneous]]
@@ -730,6 +731,16 @@ on the internet here.
          (if (string-match "\\`[`']?\\(.*?\\)'?\\'" s)
              (match-string 1 s)
            s))))
+#+end_src
+
+** Make ~align-regexp~ not use tabs
+
+Found on [[https://stackoverflow.com/questions/22710040/emacs-align-regexp-with-spaces-instead-of-tabs][Stack Overflow]].
+
+#+begin_src emacs-lisp :tangle yes
+(defadvice align-regexp (around align-regexp-with-spaces activate)
+  (let ((indent-tabs-mode nil))
+    ad-do-it))
 #+end_src
 
 * Helper functions
