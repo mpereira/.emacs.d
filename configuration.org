@@ -185,7 +185,7 @@ sudo snap install emacs --edge --classic
   - [[#company-box][company-box]]
   - [[#minibuffer-line][minibuffer-line]]
   - [[#highlight-indent-guides][highlight-indent-guides]]
-  - [[#hideshow][hideshow]]
+  - [[#origami][origami]]
   - [[#beacon][beacon]]
   - [[#rainbow-delimiters][rainbow-delimiters]]
   - [[#diff-hl][diff-hl]]
@@ -1192,15 +1192,6 @@ in any structured movement package is mind-boggling to me."
     (kill-new pwd)
     (message pwd)
     pwd))
-
-(defun mpereira/make-hs-hide-level (n)
-  "TODO: docstring"
-  (lexical-let ((n n))
-    #'(lambda ()
-        (interactive)
-        (save-excursion
-          (goto-char (point-min))
-          (hs-hide-level n)))))
 
 (defun mpereira/bm-counsel-get-list (bookmark-overlays)
   "TODO: docstring.
@@ -4861,31 +4852,11 @@ Mode not enabled by default.
   (setq highlight-indent-guides-method 'character))
 #+end_src
 
-** hideshow
+** origami
 #+begin_src emacs-lisp :tangle yes
-(use-package hideshow
+(use-package origami
   :config
-  (setq hs-isearch-open t)
-
-  (defun mpereira/display-code-line-counts (ov)
-    (when (eq 'code (overlay-get ov 'hs))
-      (overlay-put ov
-                   'display
-                   (format " ... [%d]"
-                           (count-lines (overlay-start ov)
-                                        (overlay-end ov))))))
-
-  (setq hs-set-up-overlay #'mpereira/display-code-line-counts)
-
-  (defun mpereira/hs-toggle-all ()
-    "If anything isn't hidden, run `hs-hide-all', else run `hs-show-all'."
-    (interactive)
-    (let ((starting-ov-count (length (overlays-in (point-min) (point-max)))))
-      (hs-hide-all)
-      (when (equal (length (overlays-in (point-min) (point-max))) starting-ov-count)
-        (hs-show-all))))
-
-  (add-hook 'prog-mode-hook #'hs-minor-mode))
+  (add-hook 'prog-mode-hook #'origami-mode))
 #+end_src
 
 ** beacon
@@ -8256,32 +8227,18 @@ INFO is a plist used as a communication channel."
  "e" #'toggle-debug-on-error
  "l" #'toggle-truncate-lines
  "n" #'mpereira/narrow-or-widen-dwim
- "o" #'mpereira/hs-toggle-all
  "q" #'toggle-debug-on-quit
  "r" #'toggle-read-only
  "t" #'mpereira/narrow-or-widen-dwim
  "w" #'delete-trailing-whitespace)
 
-;; z -> fold ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(general-define-key
- :keymaps '(hs-minor-mode-map)
- :states '(normal visual)
- :prefix "z"
- "0" #'hs-show-all
- "1" (mpereira/make-hs-hide-level 1)
- "2" (mpereira/make-hs-hide-level 2)
- "3" (mpereira/make-hs-hide-level 3)
- "4" (mpereira/make-hs-hide-level 4)
- "5" (mpereira/make-hs-hide-level 5))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (general-define-key
- :keymaps '(hs-minor-mode-map)
+ :keymaps '(origami-mode-map)
  :states '(normal visual)
- "TAB" #'hs-toggle-hiding
- "<S-tab>" #'mpereira/hs-toggle-all)
+ "TAB" #'origami-toggle-node
+ "<S-tab>" #'origami-toggle-all-nodes)
 
 ;; Return to original cursor position when cancelling search.
 (general-define-key
