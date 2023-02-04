@@ -134,6 +134,11 @@ restore-dependencies-from-latest-test:
 custom.el:
 	touch $(CUSTOM_EL)
 
+# https://emacs.stackexchange.com/a/12116
+.PHONY: diagnose-savehist
+diagnose-savehist:
+	grep -E -b -o '^\(setq [^ ]+' ~/.emacs.d/savehist
+
 .PHONY: clean-custom.el
 clean-custom.el:
 	rm -f $(CUSTOM_EL)
