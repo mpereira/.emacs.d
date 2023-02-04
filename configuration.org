@@ -163,13 +163,11 @@ sudo snap install emacs --edge --classic
   - [[#reveal-in-osx-finder][reveal-in-osx-finder]]
 - [[#shell-terminal][Shell, terminal]]
   - [[#with-editor][with-editor]]
-  - [[#xterm-color][xterm-color]]
   - [[#shell][shell]]
   - [[#eshell][eshell]]
   - [[#vterm][vterm]]
   - [[#term][term]]
   - [[#eterm-256color][eterm-256color]]
-  - [[#configure-xterm-color][Configure xterm-color]]
   - [[#bash-completion][bash-completion]]
   - [[#fish-completion][fish-completion]]
   - [[#load-bash-alias][load-bash-alias]]
@@ -3981,39 +3979,6 @@ impacts performance heavily in large directories.
   (add-hook 'with-editor-mode-hook 'evil-insert-state))
 #+end_src
 
-** xterm-color
-REVIEW(maybe-unnecessary)
-
-#+begin_src emacs-lisp :tangle yes
-(use-package xterm-color
-  :config
-  (setq comint-output-filter-functions (remove 'ansi-color-process-output
-                                               comint-output-filter-functions))
-
-  (add-hook 'shell-mode-hook
-            (lambda ()
-              (add-hook 'comint-preoutput-filter-functions
-                        'xterm-color-filter
-                        nil
-                        t)))
-
-  (defun mpereira/handle-progress-message (progress)
-    (setq mode-line-process
-          (if (string-match
-               "Progress: \\[ *\\([0-9]+\\)%\\]" progress)
-              (list
-               (concat ":%s "
-                       (match-string 1 progress)
-                       "%%%% "))
-            '(":%s")))
-    (force-mode-line-update))
-
-  ;; TODO: implement this?
-  ;; (advice-add #'xterm-color-filter
-  ;;             :before #'mpereira/handle-progress-bars-on-region)
-  )
-#+end_src
-
 ** shell
 #+begin_src emacs-lisp :tangle yes
 (add-hook 'shell-mode-hook 'buffer-disable-undo)
@@ -4414,22 +4379,6 @@ And other weird completions.
 (use-package eterm-256color
   :config
   (add-hook 'term-mode-hook #'eterm-256color-mode))
-#+end_src
-
-** Configure xterm-color
-REVIEW(maybe-unnecessary).
-
-#+begin_src emacs-lisp :tangle yes
-(setenv "TERM" "xterm-256color")
-
-(add-hook 'eshell-before-prompt-hook
-          (lambda ()
-            (setq xterm-color-preserve-properties t)))
-
-(add-to-list 'eshell-preoutput-filter-functions 'xterm-color-filter)
-
-(setq eshell-output-filter-functions (remove 'eshell-handle-ansi-color
-                                             eshell-output-filter-functions))
 #+end_src
 
 ** bash-completion
