@@ -207,7 +207,6 @@ sudo snap install emacs --edge --classic
   - [[#swiper][swiper]]
   - [[#ripgrep][ripgrep]]
   - [[#wgrep][wgrep]]
-  - [[#string-edit][string-edit]]
   - [[#double-saber][double-saber]]
   - [[#symbol-overlay][symbol-overlay]]
   - [[#expand-region][expand-region]]
@@ -220,7 +219,7 @@ sudo snap install emacs --edge --classic
   - [[#move-text][move-text]]
   - [[#unfill][unfill]]
   - [[#string-inflection][string-inflection]]
-  - [[#string-edit][string-edit]]
+  - [[#string-edit-at-point][string-edit-at-point]]
   - [[#format-all][format-all]]
   - [[#blacken][blacken]]
   - [[#prettier][prettier]]
@@ -5372,11 +5371,6 @@ This mode affects performance for some functions
   (setq wgrep-auto-save-buffer t))
 #+end_src
 
-** string-edit
-#+begin_src emacs-lisp :tangle yes
-(use-package string-edit)
-#+end_src
-
 ** double-saber
 #+begin_src emacs-lisp :tangle yes
 (use-package double-saber
@@ -5527,9 +5521,9 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 (use-package string-inflection)
 #+end_src
 
-** string-edit
+** string-edit-at-point
 #+begin_src emacs-lisp :tangle yes
-(use-package string-edit)
+(use-package string-edit-at-point)
 #+end_src
 
 ** format-all
