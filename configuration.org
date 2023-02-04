@@ -2213,7 +2213,21 @@ My favorite light themes:
 (use-package evil-matchit
   :after evil
   :config
-  (global-evil-matchit-mode 1))
+  (global-evil-matchit-mode 1)
+
+  ;; https://github.com/redguardtoo/evil-matchit/pull/141
+  (evilmi-load-plugin-rules '(js-mode
+                              json-mode
+                              js2-mode
+                              js3-mode
+                              javascript-mode
+                              rjsx-mode
+                              js2-jsx-mode
+                              react-mode
+                              typescript-mode
+                              typescript-tsx-mode
+                              tsx-ts-mode)
+                            '(simple javascript html)))
 #+end_src
 
 ** evil-lion
