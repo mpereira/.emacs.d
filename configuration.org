@@ -527,8 +527,10 @@ Check [[https://github.com/mpereira/dotfiles/blob/master/.profile][mpereira/dotf
 
 (setq mpereira/leader ",")
 
-(setq mpereira/light-theme 'doom-acario-light)
-(setq mpereira/dark-theme 'doom-monokai-classic)
+;; NOTE(2023-01-25): switching from `doom-acario-light' because magit diffs look
+;; bad.
+(setq mpereira/light-theme 'modus-operandi)
+(setq mpereira/dark-theme 'vscode-dark-plus)
 (setq mpereira/initial-theme mpereira/dark-theme)
 
 (setq mpereira/cloud-synced-directory
