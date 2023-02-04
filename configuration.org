@@ -2097,33 +2097,8 @@ My favorite light themes:
             (unless eshell-mode
               (propertize " %p %l,%c " 'face 'font-lock-comment-face))))
 
-        (defun mpereira/flycheck-lighter (state)
-          "Return flycheck information for the given error type STATE.
-
-Source: https://git.io/vQKzv"
-          (let* ((counts (flycheck-count-errors flycheck-current-errors))
-                 (errorp (flycheck-has-current-errors-p state))
-                 (err (or (cdr (assq state counts)) "?"))
-                 (running (eq 'running flycheck-last-status-change)))
-            (if errorp (format "•%s" err))))
-
-        (defconst mpereira/flycheck
-          '(:eval
-            (when (and (bound-and-true-p flycheck-mode)
-                       (or flycheck-current-errors
-                           (eq 'running flycheck-last-status-change)))
-              (concat
-               (cl-loop for state in '((error . compilation-error)
-                                       (warning . compilation-warning)
-                                       (info . compilation-info))
-                        as lighter = (mpereira/flycheck-lighter (car state))
-                        when lighter
-                        concat (propertize lighter 'face (cdr state)))
-               " "))))
-
         (setq-default mode-line-format (list mpereira/mode-line-projectile
                                              mpereira/mode-line-buffer
-                                             mpereira/flycheck
                                              mpereira/mode-line-major-mode
                                              mpereira/mode-line-buffer-position
                                              mode-line-misc-info
