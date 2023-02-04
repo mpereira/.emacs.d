@@ -175,6 +175,7 @@ sudo snap install emacs --edge --classic
   - [[#load-bash-alias][load-bash-alias]]
 - [[#ui][UI]]
   - [[#settings][Settings]]
+  - [[#tree-sitter][tree-sitter]]
   - [[#default-text-scale][default-text-scale]]
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
@@ -4575,6 +4576,27 @@ fish."
   :config
   (setf (caar profiler-report-cpu-line-format) 100
         (caar profiler-report-memory-line-format) 100))
+#+end_src
+
+** tree-sitter
+#+begin_src emacs-lisp :tangle yes
+(use-package tree-sitter
+  :config
+  (add-to-list 'tree-sitter-major-mode-language-alist '(tsx-ts-mode . tsx))
+  (add-hook 'prog-mode-hook #'turn-on-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :config
+  (tree-sitter-langs-install-grammars)
+  (tree-sitter-require 'javascript)
+  (tree-sitter-require 'tsx)
+  (tree-sitter-require 'typescript))
+
+(use-package treesit-auto
+  :config
+  (setq treesit-auto-install t)
+  (global-treesit-auto-mode))
 #+end_src
 
 ** default-text-scale
