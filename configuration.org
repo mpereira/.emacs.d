@@ -2264,6 +2264,14 @@ My favorite light themes:
   ;; ;; `evil-multiedit-prev' respectively.
   ;; (setq evil-multiedit-dwim-motion-keys t)
 
+  ;; Make matching case-sensitive.
+  ;; https://github.com/hlissner/evil-multiedit/issues/48#issuecomment-1011418580
+  (defun make-evil-multiedit-case-sensitive (fn &rest args)
+    (let ((case-fold-search (not iedit-case-sensitive)))
+      (apply fn args)))
+
+  (advice-add #'evil-multiedit-match-and-next :around #'make-evil-multiedit-case-sensitive)
+
   (general-define-key
    :states '(normal)
    "C-RET" 'evil-multiedit-toggle-marker-here
