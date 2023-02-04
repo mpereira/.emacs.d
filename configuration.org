@@ -267,6 +267,7 @@ sudo snap install emacs --edge --classic
   - [[#css][css]]
   - [[#js2-refactor][js2-refactor]]
   - [[#rjsx-mode][rjsx-mode]]
+  - [[#lsp-tailwindcss][lsp-tailwindcss]]
 - [[#infrastructure][Infrastructure]]
   - [[#kubel][kubel]]
   - [[#nginx-mode][nginx-mode]]
@@ -6779,6 +6780,14 @@ hierarchy--make)=.
 ** css
 #+begin_src emacs-lisp :tangle yes
 (setq css-indent-offset 2)
+#+end_src
+
+** lsp-tailwindcss
+#+begin_src emacs-lisp :tangle yes
+(use-package lsp-tailwindcss
+  :init
+  (setq lsp-tailwindcss-add-on-mode t)
+  (add-to-list 'lsp-tailwindcss-major-modes 'tsx-ts-mode))
 #+end_src
 
 ** js2-refactor
