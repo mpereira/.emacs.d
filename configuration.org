@@ -265,9 +265,8 @@ sudo snap install emacs --edge --classic
   - [[#web-mode][web-mode]]
   - [[#auto-rename-tag][auto-rename-tag]]
   - [[#css][css]]
-  - [[#js2-refactor][js2-refactor]]
-  - [[#rjsx-mode][rjsx-mode]]
   - [[#lsp-tailwindcss][lsp-tailwindcss]]
+  - [[#tsx-ts-mode][tsx-ts-mode]]
 - [[#infrastructure][Infrastructure]]
   - [[#kubel][kubel]]
   - [[#nginx-mode][nginx-mode]]
@@ -6790,35 +6789,20 @@ hierarchy--make)=.
   (add-to-list 'lsp-tailwindcss-major-modes 'tsx-ts-mode))
 #+end_src
 
-** js2-refactor
-#+begin_src emacs-lisp :tangle yes
-(use-package js2-refactor
-  :config
-  (add-hook 'js2-mode-hook #'js2-refactor-mode))
-#+end_src
+** tsx-ts-mode
+Still need something like
+[rjsx-mode](https://github.com/felipeochoa/rjsx-mode)'s
+[rjsx-comment-dwim](https://github.com/felipeochoa/rjsx-mode/blob/b697fe4d92cc84fa99a7bcb476f815935ea0d919/rjsx-mode.el#L1161).
 
-** rjsx-mode
 #+begin_src emacs-lisp :tangle yes
-(use-package rjsx-mode
-  :mode ("\\.jsx?$" . rjsx-mode)
+(use-package emacs
+  :mode ("\\.jsx?$" . tsx-ts-mode)
   :config
-  ;; js-mode and js2-mode indent multiline chained function calls like:
-  ;;
-  ;; foo.
-  ;; .bar()
-  ;; .baz()
-  ;;
-  ;; while Prettier indents it like:
-  ;;
-  ;; foo.
-  ;;   .bar()
-  ;;   .baz()
-  ;;
-  ;; Disable aggressive indent for js2-mode to give priority to Prettier auto
+  ;; NOTE: disable aggressive indent for tsx-ts-mode because I've seen some
+  ;; weirdness. Also I wanna give priority to LSP and Prettier automatic
   ;; formatting.
-  (add-to-list 'aggressive-indent-excluded-modes 'js-mode)
-  (add-to-list 'aggressive-indent-excluded-modes 'js2-mode)
-  (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode)))
+  (add-to-list 'aggressive-indent-excluded-modes 'tsx-ts-mode)
+  (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . tsx-ts-mode)))
 #+end_src
 
 * Infrastructure
