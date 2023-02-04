@@ -197,6 +197,7 @@ sudo snap install emacs --edge --classic
   - [[#ivy-rich][ivy-rich]]
   - [[#all-the-icons-ivy-rich][all-the-icons-ivy-rich]]
 - [[#movement][Movement]]
+  - [[#combobulate][combobulate]]
   - [[#bm][bm]]
   - [[#avy][avy]]
   - [[#goto-address-mode][goto-address-mode]]
@@ -5286,6 +5287,123 @@ This mode affects performance for some functions
 #+end_src
 
 * Movement
+** combobulate
+#+begin_src emacs-lisp :tangle yes
+(use-package emacs
+  :preface
+  (defun mpereira/combobulate-setup-install-grammars ()
+    "Install Tree-sitter grammars if they are absent."
+    (interactive)
+    (dolist (grammar
+             '((css "https://github.com/tree-sitter/tree-sitter-css")
+               (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
+               (python "https://github.com/tree-sitter/tree-sitter-python")
+               (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+               (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+      (add-to-list 'treesit-language-source-alist grammar)
+      ;; Only install `grammar' if we don't already have it
+      ;; installed. However, if you want to *update* a grammar then
+      ;; this obviously prevents that from happening.
+      (unless (treesit-language-available-p (car grammar))
+        (treesit-install-language-grammar (car grammar)))))
+
+  ;; Optional, but recommended. Tree-sitter enabled major modes are distinct
+  ;; from their ordinary counterparts.
+  ;;
+  ;; You can remap major modes with `major-mode-remap-alist'. Note that this
+  ;; does *not* extend to hooks! Make sure you migrate them also.
+  (dolist (mapping '((python-mode . python-ts-mode)
+                     (css-mode . css-ts-mode)
+                     (typescript-mode . tsx-ts-mode)
+                     (js-mode . js-ts-mode)
+                     (css-mode . css-ts-mode)
+                     (yaml-mode . yaml-ts-mode)))
+    (add-to-list 'major-mode-remap-alist mapping))
+
+  :config
+  (mpereira/combobulate-setup-install-grammars)
+  (use-package combobulate
+    :hook ((python-ts-mode-hook . combobulate-mode)
+           (js-ts-mode-hook . combobulate-mode)
+           (css-ts-mode-hook . combobulate-mode)
+           (yaml-ts-mode-hook . combobulate-mode)
+           (typescript-ts-mode-hook . combobulate-mode)
+           (tsx-ts-mode-hook . combobulate-mode))
+    :load-path ((expand-file-name "~/git/combobulate"))
+    :config
+    (setq combobulate-flash-node nil)
+
+    (general-define-key
+     :keymaps '(mpereira/combobulate-mode-map)
+     :states '(normal visual)
+     "+" #'combobulate-mark-node-dwim
+     "{" #'combobulate-navigate-beginning-of-defun
+     "}" #'combobulate-navigate-end-of-defun
+     "(" #'combobulate-navigate-up-list-maybe
+     ")" #'combobulate-navigate-down
+     "B" #'combobulate-navigate-logical-previous
+     "C-j" #'combobulate-navigate-next
+     "C-k" #'combobulate-navigate-previous
+     "E" #'combobulate-navigate-logical-next
+     "W" #'combobulate-navigate-forward
+     "C-S-j" #'combobulate-drag-down
+     "C-S-k" #'combobulate-drag-up
+     "C-k" #'combobulate-navigate-previous)
+
+    (general-define-key
+     :keymaps '(mpereira/combobulate-mode-map)
+     :states '(normal visual)
+     :prefix mpereira/leader
+     "r" #'combobulate-splice-up
+     "m" #'combobulate-mark-node-dwim
+     "R" #'combobulate-vanish-node
+     "k" #'combobulate-kill-node-dwim
+     "(" #'combobulate-envelop-tsx-ts-mode-wrap-parentheses
+     "<" #'combobulate-envelop-tsx-ts-mode-tag
+     "{" #'combobulate-envelop-tsx-ts-mode-expression
+     "c" #'combobulate-clone-node-dwim)))
+
+;; Main use is to have my key bindings have the highest priority
+;; https://github.com/kaushalmodi/.emacs.d/blob/master/elisp/modi-mode.el
+(defvar mpereira/combobulate-mode-map (make-sparse-keymap)
+  "Keymap for `mpereira/combobulate-mode'.")
+
+;;;###autoload
+(define-minor-mode mpereira/combobulate-mode
+  "A minor mode so that my key settings override annoying major modes."
+  ;; If init-value is not set to t, this mode does not get enabled in
+  ;; `fundamental-mode' buffers even after doing \"(global-mpereira-combobulate-mode 1)\".
+  ;; More info: http://emacs.stackexchange.com/q/16693/115
+  :init-value nil
+  :lighter " mpereira/combobulate-mode"
+  :keymap mpereira/combobulate-mode-map)
+
+;;;###autoload
+(define-globalized-minor-mode global-mpereira-combobulate-mode
+  mpereira/combobulate-mode
+  mpereira/combobulate-mode)
+
+;; The keymaps in `emulation-mode-map-alists' take precedence over
+;; `minor-mode-map-alist'
+(add-to-list 'emulation-mode-map-alists `((mpereira/combobulate-mode . ,mpereira/combobulate-mode-map)))
+
+(defun mpereira/turn-off-mpereira-combobulate-mode ()
+  "Turn off `mpereira/combobulate-mode'."
+  (mpereira/combobulate-mode -1))
+
+(add-hook 'minibuffer-setup-hook #'mpereira/turn-off-mpereira-combobulate-mode)
+
+(dolist (hook '(python-ts-mode-hook
+                css-ts-mode-hook
+                tsx-ts-mode-hook
+                js-ts-mode-hook
+                css-ts-mode-hook
+                yaml-ts-mode-hook))
+  (add-hook hook #'mpereira/combobulate-mode))
+
+(provide 'mpereira/combobulate-mode)
+#+end_src
+
 ** bm
 #+begin_src emacs-lisp :tangle yes
 (use-package bm)
@@ -6405,6 +6523,10 @@ Install some dependencies:
 
 ** Emacs Lisp
 #+begin_src emacs-lisp :tangle yes
+(use-package emacs
+  :config
+  (add-hook 'emacs-lisp-mode-hook #'mpereira/turn-off-mpereira-combobulate-mode))
+
 (use-package eros
   :config
   (eros-mode 1))
