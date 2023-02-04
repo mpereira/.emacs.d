@@ -1742,9 +1742,8 @@ freezes.
       require-final-newline t
       save-place-file (concat user-emacs-directory "places"))
 
-(setq display-time-world-list '(("Europe/Berlin" "Hamburg")
-                                ("America/Sao_Paulo" "São Paulo")
-                                ("America/Los_Angeles" "San Francisco")))
+(setq display-time-world-list '(("Europe/Berlin" "Munich")
+                                ("America/Sao_Paulo" "São Paulo")))
 #+end_src
 ** File backups
 =make-backup-files= and =auto-save-default= are set to =t= by default.
