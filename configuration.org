@@ -1324,16 +1324,6 @@ Copies the selected process's PID to the clipboard."
         (kill-buffer current-buffer*))
     (kill-buffer-and-window)))
 
-(with-eval-after-load "counsel"
-  (with-eval-after-load "lispy"
-    ;; `lispy-goto-local' doesn't work in org babel indirect src block buffers.
-    (defun mpereira/lispy-goto-local (&optional args)
-      "lispy-goto-local with fallback to counsel-imenu."
-      (interactive)
-      (if (lispy--file-list)
-          (funcall 'lispy-goto-local args)
-        (funcall 'counsel-imenu)))))
-
 ;; TODO: make it be able to get indirect buffer file names.
 (defun mpereira/file-metadata ()
   "TODO."
@@ -6393,8 +6383,7 @@ Install some dependencies:
    :keymaps 'lispy-mode-map
    :states '(normal)
    :prefix mpereira/leader
-   "fo" 'mpereira/lispy-goto-local
-   "fO" 'lispy-goto-projectile
+   "fo" 'counsel-imenu
    "r" 'lispy-raise-sexp
    "R" 'lispy-raise-some
    "(" 'lispy-wrap-round
