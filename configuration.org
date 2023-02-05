@@ -1630,7 +1630,15 @@ freezes.
 (global-eldoc-mode -1)
 
 ;; Break lines automatically in "text" buffers.
-(add-hook 'text-mode-hook 'auto-fill-mode)
+
+(setq mpereira/auto-fill-disabled-text-modes '(yaml-mode))
+
+(defun mpereira/maybe-enable-auto-fill-mode ()
+  "TODO: docstring."
+  (interactive)
+  (when (not (-contains? mpereira/auto-fill-disabled-text-modes major-mode))
+    (auto-fill-mode 1)))
+(add-hook 'text-mode-hook 'mpereira/maybe-enable-auto-fill-mode)
 
 ;; Highlight current line.
 (global-hl-line-mode t)
