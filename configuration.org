@@ -8417,7 +8417,7 @@ https://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
 #+begin_src text :tangle LICENSE
 MIT License
 
-Copyright (c) 2020 Murilo Pereira
+Copyright (c) 2023 Murilo Pereira
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
