@@ -259,6 +259,7 @@ sudo snap install emacs --edge --classic
   - [[#bazel-mode][bazel-mode]]
   - [[#groovy-mode][groovy-mode]]
   - [[#dockerfile-mode][dockerfile-mode]]
+  - [[#jinja2-mode][jinja2-mode]]
   - [[#literate-calc-mode][literate-calc-mode]]
 - [[#web-development][Web development]]
   - [[#web-mode][web-mode]]
@@ -6785,6 +6786,11 @@ hierarchy--make)=.
 #+begin_src emacs-lisp :tangle yes
 (use-package dockerfile-mode
   :mode "Dockerfile.*\\'")
+#+end_src
+
+** jinja2-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package jinja2-mode)
 #+end_src
 
 ** literate-calc-mode
