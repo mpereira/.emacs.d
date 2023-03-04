@@ -4357,11 +4357,8 @@ This is apparently [[https://github.com/company-mode/company-mode/issues/1322#is
   :init
   (setq vterm-always-compile-module t)
   :config
-  (general-define-key
-   :states '(normal visual)
-   :keymaps '(vterm-mode-map)
-   ;; REVIEW(necessary?)
-   "C-l" nil))
+  (setq vterm-max-scrollback 100000)
+  (setq vterm-clear-scrollback-when-clearing t))
 #+end_src
 
 ** term
