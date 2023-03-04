@@ -217,6 +217,7 @@ sudo snap install emacs --edge --classic
   - [[#add-yasnippet-support-for-all-company-backends][Add yasnippet support for all company backends]]
   - [[#electric-pair-mode][electric-pair-mode]]
   - [[#undo-tree][undo-tree]]
+  - [[#ediff][ediff]]
   - [[#move-text][move-text]]
   - [[#unfill][unfill]]
   - [[#string-inflection][string-inflection]]
@@ -750,6 +751,11 @@ Found on [[https://stackoverflow.com/questions/22710040/emacs-align-regexp-with-
 (defmacro comment (&rest body)
   "Comment out one or more s-expressions."
   nil)
+
+;; https://emacs.stackexchange.com/a/24602
+(defun disable-y-or-n-p (orig-fun &rest args)
+  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
+    (apply orig-fun args)))
 
 (defun eshell-p (buffer)
   "Return t if BUFFER is an Eshell buffer."
@@ -5569,6 +5575,32 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 (defun undo-tree-visualizer-update-diff (&optional node)
   (with-current-buffer undo-tree-visualizer-parent-buffer
     (undo-tree-diff node)))
+#+end_src
+
+** ediff
+#+begin_src emacs-lisp :tangle yes
+;; https://oremacs.com/2015/01/17/setting-up-ediff/
+(use-package ediff
+  :custom
+  (ediff-window-setup-function 'ediff-setup-windows-plain)
+  (ediff-split-window-function 'split-window-horizontally)
+  :config
+  (advice-add 'ediff-quit :around #'disable-y-or-n-p)
+
+  (defun mpereira/ediff-janitor ()
+    (ediff-janitor nil nil))
+  (add-hook 'ediff-cleanup-hook #'mpereira/ediff-janitor)
+
+  (defvar mpereira/ediff-last-windows nil)
+
+  (defun mpereira/store-pre-ediff-winconfig ()
+    (setq mpereira/ediff-last-windows (current-window-configuration)))
+
+  (defun mpereira/restore-pre-ediff-winconfig ()
+    (set-window-configuration mpereira/ediff-last-windows))
+
+  (add-hook 'ediff-before-setup-hook #'mpereira/store-pre-ediff-winconfig)
+  (add-hook 'ediff-quit-hook #'mpereira/restore-pre-ediff-winconfig))
 #+end_src
 
 ** move-text
