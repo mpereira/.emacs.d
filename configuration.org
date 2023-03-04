@@ -296,7 +296,6 @@ sudo snap install emacs --edge --classic
 - [[#project-management][Project management]]
   - [[#a-fast-non-projectile-based-project-file-finder][A fast non-Projectile-based project file finder]]
   - [[#projectile][projectile]]
-  - [[#term-projectile][term-projectile]]
   - [[#ibuffer][ibuffer]]
   - [[#ibuffer-projectile][ibuffer-projectile]]
   - [[#perspective][perspective]]
@@ -7401,10 +7400,6 @@ reason or another.
   (setq projectile-completion-system 'ivy))
 #+end_src
 
-** term-projectile
-#+begin_src emacs-lisp :tangle yes
-(use-package term-projectile
-  :after projectile)
 #+end_src
 
 ** ibuffer
