@@ -8042,6 +8042,7 @@ INFO is a plist used as a communication channel."
  "M-l" #'evil-window-right
  "C-w =" #'balance-windows              ; this is the default keybinding.
  "C-0" #'mpereira/git-messenger-show
+ "C-M-u" #'universal-argument
  "<C-left>" #'winner-undo
  "<C-right>" #'winner-redo)
 
