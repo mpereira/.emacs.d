@@ -3,6 +3,8 @@
 
 set -euxo pipefail
 
+brew install html-tidy5
+
 curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-mac \
      -o /usr/local/bin/rust-analyzer \
   && chmod +x /usr/local/bin/rust-analyzer
@@ -16,9 +18,9 @@ rm -rf clojure-lsp-native-macos-amd64.zip
 
 sudo npm i -g \
      typescript-language-server \
-     typescript
+     typescript \
 
-sudo npm i -g pyright
+npm i -g pyright
 
 brew install llvm
 
