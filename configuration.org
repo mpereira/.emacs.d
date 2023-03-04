@@ -99,7 +99,6 @@ sudo snap install emacs --edge --classic
   - [[#dont-save-minibuffer-winner-mode-state][Don't save minibuffer winner-mode state]]
   - [[#dont-show-buffer-remote-path-in-minibuffer][Don't show buffer remote path in minibuffer]]
   - [[#show-garbage-collections-in-minibuffer][Show garbage collections in minibuffer]]
-  - [[#prevent-garbage-collecting-when-opening-the-minibuffer][Prevent garbage collecting when opening the minibuffer]]
   - [[#garbage-collection-magic-hack][Garbage collection magic hack]]
   - [[#dont-delete-trailing-whitespace-on-save][*Don't* delete trailing whitespace on save]]
   - [[#make-cursor-movement-an-order-of-magnitude-faster][Make cursor movement an order of magnitude faster]]
@@ -1864,39 +1863,14 @@ Winner mode adds this hook by default.
 (setq garbage-collection-messages t)
 #+end_src
 
-** Prevent garbage collecting when opening the minibuffer
-The following are set in [[file:init.el][init.el]]:
-- =mpereira/gc-cons-percentage-maximum=
-- =mpereira/gc-cons-percentage-normal=
-- =mpereira/gc-cons-threshold-maximum=
-- =mpereira/gc-cons-threshold-normal=
-
-This seems to cause garbage collection when exiting the minibuffer though...
-
-#+begin_src emacs-lisp :tangle yes
-(defun mpereira/gc-cons-set-maximum ()
-  (when (fboundp 'mpereira/gc-cons-threshold-maximum)
-    (setq gc-cons-threshold mpereira/gc-cons-threshold-maximum)
-    (setq gc-cons-percentage mpereira/gc-cons-percentage-maximum)))
-
-(defun mpereira/gc-cons-set-normal ()
-  ;; Defer it so that commands launched immediately after will enjoy the
-  ;; benefits.
-  (when (fboundp 'mpereira/gc-cons-threshold-maximum)
-    (run-at-time
-     1 nil (lambda ()
-             (setq gc-cons-threshold mpereira/gc-cons-threshold-normal)
-             (setq gc-cons-percentage mpereira/gc-cons-percentage-normal)))))
-
-(add-hook 'minibuffer-setup-hook #'mpereira/gc-cons-set-maximum)
-(add-hook 'minibuffer-exit-hook #'mpereira/gc-cons-set-normal)
-#+end_src
-
 ** Garbage collection magic hack
 #+begin_src emacs-lisp :tangle yes
 (use-package gcmh
   :config
-  (gcmh-mode 1))
+  (gcmh-mode 1)
+  :custom
+  ((gcmh-idle-delay 5)
+   (gcmh-verbose t)))
 #+end_src
 
 ** **Don't** delete trailing whitespace on save
