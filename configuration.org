@@ -1657,7 +1657,7 @@ freezes.
 (global-hl-line-mode t)
 
 ;; Provide undo/redo commands for window changes.
-(winner-mode t)
+(winner-mode 1)
 
 ;; Don't lock files.
 (setq create-lockfiles nil)
@@ -1862,8 +1862,16 @@ https://emacs-lsp.github.io/lsp-mode/page/performance/
 ** Don't save minibuffer winner-mode state
 Winner mode adds this hook by default.
 
+Recommended in https://github.com/abo-abo/swiper/issues/963#issuecomment-294517528.
+
 #+begin_src emacs-lisp :tangle yes
-(remove-hook 'minibuffer-setup-hook 'winner-save-unconditionally)
+(defun mpereira/disable-winner-mode-in-the-minibuffer ()
+  "TODO."
+  (remove-hook 'minibuffer-setup-hook 'winner-save-unconditionally))
+
+(mpereira/disable-winner-mode-in-the-minibuffer)
+
+(add-hook 'winner-mode-hook 'mpereira/disable-winner-mode-in-the-minibuffer)
 #+end_src
 
 ** Don't show buffer remote path in minibuffer
