@@ -351,7 +351,7 @@ sudo snap install emacs --edge --classic
   - [[#after-modifying-path][After modifying PATH]]
   - [[#terminate-initel-loading-early][Terminate init.el loading early]]
   - [[#change-font-m-x-x-select-font][Change font: M-x x-select-font]]
-  - [[#when-melpaorg-is-down][When melpa.org is down]]
+  - [[#when-melpaorg-is-down]]
   - [[#overriding-a-function][Overriding a function]]
 - [[#license][License]]
 - [[#file-local-variables][File-local variables]]
@@ -3861,7 +3861,6 @@ child tree.
 (setq wdired-allow-to-change-permissions t)
 
 (require 'dired-x)
-(add-hook 'dired-mode-hook 'dired-omit-mode)
 
 (general-define-key
  :keymaps '(dired-mode-map)
@@ -4250,6 +4249,7 @@ This is apparently [[https://github.com/company-mode/company-mode/issues/1322#is
 #+begin_src emacs-lisp :tangle yes
 (use-package emacs
   :when (< emacs-major-version 29)
+  :config
   (defun eshell--complete-commands-list ()
     "Generate list of applicable, visible commands."
     (let ((filename (pcomplete-arg)) glob-name)
@@ -4549,7 +4549,7 @@ fish."
 
 (use-package tree-sitter-langs
   :config
-  (tree-sitter-langs-install-grammars)
+  (tree-sitter-langs-install-grammars t)
   (tree-sitter-require 'javascript)
   (tree-sitter-require 'tsx)
   (tree-sitter-require 'typescript))
@@ -5292,7 +5292,7 @@ This mode affects performance for some functions
            (yaml-ts-mode-hook . combobulate-mode)
            (typescript-ts-mode-hook . combobulate-mode)
            (tsx-ts-mode-hook . combobulate-mode))
-    :load-path ((expand-file-name "~/git/combobulate"))
+    :load-path ("~/git/combobulate")
     :config
     (setq combobulate-flash-node nil)
 
@@ -5326,8 +5326,6 @@ This mode affects performance for some functions
      "{" #'combobulate-envelop-tsx-ts-mode-expression
      "c" #'combobulate-clone-node-dwim)))
 
-;; Main use is to have my key bindings have the highest priority
-;; https://github.com/kaushalmodi/.emacs.d/blob/master/elisp/modi-mode.el
 (defvar mpereira/combobulate-mode-map (make-sparse-keymap)
   "Keymap for `mpereira/combobulate-mode'.")
 
@@ -6860,6 +6858,7 @@ hierarchy--make)=.
 (use-package lsp-tailwindcss
   :init
   (setq lsp-tailwindcss-add-on-mode t)
+  :config
   (add-to-list 'lsp-tailwindcss-major-modes 'tsx-ts-mode))
 #+end_src
 
