@@ -1190,15 +1190,23 @@ in any structured movement package is mind-boggling to me."
         (message timestamp)
         timestamp)))
 
-(defun mpereira/pwd ()
+(defun mpereira/yank-buffer-file-name ()
   "TODO: docstring"
   (interactive)
-  (let ((pwd (if (eshell-p (current-buffer))
-                 (eshell/pwd)
-               (buffer-file-name))))
-    (kill-new pwd)
-    (message pwd)
-    pwd))
+  (let ((buffer-file-name* (if (eshell-p (current-buffer))
+                               (eshell/pwd)
+                             (buffer-file-name))))
+    (kill-new buffer-file-name*)
+    (message buffer-file-name*)
+    buffer-file-name*))
+
+(defun mpereira/yank-buffer-name ()
+  "TODO: docstring"
+  (interactive)
+  (let ((buffer-name* (buffer-name)))
+    (kill-new buffer-name*)
+    (message buffer-name*)
+    buffer-name*))
 
 (defun mpereira/bm-counsel-get-list (bookmark-overlays)
   "TODO: docstring.
@@ -1321,7 +1329,7 @@ Copies the selected process's PID to the clipboard."
               :action (lambda (project-path)
                         (kill-new (cadr (split-string project-path " " t)))))))
 
-(defun mpereira/kill-buffer-and-maybe-window ()
+(defun mpereira/kill-buffer-and-maybe-window (&optional kill-buffer-p)
   "TODO."
   (interactive)
   (if (window-prev-buffers)
@@ -1444,6 +1452,18 @@ no duplicate or conflicting entries."
                                (substring time-zone-part 3 5))))
     (message iso8601-date-string)
     (kill-new iso8601-date-string)))
+
+(defun mpereira/align-clojure-csv-vector (start end)
+  "Aligns Clojure CSV vectors by the whitespace separating elements."
+  (interactive "r")
+  (align-regexp start end
+                "\"\\(\\s-+\\)\"" 1 1 t))
+
+(defun mpereira/align-clojure-vector (start end)
+  "Aligns Clojure vectors by the whitespace separating elements."
+  (interactive "r")
+  (align-regexp start end
+                "\\(\\s-+\\)" 1 1 t))
 #+end_src
 
 * Toggle buffer maximize
@@ -6647,6 +6667,9 @@ Install some dependencies:
 *** cider
 #+begin_src emacs-lisp :tangle yes
 (use-package cider
+  :custom
+  (cider-popup-buffer-quit-function (lambda (kill-buffer-p)
+                                      (mpereira/kill-buffer-and-maybe-window)))
   :config
   (setq cider-prompt-for-symbol nil)
   (setq cider-repl-display-help-banner nil)
@@ -8198,7 +8221,7 @@ INFO is a plist used as a communication channel."
   '(evil-ex-define-cmd "bD" #'mpereira/delete-file-and-buffer))
 
 (eval-after-load 'evil-ex
-  '(evil-ex-define-cmd "pwd" #'mpereira/pwd))
+  '(evil-ex-define-cmd "pwd" #'mpereira/yank-buffer-file-name))
 
 ;; Non-leader "g" ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -8279,7 +8302,9 @@ INFO is a plist used as a communication channel."
  "u" #'undo-tree-visualize
  "vh" #'mpereira/toggle-window-split           ; REVIEW: rethink.
  "vs" #'mpereira/split-window-right-and-switch ; REVIEW: rethink.
- "w" #'save-buffer)
+ "w" #'save-buffer
+ "y" #'mpereira/yank-buffer-name
+ "Y" #'mpereira/yank-buffer-file-name)
 
 ;; d -> describe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
