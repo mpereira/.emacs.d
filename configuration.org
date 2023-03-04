@@ -1613,7 +1613,14 @@ freezes.
 (setq custom-safe-themes t)
 
 ;; Avoid loading old bytecode instead of newer source.
-(setq load-prefer-newer t)
+;; Re: jka-compr: https://www.mattduck.com/2021-05-upgrading-to-emacs-28.html
+;;
+;; NOTE: uncomment the next 3 lines if seeing issues like:
+;;
+;;     Recursive load: "/Applications/Emacs.app/Contents/Resources/lisp/jka-compr.el.gz"
+;; (setq load-prefer-newer nil)
+;; (require 'jka-compr)
+;; (setq load-prefer-newer t)
 
 ;; Automatically scroll compilation buffers to the bottom.
 (setq compilation-scroll-output t)
