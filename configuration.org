@@ -296,6 +296,7 @@ sudo snap install emacs --edge --classic
 - [[#project-management][Project management]]
   - [[#a-fast-non-projectile-based-project-file-finder][A fast non-Projectile-based project file finder]]
   - [[#projectile][projectile]]
+  - [[#prodigy][prodigy]]
   - [[#ibuffer][ibuffer]]
   - [[#ibuffer-projectile][ibuffer-projectile]]
   - [[#perspective][perspective]]
@@ -7100,6 +7101,12 @@ Also start them in Org mode.
           ("\\*Org Agenda\\*"
            (display-buffer-same-window))
 
+          ("\\*prodigy\\*"
+           (display-buffer-same-window))
+
+          ("\\*prodigy-.+\\*"
+           (display-buffer-same-window))
+
           ("\\*docker-\\(containers\\|images\\|networks\\|volumes\\)\\*"
            (display-buffer-below-selected))
 
@@ -7400,6 +7407,13 @@ reason or another.
   (setq projectile-completion-system 'ivy))
 #+end_src
 
+** prodigy
+#+begin_src emacs-lisp :tangle no
+(use-package prodigy
+  :general (:keymaps '(prodigy-mode-map)
+            :states '(normal)
+            "gr" 'prodigy-refresh
+            "RET" 'prodigy-display-process))
 #+end_src
 
 ** ibuffer
