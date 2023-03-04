@@ -2270,8 +2270,6 @@ My favorite light themes:
    :states '(normal)
    "C-RET" 'evil-multiedit-toggle-marker-here
    "RET" 'evil-multiedit-toggle-or-restrict-region
-   "C-k" 'evil-multiedit-prev
-   "C-j" 'evil-multiedit-next
    "C-n" 'evil-multiedit-match-and-next
    "C-p" 'evil-multiedit-match-and-prev
    "C-S-n" 'evil-multiedit-match-all)
@@ -2291,6 +2289,7 @@ My favorite light themes:
    "RET" 'evil-multiedit-toggle-or-restrict-region
    "C-n" 'evil-multiedit-match-symbol-and-next
    "C-p" 'evil-multiedit-match-symbol-and-prev
+   ;; FIXME: combobulate mode is overriding this.
    "C-k" 'evil-multiedit-prev
    "C-j" 'evil-multiedit-next))
 #+end_src
@@ -5572,11 +5571,14 @@ Automatically close brackets, parens, etc. Bundled with Emacs.
 #+begin_src emacs-lisp :tangle yes
 (use-package elec-pair
   :config
-  (electric-pair-mode 1))
+  (electric-pair-mode 1)
+  (global-unset-key "\C-j"))
 #+end_src
 
 ** undo-tree
 #+begin_src emacs-lisp :tangle yes
+(use-package undo-tree)
+
 (dolist (hook '(undo-tree-mode-hook
                 undo-tree-visualizer-mode-hook))
   (add-hook hook 'mpereira/hide-trailing-whitespace))
@@ -6560,7 +6562,10 @@ Install some dependencies:
    "_" 'lispy-join
    "<f" 'lispyville-drag-backward
    ">f" 'lispyville-drag-forward
-   "C-9" 'lispy-describe-inline
+   ;; FIXME: using `#'lsp-ui-doc-glance` for Clojure. This is failing with:
+   ;; "cond: Eval error".
+   ;;
+   ;; "C-9" 'lispy-describe-inline
    "C-0" 'lispy-arglist-inline))
 #+end_src
 
@@ -6653,6 +6658,12 @@ Install some dependencies:
    "K" 'cider-doc
    "gf" 'cider-find-var)
 
+  (general-define-key
+   :keymaps 'cider-inspector-mode-map
+   :states '(normal)
+   ">" 'cider-inspector-next-page
+   "<" 'cider-inspector-prev-page)
+
   (defun mpereira/cider-eval-sexp-at-point (&optional output-to-current-buffer)
     "Evaluate the expression around point.
 If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
@@ -6663,12 +6674,18 @@ If invoked with OUTPUT-TO-CURRENT-BUFFER, output the result to current buffer."
       (cider-eval-last-sexp output-to-current-buffer)))
 
   (general-define-key
+   :keymaps '(clojure-mode-map)
+   :states '(normal)
+   "C-9" #'lsp-ui-doc-glance)
+
+  (general-define-key
    :keymaps 'cider-mode-map
    :states '(normal)
    :prefix mpereira/leader
    "ee" #'mpereira/cider-eval-sexp-at-point
    "e(" #'cider-eval-defun-at-point
-   "F" #'cider-format-buffer
+   ;; NOTE: formatting with LSP.
+   ;; "F" #'cider-format-buffer
    "eE" #'cider-eval-buffer
    "en" #'cider-eval-ns-form
    "dd" #'cider-debug-defun-at-point
@@ -7293,6 +7310,8 @@ Also start them in Org mode.
 ;; 3. navigating to a different project/perpective
 ;; 4. quitting the compilation buffer window
 ;; the error buffer window doesn't get deleted.
+;;
+;; FIXME: multiple error buffers open side by side after `rg-recompile'.
 (defun mpereira/display-buffer-compilation-result (buffer alist)
   "TODO: docstring."
   (interactive)
@@ -7321,7 +7340,9 @@ Also start them in Org mode.
 
 (general-define-key
  :keymaps '(compilation-button-map)
- "RET" #'mpereira/compile-goto-error-window-to-the-right)
+ "RET" #'mpereira/compile-goto-error-window-to-the-right
+ "]" #'next-error
+ "[" #'previous-error)
 #+end_src
 
 * Project management
