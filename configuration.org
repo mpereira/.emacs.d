@@ -153,6 +153,7 @@ sudo snap install emacs --edge --classic
   - [[#ox-hugo][ox-hugo]]
   - [[#ox-pandoc][ox-pandoc]]
 - [[#file-management][File management]]
+  - [[#dont-change-the-inode-of-hard-links-on-save][Don't change the inode of hard links on save]]
   - [[#dired][dired]]
   - [[#dired-quick-sort][dired-quick-sort]]
   - [[#dired-ranger][dired-ranger]]
@@ -3828,6 +3829,11 @@ child tree.
 #+end_src
 
 * File management
+** Don't change the inode of hard links on save
+#+begin_src emacs-lisp :tangle yes
+(setq backup-by-copying-when-linked t)
+#+end_src
+
 ** dired
 #+begin_src emacs-lisp :tangle yes
 (setq dired-recursive-copies 'always)
