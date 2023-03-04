@@ -176,6 +176,7 @@ sudo snap install emacs --edge --classic
   - [[#tree-sitter][tree-sitter]]
   - [[#ts-fold][ts-fold]]
   - [[#default-text-scale][default-text-scale]]
+  - [[#pixel-scroll-precision-mode][pixel-scroll-precision-mode]]
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
   - [[#ivy-posframe][ivy-posframe]]
@@ -4576,6 +4577,11 @@ Doesn't do nested folds for JavaScript yet.
 ** default-text-scale
 #+begin_src emacs-lisp :tangle yes
 (use-package default-text-scale)
+#+end_src
+
+** pixel-scroll-precision-mode
+#+begin_src emacs-lisp :tangle yes
+(pixel-scroll-precision-mode 1)
 #+end_src
 
 ** Font sizes
