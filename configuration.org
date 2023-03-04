@@ -3486,8 +3486,7 @@ otherwise."
                   ((org-agenda-overriding-header "\nDone this week\n")
                    (org-agenda-prefix-format ,multi-day-prefix-format)
                    (org-agenda-sorting-strategy '(timestamp-up))
-                   (org-agenda-show-all-dates t)
-                   (org-agenda-sorting-strategy '(timestamp-down))))
+                   (org-agenda-show-all-dates t)))
             (tags (mpereira/org-agenda-review-search
                    (mpereira/org-agenda-date-week-start
                     (mpereira/format-calendar-date-Y-m-d
