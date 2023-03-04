@@ -239,6 +239,7 @@ sudo snap install emacs --edge --classic
   - [[#flycheck][flycheck]]
   - [[#lsp][LSP]]
   - [[#company][company]]
+  - [[#copilot][copilot]]
   - [[#aggressive-indent][aggressive-indent]]
   - [[#lisp][LISP]]
   - [[#emacs-lisp][Emacs Lisp]]
@@ -247,7 +248,6 @@ sudo snap install emacs --edge --classic
   - [[#go][Go]]
   - [[#rust][Rust]]
   - [[#kotlin][Kotlin]]
-  - [[#c][C#]]
   - [[#javascript][JavaScript]]
   - [[#typescript][TypeScript]]
   - [[#graphql][GraphQL]]
@@ -278,7 +278,6 @@ sudo snap install emacs --edge --classic
 - [[#writing-prose][Writing prose]]
   - [[#grammarly][Grammarly]]
   - [[#flyspell][flyspell]]
-  - [[#flyspell-correct-ivy][flyspell-correct-ivy]]
   - [[#mw-thesaurus][mw-thesaurus]]
   - [[#atomic-chrome][atomic-chrome]]
 - [[#distraction-free-editing][Distraction-free editing]]
@@ -6350,6 +6349,22 @@ Install some dependencies:
    "TAB" 'company-abort))
 #+end_src
 
+** copilot
+#+begin_src emacs-lisp :tangle yes
+(use-package copilot
+  :ensure nil
+  :quelpa (copilot
+           :fetcher github
+           :repo "zerolfx/copilot.el"
+           :files ("dist" "*.el"))
+  :hook (prog-mode-hook . copilot-mode)
+  :bind (:map copilot-mode-map
+         ("C-;" . copilot-accept-completion)
+         ("C-'" . copilot-accept-completion-by-line)
+         ("C-j" . copilot-next-completion)
+         ("C-k" . copilot-previous-completion)))
+#+end_src
+
 ** aggressive-indent
 #+begin_src emacs-lisp :tangle yes
 (use-package aggressive-indent
@@ -6941,18 +6956,6 @@ This currently makes buffers slow and [[https://github.com/emacs-grammarly/flych
   (flyspell-issue-message-flag nil)
   (flyspell-issue-welcome-flag nil)
   (flyspell-mode 1))
-#+end_src
-
-** flyspell-correct-ivy
-#+begin_src emacs-lisp :tangle yes
-(use-package flyspell-correct-ivy
-  :after flyspell
-  :bind (:map flyspell-mode-map
-         ;; TODO: This mapping is too good... should I use it for something
-         ;; else?
-         ("C-;" . flyspell-correct-word-generic))
-  :custom
-  (flyspell-correct-interface 'flyspell-correct-ivy))
 #+end_src
 
 ** mw-thesaurus
