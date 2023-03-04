@@ -2446,14 +2446,17 @@ the same as the =ivy-posframe= one.
 (add-hook 'org-log-buffer-setup-hook #'evil-insert-state)
 (add-hook 'org-capture-mode-hook #'evil-insert-state)
 
-;; Only refile to a few files.
-(setq mpereira/org-refile-files
+(setq mpereira/org-files
       (-map (lambda (file-name)
               (expand-file-name file-name mpereira/org-directory))
             '("blog.org"
               "life.org"
               "projects.org"
-              "work.org")))
+              "work.org"
+              "contextualize.org")))
+
+;; Only refile to a few files.
+(setq mpereira/org-refile-files mpereira/org-files)
 
 (setq org-refile-targets '((mpereira/org-refile-files :maxlevel . 1)))
 
@@ -2918,8 +2921,7 @@ giving priority to CREATED:
 #+begin_src emacs-lisp :tangle yes
 (require 'org-agenda)
 
-(setq org-agenda-files (list org-directory
-                             mpereira/org-gcal-directory))
+(setq org-agenda-files (cons mpereira/org-gcal-directory mpereira/org-files))
 
 ;; Full screen org-agenda.
 ;; NOTE: this also makes stuff like `org-search-view' full screen.
