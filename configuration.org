@@ -2484,6 +2484,12 @@ the same as the =ivy-posframe= one.
             (interactive)
             (mpereira/org-sort-parent-entries nil ?o)))
 
+(defun mpereira/org-refile-update-cache ()
+  "TODO."
+  (interactive)
+  (org-refile-cache-clear)
+  (org-refile-get-targets))
+
 (add-hook 'org-after-sorting-entries-or-items-hook #'mpereira/org-cycle-cycle)
 
 ;; Save org buffers after some operations.
