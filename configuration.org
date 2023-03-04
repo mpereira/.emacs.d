@@ -5767,13 +5767,54 @@ the agent.
    "L" nil)
 
   (general-define-key
-   :keymaps '(magit-mode-map)
+   :keymaps '(mpereira/magit-mode-map)
    :states '(normal visual)
+   "(" 'magit-section-up
    "<" #'magit-go-backward
    ">" #'magit-go-forward
+   "C-j" 'magit-section-forward-sibling
+   "C-k" 'magit-section-backward-sibling
+   "TAB" 'magit-section-cycle
+   "j" 'evil-next-visual-line           ; originally `evil-next-line'.
+   "k" 'evil-previous-visual-line       ; originally `evil-previous-line'.
+   "H" 'evil-window-top
+   "L" 'evil-window-bottom
    "zb" #'evil-scroll-line-to-bottom
    "zt" #'evil-scroll-line-to-top
    "zz" #'evil-scroll-line-to-center))
+
+(defvar mpereira/magit-mode-map (make-sparse-keymap)
+  "Keymap for `mpereira/magit-mode'.")
+
+;;;###autoload
+(define-minor-mode mpereira/magit-mode
+  "A minor mode so that my key settings override annoying major modes."
+  ;; If init-value is not set to t, this mode does not get enabled in
+  ;; `fundamental-mode' buffers even after doing \"(global-mpereira-magit-mode 1)\".
+  ;; More info: http://emacs.stackexchange.com/q/16693/115
+  :init-value nil
+  :lighter " mpereira/magit-mode"
+  :keymap mpereira/magit-mode-map)
+
+;;;###autoload
+(define-globalized-minor-mode global-mpereira-magit-mode
+  mpereira/magit-mode
+  mpereira/magit-mode)
+
+;; The keymaps in `emulation-mode-map-alists' take precedence over
+;; `minor-mode-map-alist'
+(add-to-list 'emulation-mode-map-alists `((mpereira/magit-mode . ,mpereira/magit-mode-map)))
+
+(defun mpereira/turn-off-mpereira-magit-mode ()
+  "Turn off `mpereira/magit-mode'."
+  (mpereira/magit-mode -1))
+
+(add-hook 'minibuffer-setup-hook #'mpereira/turn-off-mpereira-magit-mode)
+
+(dolist (hook '(magit-mode-hook))
+  (add-hook hook #'mpereira/magit-mode))
+
+(provide 'mpereira/magit-mode)
 #+end_src
 
 ** libegit2 and magit-libjit
@@ -8050,24 +8091,6 @@ INFO is a plist used as a communication channel."
    :states '(normal)
    ;; Originally `image-previous-frame'.
    "," nil))
-
-(use-package emacs
-  :config
-  (general-define-key
-   :keymaps '(magit-mode-map)
-   :states '(normal visual)
-   "j" 'evil-next-visual-line           ; originally `evil-next-line'.
-   "k" 'evil-previous-visual-line       ; originally `evil-previous-line'.
-   "(" 'magit-section-up
-   "TAB" 'magit-section-cycle
-   "C-j" 'magit-section-forward-sibling
-   "C-k" 'magit-section-backward-sibling)
-
-  (general-define-key
-   :keymaps '(git-rebase-mode-map)
-   :states '(normal)
-   "C-S-j" 'git-rebase-move-line-down
-   "C-S-k" 'git-rebase-move-line-up))
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
