@@ -22,17 +22,19 @@ One day I'll include some screenshots here.
 * Installing Emacs
 
 I mostly use GUI Emacs on macOS. For work I use TUI Emacs on Ubuntu via SSH. On
-macOS I install the excellent [[https://github.com/daviderestivo/homebrew-emacs-head][homebrew-emacs-head]] package created by [[https://github.com/daviderestivo][Davide
+macOS I [[https://github.com/mpereira/macbook-playbook/blob/master/roles/build-emacs/tasks/main.yml][install]] the excellent [[https://github.com/daviderestivo/homebrew-emacs-head][homebrew-emacs-head]] package created by [[https://github.com/daviderestivo][Davide
 Restivo]]:
 
 #+begin_src bash
-brew install emacs-head@28 \
+brew install emacs-head@29 \
      --with-cocoa \
+     --with-crash-debug \
      --with-imagemagick \
      --with-modern-icon-pen \
      --with-native-comp \
      --with-no-frame-refocus \
      --with-pdumper \
+     --with-tree-sitter \
      --with-xwidgets
 #+end_src
 
@@ -65,6 +67,7 @@ sudo snap install emacs --edge --classic
   - [[#async][async]]
   - [[#aio][aio]]
   - [[#cl-lib][cl-lib]]
+  - [[#no-littering][no-littering]]
   - [[#s][s]]
   - [[#dash][dash]]
   - [[#thingatpt][thingatpt+]]
@@ -79,8 +82,6 @@ sudo snap install emacs --edge --classic
 - [[#redefinitions-advices][Redefinitions, advices]]
   - [[#make-org-src-buffer-name-shorter-and-nicer][Make org src buffer name shorter and nicer]]
   - [[#improve-lisp-code-indentation][Improve Lisp code indentation]]
-  - [[#archive-org-subtrees-under-the-same-hierarchy-as-the-original-in-the-archive-files][Archive org subtrees under the same hierarchy as the original in the archive files]]
-  - [[#provide-counsel-symbol-at-point][Provide counsel-symbol-at-point]]
   - [[#make-align-regexp-not-use-tabs][Make align-regexp not use tabs]]
 - [[#helper-functions][Helper functions]]
   - [[#standard-library-type-of-things][Standard library type of things]]
@@ -89,7 +90,6 @@ sudo snap install emacs --edge --classic
 - [[#native-compilation][Native compilation]]
 - [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
 - [[#tramp][Tramp]]
-  - [[#counsel-tramp][counsel-tramp]]
 - [[#server][Server]]
 - [[#options][Options]]
   - [[#file-backups][File backups]]
@@ -97,7 +97,6 @@ sudo snap install emacs --edge --classic
   - [[#increase-the-amount-of-data-read-from-processes][Increase the amount of data read from processes]]
   - [[#asynchronous-org-babel-tangling-and-byte-recompilation][Asynchronous Org Babel tangling and byte recompilation]]
   - [[#dont-save-minibuffer-winner-mode-state][Don't save minibuffer winner-mode state]]
-  - [[#dont-show-buffer-remote-path-in-minibuffer][Don't show buffer remote path in minibuffer]]
   - [[#show-garbage-collections-in-minibuffer][Show garbage collections in minibuffer]]
   - [[#garbage-collection-magic-hack][Garbage collection magic hack]]
   - [[#dont-delete-trailing-whitespace-on-save][*Don't* delete trailing whitespace on save]]
@@ -120,7 +119,6 @@ sudo snap install emacs --edge --classic
   - [[#evil-string-inflection][evil-string-inflection]]
   - [[#evil-goggles][evil-goggles]]
   - [[#evil-multiedit][evil-multiedit]]
-  - [[#evil-owl][evil-owl]]
   - [[#evil-collection][evil-collection]]
 - [[#org][Org]]
   - [[#org-mode][org-mode]]
@@ -164,7 +162,8 @@ sudo snap install emacs --edge --classic
 - [[#shell-terminal][Shell, terminal]]
   - [[#with-editor][with-editor]]
   - [[#shell][shell]]
-  - [[#eshell][eshell]]
+- [[#eshell][eshell]]
+  - [[#fix-eshell-autocomplete][Fix eshell autocomplete]]
   - [[#vterm][vterm]]
   - [[#term][term]]
   - [[#eterm-256color][eterm-256color]]
@@ -179,33 +178,27 @@ sudo snap install emacs --edge --classic
   - [[#pixel-scroll-precision-mode][pixel-scroll-precision-mode]]
   - [[#font-sizes][Font sizes]]
   - [[#posframe][posframe]]
-  - [[#ivy-posframe][ivy-posframe]]
   - [[#so-long][so-long]]
   - [[#too-long-lines-mode][too-long-lines-mode]]
-  - [[#company-box][company-box]]
   - [[#minibuffer-line][minibuffer-line]]
   - [[#highlight-indent-guides][highlight-indent-guides]]
   - [[#origami][origami]]
-  - [[#beacon][beacon]]
   - [[#rainbow-delimiters][rainbow-delimiters]]
   - [[#diff-hl][diff-hl]]
-  - [[#dimmer][dimmer]]
   - [[#all-the-icons][all-the-icons]]
   - [[#dired-sidebar][dired-sidebar]]
   - [[#all-the-icons-dired][all-the-icons-dired]]
   - [[#emojify][emojify]]
-  - [[#ivy-rich][ivy-rich]]
-  - [[#all-the-icons-ivy-rich][all-the-icons-ivy-rich]]
 - [[#movement][Movement]]
   - [[#combobulate][combobulate]]
   - [[#bm][bm]]
+  - [[#consult][consult]]
   - [[#avy][avy]]
   - [[#goto-address-mode][goto-address-mode]]
   - [[#dumb-jump][dumb-jump]]
   - [[#frog-jump-buffer][frog-jump-buffer]]
   - [[#link-hint][link-hint]]
 - [[#text-search-and-manipulation][Text search and manipulation]]
-  - [[#swiper][swiper]]
   - [[#ripgrep][ripgrep]]
   - [[#wgrep][wgrep]]
   - [[#double-saber][double-saber]]
@@ -214,7 +207,6 @@ sudo snap install emacs --edge --classic
   - [[#ialign][ialign]]
   - [[#yasnippet][yasnippet]]
   - [[#yasnippet-snippets][yasnippet-snippets]]
-  - [[#add-yasnippet-support-for-all-company-backends][Add yasnippet support for all company backends]]
   - [[#electric-pair-mode][electric-pair-mode]]
   - [[#undo-tree][undo-tree]]
   - [[#ediff][ediff]]
@@ -229,7 +221,6 @@ sudo snap install emacs --edge --classic
   - [[#magit][magit]]
   - [[#libegit2-and-magit-libjit][libegit2 and magit-libjit]]
   - [[#forge][forge]]
-  - [[#magit-todos][magit-todos]]
   - [[#a-vscode-git-lens-type-of-thing][A VSCode git lens type of thing]]
   - [[#gist][gist]]
   - [[#git-modes][git-modes]]
@@ -238,7 +229,6 @@ sudo snap install emacs --edge --classic
 - [[#software-development][Software development]]
   - [[#flycheck][flycheck]]
   - [[#lsp][LSP]]
-  - [[#company][company]]
   - [[#copilot][copilot]]
   - [[#aggressive-indent][aggressive-indent]]
   - [[#lisp][LISP]]
@@ -263,6 +253,7 @@ sudo snap install emacs --edge --classic
   - [[#dockerfile-mode][dockerfile-mode]]
   - [[#jinja2-mode][jinja2-mode]]
   - [[#literate-calc-mode][literate-calc-mode]]
+  - [[#applescript-mode][applescript-mode]]
 - [[#web-development][Web development]]
   - [[#web-mode][web-mode]]
   - [[#auto-rename-tag][auto-rename-tag]]
@@ -300,19 +291,17 @@ sudo snap install emacs --edge --classic
   - [[#ibuffer][ibuffer]]
   - [[#ibuffer-projectile][ibuffer-projectile]]
   - [[#perspective][perspective]]
-  - [[#counsel][counsel]]
   - [[#persp-projectile][persp-projectile]]
-  - [[#counsel-projectile][counsel-projectile]]
   - [[#find-file-in-project][find-file-in-project]]
 - [[#commands][Commands]]
   - [[#amx][amx]]
-  - [[#ivy][ivy]]
-  - [[#prescient][prescient]]
-  - [[#ivy-prescient][ivy-prescient]]
-  - [[#company-prescient][company-prescient]]
+  - [[#embark][embark]]
+  - [[#embark-consult][embark-consult]]
+  - [[#orderless][orderless]]
+  - [[#corfu][corfu]]
+  - [[#vertico][vertico]]
 - [[#help][Help]]
   - [[#helpful][helpful]]
-  - [[#discover-my-major][discover-my-major]]
   - [[#which-key][which-key]]
   - [[#dash-at-point][dash-at-point]]
   - [[#command-log-mode][command-log-mode]]
@@ -325,9 +314,7 @@ sudo snap install emacs --edge --classic
 - [[#interactions-with-websites][Interactions with websites]]
   - [[#counsel-web][counsel-web]]
   - [[#emacs-webkit][emacs-webkit]]
-  - [[#xwwp-follow-link][xwwp-follow-link]]
   - [[#elfeed][elfeed]]
-  - [[#stackoverflow][stackoverflow]]
   - [[#google-this][google-this]]
   - [[#wolfram-alpha][Wolfram Alpha]]
   - [[#hackernews][hackernews]]
@@ -434,6 +421,11 @@ Set it with emacs lisp.
 ** cl-lib
 #+begin_src emacs-lisp :tangle yes
 (use-package cl-lib)
+#+end_src
+
+** no-littering
+#+begin_src emacs-lisp :tangle yes
+(use-package no-littering)
 #+end_src
 
 ** s
@@ -670,72 +662,7 @@ Lisp function does not specify a special indentation."
                   (funcall method indent-point state)))))))))
 #+end_src
 
-** Archive org subtrees under the same hierarchy as the original in the archive files
-I got this from [[https://github.com/Fuco1/.emacs.d/blob/b55c7e85d87186f16c395bd35f289da0b5bb84b1/files/org-defs.el#L1582-L1619][Fuco1/.emacs.d/files/org-defs.el]].
-
-FIXME: I've been having issues with archiving lately because this defadvice
-became incompatible with newer versions of org. Fuco1 is [[https://github.com/Fuco1/.emacs.d/issues/60][thinking of turning it
-into a package]]. For now I'm making this source block not be tangled and using
-[[https://gitlab.com/andersjohansson/org-archive-hierarchically][andersjohansson/org-archive-hierarchically]] instead.
-
-Not tangled!
-#+begin_src emacs-lisp :tangle no
-(defadvice org-archive-subtree (around fix-hierarchy activate)
-  (let* ((fix-archive-p (and (not current-prefix-arg)
-                             (not (use-region-p))))
-         (afile (org-extract-archive-file (org-get-local-archive-location)))
-         (buffer (or (find-buffer-visiting afile) (find-file-noselect afile))))
-    ad-do-it
-    (when fix-archive-p
-      (with-current-buffer buffer
-        (goto-char (point-max))
-        (while (org-up-heading-safe))
-        (let* ((olpath (org-entry-get (point) "ARCHIVE_OLPATH"))
-               (path (and olpath (split-string olpath "/")))
-               (level 1)
-               tree-text)
-          (when olpath
-            (org-mark-subtree)
-            (setq tree-text (buffer-substring (region-beginning) (region-end)))
-            (let (this-command) (org-cut-subtree))
-            (goto-char (point-min))
-            (save-restriction
-              (widen)
-              (-each path
-                (lambda (heading)
-                  (if (re-search-forward
-                       (rx-to-string
-                        `(: bol (repeat ,level "*") (1+ " ") ,heading)) nil t)
-                      (org-narrow-to-subtree)
-                    (goto-char (point-max))
-                    (unless (looking-at "^")
-                      (insert "\n"))
-                    (insert (make-string level ?*)
-                            " "
-                            heading
-                            "\n"))
-                  (cl-incf level)))
-              (widen)
-              (org-end-of-subtree t t)
-              (org-paste-subtree level tree-text))))))))
-#+end_src
-
-** Provide ~counsel-symbol-at-point~
-~counsel-symbol-at-point~ was removed from counsel so I'm adding a version I found
-on the internet here.
-
-#+begin_src emacs-lisp :tangle yes
-(defun counsel-symbol-at-point ()
-  "Return current symbol at point as a string."
-  (let ((s (thing-at-point 'symbol)))
-    (and (stringp s)
-         (if (string-match "\\`[`']?\\(.*?\\)'?\\'" s)
-             (match-string 1 s)
-           s))))
-#+end_src
-
 ** Make ~align-regexp~ not use tabs
-
 Found on [[https://stackoverflow.com/questions/22710040/emacs-align-regexp-with-spaces-instead-of-tabs][Stack Overflow]].
 
 #+begin_src emacs-lisp :tangle yes
@@ -1052,59 +979,6 @@ in any structured movement package is mind-boggling to me."
   (let ((current-prefix-arg prefix-arg))
     (call-interactively func)))
 
-(defun mpereira/perspective-switch (perspective-name
-                                    &optional after-perspective-creation-function)
-  "TODO: docstring."
-  (let ((perspective (gethash perspective-name (perspectives-hash))))
-    (if perspective
-        ;; Perspective already exists and is not the current.
-        (when (not (equal perspective (persp-curr)))
-          (persp-switch perspective-name))
-      ;; Perspective doesn't exist.
-      (progn
-        (persp-switch perspective-name)
-        (and after-perspective-creation-function
-             (funcall after-perspective-creation-function perspective-name))))))
-
-(defun mpereira/projectile-default-project-name (project-root)
-  "TODO: PROJECT-ROOT docstring."
-  (let* ((default-directory project-root)
-         (suffix (if (file-remote-p project-root)
-                     (format " @ %s" (mpereira/remote-host))
-                   "")))
-    (concat (file-name-nondirectory (directory-file-name default-directory))
-            suffix)))
-
-(defun mpereira/projectile-switch-project-action (project-root)
-  "TODO: PROJECT-ROOT docstring."
-  (let ((perspective-name (funcall
-                           projectile-project-name-function
-                           project-root)))
-    (mpereira/perspective-switch perspective-name
-                                 (lambda (perspective-name)
-                                   (if (file-remote-p project-root)
-                                       (let ((default-directory project-root))
-                                         (mpereira/maybe-projectile-dired))
-                                     (counsel-projectile-switch-project-action-dired
-                                      project-root))))))
-
-(defun mpereira/counsel-projectile-perspective-switch-project (&optional default-action)
-  "TODO: docstring."
-  (interactive)
-  (ivy-read (projectile-prepend-project-name "Switch to project: ")
-            (projectile-relevant-known-projects)
-            :preselect (and (projectile-project-p)
-                            (projectile-project-root))
-            :action (or default-action
-                        'mpereira/projectile-switch-project-action)
-            :require-match t
-            :sort 'ivy-prescient-sort-function
-            :caller 'mpereira/counsel-projectile-perspective-switch-project))
-
-(with-eval-after-load "ivy"
-  (ivy-configure 'mpereira/counsel-projectile-perspective-switch-project
-    :display-transformer-fn 'mpereira/projectile-default-project-name))
-
 (with-eval-after-load "find-file-in-project"
   (defun mpereira/find-directory ()
     (interactive)
@@ -1131,23 +1005,23 @@ in any structured movement package is mind-boggling to me."
         (eshell t))))
 
   (with-eval-after-load "find-file-in-project"
-    (with-eval-after-load "counsel-projectile"
+    (with-eval-after-load "consult-projectile"
       (defun mpereira/maybe-projectile-switch-buffer ()
         (interactive)
         (if (projectile-project-p)
-            (counsel-projectile-switch-to-buffer)
-          (ivy-switch-buffer)))
+            (consult-projectile-switch-to-buffer)
+          (switch-buffer)))
 
       (defun mpereira/maybe-projectile-find-file ()
         (interactive)
         (if (projectile-project-p)
-            (counsel-projectile-find-file)
-          (fast-project-find-file)))
+            (consult-projectile-find-file)
+          (consult-find)))
 
       (defun mpereira/maybe-projectile-find-directory ()
         (interactive)
         (if (projectile-project-p)
-            (counsel-projectile-find-dir)
+            (consult-projectile-find-dir)
           (mpereira/find-directory))))))
 
 (defun mpereira/enable-line-numbers ()
@@ -1179,10 +1053,18 @@ in any structured movement package is mind-boggling to me."
                          "-suspend")))
     (shell-command command)))
 
+(defun mpereira/symbol-at-point ()
+  "Return current symbol at point as a string."
+  (let ((s (thing-at-point 'symbol)))
+    (and (stringp s)
+         (if (string-match "\\`[`']?\\(.*?\\)'?\\'" s)
+             (match-string 1 s)
+           s))))
+
 (defun mpereira/epoch-at-point-to-timestamp ()
   "TODO: docstring"
   (interactive)
-  (if-let (thing (counsel-symbol-at-point))
+  (if-let (thing (mpereira/symbol-at-point))
       (let* ((seconds (string-to-number thing))
              (time (seconds-to-time seconds))
              (timestamp (format-time-string "%Y-%m-%d %a %H:%M:%S" time)))
@@ -1207,41 +1089,6 @@ in any structured movement package is mind-boggling to me."
     (kill-new buffer-name*)
     (message buffer-name*)
     buffer-name*))
-
-(defun mpereira/bm-counsel-get-list (bookmark-overlays)
-  "TODO: docstring.
-Arguments: BOOKMARK-OVERLAYS."
-  (-map (lambda (bm)
-          (with-current-buffer (overlay-buffer bm)
-            (let* ((line (replace-regexp-in-string
-                          "\n$"
-                          ""
-                          (buffer-substring (overlay-start bm)
-                                            (overlay-end bm))))
-                   ;; line numbers start on 1
-                   (line-num (+ 1 (count-lines (point-min) (overlay-start bm))))
-                   (name (format "%s:%d - %s" (buffer-name) line-num line)))
-              `(,name . ,bm))))
-        bookmark-overlays))
-
-(defun mpereira/bm-counsel-find-bookmark ()
-  "TODO: docstring.
-Arguments: none."
-  (interactive)
-  (let* ((bm-list (mpereira/bm-counsel-get-list (bm-overlays-lifo-order t)))
-         (bm-hash-table (make-hash-table :test 'equal))
-         (search-list (-map (lambda (bm) (car bm)) bm-list)))
-    (-each bm-list (lambda (bm)
-                     (puthash (car bm) (cdr bm) bm-hash-table)))
-    (ivy-read "Find bookmark: "
-              search-list
-              :require-match t
-              :keymap counsel-describe-map
-              :action (lambda (chosen)
-                        (let ((bookmark (gethash chosen bm-hash-table)))
-                          (switch-to-buffer (overlay-buffer bookmark))
-                          (bm-goto bookmark)))
-              :sort t)))
 
 (defun mpereira/narrow-or-widen-dwim (p)
   "Widen if buffer is narrowed, narrow-dwim otherwise.
@@ -1290,44 +1137,36 @@ With prefix P, don't widen, just narrow even if buffer is already narrowed."
 (defun mpereira/load-light-theme ()
   "TODO: docstring."
   (interactive)
-  (counsel-load-theme-action (symbol-name mpereira/light-theme)))
+  (consult-theme mpereira/light-theme))
 
 (defun mpereira/load-dark-theme ()
   "TODO: docstring."
   (interactive)
-  (counsel-load-theme-action (symbol-name mpereira/dark-theme)))
+  (consult-theme mpereira/dark-theme))
 
 (defun mpereira/process-using-port ()
   "Show list of processes listening on ports via TCP.
   Copies the selected process's PID to the clipboard."
   (interactive)
-  (let ((sort-fn (lambda (name candidates)
-                   candidates))
-        (ivy-sort-functions-alist '((t . sort-fn)))
-        (candidates (split-string (shell-command-to-string
+  (let ((candidates (split-string (shell-command-to-string
                                    "lsof -nP -iTCP | grep LISTEN")
                                   "\n"
                                   t)))
-    (ivy-read "Port: "
-              candidates
-              :action (lambda (project-path)
-                        (kill-new (cadr (split-string project-path " " t)))))))
+    (let ((chosen-process (completing-read "Port: " candidates nil t)))
+      (when chosen-process
+        (kill-new (cadr (split-string chosen-process " " t)))))))
 
 (defun mpereira/ps ()
   "Show list of system processes.
 Copies the selected process's PID to the clipboard."
   (interactive)
-  (let ((ps-sort (lambda (name candidates)
-                   candidates))
-        (ivy-sort-functions-alist '((t . ps-sort)))
-        (ps (split-string (shell-command-to-string
+  (let ((ps (split-string (shell-command-to-string
                            "ps axco user,pid,%cpu,%mem,start,time,command -r")
                           "\n"
                           t)))
-    (ivy-read "Process: "
-              ps
-              :action (lambda (project-path)
-                        (kill-new (cadr (split-string project-path " " t)))))))
+    (let ((chosen-process (completing-read "Process: " ps nil t)))
+      (when chosen-process
+        (kill-new (cadr (split-string chosen-process " " t)))))))
 
 (defun mpereira/kill-buffer-and-maybe-window (&optional kill-buffer-p)
   "TODO."
@@ -1610,11 +1449,6 @@ freezes.
                          "-o ControlMaster=auto -o ControlPersist=yes"))
 #+end_src
 
-** counsel-tramp
-#+begin_src emacs-lisp :tangle yes
-(use-package counsel-tramp)
-#+end_src
-
 * Server
 #+begin_src emacs-lisp :tangle yes
 (require 'server)
@@ -1894,12 +1728,6 @@ Recommended in https://github.com/abo-abo/swiper/issues/963#issuecomment-2945175
 (add-hook 'winner-mode-hook 'mpereira/disable-winner-mode-in-the-minibuffer)
 #+end_src
 
-** Don't show buffer remote path in minibuffer
-#+begin_src emacs-lisp :tangle yes
-(with-eval-after-load "ivy-rich"
-  (setq ivy-rich-parse-remote-buffer nil))
-#+end_src
-
 ** Show garbage collections in minibuffer
 #+begin_src emacs-lisp :tangle yes
 (setq garbage-collection-messages t)
@@ -2021,7 +1849,7 @@ My favorite light themes:
 (use-package vscode-dark-plus-theme)
 
 (add-hook 'after-init-hook
-          (lambda () (counsel-load-theme-action (symbol-name mpereira/initial-theme)))
+          (lambda () (consult-theme mpereira/initial-theme))
           'append)
 #+end_src
 
@@ -2314,37 +2142,6 @@ My favorite light themes:
    "C-j" 'evil-multiedit-next))
 #+end_src
 
-** evil-owl
-~evil-owl-extra-posframe-args~ is set so that the evil-owl frame looks exactly
-the same as the =ivy-posframe= one.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package evil-owl
-  :after (evil ivy-posframe)
-  :config
-  (setq evil-owl-max-string-length 50)
-  (setq evil-owl-display-method 'posframe)
-
-  (defun mpereira/update-evil-owl-posframe-args ()
-    (interactive)
-    (setq evil-owl-extra-posframe-args
-          `(:width 80
-            :height 20
-            :background-color ,(face-attribute 'ivy-posframe :background nil t)
-            :foreground-color ,(face-attribute 'ivy-posframe :foreground nil t)
-            :internal-border-width ,ivy-posframe-border-width
-            :internal-border-color ,(face-attribute 'ivy-posframe-border
-                                                    :background
-                                                    nil
-                                                    t))))
-
-  ;; This needs to run after the initial theme load.
-  (add-hook 'after-init-hook 'mpereira/update-evil-owl-posframe-args 'append)
-  (add-hook 'after-load-theme-hook 'mpereira/update-evil-owl-posframe-args)
-
-  (evil-owl-mode))
-#+end_src
-
 ** evil-collection
 #+begin_src emacs-lisp :tangle yes
 (use-package evil-collection
@@ -2618,7 +2415,7 @@ the beginning of the line. This fixes that."
  :states '(normal visual)
  :prefix mpereira/leader
  :infix "f"
- "o" 'counsel-org-goto)
+ "o" 'consult-org-heading)
 
 (general-define-key
  :keymaps '(org-mode-map)
@@ -2643,7 +2440,7 @@ the beginning of the line. This fixes that."
  :infix "o"
  "a" #'mpereira/open-or-build-main-org-agenda
  "A" #'mpereira/open-or-build-review-org-agenda
- "c" 'counsel-org-capture
+ "c" 'org-capture
  "Ci" 'org-clock-in
  "Co" 'org-clock-out
  "Cg" 'org-clock-goto
@@ -2698,7 +2495,7 @@ the beginning of the line. This fixes that."
          '(4) 'org-schedule))
  "s" 'org-schedule
  "S" 'org-sort-entries
- "t" 'counsel-org-tag
+ "t" 'org-set-tags-command
  "u" 'org-toggle-link-display
  "w" 'org-web-tools-insert-web-page-as-entry
  "x" 'org-export-dispatch
@@ -3979,30 +3776,6 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
   :after dired)
 #+end_src
 
-Make =dired-subtree= work with =all-the-icons-dired= by reverting the buffer on
-cycling so that icons are rendered. Disabled by default for now because it
-impacts performance heavily in large directories.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package dired-subtree
-  :disabled
-  :after dired
-  :init
-  (defun mpereira/dired-subtree-toggle ()
-    (interactive)
-    (dired-subtree-toggle)
-    (revert-buffer))
-
-  (defun mpereira/dired-subtree-cycle ()
-    (interactive)
-    (dired-subtree-cycle)
-    (revert-buffer))
-
-  :bind (:map dired-mode-map
-         ("<tab>" . mpereira/dired-subtree-toggle)
-         ("<S-tab>" . mpereira/dired-subtree-cycle)))
-#+end_src
-
 ** reveal-in-osx-finder
 #+begin_src emacs-lisp :tangle yes
 (use-package reveal-in-osx-finder)
@@ -4030,7 +3803,7 @@ impacts performance heavily in large directories.
  "C-l" 'comint-clear-buffer)
 #+end_src
 
-** eshell
+* eshell
 #+begin_src emacs-lisp :tangle yes
 (require 'eshell)
 (require 'em-dirs) ;; for `eshell/pwd'.
@@ -4066,15 +3839,7 @@ impacts performance heavily in large directories.
          (input (eshell-get-old-input)))
     (eshell/clear-scrollback)
     (eshell-emit-prompt)
-    (insert input)
-    ;; This fixes the scenario where `ivy-completion-in-region-action' tries to
-    ;; delete a region delimited by these two variables after they went out of
-    ;; sync due to clearing an eshell buffer. The symptoms are broken completion
-    ;; insertion and messages like: "Args out of range: #<buffer *eshell*>,
-    ;; 237506, 237518" in the messages buffer. Should probably check with the
-    ;; ivy people if this should be handled by ivy itself instead?
-    (setq ivy-completion-beg nil)
-    (setq ivy-completion-end nil)))
+    (insert input)))
 
 (defun mpereira/eshell-clear ()
   (interactive)
@@ -4085,13 +3850,13 @@ impacts performance heavily in large directories.
   "Switch to a recent `eshell' directory using completion.
 With \\[universal-argument] also open the directory in a `dired' buffer."
   (interactive "P")
-  (ivy-read "Switch to recent dir: "
-            (delete-dups (ring-elements eshell-last-dir-ring))
-            :action (lambda (x)
-                      (insert dir)
-                      (eshell-send-input)
-                      (when arg
-                        (dired dir)))))
+  (let ((recent-dirs (delete-dups (ring-elements eshell-last-dir-ring))))
+    (let ((chosen-dir (completing-read "Switch to recent dir: " recent-dirs nil t)))
+      (when chosen-dir
+        (insert chosen-dir)
+        (eshell-send-input)
+        (when arg
+          (dired chosen-dir))))))
 
 ;; Inspired by Prot's.
 (defun mpereira/eshell-switch-to-last-output-buffer ()
@@ -4113,35 +3878,6 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
   (end-of-line)
   (insert
    (concat " >>> #<" (read-buffer-to-switch "Redirect to buffer:") ">")))
-
-;; I don't use `counsel-esh-history' because it doesn't take into consideration
-;; the current input.
-(defun mpereira/eshell-history ()
-  "Browse Eshell history."
-  (interactive)
-  (let ((candidates (delete-dups (ring-elements eshell-history-ring)))
-        (input (let ((input-start (save-excursion (eshell-bol)))
-                     (input-end (save-excursion (end-of-line) (point))))
-                 (buffer-substring-no-properties input-start input-end))))
-    (ivy-read "Command: "
-              candidates
-              :action (lambda (candidate)
-                        (end-of-line)
-                        (eshell-kill-input)
-                        (insert (string-trim candidate)))
-              :caller 'mpereira/eshell-history
-              :initial-input input)))
-
-;; FIXME: this needs to be manually evaluated after init. Why?
-(with-eval-after-load "ivy"
-  (ivy-set-display-transformer
-   'mpereira/eshell-history
-   (lambda (candidate)
-     (->> candidate
-          ;; Don't display multiline commands.
-          (s-replace "\n" "; ")
-          ;; Limit command width to ivy-posframe frame width.
-          (s-truncate ivy-posframe-width)))))
 
 ;; eshell-mode-map needs to be configured in an `eshell-mode-hook'.
 ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2016-02/msg01532.html
@@ -4182,7 +3918,7 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
    "<tab>" 'completion-at-point
    "C-k" 'eshell-previous-matching-input-from-input
    "C-j" 'eshell-next-matching-input-from-input
-   "C-/" 'mpereira/eshell-history
+   "C-/" 'consult-history
    ;; https://github.com/ksonney/spacemacs/commit/297945a45696e235c6983a78acdf05b5f0e015ca
    "C-l" 'mpereira/eshell-clear)
 
@@ -4276,7 +4012,7 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 (add-hook 'eshell-mode-hook #'mpereira/eshell-hist-use-global-history)
 #+end_src
 
-*** Fix eshell autocomplete
+** Fix eshell autocomplete
 This [[https://github.com/company-mode/company-mode/issues/1322#issuecomment-1114453423][fix]] provided by [[https://github.com/ethan-leba][Ethan Leba]] essentially reverts [[https://git.savannah.gnu.org/cgit/emacs.git/commit/?id=82c76e3aeb2465d1d1e66eae5db13ba53e38ed84][the commit which introduced
 the bug]]. Tracking bug in debbugs: [[https://debbugs.gnu.org/cgi/bugreport.cgi?bug=48995][#48995]].
 
@@ -4429,118 +4165,19 @@ Disabled because it [[https://github.com/szermatt/emacs-bash-completion/issues/2
 
 #+begin_src emacs-lisp :tangle yes
 (use-package bash-completion
-  :disabled
-  :init
-  (setq bash-completion-use-separate-processes nil)
   :config
   (bash-completion-setup))
 #+end_src
 
 ** fish-completion
-Disabling this for now because it breaks path completion. The issue below says
-that the issue is fixed on recent versions of emacs-fish-completion, but it
-doesn't really seem to be.
-https://gitlab.com/ambrevar/emacs-fish-completion/issues/3.
-
-I wrote the above a while ago. Maybe it's fixed now?
-
-This doesn't work on remote Eshell buffers even when fish is installed on the
-remote machines.
-
 #+begin_src emacs-lisp :tangle yes
 (use-package fish-completion
-  :disabled
+  :custom
+  (fish-completion-fallback-on-bash-p t)
   :config
   (if (executable-find "fish")
       (global-fish-completion-mode)
-    (message "fish executable not found, not enabling fish-completion-mode"))
-
-  (setq fish-completion-fallback-on-bash-p t)
-
-  ;; TODO: implement this.
-  ;; WIP: Adds support for showing completion descriptions.
-  ;; https://github.com/emacs-helm/helm-fish-completion/blob/master/helm-fish-completion.el
-  (defun mpereira/fish-completion-complete (input)
-    "Complete RAW-PROMPT (any string) using the fish shell.
-
-If `fish-completion-fallback-on-bash-p' is non-nil and if the `bash-completion'
-package is available, fall back on bash in case no completion was found with
-fish."
-    (interactive)
-    (while
-        (pcomplete-here
-         (let ((completions
-                (let* (;; Keep spaces at the end with OMIT-NULLS=nil in
-                       ;; `split-string'.
-                       (tokens* (split-string input
-                                              split-string-default-separators
-                                              nil))
-                       ;; The first non-empty `car' is the command. Discard
-                       ;; leading empty strings.
-                       (tokens (progn (while (string= (car tokens*) "")
-                                        (setq tokens* (cdr tokens*)))
-                                      tokens*))
-                       ;; Fish does not support subcommand completion. We make a
-                       ;; special case of 'sudo' and 'env' since they are the most
-                       ;; common cases involving subcommands. See
-                       ;; https://github.com/fish-shell/fish-shell/issues/4093.
-                       (prompt (if (not (member (car tokens) '("sudo" "env")))
-                                   input
-                                 (setq tokens (cdr tokens))
-                                 (while (and tokens
-                                             (or (string-match "^-.*" (car tokens))
-                                                 (string-match "=" (car tokens))))
-                                   ;; Skip env/sudo parameters, like LC_ALL=C.
-                                   (setq tokens (cdr tokens)))
-                                 (mapconcat 'identity tokens " "))))
-                  ;; Completion result can be a filename. pcomplete expects
-                  ;; cannonical file names (i.e. without '~') while fish preserves
-                  ;; non-cannonical results. If the result contains a directory,
-                  ;; expand it.
-                  (split-string
-                   (with-output-to-string
-                     (with-current-buffer standard-output
-                       (call-process fish-completion-command
-                                     nil
-                                     t
-                                     nil
-                                     "-c"
-                                     (format "complete -C%s"
-                                             (shell-quote-argument prompt)))))
-                   "\n"
-                   t))))
-           (if (and fish-completion-fallback-on-bash-p
-                    (or (not completions)
-                        (file-exists-p (car completions)))
-                    (require 'bash-completion nil t))
-               ;; Remove trailing spaces of bash completion entries. (Does this
-               ;; only occurs when there is 1 completion item?)
-               ;; TODO: Maybe this should be fixed in bash-completion instead.
-               (mapcar 'string-trim-right
-                       (mapcar (lambda (s)
-                                 ;; bash-completion inserts "\" to escape white
-                                 ;; spaces, we need to remove them since pcomplete
-                                 ;; does that too.
-                                 (replace-regexp-in-string (regexp-quote "\\") "" s))
-                               (nth 2 (bash-completion-dynamic-complete-nocomint
-                                       (save-excursion (eshell-bol) (point)) (point)))))
-             (if (and completions (file-exists-p (car completions)))
-                 (pcomplete-dirs-or-entries)
-               (let ((formatted-completions
-                      (mapcar
-                       (lambda (e)
-                         (multiple-value-bind (flag description) (split-string e "\t")
-                           ;; Remove trailing spaces to avoid it being converted
-                           ;; into "\ ".
-                           (string-trim-right
-                            (if description
-                                (replace-regexp-in-string
-                                 (regexp-quote " ")
-                                 " "
-                                 (format "%-50s %s" flag description))
-                              flag))))
-                       completions)))
-                 formatted-completions))))))))
+    (message "fish executable not found, not enabling fish-completion-mode")))
 #+end_src
 
 ** load-bash-alias
@@ -4677,29 +4314,25 @@ to get the actual frame width in characters.
   (let* ((default-font-family (face-attribute 'default :family))
          (frame-column-width (/ (frame-text-width)
                                 (frame-char-width)))
-         (ivy-posframe-width-multiplier 0.5)
-         (ivy-posframe-font-size-multiplier 1.1)
-         (ivy-posframe-font-size (mpereira/font-size-normalize
-                                  (truncate
-                                   (* ivy-posframe-font-size-multiplier
-                                      (/ new-font-size 10))))))
-    (with-eval-after-load "ivy-posframe"
-      (message (format "setting ivy-posframe-font to '%s'"
+         (posframe-width-multiplier 0.5)
+         (posframe-font-size-multiplier 1.1)
+         (posframe-font-size (mpereira/font-size-normalize
+                              (truncate
+                               (* posframe-font-size-multiplier
+                                  (/ new-font-size 10))))))
+    (with-eval-after-load "vertico-posframe"
+      (message (format "setting vertico-posframe-font to '%s'"
                        (format "%s %s"
                                default-font-family
-                               ivy-posframe-font-size)))
-      (setq ivy-posframe-font (format "%s %s"
-                                      default-font-family
-                                      ivy-posframe-font-size))
-      (message (format "setting ivy-posframe-width to '%d'"
-                       (truncate (* ivy-posframe-width-multiplier
+                               posframe-font-size)))
+      (setq vertico-posframe-font (format "%s %s"
+                                          default-font-family
+                                          posframe-font-size))
+      (message (format "setting vertico-posframe-width to '%d'"
+                       (truncate (* posframe-width-multiplier
                                     frame-column-width))))
-      (setq ivy-posframe-width (truncate (* ivy-posframe-width-multiplier
-                                            frame-column-width))))
-    (setq mpereira/company-box-icon-size-pixels (mpereira/font-size-normalize
-                                                 (truncate (/ new-font-size 10))))
-    (with-eval-after-load "company-box"
-      (company-box-icons-resize mpereira/company-box-icon-size-pixels))))
+      (setq vertico-posframe-width (truncate (* posframe-width-multiplier
+                                                frame-column-width))))))
 
 (defun mpereira/font-size-change (change-fn)
   (interactive)
@@ -4774,18 +4407,6 @@ to get the actual frame width in characters.
 (use-package posframe)
 #+end_src
 
-** ivy-posframe
-#+begin_src emacs-lisp :tangle yes
-(use-package ivy-posframe
-  :after (ivy posframe)
-  :custom
-  (ivy-posframe-border-width 1)
-  (ivy-posframe-display-functions-alist '((swiper . ivy-display-function-fallback)
-                                          (t . ivy-posframe-display-at-frame-center)))
-  :config
-  (ivy-posframe-mode))
-#+end_src
-
 ** so-long
 #+begin_src emacs-lisp :tangle yes
 (use-package so-long
@@ -4802,64 +4423,6 @@ to get the actual frame width in characters.
            :repo "rakete/too-long-lines-mode")
   :config
   (too-long-lines-mode))
-#+end_src
-
-** company-box
-Changing themes usually breaks the =company-box= frames appearance. This setup
-fixes that.
-
-Check out the [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Layout-Parameters.html#Layout-Parameters][Layout Parameters]] documentation for configuring
-=company-box-frame-parameters= below.
-
-Since I upgraded Emacs to contain the frame border fix for macOS, company-box
-has been causing Emacs to die sporadically. Disabling it until I fix this.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package company-box
-  :after (company ivy-posframe)
-  :hook (company-mode-hook . company-box-mode)
-  :init
-  (setq company-box-doc-delay 0)
-  (setq company-box-max-candidates 1000)
-  (setq company-box-show-single-candidate t)
-  (setq company-tooltip-align-annotations t)
-
-  (setq company-box-doc-frame-parameters
-        `((internal-border-width . ,ivy-posframe-border-width)))
-
-  (defun mpereira/company-box-doc-sync-frame-with-current-theme ()
-    "TODO: docstring."
-    (interactive)
-    (setq company-box-doc-frame-parameters
-          `((background-color . ,(face-attribute 'ivy-posframe :background nil t))
-            (foreground-color . ,(face-attribute 'ivy-posframe :foreground nil t))
-            (internal-border-width . ,ivy-posframe-border-width)
-            (internal-border-color . ,(face-attribute 'ivy-posframe-border
-                                                      :background
-                                                      nil
-                                                      t)))))
-
-  (defun mpereira/company-box-update-frames-and-parameters ()
-    "TODO: docstring."
-    (interactive)
-    (mpereira/company-box-doc-sync-frame-with-current-theme)
-    (company-box--set-frame (company-box--make-frame (company-box--get-buffer)))
-    (frame-local-setq company-box-doc-frame
-                      (company-box-doc--make-frame (company-box--get-buffer
-                                                    "doc"))))
-
-  ;; FIXME: this is causing the company-box frame to have a small,
-  ;; non-expandable width.
-  ;; (add-hook 'after-init-hook
-  ;;           (lambda (&optional _)
-  ;;             ;; This needs to run after the hook that sets the initial theme.
-  ;;             (mpereira/company-box-doc-sync-frame-with-current-theme)
-  ;;             ;; Adding this hook only after Emacs startup so that the initial
-  ;;             ;; theme setting doesn't trigger it. It was causing the
-  ;;             ;; company-box frame width to be truncated, for some reason.
-  ;;             (add-hook 'after-load-theme-hook 'mpereira/company-box-update-frames-and-parameters))
-  ;;           'append)
-  )
 #+end_src
 
 ** minibuffer-line
@@ -4894,19 +4457,6 @@ Mode not enabled by default.
   (add-hook 'prog-mode-hook #'origami-mode))
 #+end_src
 
-** beacon
-Disabling beacon because it makes some modes really slow:
-- magit-diff buffers
-
-#+begin_src emacs-lisp :tangle yes
-(use-package beacon
-  :disabled
-  :config
-  (add-to-list 'beacon-dont-blink-major-modes 'eshell-mode)
-  (beacon-mode 1)
-  (setq beacon-size 40))
-#+end_src
-
 ** rainbow-delimiters
 #+begin_src emacs-lisp :tangle yes
 (use-package rainbow-delimiters
@@ -4933,31 +4483,6 @@ Disabling for now because it was making buffers slow.
   (set-face-background 'diff-hl-change "yellow3")
   (set-face-foreground 'diff-hl-delete "diff-nonexistent")
   (set-face-background 'diff-hl-delete "red4"))
-#+end_src
-
-** dimmer
-This package seems to cause Emacs to become sluggish after being enabled.
-Disabling it doesn't help, only restarting Emacs.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package dimmer
-  :after (ivy-posframe company-posframe)
-  :config
-  (setq dimmer-fraction 0.5)
-  (setq dimmer-exclusion-predicates '(window-minibuffer-p))
-  ;; Seems to improve performance a bit.
-  (setq dimmer-watch-frame-focus-events nil)
-  (setq dimmer-exclusion-regexp-list
-        `(,ivy-posframe-buffer
-          ,company-posframe-buffer
-          ,company-posframe-quickhelp-buffer
-          "^\\*Minibuf-[0-9]+\\*$"
-          "^\\*Echo.*\\*$"
-          " \\*transient\\*"
-          ".*which-key.*"
-          ".*Messages.*"
-          ".*Async.*"
-          ".*Warnings.*")))
 #+end_src
 
 ** all-the-icons
@@ -4987,319 +4512,6 @@ Mode not enabled by default.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package emojify)
-#+end_src
-
-** ivy-rich
-This mode affects performance for some functions
-
-#+begin_src emacs-lisp :tangle yes
-(use-package ivy-rich
-  :after ivy
-  :init
-  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
-#+end_src
-
-*** Run ~ivy-rich-mode~ only after loading ~all-the-icons-ivy-rich~
-#+begin_src emacs-lisp :tangle yes
-(use-package emacs
-  :after (ivy-rich all-the-icons-ivy-rich)
-  :config
-  ;; Toggle `ivy-rich-mode' after modifying `ivy-rich-display-transformers-list'.
-  (setq ivy-rich-display-transformers-list
-        `(ivy-switch-buffer
-          (:columns ((all-the-icons-ivy-rich-buffer-icon)
-                     (ivy-switch-buffer-transformer
-                      (:width 0.2))
-                     (ivy-rich-switch-buffer-major-mode
-                      (:width 18 :face warning))
-                     (ivy-rich-switch-buffer-project
-                      (:width 15 :face success))
-                     (ivy-rich-switch-buffer-indicators
-                      (:width 4 :face error :align right))
-                     (ivy-rich-switch-buffer-size
-                      (:width 7))
-                     (ivy-rich-switch-buffer-path
-                      (:width (lambda (candidate)
-                                (ivy-rich-switch-buffer-shorten-path
-                                 candidate (ivy-rich-minibuffer-width 0.2))))))
-           :predicate (lambda (candidate)
-                        (get-buffer candidate))
-           :delimiter "	")
-          ivy-switch-buffer-other-window
-          (:columns ((all-the-icons-ivy-rich-buffer-icon)
-                     (ivy-rich-candidate
-                      (:width 30))
-                     (ivy-rich-switch-buffer-size
-                      (:width 7))
-                     (ivy-rich-switch-buffer-indicators
-                      (:width 4 :face error :align right))
-                     (ivy-rich-switch-buffer-major-mode
-                      (:width 18 :face warning))
-                     (ivy-rich-switch-buffer-project
-                      (:width 15 :face success))
-                     (ivy-rich-switch-buffer-path
-                      (:width (lambda
-                                (candidate)
-                                (ivy-rich-switch-buffer-shorten-path
-                                 candidate (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda (candidate)
-                        (get-buffer candidate))
-           :delimiter "	")
-          counsel-switch-buffer
-          (:columns ((all-the-icons-ivy-rich-buffer-icon)
-                     (ivy-rich-candidate
-                      (:width 30))
-                     (ivy-rich-switch-buffer-size
-                      (:width 7))
-                     (ivy-rich-switch-buffer-indicators
-                      (:width 4 :face error :align right))
-                     (ivy-rich-switch-buffer-major-mode
-                      (:width 18 :face warning))
-                     (ivy-rich-switch-buffer-project
-                      (:width 15 :face success))
-                     (ivy-rich-switch-buffer-path
-                      (:width (lambda (candidate)
-                                (ivy-rich-switch-buffer-shorten-path
-                                 candidate (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda (candidate)
-                        (get-buffer candidate))
-           :delimiter "	")
-          counsel-projectile-switch-to-buffer
-          (:columns ((all-the-icons-ivy-rich-buffer-icon)
-                     (ivy-rich-candidate
-                      (:width 30))
-                     (ivy-rich-switch-buffer-size
-                      (:width 7))
-                     (ivy-rich-switch-buffer-indicators
-                      (:width 4 :face error :align right))
-                     (ivy-rich-switch-buffer-major-mode
-                      (:width 18 :face warning))
-                     (ivy-rich-switch-buffer-project
-                      (:width 15 :face success))
-                     (ivy-rich-switch-buffer-path
-                      (:width (lambda (candidate)
-                                (ivy-rich-switch-buffer-shorten-path
-                                 candidate (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda (candidate)
-                        (get-buffer candidate))
-           :delimiter "	")
-          counsel-switch-buffer-other-window
-          (:columns ((all-the-icons-ivy-rich-buffer-icon)
-                     (ivy-rich-candidate
-                      (:width 30))
-                     (ivy-rich-switch-buffer-size
-                      (:width 7))
-                     (ivy-rich-switch-buffer-indicators
-                      (:width 4 :face error :align right))
-                     (ivy-rich-switch-buffer-major-mode
-                      (:width 18 :face warning))
-                     (ivy-rich-switch-buffer-project
-                      (:width 15 :face success))
-                     (ivy-rich-switch-buffer-path
-                      (:width (lambda (candidate)
-                                (ivy-rich-switch-buffer-shorten-path
-                                 candidate (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda (candidate)
-                        (get-buffer candidate))
-           :delimiter "	")
-          package-install
-          (:columns ((ivy-rich-candidate (:width 30))
-                     (ivy-rich-package-version (:width 16 :face font-lock-comment-face)) ; package version
-                     (ivy-rich-package-archive-summary (:width 7 :face font-lock-builtin-face)) ; archive summary
-                     (ivy-rich-package-install-summary (:face font-lock-doc-face)))) ; package description
-          persp-switch-to-buffer
-          (:columns ((all-the-icons-ivy-rich-buffer-icon)
-                     (ivy-rich-candidate
-                      (:width 30))
-                     (ivy-rich-switch-buffer-size
-                      (:width 7))
-                     (ivy-rich-switch-buffer-indicators
-                      (:width 4 :face error :align right))
-                     (ivy-rich-switch-buffer-major-mode
-                      (:width 18 :face warning))
-                     (ivy-rich-switch-buffer-project
-                      (:width 15 :face success))
-                     (ivy-rich-switch-buffer-path
-                      (:width (lambda (candidate)
-                                (ivy-rich-switch-buffer-shorten-path
-                                 candidate (ivy-rich-minibuffer-width 0.3))))))
-           :predicate (lambda (candidate)
-                        (get-buffer candidate))
-           :delimiter "	")
-          counsel-M-x
-          (:columns ((all-the-icons-ivy-rich-function-icon)
-                     (counsel-M-x-transformer
-                      (:width 50))
-                     (ivy-rich-counsel-function-docstring
-                      (:face font-lock-doc-face))))
-          counsel-describe-function
-          (:columns ((all-the-icons-ivy-rich-function-icon)
-                     (counsel-describe-function-transformer
-                      (:width 50))
-                     (ivy-rich-counsel-function-docstring
-                      (:face font-lock-doc-face))))
-          counsel-describe-variable
-          (:columns ((all-the-icons-ivy-rich-variable-icon
-                      (:width 0.01))
-                     (counsel-describe-variable-transformer
-                      (:width 0.29))
-                     (ivy-rich-counsel-variable-docstring
-                      (:width 0.5
-                       :face font-lock-doc-face))))
-          counsel-set-variable
-          (:columns ((all-the-icons-ivy-rich-variable-icon)
-                     (counsel-describe-variable-transformer
-                      (:width 50))
-                     (ivy-rich-counsel-variable-docstring
-                      (:face font-lock-doc-face))))
-          counsel-apropos
-          (:columns ((all-the-icons-ivy-rich-symbol-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-info-lookup-symbol
-          (:columns ((all-the-icons-ivy-rich-symbol-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-descbinds
-          (:columns ((all-the-icons-ivy-rich-keybinding-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-find-file
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-read-file-transformer))
-           :delimiter "	")
-          counsel-file-jump
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-dired
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-read-file-transformer))
-           :delimiter "	")
-          counsel-dired-jump
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-el
-          (:columns ((all-the-icons-ivy-rich-symbol-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-fzf
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-git
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-recentf
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate
-                      (:width 0.2))
-                     (ivy-rich-file-last-modified-time
-                      (:face font-lock-comment-face)))
-           :delimiter "	")
-          counsel-buffer-or-recentf
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (counsel-buffer-or-recentf-transformer
-                      (:width 0.2))
-                     (ivy-rich-file-last-modified-time
-                      (:face font-lock-comment-face)))
-           :delimiter "	")
-          counsel-bookmark
-          (:columns ((ivy-rich-bookmark-type)
-                     (all-the-icons-ivy-rich-bookmark-name
-                      (:width 40))
-                     (ivy-rich-bookmark-info))
-           :delimiter "	")
-          counsel-bookmarked-directory
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-package
-          (:columns ((all-the-icons-ivy-rich-package-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-fonts
-          (:columns ((all-the-icons-ivy-rich-font-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-major
-          (:columns ((all-the-icons-ivy-rich-function-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-find-library
-          (:columns ((all-the-icons-ivy-rich-library-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-load-library
-          (:columns ((all-the-icons-ivy-rich-library-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-load-theme
-          (:columns ((all-the-icons-ivy-rich-theme-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-world-clock
-          (:columns ((all-the-icons-ivy-rich-world-clock-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-tramp
-          (:columns ((all-the-icons-ivy-rich-tramp-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-git-checkout
-          (:columns ((all-the-icons-ivy-rich-git-branch-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-list-processes
-          (:columns ((all-the-icons-ivy-rich-process-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-projectile-switch-project
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          projectile-persp-switch-project
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-projectile-find-file
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (counsel-projectile-find-file-transformer))
-           :delimiter "	")
-          counsel-projectile-find-dir
-          (:columns ((all-the-icons-ivy-rich-project-icon)
-                     (counsel-projectile-find-dir-transformer))
-           :delimiter "	")
-          counsel-minor
-          (:columns ((all-the-icons-ivy-rich-mode-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          counsel-imenu
-          (:columns ((all-the-icons-ivy-rich-imenu-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")
-          treemacs-projectile
-          (:columns ((all-the-icons-ivy-rich-file-icon)
-                     (ivy-rich-candidate))
-           :delimiter "	")))
-  (ivy-rich-mode 1))
-#+end_src
-
-** all-the-icons-ivy-rich
-#+begin_src emacs-lisp :tangle yes
-(use-package all-the-icons-ivy-rich
-  :after (ivy-rich all-the-icons)
-  :init
-  ;; For some reason, if the icon size is 1 their widths are different.
-  ;; https://github.com/seagle0128/all-the-icons-ivy-rich/issues/7
-  ;;
-  ;; Also, setting a size bigger than 0.7 seems to cause candidates in the
-  ;; bottom to not appear in the frame.
-  (setq all-the-icons-ivy-rich-icon-size 0.7)
-  :config
-  (all-the-icons-ivy-rich-mode 1))
 #+end_src
 
 * Movement
@@ -5337,7 +4549,6 @@ This mode affects performance for some functions
     (add-to-list 'major-mode-remap-alist mapping))
 
   :config
-  (mpereira/combobulate-setup-install-grammars)
   (use-package combobulate
     :hook ((python-ts-mode-hook . combobulate-mode)
            (js-ts-mode-hook . combobulate-mode)
@@ -5377,7 +4588,8 @@ This mode affects performance for some functions
      "(" #'combobulate-envelop-tsx-ts-mode-wrap-parentheses
      "<" #'combobulate-envelop-tsx-ts-mode-tag
      "{" #'combobulate-envelop-tsx-ts-mode-expression
-     "c" #'combobulate-clone-node-dwim)))
+     "c" #'combobulate-clone-node-dwim))
+  (mpereira/combobulate-setup-install-grammars))
 
 (defvar mpereira/combobulate-mode-map (make-sparse-keymap)
   "Keymap for `mpereira/combobulate-mode'.")
@@ -5423,6 +4635,23 @@ This mode affects performance for some functions
 (use-package bm)
 #+end_src
 
+** consult
+Command wishlist:
+- =counsel-command-history=
+- =counsel-descbinds=
+- =counsel-org-capture=
+- =counsel-tramp=
+- [[https://github.com/mnewt/counsel-web][=counsel-web-*=]]
+
+#+begin_src emacs-lisp :tangle yes
+(use-package consult)
+(use-package consult-lsp)
+(use-package consult-projectile)
+(use-package consult-git-log-grep
+  :custom
+  (consult-git-log-grep-open-function #'magit-show-commit))
+#+end_src
+
 ** avy
 #+begin_src emacs-lisp :tangle yes
 (use-package avy
@@ -5443,7 +4672,7 @@ This mode affects performance for some functions
 #+begin_src emacs-lisp :tangle yes
 (use-package dumb-jump
   :config
-  (setq dumb-jump-selector 'ivy))
+  (setq dumb-jump-selector 'completing-read))
 #+end_src
 
 ** frog-jump-buffer
@@ -5461,13 +4690,6 @@ This mode affects performance for some functions
 #+end_src
 
 * Text search and manipulation
-** swiper
-#+begin_src emacs-lisp :tangle yes
-(use-package swiper
-  :custom
-  (swiper-action-recenter t))
-#+end_src
-
 ** ripgrep
 #+begin_src emacs-lisp :tangle yes
 (use-package rg
@@ -5495,7 +4717,7 @@ This mode affects performance for some functions
 ** double-saber
 #+begin_src emacs-lisp :tangle yes
 (use-package double-saber
-  :after (rg ivy)
+  :after (rg)
   :general (:keymaps '(double-saber-mode-map)
             :states '(normal visual)
             "C-r" 'double-saber-redo
@@ -5514,10 +4736,7 @@ This mode affects performance for some functions
          (grep-mode-hook . (lambda ()
                              (double-saber-mode)
                              (setq-local double-saber-start-line 5)
-                             (setq-local double-saber-end-text "Grep finished")))
-         (ivy-occur-grep-mode-hook . (lambda ()
-                                       (double-saber-mode)
-                                       (setq-local double-saber-start-line 5)))))
+                             (setq-local double-saber-end-text "Grep finished")))))
 #+end_src
 
 ** symbol-overlay
@@ -5563,26 +4782,6 @@ I can't get this to plan nice with `company-mode`, so I'm disabling it.
   :quelpa (doom-snippets
            :fetcher github
            :repo "hlissner/doom-snippets"))
-#+end_src
-
-** Add yasnippet support for all company backends
-Got this from [[https://github.com/syl20bnr/spacemacs/pull/179][here]].
-
-Not tangled.
-#+begin_src emacs-lisp :tangle no
-(defvar mpereira/company-mode-enable-yas t
-  "Enable yasnippet for all backends.")
-
-(defun mpereira/company-mode-add-yas-backend (backend)
-  (if (or (not mpereira/company-mode-enable-yas)
-          (and (listp backend)
-               (member 'company-yasnippet backend)))
-      backend
-    (append (if (consp backend) backend (list backend))
-            '(:with company-yasnippet))))
-
-(setq company-backends (mapcar #'mpereira/company-mode-add-yas-backend
-                               company-backends))
 #+end_src
 
 ** electric-pair-mode
@@ -5930,25 +5129,6 @@ to disable it since the project doesn't appear to be in active development.
    "go" 'forge-browse-post))
 #+end_src
 
-** magit-todos
-#+begin_src emacs-lisp :tangle yes
-(use-package magit-todos
-  ;; Disabled on 2020-05-05.
-  :disabled
-  :ensure nil
-  :quelpa (magit-todos
-           :fetcher github
-           :repo "alphapapa/magit-todos")
-  :after (magit ivy)
-  :config
-  ;; Only show magit-todos on non-TRAMP magit status buffers.
-  (add-hook 'magit-status-mode-hook
-            (lambda ()
-              (when (not (ivy--remote-buffer-p (current-buffer)))
-                (let ((magit-todos-mode t))
-                  (magit-todos-update))))))
-#+end_src
-
 ** A VSCode git lens type of thing
 #+begin_src emacs-lisp :tangle yes
 (use-package hydra)
@@ -5966,8 +5146,8 @@ to disable it since the project doesn't appear to be in active development.
   (hydra-posframe-mode)
 
   (custom-set-faces
-   '(hydra-posframe-face ((t (:inherit ivy-posframe))))
-   '(hydra-posframe-border-face ((t (:inherit ivy-posframe-border))))))
+   '(hydra-posframe-face ((t (:inherit vertico-posframe))))
+   '(hydra-posframe-border-face ((t (:inherit vertico-posframe-border))))))
 
 (use-package git-messenger
   :custom
@@ -6029,13 +5209,13 @@ to disable it since the project doesn't appear to be in active development.
                               :string detailed-message
                               :left-fringe 8
                               :right-fringe 8
-                              :background-color (face-attribute 'ivy-posframe :background nil t)
-                              :foreground-color (face-attribute 'ivy-posframe :foreground nil t)
-                              :internal-border-color (face-attribute 'ivy-posframe-border
+                              :background-color (face-attribute 'vertico-posframe :background nil t)
+                              :foreground-color (face-attribute 'vertico-posframe :foreground nil t)
+                              :internal-border-color (face-attribute 'vertico-posframe-border
                                                                      :background
                                                                      nil
                                                                      t)
-                              :internal-border-width ivy-posframe-border-width)
+                              :internal-border-width vertico-posframe-border-width)
                (unwind-protect
                    (push (read-event) unread-command-events)
                  (posframe-delete buffer-name))))
@@ -6265,8 +5445,8 @@ Install some dependencies:
    "F" 'lsp-format-buffer
    "e" 'lsp-ui-peek-find-references
    "r" 'lsp-rename
-   "S" 'lsp-ivy-global-workspace-symbol
-   "s" 'lsp-ivy-workspace-symbol
+   "S" 'consult-lsp-symbols
+   "s" 'consult-lsp-file-symbols
    "n" 'lsp-organize-imports)
 
   (general-define-key
@@ -6387,69 +5567,6 @@ Install some dependencies:
                     :server-id 'mypyls-remote)))
 #+end_src
 
-*** lsp-ivy
-#+begin_src emacs-lisp :tangle yes
-(use-package lsp-ivy
-  :after (ivy lsp-mode)
-  :commands (lsp-ivy-workspace-symbol
-             lsp-ivy-global-workspace-symbol))
-#+end_src
-
-
-** company
-#+begin_src emacs-lisp :tangle yes
-(use-package company-tabnine
-  :disabled
-  :config
-  (require 'company-tabnine))
-
-(use-package company
-  :config
-  (setq company-global-modes '(not comint-mode
-                                   eshell-mode
-                                   help-mode
-                                   message-mode
-                                   org-mode))
-
-  (add-hook 'after-init-hook 'global-company-mode)
-
-  (setq company-backends '(company-capf
-                           company-cmake
-                           company-clang
-                           company-files
-                           (company-dabbrev-code company-gtags company-etags company-keywords)
-                           company-dabbrev))
-
-  (setq company-idle-delay nil)
-  (setq company-require-match 'never)
-  (setq company-tooltip-align-annotations t)
-  ;; Prescient will prepend `company-prescient-transformer' to this.
-  (setq company-transformers '(company-sort-by-backend-importance))
-  ;; company-box will set this to a single item list containing
-  ;; `company-box-frontend'.
-  (setq company-frontends '(company-pseudo-tooltip-frontend))
-
-  (general-define-key
-   :keymaps '(company-mode-map)
-   :states '(insert)
-   "<tab>" 'company-complete
-   "<backtab>" 'counsel-company)
-
-  (general-define-key
-   :keymaps '(company-search-map)
-   "<tab>" 'company-search-abort)
-
-  ;; NOTE: these are an increment over the mappings already set by
-  ;; evil-collection.
-  (general-define-key
-   :keymaps '(company-active-map)
-   "C-/" 'company-filter-candidates
-   "C-b" 'company-previous-page
-   "C-f" 'company-next-page
-   "RET" 'company-complete-selection
-   "TAB" 'company-abort))
-#+end_src
-
 ** copilot
 #+begin_src emacs-lisp :tangle yes
 (use-package copilot
@@ -6525,7 +5642,7 @@ Install some dependencies:
    :keymaps 'lispy-mode-map
    :states '(normal)
    :prefix mpereira/leader
-   "fo" 'counsel-imenu
+   "fo" 'consult-imenu
    "r" 'lispy-raise-sexp
    "R" 'lispy-raise-some
    "(" 'lispy-wrap-round
@@ -6853,25 +5970,6 @@ python3 -m pip install mypy flake8 pylint black
             (setq evil-shift-width python-indent-offset)))
 #+end_src
 
-*** elpy
-#+begin_src emacs-lisp :tangle yes
-(use-package elpy
-  :after company
-  :init
-  (setq elpy-rpc-python-command "python3")
-
-  ;; https://github.com/jorgenschaefer/elpy/issues/1550#issuecomment-468763310
-  (setq elpy-shell-echo-output nil)
-
-  (remove-hook 'elpy-modules 'elpy-module-eldoc)
-  (remove-hook 'elpy-modules 'elpy-module-django)
-
-  (setq company-idle-delay-before-elpy-fucks-it-up company-idle-delay)
-  (add-hook 'elpy-mode-hook
-            (lambda ()
-              (setq company-idle-delay company-idle-delay-before-elpy-fucks-it-up))))
-#+end_src
-
 ** JSON
 *** json-mode
 #+begin_src emacs-lisp :tangle yes
@@ -6948,6 +6046,11 @@ hierarchy--make)=.
   :mode "\\.calc\\'")
 #+end_src
 
+** applescript-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package applescript-mode)
+#+end_src
+
 * Web development
 ** web-mode
 #+begin_src emacs-lisp :tangle yes
@@ -6965,8 +6068,9 @@ hierarchy--make)=.
 ** auto-rename-tag
 #+begin_src emacs-lisp :tangle yes
 (use-package auto-rename-tag
-  :config
-  (add-hook 'html-mode-hook #'auto-rename-tag-mode))
+  :hook ((js-ts-mode-hook . auto-rename-tag-mode)
+         (typescript-ts-mode-hook . auto-rename-tag-mode)
+         (tsx-ts-mode-hook . auto-rename-tag-mode)))
 #+end_src
 
 ** css
@@ -6984,9 +6088,7 @@ hierarchy--make)=.
 #+end_src
 
 ** tsx-ts-mode
-Still need something like
-[rjsx-mode](https://github.com/felipeochoa/rjsx-mode)'s
-[rjsx-comment-dwim](https://github.com/felipeochoa/rjsx-mode/blob/b697fe4d92cc84fa99a7bcb476f815935ea0d919/rjsx-mode.el#L1161).
+Still need something like [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]]'s [[https://github.com/felipeochoa/rjsx-mode/blob/b697fe4d92cc84fa99a7bcb476f815935ea0d919/rjsx-mode.el#L1161][rjsx-comment-dwim]].
 
 #+begin_src emacs-lisp :tangle yes
 (use-package emacs
@@ -7038,6 +6140,8 @@ Still need something like
 ** screenshot
 This doesn't work on macOS because there's no =x-export-frames=.
 
+GitHub issue: https://github.com/tecosaur/screenshot/issues/13.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package screenshot
   :if (display-graphic-p)
@@ -7071,8 +6175,6 @@ This currently makes buffers slow and [[https://github.com/emacs-grammarly/flych
 (use-package flyspell
   :defer 1
   :custom
-  ;; TODO: Do I want this?
-  ;; (flyspell-abbrev-p t)
   (flyspell-issue-message-flag nil)
   (flyspell-issue-welcome-flag nil)
   (flyspell-mode 1))
@@ -7095,8 +6197,7 @@ This currently makes buffers slow and [[https://github.com/emacs-grammarly/flych
                               (message "dere")
                               (with-current-buffer mw-thesaurus-buffer-name
                                 (message "guise")
-                                (olivetti-mode)))))
-    ))
+                                (olivetti-mode)))))))
 
 (use-package mw-thesaurus
   :general
@@ -7371,7 +6472,14 @@ Also start them in Org mode.
 * Project management
 ** A fast non-Projectile-based project file finder
 Existing functions in projectile, counsel, ffip, etc. were too slow for one
-reason or another.
+reason or another, so previously I had written my own.
+
+Now that I'm using the excellent Consult package I don't need to have my own
+implementation, since it provides [[https://github.com/minad/consult#asynchronous-search][asynchronous search]] capabilities out of the
+box.
+
+I'm still keeping the =fast-project-find-file.el= implementation here for
+reference, and also I'm using some of the helpers defined in it.
 
 #+begin_src emacs-lisp :tangle fast-project-find-file.el
 ;;; fast-project-find-file.el --- TODO: description  -*- coding: utf-8 -*-
@@ -7512,6 +6620,9 @@ reason or another.
   (byte-compile-file (expand-file-name (concat package-name ".el") user-emacs-directory))
   (load-file (expand-file-name (concat package-name ".elc") user-emacs-directory)))
 #+end_src
+Now that I'm using the excellent Consult package I don't need to have my own
+implementation, since it provides [[https://github.com/minad/consult#asynchronous-search][asynchronous search]] capabilities out of the
+box.
 
 ** projectile
 #+begin_src emacs-lisp :tangle yes
@@ -7528,8 +6639,17 @@ reason or another.
   ;; dependency will add the dependency directory as a project.
   (setq projectile-track-known-projects-automatically nil)
 
-  ;; With this, do I even need counsel-projectile?
-  (setq projectile-completion-system 'ivy))
+  (defun mpereira/projectile-default-project-name (project-root)
+    "TODO: PROJECT-ROOT docstring."
+    (let* ((default-directory project-root)
+           (suffix (if (file-remote-p project-root)
+                       (format " @ %s" (mpereira/remote-host))
+                     "")))
+      (concat (file-name-nondirectory (directory-file-name default-directory))
+              suffix)))
+
+  (setq projectile-project-name-function 'mpereira/projectile-default-project-name)
+  (setq projectile-switch-project-action 'project-dired))
 #+end_src
 
 ** prodigy
@@ -7581,39 +6701,10 @@ reason or another.
   (persp-mode t))
 #+end_src
 
-** counsel
-#+begin_src emacs-lisp :tangle yes
-(use-package counsel
-  :after (ivy swiper)
-  :custom
-  (counsel-yank-pop-preselect-last t)
-  (counsel-yank-pop-separator "\n----\n")
-  :config
-  (counsel-mode 1)
-
-  (setq counsel-find-file-ignore-regexp "/vendor/")
-
-  ;; Counsel sets the ivy initial input as a caret for some of its functions. I
-  ;; don't want that.
-  (setq ivy-initial-inputs-alist nil)
-
-  (setq counsel-describe-function-function #'helpful-callable)
-  (setq counsel-describe-variable-function #'helpful-variable))
-#+end_src
-
 ** persp-projectile
 #+begin_src emacs-lisp :tangle yes
 (use-package persp-projectile
-  :after perspective projectile)
-#+end_src
-
-** counsel-projectile
-#+begin_src emacs-lisp :tangle yes
-(use-package counsel-projectile
-  :after (counsel projectile)
-  :config
-  (setq projectile-project-name-function 'mpereira/projectile-default-project-name)
-  (setq projectile-switch-project-action 'counsel-projectile-switch-project-action-dired))
+  :after (perspective projectile))
 #+end_src
 
 ** find-file-in-project
@@ -7627,84 +6718,130 @@ reason or another.
 
 * Commands
 ** amx
-Only installing this package for its functions. I get the actual "candidate
-recency" functionality for =M-x= from ivy-prescient.
-
-=counsel= also depends on this.
+Only installing this package for its functions.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package amx)
 #+end_src
 
-** ivy
+** embark
 #+begin_src emacs-lisp :tangle yes
-(use-package ivy
-  :general
-  (:keymaps 'ivy-switch-buffer-map
-   "C-k" 'ivy-previous-line) ;; this is bound to `ivy-switch-buffer-kill' by
-                             ;; something.
-  (:keymaps 'ivy-minibuffer-map
-   "C-j" 'ivy-next-line
-   "C-k" 'ivy-previous-line
-   "C-f" 'ivy-scroll-up-command
-   "C-b" 'ivy-scroll-down-command
-   "C-o" 'ivy-occur
-   "C-h" 'ivy-beginning-of-buffer
-   "C-l" 'ivy-end-of-buffer
-   "C-/" 'ivy-restrict-to-matches
-   "<escape>" 'minibuffer-keyboard-quit)
+(use-package embark
+  :bind
+  (("M-o" . embark-act)
+   ("S-M-o" . embark-dwim)
+   ("C-h B" . embark-bindings)))
+#+end_src
 
+** embark-consult
+#+begin_src emacs-lisp :tangle yes
+(use-package embark-consult)
+#+end_src
+
+** orderless
+#+begin_src emacs-lisp :tangle yes
+(use-package orderless)
+(setq completion-styles '(orderless basic))
+#+end_src
+
+** corfu
+#+begin_src emacs-lisp :tangle yes
+(use-package corfu
   :custom
-  (ivy-use-selectable-prompt t)
-  (ivy-height 20)
-  (ivy-wrap t)
-  (ivy-height-alist '((counsel-evil-registers . 10)
-                      (counsel-yank-pop . 10)
-                      (counsel-git-log . 8)))
-
+  (corfu-min-width 30)
+  (corfu-max-width 80)
+  (corfu-count 15)
+  (corfu-popupinfo-delay t)
+  :general
+  (:keymaps '(corfu-map)
+   :states '(insert)
+   "C-/" 'corfu-insert-separator
+   "C-h" 'corfu-first
+   "C-l" 'corfu-last
+   "C-b" 'corfu-scroll-down
+   "C-f" 'corfu-scroll-up)
+  :hook
+  (corfu-mode-hook . corfu-popupinfo-mode)
   :config
-  (ivy-mode t))
+  (global-corfu-mode))
+
+(use-package kind-icon
+  :after corfu
+  :custom
+  (kind-icon-use-icons t)
+  ;; Have background color be the same as `corfu' face background.
+  (kind-icon-default-face 'corfu-default)
+  ;; Use midpoint color between foreground and background colors ("blended")?
+  (kind-icon-blend-background nil)      
+  (kind-icon-blend-frac 0.08)
+
+  ;; NOTE 2022-02-05: `kind-icon' depends `svg-lib' which creates a cache
+  ;; directory that defaults to the `user-emacs-directory'. Here, I change that
+  ;; directory to a location appropriate to `no-littering' conventions, a
+  ;; package which moves directories of other packages to sane locations.
+  (svg-lib-icons-dir (no-littering-expand-var-file-name "svg-lib/cache/")) ; Change cache dir
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter) ; Enable `kind-icon'
+
+  ;; Add hook to reset cache so the icon colors match my theme
+  ;; NOTE 2022-02-05: This is a hook which resets the cache whenever I switch
+  ;; the theme using my custom defined command for switching themes. If I don't
+  ;; do this, then the backgound color will remain the same, meaning it will not
+  ;; match the background color corresponding to the current theme. Important
+  ;; since I have a light theme and dark theme I switch between. This has no
+  ;; function unless you use something similar
+  (add-hook 'kb/themes-hooks #'(lambda () (interactive) (kind-icon-reset-cache))))
 #+end_src
 
-** prescient
+** vertico
 #+begin_src emacs-lisp :tangle yes
-(use-package prescient
+(defun mpereira/vertico-next-page ()
+  (interactive)
+  (vertico-scroll-up 1))
+
+(defun mpereira/vertico-previous-page ()
+  (interactive)
+  (vertico-scroll-down 1))
+
+(use-package vertico
+  :bind (:map vertico-map
+         ("C-f" . mpereira/vertico-next-page)
+         ("C-b" . mpereira/vertico-previous-page)
+         ("C-S-j" . vertico-next-group)
+         ("C-S-k" . vertico-previous-group)
+         ("C-j" . vertico-next)
+         ("C-k" . vertico-previous)
+         ("C-h" . vertico-first)
+         ("C-l" . vertico-last)
+         ("C-/" . orderless-filter)
+         ("<escape>" . minibuffer-keyboard-quit)
+         :map minibuffer-local-map
+         ("<C-backspace>" . backward-kill-word))
+  :hook (minibuffer-setup-hook . vertico-repeat-save)
+  :custom
+  (vertico-cycle t)
+  (vertico-count 20)
   :config
-  (prescient-persist-mode))
-#+end_src
+  (vertico-mode 1))
 
-** ivy-prescient
-This seems to affect performance when there are lots of candidates, mostly via
-~ivy-prescient-sort-function~.
-
-Disabled for now because it seems to be [[https://github.com/raxod502/prescient.el/issues/65][broken and unmaintained]] (as of
-[2020-09-06 Sun]).
-
-#+begin_src emacs-lisp :tangle yes
-(use-package ivy-prescient
-  :disabled
-  :after (ivy counsel amx prescient)
+(use-package vertico-posframe
   :config
-  (ivy-prescient-mode))
-#+end_src
+  ;; NOTE: using `vertico-multiform-mode' as a workaround to conditionally
+  ;; disable posframe for `consult-line'.
+  (vertico-multiform-mode 1)
+  (setq vertico-multiform-commands
+        '((consult-line (:not posframe))
+          (t posframe))))
 
-** company-prescient
-#+begin_src emacs-lisp :tangle yes
-(use-package company-prescient
-  :after (company prescient)
+(use-package marginalia
   :config
-  (company-prescient-mode))
+  (marginalia-mode 1))
 #+end_src
 
 * Help
 ** helpful
 #+begin_src emacs-lisp :tangle yes
 (use-package helpful)
-#+end_src
-
-** discover-my-major
-#+begin_src emacs-lisp :tangle yes
-(use-package discover-my-major)
 #+end_src
 
 ** which-key
@@ -7785,7 +6922,6 @@ Disabled for now because it seems to be [[https://github.com/raxod502/prescient.
 ** counsel-web
 #+begin_src emacs-lisp :tangle yes
 (use-package counsel-web
-  :after counsel
   :ensure nil
   :quelpa (counsel-web
            :fetcher github
@@ -7793,26 +6929,12 @@ Disabled for now because it seems to be [[https://github.com/raxod502/prescient.
 #+end_src
 
 ** emacs-webkit
-Doesn't work with macOS [[https://github.com/akirakyle/emacs-webkit/issues/9][yet]].
-
 #+begin_src emacs-lisp :tangle no
 (use-package webkit
   :ensure nil
   :quelpa (webkit
            :fetcher github
            :repo "akirakyle/emacs-webkit"))
-#+end_src
-
-** xwwp-follow-link
-#+begin_src emacs-lisp :tangle no
-(use-package xwwp
-  :custom
-  (xwwp-follow-link-completion-system 'ivy)
-  :general (:states '(normal)
-            :keymaps '(xwidget-webkit-mode-map)
-            "f" 'xwwp-follow-link))
-
-(use-package xwwp-follow-link-ivy)
 #+end_src
 
 ** elfeed
@@ -7823,94 +6945,6 @@ Doesn't work with macOS [[https://github.com/akirakyle/emacs-webkit/issues/9][ye
                   "https://aphyr.com/posts.atom"
                   "https://feeds.transistor.fm/on-the-metal-0294649e-ec23-4eab-975a-9eb13fd94e06"
                   "https://stopa.io/feed.rss")))
-#+end_src
-
-** stackoverflow
-REVIEW: do I use or need this?
-
-#+begin_src emacs-lisp :tangle yes
-(require 'json)
-
-(defun mpereira/get-stackoverflow-answers (query)
-  "TODO: docstring QUERY."
-  (interactive "sQuestion: ")
-  (let* ((question_ids
-          (with-current-buffer
-              (url-retrieve-synchronously
-               (concat "https://google.com/search?ie=utf-8&oe=utf-8&hl=en&as_qdr=all&q="
-                       (url-hexify-string (concat query " site:stackoverflow.com"))))
-            (let (ids)
-              (while (re-search-forward "https://stackoverflow.com/questions/\\([0-9]+\\)" nil t)
-                (push (match-string-no-properties 1) ids))
-              (setq ids (reverse ids))
-              (if (> (length ids) 5)
-                  (subseq ids 0 5)
-                ids))))
-
-         (url_template (format "https://api.stackexchange.com/2.2/questions/%s%%s?site=stackoverflow.com"
-                               (string-join question_ids ";")))
-
-         (questions (with-current-buffer
-                        (url-retrieve-synchronously
-                         (format url_template ""))
-                      (goto-char (point-min))
-                      (search-forward "\n\n")
-                      (append (assoc-default 'items (json-read)) nil)))
-
-         (answers (with-current-buffer
-                      (url-retrieve-synchronously
-                       (concat (format url_template "/answers")
-                               "&order=desc&sort=activity&filter=withbody"))
-                    (goto-char (point-min))
-                    (search-forward "\n\n")
-                    (sort (append (assoc-default 'items (json-read)) nil)
-                          (lambda (x y)
-                            (> (assoc-default 'score x)
-                               (assoc-default 'score y)))))))
-
-    (switch-to-buffer "*stackexchange*")
-    (erase-buffer)
-
-    (dolist (question_id (mapcar 'string-to-number question_ids))
-      (let ((question (some (lambda (question)
-                              (if (equal (assoc-default 'question_id question)
-                                         question_id)
-                                  question))
-                            questions)))
-        (insert "<hr><h2 style='background-color:paleturquoise'>Question: "
-                (format "<a href='%s'>%s</a>"
-                        (assoc-default 'link question)
-                        (assoc-default 'title question))
-                "</h2>"
-                "\n"
-                (mapconcat
-                 'identity
-                 (let ((rendered
-                        (remove-if
-                         'null
-                         (mapcar (lambda (answer)
-                                   (if (and (equal question_id
-                                                   (assoc-default 'question_id answer))
-                                            (>= (assoc-default 'score answer) 0))
-                                       (concat "<hr><h2 style='background-color:"
-                                               "#c1ffc1'>Answer - score: "
-                                               (number-to-string (assoc-default 'score answer))
-                                               "</h2>"
-                                               (assoc-default 'body answer))))
-                                 answers))))
-                   (if (> (length rendered) 5)
-                       (append (subseq rendered 0 5)
-                               (list (format "<br><br><a href='%s'>%s</a>"
-                                             (assoc-default 'link question)
-                                             "More answers...")))
-                     rendered))
-                 "\n")
-                )))
-    (shr-render-region (point-min) (point-max))
-    (goto-char (point-min))
-    (save-excursion
-      (while (search-forward "^M" nil t)
-        (replace-match "")))))
 #+end_src
 
 ** google-this
@@ -8151,7 +7185,6 @@ INFO is a plist used as a communication channel."
  "M-L" 'buf-move-right
  "M-M" #'mpereira/toggle-buffer-maximize
  "M-N" (lambda () (interactive) (mpereira/toggle-buffer-maximize t))
- "M-O" #'transpose-frame
  "M-h" #'evil-window-left
  "M-j" #'evil-window-down
  "M-k" #'evil-window-up
@@ -8176,13 +7209,6 @@ INFO is a plist used as a communication channel."
                   (interactive)
                   (let ((evil-want-minibuffer t))
                     (evil-initialize))))
-
-(general-define-key
- :keymaps '(swiper-map
-            swiper-all-map
-            ivy-minibuffer-map)
- "<escape>" 'minibuffer-keyboard-quit   ; REVIEW: is this still needed?
- "C-r" 'evil-paste-from-register)
 
 ;; REVIEW: why doesn't this binding work in some modes like
 ;; `org-src-mode-map', even when specifically adding it in the keymaps?
@@ -8283,16 +7309,13 @@ INFO is a plist used as a communication channel."
  :states '(normal visual)
  :prefix mpereira/leader
  "," #'evil-switch-to-windows-last-buffer
- "." #'ivy-resume
- "/" #'swiper
+ "." #'vertico-repeat
+ "/" #'consult-line
  "|" #'olivetti-mode
- "<backtab>" #'discover-my-major
- "<tab>" #'counsel-descbinds
  "=" #'quick-calc
  "B" #'ibuffer
  "b" #'switch-to-buffer
- "C" #'link-hint-copy-link
- "D" #'mpereira/bm-counsel-find-bookmark       ; REVIEW: rethink.
+ "yf" #'link-hint-copy-link
  "F" #'link-hint-open-link
  "hs" #'mpereira/split-window-below-and-switch
  "hv" #'mpereira/toggle-window-split           ; REVIEW: rethink.
@@ -8303,7 +7326,7 @@ INFO is a plist used as a communication channel."
  "vh" #'mpereira/toggle-window-split           ; REVIEW: rethink.
  "vs" #'mpereira/split-window-right-and-switch ; REVIEW: rethink.
  "w" #'save-buffer
- "y" #'mpereira/yank-buffer-name
+ "yy" #'mpereira/yank-buffer-name
  "Y" #'mpereira/yank-buffer-file-name)
 
 ;; d -> describe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8333,7 +7356,7 @@ INFO is a plist used as a communication channel."
  :prefix mpereira/leader
  :infix "e"
  ":" #'eval-expression
- "v" #'counsel-set-variable
+ "v" #'set-variable
  "w" 'wolfram-alpha)
 
 ;; f -> find ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8343,23 +7366,20 @@ INFO is a plist used as a communication channel."
  :states '(normal visual)
  :prefix mpereira/leader
  :infix "f"
- ";" #'counsel-minibuffer-history
- ":" #'counsel-command-history
- "b" #'ivy-switch-buffer
- "c" #'counsel-org-clock-history
- ;; Didn't like `counsel-explorer' from ivy-explorer too much...
- ;; "f" #'counsel-explorer
- "f" #'counsel-find-file
+ ;; ";" #'counsel-minibuffer-history  ;; WAITING(consult): consult alternative?
+ ;; ":" #'counsel-command-history     ;; WAITING(consult): consult alternative?
+ "/" #'consult-isearch-history
+ "b" #'switch-buffer
+ "f" #'find-file
  "g" #'google-this
- "G" #'counsel-web-suggest
- "k" #'counsel-descbinds
- "l" #'counsel-find-library
+ ;; "G" #'counsel-web-suggest         ;; WAITING(consult): consult alternative?
+ "l" #'find-library
  "m" #'describe-keymap
- "n" #'counsel-describe-function
- "o" #'counsel-imenu
+ "n" #'describe-function
+ "o" #'consult-imenu
  "p" #'package-install
- "v" #'counsel-describe-variable
- "y" #'counsel-yank-pop)
+ "v" #'describe-variable
+ "y" #'consult-yank-pop)
 
 ;; g -> git ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -8368,7 +7388,7 @@ INFO is a plist used as a communication channel."
  :states '(normal)
  :prefix mpereira/leader
  :infix "g"
- "/" #'counsel-git-log
+ "/" #'consult-git-log-grep
  "<" #'smerge-keep-mine
  ">" #'smerge-keep-other
  "[" #'git-timemachine-show-previous-revision
@@ -8409,10 +7429,10 @@ INFO is a plist used as a communication channel."
  "d" 'mpereira/maybe-projectile-dired
  "D" 'mpereira/maybe-projectile-find-directory
  "f" 'mpereira/maybe-projectile-find-file
- "G" 'counsel-rg
+ "G" 'consult-ripgrep
  "g" 'rg
  "p" 'dired-sidebar-toggle-sidebar
- "s" 'mpereira/counsel-projectile-perspective-switch-project
+ "s" 'projectile-persp-switch-project
  "t" 'persp-switch-last)
 
 ;; s -> shell ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -33,6 +33,11 @@
 (eval-when-compile
   (require 'use-package))
 
+(unless (package-installed-p 'vc-use-package)
+  (package-vc-install "https://github.com/slotThe/vc-use-package"))
+
+(require 'vc-use-package)
+
 (setq use-package-always-ensure t)
 (setq use-package-always-demand t)
 
