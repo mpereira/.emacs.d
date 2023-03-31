@@ -393,18 +393,11 @@ Set it with emacs lisp.
 #+end_src
 
 * quelpa and quelpa-use-package
+I wasn't able to fully transition to [[https://github.com/slotThe/vc-use-package][vc-use-package]] yet. Some packages are based
+on git branches or URLs.
 #+begin_src emacs-lisp :tangle yes
-(unless (package-installed-p 'quelpa)
-  (with-temp-buffer
-    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
-    (eval-buffer)
-    (quelpa-self-upgrade)))
-
-(quelpa '(quelpa-use-package
-          :fetcher github
-          :repo "quelpa/quelpa-use-package"))
-
-(require 'quelpa-use-package)
+(use-package quelpa)
+(use-package quelpa-use-package)
 #+end_src
 
 * Utility libraries
@@ -451,28 +444,25 @@ Set it with emacs lisp.
 #+begin_src emacs-lisp :tangle yes
 (use-package help-fns+
   :ensure nil
-  :quelpa (help-fns+
-           :fetcher github
-           :repo "emacsmirror/help-fns-plus"))
+  :vc (:fetcher github
+       :repo "emacsmirror/help-fns-plus"))
 #+end_src
 
 ** ts
 #+begin_src emacs-lisp :tangle yes
 (use-package ts
   :ensure nil
-  :quelpa (ts
-           :fetcher github
-           :repo "alphapapa/ts.el"))
+  :vc (:fetcher github
+       :repo "alphapapa/ts.el"))
 #+end_src
 
 ** elx
 #+begin_src emacs-lisp :tangle yes
 (use-package elx
   :ensure nil
-  :quelpa (elx
-           :fetcher github
-           :branch "dont-break-if-no-licensee"
-           :repo "mpereira/elx"))
+  :vc (:fetcher github
+       ;; :branch "dont-break-if-no-licensee"
+       :repo "mpereira/elx"))
 #+end_src
 
 * Foundational
@@ -1778,9 +1768,8 @@ https://www.reddit.com/r/emacs/comments/gaub11/poor_scrolling_performance_in_doo
 (use-package explain-pause-mode
   :disabled
   :ensure nil
-  :quelpa (explain-pause-mode
-           :fetcher github
-           :repo "lastquestion/explain-pause-mode")
+  :vc (:fetcher github
+       :repo "lastquestion/explain-pause-mode")
   :init
   (setq explain-pause-alert-via-message nil)
   :config
@@ -1837,15 +1826,13 @@ My favorite light themes:
 (use-package tron-legacy-theme
   :ensure nil
   :defer t
-  :quelpa (tron-legacy-theme
-           :fetcher github
-           :repo "ianpan870102/tron-legacy-emacs-theme"))
+  :vc (:fetcher github
+       :repo "ianpan870102/tron-legacy-emacs-theme"))
 (use-package chocolate-theme
   :ensure nil
   :defer t
-  :quelpa (chocolate-theme
-           :fetcher github
-           :repo "SavchenkoValeriy/emacs-chocolate-theme"))
+  :vc (:fetcher github
+       :repo "SavchenkoValeriy/emacs-chocolate-theme"))
 (use-package vscode-dark-plus-theme)
 
 (add-hook 'after-init-hook
@@ -2735,11 +2722,9 @@ giving priority to CREATED:
 ** org-gcal
 #+begin_src emacs-lisp :tangle yes
 (use-package oauth2-auto
-  :ensure nil
   :defer t
-  :quelpa (oauth2-auto
-           :fetcher github
-           :repo "rhaps0dy/emacs-oauth2-auto"))
+  :vc (:fetcher github
+       :repo "rhaps0dy/emacs-oauth2-auto"))
 
 (use-package org-gcal
   :config
@@ -3408,9 +3393,8 @@ configuration and point position."
 #+begin_src emacs-lisp :tangle yes
 (use-package outorg
   :ensure nil
-  :quelpa (outorg
-           :fetcher github
-           :repo "alphapapa/outorg")
+  :vc (:fetcher github
+       :repo "alphapapa/outorg")
   :config
   (defun mpereira/outorg-edit-as-org ()
     "TODO: docstring."
@@ -3427,9 +3411,8 @@ configuration and point position."
 
 (use-package outshine
   :ensure nil
-  :quelpa (outshine
-           :fetcher github
-           :repo "alphapapa/outshine")
+  :vc (:fetcher github
+       :repo "alphapapa/outshine")
   :config
   (add-hook 'emacs-lisp-mode-hook 'outshine-mode))
 #+end_src
@@ -3575,18 +3558,16 @@ child tree.
 #+begin_src emacs-lisp :tangle yes
 (use-package org-archive-hierarchically
   :ensure nil
-  :quelpa (org-archive-hierarchically
-           :fetcher gitlab
-           :repo "andersjohansson/org-archive-hierarchically"))
+  :vc (:fetcher gitlab
+       :repo "andersjohansson/org-archive-hierarchically"))
 #+end_src
 
 ** org-autonum
 #+begin_src emacs-lisp :tangle yes
 (use-package org-autonum
   :ensure nil
-  :quelpa (org-autonum
-           :fetcher github
-           :repo "nma83/org-autonum"))
+  :vc (:fetcher github
+       :repo "nma83/org-autonum"))
 
 (defun re-seq (regexp string)
   "Get a list of all regexp matches in a string."
@@ -3751,9 +3732,8 @@ Disabled for now. Too overwhelming when combined with =all-the-icons-dired=.
 (use-package dired-plus
   :disabled
   :ensure nil
-  :quelpa (dired+
-           :fetcher github
-           :repo "emacsmirror/dired-plus"))
+  :vc (:fetcher github
+       :repo "emacsmirror/dired-plus"))
 #+end_src
 
 ** dired-show-readme
@@ -3763,9 +3743,8 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
 (use-package dired-show-readme
   :disabled
   :ensure nil
-  :quelpa (dired-show-readme
-           :fetcher gitlab
-           :repo "kisaragi-hiu/dired-show-readme")
+  :vc (:fetcher gitlab
+       :repo "kisaragi-hiu/dired-show-readme")
   :config
   (add-hook 'dired-mode-hook 'dired-show-readme-mode))
 #+end_src
@@ -4255,10 +4234,8 @@ Doesn't do nested folds for JavaScript yet.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package ts-fold
-  :ensure nil
-  :quelpa (ts-fold
-           :fetcher github
-           :repo "emacs-tree-sitter/ts-fold")
+  :vc (:fetcher github
+       :repo "emacs-tree-sitter/ts-fold")
   :config
   (add-to-list 'ts-fold-range-alist
                '(tsx-ts-mode
@@ -4417,10 +4394,8 @@ to get the actual frame width in characters.
 ** too-long-lines-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package too-long-lines-mode
-  :ensure nil
-  :quelpa (too-long-lines-mode
-           :fetcher github
-           :repo "rakete/too-long-lines-mode")
+  :vc (:fetcher github
+       :repo "rakete/too-long-lines-mode")
   :config
   (too-long-lines-mode))
 #+end_src
@@ -4679,9 +4654,8 @@ Command wishlist:
 #+begin_src emacs-lisp :tangle yes
 (use-package frog-jump-buffer
   :ensure nil
-  :quelpa (frog-jump-buffer
-           :fetcher github
-           :repo "waymondo/frog-jump-buffer"))
+  :vc (:fetcher github
+       :repo "waymondo/frog-jump-buffer"))
 #+end_src
 
 ** link-hint
@@ -5044,9 +5018,8 @@ to disable it since the project doesn't appear to be in active development.
 (use-package libgit
   :disabled
   :ensure nil
-  :quelpa (libgit
-           :fetcher github
-           :repo "mpereira/libegit2"))
+  :vc (:fetcher github
+       :repo "mpereira/libegit2"))
 
 (use-package magit-libgit
   :disabled
@@ -5139,9 +5112,8 @@ to disable it since the project doesn't appear to be in active development.
   (hydra-posframe-border-width 10)
 
   (hydra-posframe-poshandler 'posframe-poshandler-point-bottom-left-corner-upward)
-  :quelpa (hydra-posframe
-           :fetcher github
-           :repo "Ladicle/hydra-posframe")
+  :vc (:fetcher github
+       :repo "Ladicle/hydra-posframe")
   :config
   (hydra-posframe-mode)
 
@@ -5989,9 +5961,8 @@ hierarchy--make)=.
 #+begin_src emacs-lisp :tangle yes
 (use-package json-snatcher
   :ensure nil
-  :quelpa (json-snatcher
-           :fetcher github
-           :repo "Sterlingg/json-snatcher")
+  :vc (:fetcher github
+       :repo "Sterlingg/json-snatcher")
   :config
   (setq jsons-path-printer #'jsons-print-path-jq))
 #+end_src
@@ -6132,9 +6103,8 @@ Still need something like [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]
             "k" 'pdf-continuous-scroll-backward
             "C-f" 'pdf-continuous-next-page
             "C-b" 'pdf-continuous-previous-page)
-  :quelpa (pdf-continuous-scroll-mode
-           :fetcher github
-           :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
+  :vc (:fetcher github
+       :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
 #+end_src
 
 ** screenshot
@@ -6146,9 +6116,8 @@ GitHub issue: https://github.com/tecosaur/screenshot/issues/13.
 (use-package screenshot
   :if (display-graphic-p)
   :ensure nil
-  :quelpa (screenshot
-           :fetcher github
-           :repo "tecosaur/screenshot"))
+  :vc (:fetcher github
+       :repo "tecosaur/screenshot"))
 #+end_src
 
 * Writing prose
@@ -6165,9 +6134,8 @@ This currently makes buffers slow and [[https://github.com/emacs-grammarly/flych
 (use-package emacs-grammarly
   :disabled
   :ensure nil
-  :quelpa (emacs-grammarly
-           :fetcher github
-           :repo "mmagnus/emacs-grammarly"))
+  :vc (:fetcher github
+       :repo "mmagnus/emacs-grammarly"))
 #+end_src
 
 ** flyspell
@@ -6691,9 +6659,8 @@ box.
 #+begin_src emacs-lisp :tangle yes
 (use-package perspective
   :ensure nil
-  :quelpa (perspective
-           :fetcher github
-           :repo "nex3/perspective-el")
+  :vc (:fetcher github
+       :repo "nex3/perspective-el")
   :init
   (setq persp-show-modestring nil)
   (setq persp-suppress-no-prefix-key-warning t)
@@ -6923,18 +6890,16 @@ Only installing this package for its functions.
 #+begin_src emacs-lisp :tangle yes
 (use-package counsel-web
   :ensure nil
-  :quelpa (counsel-web
-           :fetcher github
-           :repo "mnewt/counsel-web"))
+  :vc (:fetcher github
+       :repo "mnewt/counsel-web"))
 #+end_src
 
 ** emacs-webkit
 #+begin_src emacs-lisp :tangle no
 (use-package webkit
   :ensure nil
-  :quelpa (webkit
-           :fetcher github
-           :repo "akirakyle/emacs-webkit"))
+  :vc (:fetcher github
+       :repo "akirakyle/emacs-webkit"))
 #+end_src
 
 ** elfeed
@@ -7063,9 +7028,8 @@ Only installing this package for its functions.
 #+begin_src emacs-lisp :tangle yes
 (use-package osascripts
   :ensure nil
-  :quelpa (osascripts
-           :fetcher github
-           :repo "leoliu/osascripts"))
+  :vc (:fetcher github
+       :repo "leoliu/osascripts"))
 #+end_src
 
 ** emacs-audit
@@ -7533,9 +7497,8 @@ FIXME: Doesn't work. Disabled for now.
 (use-package snow
   :ensure nil
   :disabled
-  :quelpa (snow
-           :fetcher github
-           :repo "alphapapa/snow.el"))
+  :vc (:fetcher github
+       :repo "alphapapa/snow.el"))
 #+end_src
 
 * Tips and tricks
