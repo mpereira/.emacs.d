@@ -84,6 +84,7 @@ sudo snap install emacs --edge --classic
   - [[#improve-lisp-code-indentation][Improve Lisp code indentation]]
   - [[#make-align-regexp-not-use-tabs][Make align-regexp not use tabs]]
 - [[#helper-functions][Helper functions]]
+  - [[#remove-from-list][remove-from-list]]
   - [[#standard-library-type-of-things][Standard library type of things]]
   - [[#miscellaneous][Miscellaneous]]
 - [[#toggle-buffer-maximize][Toggle buffer maximize]]
@@ -662,6 +663,13 @@ Found on [[https://stackoverflow.com/questions/22710040/emacs-align-regexp-with-
 #+end_src
 
 * Helper functions
+** ~remove-from-list~
+#+begin_src emacs-lisp :tangle yes
+(require 'erc)
+
+(fset 'remove-from-list #'ert--remove-from-list)
+#+end_src
+
 ** Standard library type of things
 #+begin_src emacs-lisp :tangle yes
 (defmacro comment (&rest body)
