@@ -1727,8 +1727,9 @@ Recommended in https://github.com/abo-abo/swiper/issues/963#issuecomment-2945175
 #+end_src
 
 ** Show garbage collections in minibuffer
+Not showing them for now (the default).
 #+begin_src emacs-lisp :tangle yes
-(setq garbage-collection-messages t)
+(setq garbage-collection-messages nil)
 #+end_src
 
 ** Garbage collection magic hack
@@ -1738,7 +1739,7 @@ Recommended in https://github.com/abo-abo/swiper/issues/963#issuecomment-2945175
   (gcmh-mode 1)
   :custom
   ((gcmh-idle-delay 5)
-   (gcmh-verbose t)))
+   (gcmh-verbose nil)))
 #+end_src
 
 ** **Don't** delete trailing whitespace on save
