@@ -5525,39 +5525,6 @@ Install some dependencies:
                             ("pyright/endProgress" 'lsp-pyright--end-progress-callback)))))
 #+end_src
 
-*** lsp-pyls
-=lsp-pyls= is included with =lsp-mode=.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package lsp-python-ms
-  :after lsp-mode
-  :init
-  (require 'lsp-pyls)
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-tramp-connection
-                                     (executable-find
-                                      (car lsp-pyls-server-command)))
-                    :major-modes '(python-mode)
-                    :priority -1
-                    :remote? t
-                    :server-id 'pyls-remote)))
-#+end_src
-
-*** lsp-python-ms
-#+begin_src emacs-lisp :tangle yes
-(use-package lsp-python-ms
-  :after lsp-mode
-  :init
-  (setq lsp-python-ms-auto-install-server t)
-  (setq lsp-python-ms-python-executable-cmd "python3")
-  :config
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-tramp-connection lsp-python-ms-executable)
-                    :major-modes '(python-mode)
-                    :remote? t
-                    :server-id 'mypyls-remote)))
-#+end_src
-
 ** copilot
 #+begin_src emacs-lisp :tangle yes
 (use-package copilot
