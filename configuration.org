@@ -5365,18 +5365,40 @@ Install some dependencies:
 
 *** lsp-mode
 #+begin_src emacs-lisp :tangle yes
+(defun mpereira/lsp-mode-setup-completion ()
+  (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+        '(orderless)))
+
+;; https://github.com/emacs-lsp/lsp-mode/issues/3905
+(defun mpereira/lsp-completion-prepend-detail (orig item &rest args)
+  (let ((doc (apply orig item args))
+        (detail
+         (-some->> item
+           (get-text-property 0 'lsp-completion-item)
+           (lsp:completion-item-detail?))))
+    (concat "\n" detail "\n\n" doc)))
+
 (use-package lsp-mode
+  :custom
+  ;; NOTE: Corfu setup.
+  (lsp-completion-provider :none)
+  (lsp-modeline-diagnostics-scope :file)
+  (lsp-completion-show-detail nil) ; replaced by `mpereira/lsp-completion-prepend-detail'.
+  :hook
+  (lsp-completion-mode-hook . mpereira/lsp-mode-setup-completion)
+  (prog-mode-hook . mpereira/maybe-enable-lsp)
   :config
   (setq mpereira/lsp-disabled-modes '(emacs-lisp-mode
                                       lisp-data-mode))
+
+  (advice-add 'lsp-completion--get-documentation
+              :around #'mpereira/lsp-completion-prepend-detail)
 
   (defun mpereira/maybe-enable-lsp ()
     "TODO: docstring."
     (interactive)
     (when (not (-contains? mpereira/lsp-disabled-modes major-mode))
       (lsp)))
-
-  (add-hook 'prog-mode-hook #'mpereira/maybe-enable-lsp)
 
   ;; Only enable this for debugging. It makes LSP buffers really slow.
   ;; (setq lsp-log-io t)
@@ -6354,7 +6376,14 @@ Also start them in Org mode.
            (slot . 0)
            (mode-line-format . (" " "%b")))
 
-          ("\\*\\(rg\\)\\*"
+          ("\\*Embark Export: .*"
+           (display-buffer-in-side-window)
+           (window-height . 0.5)
+           (window-width . 0.5)
+           (slot . 0)
+           (mode-line-format . (" " "%b")))
+
+          ("\\*\\(rg\\*\\|Embark Export: .*\\)"
            (display-buffer-in-side-window)
            (window-height . 0.5)
            (window-width . 0.5)
@@ -6689,11 +6718,52 @@ Only installing this package for its functions.
 
 ** embark
 #+begin_src emacs-lisp :tangle yes
+(defun embark-which-key-indicator ()
+  "An embark indicator that displays keymaps using which-key.
+The which-key help message will show the type and value of the
+current target followed by an ellipsis if there are further
+targets."
+  (lambda (&optional keymap targets prefix)
+    (if (null keymap)
+        (which-key--hide-popup-ignore-command)
+      (which-key--show-keymap
+       (if (eq (plist-get (car targets) :type) 'embark-become)
+           "Become"
+         (format "Act on %s '%s'%s"
+                 (plist-get (car targets) :type)
+                 (embark--truncate-target (plist-get (car targets) :target))
+                 (if (cdr targets) "…" "")))
+       (if prefix
+           (pcase (lookup-key keymap prefix 'accept-default)
+             ((and (pred keymapp) km) km)
+             (_ (key-binding prefix 'accept-default)))
+         keymap)
+       nil nil t (lambda (binding)
+                   (not (string-suffix-p "-argument" (cdr binding))))))))
+
+(defun embark-hide-which-key-indicator (fn &rest args)
+  "Hide the which-key indicator immediately when using the completing-read prompter."
+  (which-key--hide-popup-ignore-command)
+  (let ((embark-indicators
+         (remq #'embark-which-key-indicator embark-indicators)))
+    (apply fn args)))
+
 (use-package embark
   :bind
   (("M-o" . embark-act)
-   ("S-M-o" . embark-dwim)
-   ("C-h B" . embark-bindings)))
+   ("M-O" . embark-dwim)
+   ("C-h B" . embark-bindings))
+  ;; NOTE: partial workaround for WONTFIX issue reported in
+  ;; https://github.com/oantolin/embark/issues/171#issuecomment-1478225252
+  :general
+  (:keymaps '(grep-mode-map)
+   :states '(normal)
+   "gr" 'embark-rerun-collect-or-export)
+  :config
+  (add-to-list 'embark-indicators 'embark-which-key-indicator)
+  (remove-from-list 'embark-indicators 'embark-mixed-indicator)
+  (advice-add #'embark-completing-read-prompter
+              :around #'embark-hide-which-key-indicator))
 #+end_src
 
 ** embark-consult
@@ -6703,16 +6773,30 @@ Only installing this package for its functions.
 
 ** orderless
 #+begin_src emacs-lisp :tangle yes
-(use-package orderless)
-(setq completion-styles '(orderless basic))
+(use-package orderless
+  :init
+  (setq completion-styles '(orderless partial-completion basic))
+  (setq completion-category-defaults nil)
+  (setq completion-category-overrides nil)
+  :custom
+  (orderless-smart-case nil)
+  (completion-ignore-case t)
+  (read-buffer-completion-ignore-case t))
 #+end_src
 
 ** corfu
 #+begin_src emacs-lisp :tangle yes
+(with-eval-after-load "consult"
+  (defun mpereira/corfu-move-to-minibuffer ()
+    (interactive)
+    (let ((completion-extra-properties corfu--extra)
+          completion-cycle-threshold completion-cycling)
+      (apply #'consult-completion-in-region completion-in-region--data))))
+
 (use-package corfu
   :custom
   (corfu-min-width 30)
-  (corfu-max-width 80)
+  (corfu-max-width 100)
   (corfu-count 15)
   (corfu-popupinfo-delay t)
   :general
@@ -6722,7 +6806,9 @@ Only installing this package for its functions.
    "C-h" 'corfu-first
    "C-l" 'corfu-last
    "C-b" 'corfu-scroll-down
-   "C-f" 'corfu-scroll-up)
+   "C-f" 'corfu-scroll-up
+   "M-o" #'mpereira/corfu-move-to-minibuffer
+   "<escape>" 'corfu-quit)
   :hook
   (corfu-mode-hook . corfu-popupinfo-mode)
   :config
@@ -6744,7 +6830,8 @@ Only installing this package for its functions.
   ;; package which moves directories of other packages to sane locations.
   (svg-lib-icons-dir (no-littering-expand-var-file-name "svg-lib/cache/")) ; Change cache dir
   :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter) ; Enable `kind-icon'
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
+  (remove-from-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
 
   ;; Add hook to reset cache so the icon colors match my theme
   ;; NOTE 2022-02-05: This is a hook which resets the cache whenever I switch
@@ -6794,6 +6881,7 @@ Only installing this package for its functions.
   (vertico-multiform-mode 1)
   (setq vertico-multiform-commands
         '((consult-line (:not posframe))
+          (consult-ripgrep (:not posframe))
           (t posframe))))
 
 (use-package marginalia
