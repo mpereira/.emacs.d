@@ -1968,11 +1968,12 @@ My favorite light themes:
 ** evil
 #+begin_src emacs-lisp :tangle yes
 (use-package evil
+  :custom
+  (evil-v$-excludes-newline t)
   :general
   (:keymaps '(evil-motion-state-map)
    ";" #'evil-ex
    ":" #'evil-command-window-ex)
-
   :init
   ;; Setup for `evil-collection'.
   (setq evil-want-integration t)
@@ -2020,7 +2021,11 @@ My favorite light themes:
             (lambda ()
               (evil-org-set-key-theme '(operators
                                         navigation
-                                        textobjects)))))
+                                        textobjects))))
+  (evil-define-key 'motion 'evil-org-mode
+    ;; NOTE: overriding default which includes newline: `evil-org-end-of-line',
+    ;; even though `evil-v$-excludes-newline' is set to `t'.
+    (kbd "$") 'evil-end-of-line))
 #+end_src
 
 ** evil-exchange
@@ -7083,32 +7088,9 @@ INFO is a plist used as a communication channel."
 
 * Mappings
 #+begin_src emacs-lisp :tangle yes
-;; Resources:
-;; - https://github.com/emacs-evil/evil/issues/897
-;; - `evil-end-of-line-or-visual-line'
-;; - `evil-end-of-line'
-;; - `end-of-visual-line'
-(defun mpereira/evil-make-$-not-include-newline (keymap)
-  "Make `$' not include the newline character."
-  (general-define-key
-   :keymaps `(,keymap)
-   :states '(motion)
-   "$" '(lambda ()
-          (interactive)
-          (evil-end-of-line))))
-
-(use-package emacs
-  :after (evil-org)
-  :config
-  (add-hook 'evil-org-mode-hook
-            (lambda ()
-              (mpereira/evil-make-$-not-include-newline 'evil-org-mode-map))))
-
 (use-package emacs
   :after (evil)
   :config
-  (mpereira/evil-make-$-not-include-newline 'global)
-
   (general-define-key
    :keymaps '(evil-ex-search-keymap minibuffer-local-map)
    "C-k" #'previous-line-or-history-element
