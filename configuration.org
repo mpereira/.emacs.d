@@ -4902,6 +4902,10 @@ the agent.
 
 ** magit
 #+begin_src emacs-lisp :tangle yes
+(use-package transient
+  :custom
+  (transient-default-level 7))
+
 (use-package magit
   :config
   (setq magit-diff-refine-hunk 'all)
