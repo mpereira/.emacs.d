@@ -540,10 +540,10 @@ Check [[https://github.com/mpereira/dotfiles/blob/master/.profile][mpereira/dotf
 (setq mpereira/eshell-prompt-max-directory-length 50)
 (setq mpereira/mode-line-max-directory-length 15)
 
-(setq mpereira/is-gnu-bash
-      (with-temp-buffer
-        (call-process insert-directory-program nil t nil "--version")
-        (string-match-p "GNU" (buffer-string))))
+(defun mpereira/is-gnu-program (executable)
+  (with-temp-buffer
+    (call-process executable nil t nil "--version")
+    (string-match-p "GNU" (buffer-string))))
 #+end_src
 
 * Redefinitions, advices
@@ -3688,9 +3688,11 @@ child tree.
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
 
-(if mpereira/is-gnu-bash
-    (setq dired-listing-switches "-AFhlv --group-directories-first")
-  (setq dired-listing-switches "-alh"))
+(if (not (mpereira/is-gnu-program "ls"))
+    (progn
+      (warn "Not GNU ls: %s" (s-trim (shell-command-to-string "which ls")))))
+
+(setq dired-listing-switches "-AFhlv --group-directories-first")
 
 (setq find-ls-option ;; applies to `find-name-dired'
       '("-print0 | xargs -0 ls -AFlv --group-directories-first" . "-AFlv --group-directories-first"))
@@ -4105,6 +4107,10 @@ This is apparently [[https://github.com/company-mode/company-mode/issues/1322#is
 
 ** term
 #+begin_src emacs-lisp :tangle yes
+(if (not (mpereira/is-gnu-program "bash"))
+    (progn
+      (warn "Not GNU bash: %s" (s-trim (shell-command-to-string "which bash")))))
+
 (setq explicit-shell-file-name "bash")
 
 ;; Infinite buffer.
