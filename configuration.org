@@ -315,6 +315,7 @@ sudo snap install emacs --edge --classic
   - [[#grip-mode][grip-mode]]
 - [[#interactions-with-websites][Interactions with websites]]
   - [[#counsel-web][counsel-web]]
+  - [[#chatgpt-shell][chatgpt-shell]]
   - [[#emacs-webkit][emacs-webkit]]
   - [[#elfeed][elfeed]]
   - [[#google-this][google-this]]
@@ -6969,6 +6970,13 @@ targets."
   :ensure nil
   :vc (:fetcher github
        :repo "mnewt/counsel-web"))
+#+end_src
+
+** chatgpt-shell
+#+begin_src emacs-lisp :tangle yes
+(use-package chatgpt-shell
+  :vc (:fetcher github
+       :repo "xenodium/chatgpt-shell"))
 #+end_src
 
 ** emacs-webkit
