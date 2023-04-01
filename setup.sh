@@ -25,3 +25,5 @@ npm i -g pyright
 brew install llvm
 
 python3 -m pip install mypy flake8 pylint black
+
+brew install enchant

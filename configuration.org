@@ -269,7 +269,7 @@ sudo snap install emacs --edge --classic
   - [[#screenshot][screenshot]]
 - [[#writing-prose][Writing prose]]
   - [[#grammarly][Grammarly]]
-  - [[#flyspell][flyspell]]
+  - [[#jinx][jinx]]
   - [[#mw-thesaurus][mw-thesaurus]]
   - [[#atomic-chrome][atomic-chrome]]
 - [[#distraction-free-editing][Distraction-free editing]]
@@ -6152,14 +6152,15 @@ This currently makes buffers slow and [[https://github.com/emacs-grammarly/flych
        :repo "mmagnus/emacs-grammarly"))
 #+end_src
 
-** flyspell
+** jinx
+#+begin_src bash :tangle setup.sh :results verbatim
+brew install enchant
+#+end_src
+
 #+begin_src emacs-lisp :tangle yes
-(use-package flyspell
-  :defer 1
-  :custom
-  (flyspell-issue-message-flag nil)
-  (flyspell-issue-welcome-flag nil)
-  (flyspell-mode 1))
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind ([remap ispell-word] . jinx-correct))
 #+end_src
 
 ** mw-thesaurus
