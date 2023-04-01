@@ -4143,8 +4143,6 @@ This is apparently [[https://github.com/company-mode/company-mode/issues/1322#is
 #+end_src
 
 ** bash-completion
-Disabled because it [[https://github.com/szermatt/emacs-bash-completion/issues/24][doesn't work in Eshell buffers]].
-
 #+begin_src emacs-lisp :tangle yes
 (use-package bash-completion
   :config
@@ -4740,7 +4738,6 @@ I can't get this to plan nice with `company-mode`, so I'm disabling it.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package yasnippet
-  :disabled
   :config
   (yas-reload-all)
   (add-hook 'prog-mode-hook #'yas-minor-mode))
@@ -4749,16 +4746,7 @@ I can't get this to plan nice with `company-mode`, so I'm disabling it.
 ** yasnippet-snippets
 #+begin_src emacs-lisp :tangle yes
 (use-package yasnippet-snippets
-  :disabled
   :after yasnippet)
-
-(use-package doom-snippets
-  :disabled
-  :ensure nil
-  :after yasnippet
-  :quelpa (doom-snippets
-           :fetcher github
-           :repo "hlissner/doom-snippets"))
 #+end_src
 
 ** electric-pair-mode
