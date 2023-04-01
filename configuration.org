@@ -498,9 +498,8 @@ Check [[https://github.com/mpereira/dotfiles/blob/master/.profile][mpereira/dotf
                             "SSH_AGENT_PID"))
     (add-to-list 'exec-path-from-shell-variables shell-variable))
 
-  ;; Removing the "-l" flag so that it doesn't try to source /etc/profile. For
-  ;; whatever reason it causes the paths from `/usr/libexec/path_helper' to be
-  ;; at the head of `$PATH'.
+  ;; Removing the "-l" flag so that it sources ~/HOME/profile after all the
+  ;; other scripts (e.g. /etc/paths.d/*, etc.).
   (setq exec-path-from-shell-arguments '("-i"))
 
   (exec-path-from-shell-initialize))
