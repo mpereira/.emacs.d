@@ -5289,6 +5289,7 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
    :prefix mpereira/leader
    :infix "1"
    "c" 'flycheck-buffer
+   "C" 'flycheck-clear
    "e" 'flycheck-explain-error-at-point
    "h" 'flycheck-display-error-at-point
    "j" 'flycheck-next-error
@@ -5296,7 +5297,8 @@ gist.el depends on a GitHub [[https://github.com/settings/tokens][personal acces
    "l" 'flycheck-list-errors
    "n" 'flycheck-next-error
    "p" 'flycheck-previous-error
-   "y" 'flycheck-copy-errors-as-kill)
+   "y" 'flycheck-copy-errors-as-kill
+   "?" 'flycheck-describe-checker)
 
   (setq flycheck-display-errors-delay 0.3)
   (setq-default flycheck-emacs-lisp-load-path 'inherit)
