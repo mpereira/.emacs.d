@@ -97,7 +97,6 @@ sudo snap install emacs --edge --classic
 - [[#performance][Performance]]
   - [[#increase-the-amount-of-data-read-from-processes][Increase the amount of data read from processes]]
   - [[#asynchronous-org-babel-tangling-and-byte-recompilation][Asynchronous Org Babel tangling and byte recompilation]]
-  - [[#dont-save-minibuffer-winner-mode-state][Don't save minibuffer winner-mode state]]
   - [[#show-garbage-collections-in-minibuffer][Show garbage collections in minibuffer]]
   - [[#garbage-collection-magic-hack][Garbage collection magic hack]]
   - [[#dont-delete-trailing-whitespace-on-save][*Don't* delete trailing whitespace on save]]
@@ -1709,21 +1708,6 @@ https://emacs-lsp.github.io/lsp-mode/page/performance/
 
                               (format ". output: %s" result)))))))))
  #+end_src
-
-** Don't save minibuffer winner-mode state
-Winner mode adds this hook by default.
-
-Recommended in https://github.com/abo-abo/swiper/issues/963#issuecomment-294517528.
-
-#+begin_src emacs-lisp :tangle yes
-(defun mpereira/disable-winner-mode-in-the-minibuffer ()
-  "TODO."
-  (remove-hook 'minibuffer-setup-hook 'winner-save-unconditionally))
-
-(mpereira/disable-winner-mode-in-the-minibuffer)
-
-(add-hook 'winner-mode-hook 'mpereira/disable-winner-mode-in-the-minibuffer)
-#+end_src
 
 ** Show garbage collections in minibuffer
 Not showing them for now (the default).
