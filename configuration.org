@@ -259,6 +259,8 @@ sudo snap install emacs --edge --classic
   - [[#auto-rename-tag][auto-rename-tag]]
   - [[#css][css]]
   - [[#lsp-tailwindcss][lsp-tailwindcss]]
+  - [[#lsp-eslint][lsp-eslint]]
+  - [[#graphql-lsp][graphql-lsp]]
   - [[#tsx-ts-mode][tsx-ts-mode]]
 - [[#infrastructure][Infrastructure]]
   - [[#kubel][kubel]]
@@ -6036,18 +6038,42 @@ hierarchy--make)=.
 ** lsp-tailwindcss
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-tailwindcss
+  :after '(lsp-mode)
   :init
   (setq lsp-tailwindcss-add-on-mode t)
   :config
-  (add-to-list 'lsp-tailwindcss-major-modes 'tsx-ts-mode))
+  (add-to-list 'lsp-tailwindcss-major-modes 'tsx-ts-mode)
+  (lsp-install-server nil 'tailwindcss))
+#+end_src
+
+** lsp-eslint
+#+begin_src emacs-lisp :tangle yes
+(use-package emacs
+  :after '(lsp-mode)
+  :config
+  (lsp-install-server nil 'eslint))
+#+end_src
+
+** graphql-lsp
+#+begin_src emacs-lisp :tangle yes
+(use-package emacs
+  :after '(lsp-mode)
+  :config
+  (lsp-install-server nil 'graphql-lsp))
 #+end_src
 
 ** tsx-ts-mode
 Still need something like [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]]'s [[https://github.com/felipeochoa/rjsx-mode/blob/b697fe4d92cc84fa99a7bcb476f815935ea0d919/rjsx-mode.el#L1161][rjsx-comment-dwim]].
 
 #+begin_src emacs-lisp :tangle yes
+(defun mpereira/set-tsx-ts-mode-lsp-enabled-clients ()
+  "TODO: docstring."
+  ;;(setq-local lsp-enabled-clients '(tailwindcss ts-ls eslint))
+  (setq-local lsp-enabled-clients nil))
+
 (use-package emacs
   :mode ("\\.jsx?$" . tsx-ts-mode)
+  :hook (tsx-ts-mode-hook  . mpereira/set-tsx-ts-mode-lsp-enabled-clients)
   :config
   ;; NOTE: disable aggressive indent for tsx-ts-mode because I've seen some
   ;; weirdness. Also I wanna give priority to LSP and Prettier automatic
