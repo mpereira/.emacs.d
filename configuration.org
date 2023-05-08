@@ -6639,7 +6639,7 @@ box.
 #+end_src
 
 ** prodigy
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
 (use-package prodigy
   :general (:keymaps '(prodigy-mode-map)
             :states '(normal)
