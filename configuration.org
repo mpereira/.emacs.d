@@ -2724,7 +2724,7 @@ giving priority to CREATED:
 (use-package oauth2-auto
   :defer t
   :vc (:fetcher github
-       :repo "rhaps0dy/emacs-oauth2-auto"))
+       :repo "telotortium/emacs-oauth2-auto"))
 
 (use-package org-gcal
   :config
