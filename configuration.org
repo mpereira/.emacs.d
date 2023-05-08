@@ -1438,9 +1438,6 @@ Reuse SSH connections. Taken from the [[https://www.gnu.org/software/emacs/manua
 
 Not tangled for now because it seems to affect remote LSP buffers under
 =rust-analyzer=.
-
-[2020-08-17 Mon] Tangling this again to see if it helps with TRAMP slowness and
-freezes.
 #+begin_src emacs-lisp :tangle no
 (customize-set-variable 'tramp-ssh-controlmaster-options
                         (concat
@@ -4237,6 +4234,7 @@ Doesn't do nested folds for JavaScript yet.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package ts-fold
+  :ensure nil
   :vc (:fetcher github
        :repo "emacs-tree-sitter/ts-fold")
   :config
@@ -4397,6 +4395,7 @@ to get the actual frame width in characters.
 ** too-long-lines-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package too-long-lines-mode
+  :ensure nil
   :vc (:fetcher github
        :repo "rakete/too-long-lines-mode")
   :config
@@ -6974,11 +6973,14 @@ targets."
 ** chatgpt-shell
 #+begin_src emacs-lisp :tangle yes
 (use-package chatgpt-shell
+  :ensure nil
   :vc (:fetcher github
        :repo "xenodium/chatgpt-shell"))
 #+end_src
 
 ** emacs-webkit
+Currently not tangled.
+
 #+begin_src emacs-lisp :tangle no
 (use-package webkit
   :ensure nil
