@@ -1954,6 +1954,13 @@ My favorite light themes:
 (use-package evil
   :custom
   (evil-v$-excludes-newline t)
+  ;; NOTE: replacing the stock `undo' with `undo-tree-undo' due to the following
+  ;; error:
+  ;;
+  ;;   "primitive-undo: Unrecognized entry in undo list undo-tree-canary"
+  ;;
+  ;; More details in https://www.dr-qubit.org/Lost_undo-tree_history.html.
+  (evil-undo-system 'undo-tree)
   :general
   (:keymaps '(evil-motion-state-map)
    ";" #'evil-ex
@@ -7300,17 +7307,6 @@ INFO is a plist used as a communication channel."
  "C-]" 'dumb-jump-go
  "C-}" 'dumb-jump-quick-look
  "C-l" #'evil-ex-nohighlight)
-
-;; NOTE: replacing the stock `undo' with `undo-tree-undo' due to the following
-;; error:
-;;
-;;   "primitive-undo: Unrecognized entry in undo list undo-tree-canary"
-;;
-;; More details in https://www.dr-qubit.org/Lost_undo-tree_history.html.
-(general-define-key
- :keymaps '(global-map)
- :states '(normal)
- "u" 'undo-tree-undo)
 
 (general-define-key
  :keymaps '(global-map)
