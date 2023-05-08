@@ -2722,21 +2722,20 @@ giving priority to CREATED:
 ** org-gcal
 #+begin_src emacs-lisp :tangle yes
 (use-package oauth2-auto
-  :defer t
+  :ensure nil
   :vc (:fetcher github
        :repo "telotortium/emacs-oauth2-auto"))
 
 (use-package org-gcal
-  :config
+  :init
   (setq mpereira/org-gcal-directory (expand-file-name "gcal" org-directory))
-
   (load-file (expand-file-name "org-gcal-secrets.el" user-emacs-directory))
-
-  (setq org-gcal-client-id mpereira/secret-org-gcal-client-id)
-  (setq org-gcal-client-secret mpereira/secret-org-gcal-client-secret)
-  (setq org-gcal-file-alist mpereira/secret-org-gcal-file-alist)
-  (setq org-gcal-auto-archive nil)
-  (setq org-gcal-notify-p nil))
+  :custom
+  (org-gcal-client-id mpereira/secret-org-gcal-client-id)
+  (org-gcal-client-secret mpereira/secret-org-gcal-client-secret)
+  (org-gcal-file-alist mpereira/secret-org-gcal-file-alist)
+  (org-gcal-auto-archive nil)
+  (org-gcal-notify-p nil))
 #+end_src
 
 ** Org agenda
