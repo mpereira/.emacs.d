@@ -6072,14 +6072,8 @@ hierarchy--make)=.
 Still need something like [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]]'s [[https://github.com/felipeochoa/rjsx-mode/blob/b697fe4d92cc84fa99a7bcb476f815935ea0d919/rjsx-mode.el#L1161][rjsx-comment-dwim]].
 
 #+begin_src emacs-lisp :tangle yes
-(defun mpereira/set-tsx-ts-mode-lsp-enabled-clients ()
-  "TODO: docstring."
-  ;;(setq-local lsp-enabled-clients '(tailwindcss ts-ls eslint))
-  (setq-local lsp-enabled-clients nil))
-
 (use-package emacs
   :mode ("\\.jsx?$" . tsx-ts-mode)
-  :hook (tsx-ts-mode-hook  . mpereira/set-tsx-ts-mode-lsp-enabled-clients)
   :config
   ;; NOTE: disable aggressive indent for tsx-ts-mode because I've seen some
   ;; weirdness. Also I wanna give priority to LSP and Prettier automatic
