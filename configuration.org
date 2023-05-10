@@ -6797,7 +6797,7 @@ targets."
   (corfu-min-width 30)
   (corfu-max-width 100)
   (corfu-count 15)
-  (corfu-popupinfo-delay t)
+  (corfu-popupinfo-delay '(0.5 . 0.5))
   :general
   (:keymaps '(corfu-map)
    :states '(insert)
