@@ -3,7 +3,7 @@
 
 set -euxo pipefail
 
-brew install html-tidy5
+brew install tidy-html5
 
 curl -L https://github.com/rust-analyzer/rust-analyzer/releases/latest/download/rust-analyzer-mac \
      -o /usr/local/bin/rust-analyzer \
@@ -20,7 +20,7 @@ sudo npm i -g \
      typescript-language-server \
      typescript \
 
-npm i -g pyright
+sudo npm i -g pyright
 
 brew install llvm
 

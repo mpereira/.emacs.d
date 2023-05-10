@@ -4853,7 +4853,7 @@ Keep an eye on [[https://github.com/lassik/emacs-format-all-the-code/issues/47][
 
 Install [[http://www.html-tidy.org/][Tidy]]:
 #+begin_src bash :tangle setup.sh :results verbatim
-brew install html-tidy5
+brew install tidy-html5
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
@@ -5365,7 +5365,7 @@ Install some dependencies:
 
 - [[https://github.com/microsoft/pyright][pyright]] for [[https://github.com/emacs-lsp/lsp-pyright][Python]].
   #+begin_src bash :tangle setup.sh :results verbatim
-  npm i -g pyright
+  sudo npm i -g pyright
   #+end_src
 
 - LLVM for C/C++. You might need to configure =PATH=, =LDFLAGS=, and =CPPFLAGS=.
