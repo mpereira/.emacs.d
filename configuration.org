@@ -3884,6 +3884,8 @@ With \\[universal-argument] also open the directory in a `dired' buffer."
 
   (eshell/alias "e" "find-file $1")
 
+  (chatgpt-shell-add-??-command-to-eshell)
+
   ;; Eshell needs this variable set in addition to the PATH environment variable.
   (setq eshell-path-env (getenv "PATH"))
 
