@@ -372,6 +372,7 @@ Other dependencies have to be manually set up:
 - [[https://github.com/settings/tokens][GitHub personal token]] (for =magit=, =gist=, etc. Will be in =~/.authinfo.gpg=)
 - [[http://developer.wolframalpha.com/portal/myapps/][Wolfram Alpha AppID]] (for =wolfram=)
 - [[https://github.com/myuhe/org-gcal.el][Google Apps client ID and Calendar API]] (for =org-gcal=)
+- [[https://platform.openai.com/account/api-keys][OpenAI secret API key]] (for =chatgpt-shell=)
 
 * Silent exports for emacs lisp org babel code blocks
 Having this as an org file property doesn't seem to work for some reason.
@@ -1301,6 +1302,7 @@ no duplicate or conflicting entries."
 I use code outside of this repository to write a GPG-encrypted =secrets.el.gpg=
 file that will set these variables.
 - =mpereira/secret-circe-nickserv-password=
+- =mpereira/secret-openai-secret-api-key=
 - =mpereira/secret-org-gcal-client-id=
 - =mpereira/secret-org-gcal-client-secret=
 - =mpereira/secret-wolfram-alpha-app-id=
@@ -6984,7 +6986,9 @@ targets."
 (use-package chatgpt-shell
   :ensure nil
   :vc (:fetcher github
-       :repo "xenodium/chatgpt-shell"))
+       :repo "xenodium/chatgpt-shell")
+  :custom
+  (chatgpt-shell-openai-key mpereira/secret-openai-secret-api-key))
 #+end_src
 
 ** emacs-webkit
