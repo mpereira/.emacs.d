@@ -7065,10 +7065,11 @@ Currently not tangled.
 ** gif-screencast
 #+begin_src emacs-lisp :tangle yes
 (use-package gif-screencast
-  :config
-  (setq gif-screencast-args '("-x"))
-  (setq gif-screencast-cropping-program "mogrify")
-  (setq gif-screencast-capture-format "ppm"))
+  :custom
+  (gif-screencast-args '("-x"))
+  (gif-screencast-cropping-program "mogrify")
+  (gif-screencast-capture-format "ppm")
+  (gif-screencast-output-directory (expand-file-name "Documents" "~")))
 #+end_src
 
 ** disk-usage
