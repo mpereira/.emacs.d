@@ -160,6 +160,7 @@ sudo snap install emacs --edge --classic
   - [[#dired-show-readme][dired-show-readme]]
   - [[#dired-subtree][dired-subtree]]
   - [[#reveal-in-osx-finder][reveal-in-osx-finder]]
+  - [[#sudo-edit][sudo-edit]]
 - [[#shell-terminal][Shell, terminal]]
   - [[#with-editor][with-editor]]
   - [[#shell][shell]]
@@ -3773,6 +3774,11 @@ Disabled for now. Doesn't allow navigating README, doesn't render markdown.
 ** reveal-in-osx-finder
 #+begin_src emacs-lisp :tangle yes
 (use-package reveal-in-osx-finder)
+#+end_src
+
+** sudo-edit
+#+begin_src emacs-lisp :tangle yes
+(use-package sudo-edit)
 #+end_src
 
 * Shell, terminal
