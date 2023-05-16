@@ -1,25 +1,25 @@
-EMACS						:= $(shell readlink -f $(shell which emacs))
-COPY_DIRECTORY	:= rsync -rhqr
+EMACS                    := $(shell readlink -f $(shell which emacs))
+COPY_DIRECTORY           := rsync -rhqr
 
-PROJECT_ROOT				:= $(shell pwd)
-TEST_RUNS_DIRECTORY := $(PROJECT_ROOT)/test-runs
-TEST_HOME						:= $(TEST_RUNS_DIRECTORY)/$(shell date +%Y%m%d%H%M%S)
-TEST_HOME_EMACSD		:= $(TEST_HOME)/.emacs.d
+PROJECT_ROOT             := $(shell pwd)
+TEST_RUNS_DIRECTORY      := $(PROJECT_ROOT)/test-runs
+TEST_HOME                := $(TEST_RUNS_DIRECTORY)/$(shell date +%Y%m%d%H%M%S)
+TEST_HOME_EMACSD         := $(TEST_HOME)/.emacs.d
 
-TEST_ELPA									:= $(PROJECT_ROOT)/$(TEST_ELPA_NAME)
-TEST_ELPA_FILE						:= .test-elpa
-TEST_ELPA_FROM_TEST_NAME	:= elpa-from-test-$(shell date +%Y%m%d%H%M%S)
-TEST_ELPA_NAME						:= elpa-$(shell date +%Y%m%d%H%M%S)
+TEST_ELPA                := $(PROJECT_ROOT)/$(TEST_ELPA_NAME)
+TEST_ELPA_FILE           := .test-elpa
+TEST_ELPA_FROM_TEST_NAME := elpa-from-test-$(shell date +%Y%m%d%H%M%S)
+TEST_ELPA_NAME           := elpa-$(shell date +%Y%m%d%H%M%S)
 
-CUSTOM_EL := $(PROJECT_ROOT)/custom.el
-ELPA_FILE := .elpa
+CUSTOM_EL                := $(PROJECT_ROOT)/custom.el
+ELPA_FILE                := .elpa
 
-BACKUP_DATE					:= $(shell date +%Y%m%d%H%M%S)
-BACKUP_DIRECTORY		:= $(PROJECT_ROOT)/package-repository-backups
-BACKUP_ELPA					:= $(BACKUP_DIRECTORY)/elpa-$(BACKUP_DATE)
-BACKUP_ELPA_FILE		:= $(BACKUP_DIRECTORY)/.latest-backup-elpa
-BACKUP_QUELPA				:= $(BACKUP_DIRECTORY)/quelpa-$(BACKUP_DATE)
-BACKUP_QUELPA_FILE	:= $(BACKUP_DIRECTORY)/.latest-backup-quelpa
+BACKUP_DATE              := $(shell date +%Y%m%d%H%M%S)
+BACKUP_DIRECTORY         := $(PROJECT_ROOT)/package-repository-backups
+BACKUP_ELPA              := $(BACKUP_DIRECTORY)/elpa-$(BACKUP_DATE)
+BACKUP_ELPA_FILE         := $(BACKUP_DIRECTORY)/.latest-backup-elpa
+BACKUP_QUELPA            := $(BACKUP_DIRECTORY)/quelpa-$(BACKUP_DATE)
+BACKUP_QUELPA_FILE       := $(BACKUP_DIRECTORY)/.latest-backup-quelpa
 
 .DEFAULT_GOAL := test
 
