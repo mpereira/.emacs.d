@@ -87,6 +87,7 @@ sudo snap install emacs --edge --classic
   - [[#remove-from-list][remove-from-list]]
   - [[#standard-library-type-of-things][Standard library type of things]]
   - [[#miscellaneous][Miscellaneous]]
+- [[#read-secrets][Read secrets]]
 - [[#toggle-buffer-maximize][Toggle buffer maximize]]
 - [[#native-compilation][Native compilation]]
 - [[#reload-directory-local-variables-when-saving-dir-localsel-files][Reload directory local variables when saving .dir-locals.el files]]
@@ -368,17 +369,9 @@ set -euxo pipefail
 #+end_src
 
 Other dependencies have to be manually set up:
-- [[https://github.com/settings/tokens][GitHub personal token]] (for magit, gist, etc.)
-- [[http://developer.wolframalpha.com/portal/myapps/][Wolfram Alpha AppID]] (for wolfram)
-- TODO: Google Apps Calendar (for org-gcal)
-- =~/.emacs.d/circe-secrets.el=
-  - =mpereira/secret-circe-nickserv-password=
-- =~/.emacs.d/org-gcal-secrets.el=
-  - =mpereira/secret-org-gcal-client-id=
-  - =mpereira/secret-org-gcal-client-secret=
-  - =mpereira/secret-org-gcal-file-alist=
-- =~/.emacs.d/wolfram-secrets.el=
-  - =mpereira/secret-wolfram-alpha-app-id=
+- [[https://github.com/settings/tokens][GitHub personal token]] (for =magit=, =gist=, etc. Will be in =~/.authinfo.gpg=)
+- [[http://developer.wolframalpha.com/portal/myapps/][Wolfram Alpha AppID]] (for =wolfram=)
+- [[https://github.com/myuhe/org-gcal.el][Google Apps client ID and Calendar API]] (for =org-gcal=)
 
 * Silent exports for emacs lisp org babel code blocks
 Having this as an org file property doesn't seem to work for some reason.
@@ -1302,6 +1295,18 @@ no duplicate or conflicting entries."
   (interactive "r")
   (align-regexp start end
                 "\\(\\s-+\\)" 1 1 t))
+#+end_src
+
+* Read secrets
+I use code outside of this repository to write a GPG-encrypted =secrets.el.gpg=
+file that will set these variables.
+- =mpereira/secret-circe-nickserv-password=
+- =mpereira/secret-org-gcal-client-id=
+- =mpereira/secret-org-gcal-client-secret=
+- =mpereira/secret-wolfram-alpha-app-id=
+
+#+begin_src emacs-lisp :tangle yes
+(load-library (expand-file-name "secrets.el.gpg" user-emacs-directory))
 #+end_src
 
 * Toggle buffer maximize
@@ -2733,11 +2738,14 @@ giving priority to CREATED:
 (use-package org-gcal
   :init
   (setq mpereira/org-gcal-directory (expand-file-name "gcal" org-directory))
-  (load-file (expand-file-name "org-gcal-secrets.el" user-emacs-directory))
   :custom
   (org-gcal-client-id mpereira/secret-org-gcal-client-id)
   (org-gcal-client-secret mpereira/secret-org-gcal-client-secret)
-  (org-gcal-file-alist mpereira/secret-org-gcal-file-alist)
+  (org-gcal-file-alist `(("murilo@murilopereira.com"
+                          .
+                          ,(expand-file-name
+                            "calendar.org"
+                            mpereira/org-gcal-directory))))
   (org-gcal-auto-archive nil)
   (org-gcal-notify-p nil))
 #+end_src
@@ -7010,7 +7018,6 @@ Currently not tangled.
 #+begin_src emacs-lisp :tangle yes
 (use-package wolfram
   :config
-  (load-file (expand-file-name "wolfram-secrets.el" user-emacs-directory))
   (setq wolfram-alpha-app-id mpereira/secret-wolfram-alpha-app-id))
 #+end_src
 
@@ -7055,8 +7062,6 @@ Currently not tangled.
    "K" 'helpful-at-point)
   :config
   (enable-circe-color-nicks)
-
-  (load-file (expand-file-name "circe-secrets.el" user-emacs-directory))
 
   ;; Disable name listing when joining channels.
   (circe-set-display-handler "353" 'circe-display-ignore)

@@ -36,6 +36,7 @@
 /request
 /savehist
 /secrets.el
+/secrets.el.gpg
 /semanticdb
 /session.*
 /sessions

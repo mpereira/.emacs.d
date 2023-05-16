@@ -116,9 +116,7 @@ test:
 	cp init.el $(TEST_HOME_EMACSD)
 	cp configuration.org $(TEST_HOME_EMACSD)
 	touch $(TEST_HOME_EMACSD)/custom.el
-	cp org-gcal-secrets.el $(TEST_HOME_EMACSD)
-	cp wolfram-secrets.el $(TEST_HOME_EMACSD)
-	cp circe-secrets.el $(TEST_HOME_EMACSD)
+	cp secrets.el.gpg $(TEST_HOME_EMACSD)
 	echo "git diff:"
 	git diff
 	echo
