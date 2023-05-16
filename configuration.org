@@ -314,6 +314,8 @@ sudo snap install emacs --edge --classic
   - [[#markdown-mode][markdown-mode]]
   - [[#toml-mode][toml-mode]]
   - [[#yaml-mode][yaml-mode]]
+  - [[#yaml-ts-mode][yaml-ts-mode]]
+  - [[#yaml-pro][yaml-pro]]
   - [[#htmlize][htmlize]]
   - [[#grip-mode][grip-mode]]
 - [[#interactions-with-websites][Interactions with websites]]
@@ -6978,6 +6980,20 @@ targets."
    :keymaps '(yaml-mode-map)
    :states '(insert)
    "RET" 'newline-and-indent))
+#+end_src
+
+** yaml-ts-mode
+#+begin_src emacs-lisp :tangle yes
+(use-package yaml-ts-mode
+  :general (:keymaps '(yaml-ts-mode-map)
+            :states '(insert)
+            "TAB" #'completion-at-point))
+#+end_src
+
+** yaml-pro
+#+begin_src emacs-lisp :tangle yes
+(use-package yaml-pro
+  :hook (yaml-ts-mode-hook . yaml-pro-mode))
 #+end_src
 
 ** htmlize
