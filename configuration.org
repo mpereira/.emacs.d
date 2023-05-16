@@ -249,6 +249,7 @@ sudo snap install emacs --edge --classic
   - [[#scala][Scala]]
   - [[#sql][SQL]]
   - [[#terraform-mode][terraform-mode]]
+  - [[#ansible][ansible]]
   - [[#docker][docker]]
   - [[#bazel-mode][bazel-mode]]
   - [[#groovy-mode][groovy-mode]]
@@ -5990,6 +5991,18 @@ hierarchy--make)=.
 ** terraform-mode
 #+begin_src emacs-lisp :tangle yes
 (use-package terraform-mode)
+#+end_src
+
+** ansible
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/maybe-enable-ansible-mode ()
+  "TODO: docstring."
+  (when (string-match-p "\\(roles\\|playbooks\\)\\/.*\\.ya?ml\\'" (buffer-file-name))
+    (ansible)))
+
+(use-package ansible
+  :hook ((yaml-ts-mode-hook . lsp-deferred)
+         (yaml-ts-mode-hook . mpereira/maybe-enable-ansible-mode)))
 #+end_src
 
 ** docker
