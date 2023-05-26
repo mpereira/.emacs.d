@@ -85,6 +85,8 @@ sudo snap install emacs --edge --classic
   - [[#make-align-regexp-not-use-tabs][Make align-regexp not use tabs]]
 - [[#helper-functions][Helper functions]]
   - [[#remove-from-list][remove-from-list]]
+  - [[#mpereirayank-current-selection-as-console-log][mpereira/yank-current-selection-as-console-log]]
+  - [[#mpereiraremove-from-list-variable][mpereira/remove-from-list-variable]]
   - [[#standard-library-type-of-things][Standard library type of things]]
   - [[#miscellaneous][Miscellaneous]]
 - [[#read-secrets][Read secrets]]
@@ -667,6 +669,53 @@ Found on [[https://stackoverflow.com/questions/22710040/emacs-align-regexp-with-
 (require 'erc)
 
 (fset 'remove-from-list #'ert--remove-from-list)
+#+end_src
+
+** ~mpereira/yank-current-selection-as-console-log~
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/yank-current-selection-as-console-log ()
+  "TODO."
+  (interactive)
+  (when (region-active-p)
+    (let* ((selected-text (buffer-substring-no-properties (region-beginning) (region-end)))
+           (output (concat "console.log(['" selected-text "', " selected-text "]);")))
+      (deactivate-mark)
+      (kill-new output)
+      (message output)
+      output)))
+#+end_src
+
+** ~mpereira/remove-from-list-variable~
+Got from https://xenodium.com/deleting-from-emacs-sequence-vars/.
+
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/remove-from-list-variable ()
+  (interactive)
+  (let* ((var (intern
+               (completing-read "From variable: "
+                                (let (symbols)
+                                  (mapatoms
+                                   (lambda (sym)
+                                     (when (and (boundp sym)
+                                                (seqp (symbol-value sym)))
+                                       (push sym symbols))))
+                                  symbols) nil t)))
+         (values (mapcar (lambda (item)
+                           (setq item (prin1-to-string item))
+                           (concat (truncate-string-to-width
+                                    (nth 0 (split-string item "\n"))
+                                    (window-body-width))
+                                   (propertize item 'invisible t)))
+                         (symbol-value var)))
+         (index (progn
+                  (when (seq-empty-p values) (error "Already empty"))
+                  (seq-position values (completing-read "Delete: " values nil t)))))
+    (unless index (error "Eeek. Something's up."))
+    (set var (append (seq-take (symbol-value var) index)
+                     (seq-drop (symbol-value var) (1+ index))))
+    (message "Deleted: %s" (truncate-string-to-width
+                            (seq-elt values index)
+                            (- (window-body-width) 9)))))
 #+end_src
 
 ** Standard library type of things
