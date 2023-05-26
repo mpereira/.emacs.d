@@ -5536,6 +5536,62 @@ Install some dependencies:
    "C-k" 'lsp-ui-peek--select-prev))
 #+end_src
 
+*** ~mpereira/lsp-imenu~
+#+begin_src emacs-lisp :tangle yes
+(defun mpereira/lsp-imenu ()
+  (interactive)
+  (lsp-request-async
+   "textDocument/documentSymbol"
+   (lsp-make-document-symbol-params
+    :text-document
+    (lsp--text-document-identifier))
+   (lambda (document-symbols)
+     (let ((symbols
+            (mapcar
+             (lambda (symbol)
+               (let* ((name (gethash "name" symbol))
+                      (kind (gethash "kind" symbol))
+                      (position (or (-some->> symbol
+                                      lsp:document-symbol-selection-range
+                                      lsp:range-start)
+                                    (-some->> symbol
+                                      lsp:symbol-information-location
+                                      lsp:location-range
+                                      lsp:range-start)
+                                    (error "Unable to go to location")))
+                      (point (lsp--position-to-point position))
+                      (kind-name (inflection-singularize-string
+                                  (lsp--imenu-kind->name kind))))
+                 (cons (concat (propertize
+                                kind-name
+                                'face
+                                (cond
+                                 ((string= kind-name "Function")
+                                  'font-lock-function-name-face)
+                                 ((string= kind-name "Constant")
+                                  'font-lock-constant-face)
+                                 (t
+                                  'font-lock-keyword-face)))
+                               " "
+                               name)
+                       (list kind point))))
+             document-symbols)))
+       (let* ((symbol-name (consult--read
+                            (sort symbols
+                                  (lambda (a b)
+                                    (< (nth 1 (cdr a))
+                                       (nth 1 (cdr b)))))
+                            :prompt "Go to symbol: "
+                            :require-match t
+                            :sort nil
+                            :category 'foo))
+              (symbol-data (alist-get symbol-name symbols nil nil 'equal))
+              (kind (nth 0 symbol-data))
+              (position (nth 1 symbol-data)))
+         (goto-char position))))
+   :mode 'alive))
+#+end_src
+
 *** lsp-ui
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-ui
@@ -6153,6 +6209,16 @@ Still need something like [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]
 #+begin_src emacs-lisp :tangle yes
 (use-package emacs
   :mode ("\\.jsx?$" . tsx-ts-mode)
+  :general (:keymaps '(tsx-ts-mode-map)
+            :states '(normal visual)
+            :prefix mpereira/leader
+            :infix "f"
+            ;; NOTE: `consult-imenu' shows a flattened list containing nested
+            ;; items, which ends up being pretty long and unhelpful in
+            ;; `tsx-ts-mode' buffers because the imenu items are not tagged as
+            ;; functions, etc., so `consult-imenu' can't correctly parse and
+            ;; format them.
+            "o" #'mpereira/lsp-imenu)
   :config
   ;; NOTE: disable aggressive indent for tsx-ts-mode because I've seen some
   ;; weirdness. Also I wanna give priority to LSP and Prettier automatic
