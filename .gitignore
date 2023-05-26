@@ -1,6 +1,7 @@
 /**/*.elc
 /*-secrets.el
 /.cache
+/.dap-breakpoints
 /.dir-locals.el
 /.lsp-session-*
 /.org-generic-id-locations
@@ -10,12 +11,14 @@
 /amx-items
 /auto-save-list
 /bookmarks
+/chatgpt
 /configuration.el
 /custom.el
 /eln-cache
 /elpa*
 /emojis
 /eshell
+/etc
 /fast-project-find-file.el
 /file-backups
 /forge-database.sqlite
@@ -23,8 +26,10 @@
 /image-dired
 /junk
 /network-security.data
+/oauth2-auto.plist
 /org-clock-save.el
 /org-gcal
+/org-persist
 /package-repository-backups
 /persist
 /places
@@ -45,6 +50,7 @@
 /tramp-auto-save
 /tramp-connection-history
 /transient
+/tree-sitter
 /undo*
 /url
 /var
