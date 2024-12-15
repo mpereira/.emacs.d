@@ -1,1 +1,70 @@
-configuration.org
+#+TITLE: mpereira's Emacs configuration
+#+AUTHOR: Murilo Pereira <murilo@murilopereira.com>
+
+:PROPERTIES:
+:TOC:      ignore
+:END:
+
+This is my vanilla, [[https://github.com/emacs-evil/evil][Evil]], Emacs configuration. It enables most of my
+computing needs, since most of the time I'm on a computer I'm on
+Emacs.
+
+I just made the switch from a literate configuration to a simple
+=init.el=. Check out my configuration there. Maybe I'll go back to a
+literate configuration at some point.
+
+It can be found at https://github.com/mpereira/.emacs.d.
+
+I wouldn't recommend others to use this configuration as-is. I'm sure
+there are sections, snippets, or settings that might be interesting,
+though.
+
+If you'd like to know more about my relationship with Emacs, check out
+this thing I wrote: /[[https://www.murilopereira.com/how-to-open-a-file-in-emacs/][How to open a file in Emacs]]: a short story about
+Lisp, technology, and human progress/.
+
+One day I'll include some screenshots here.
+
+* Installing Emacs
+
+These days I almost exclusively use GUI Emacs on macOS. I [[https://github.com/mpereira/macbook-playbook/blob/master/roles/build-emacs/tasks/main.yml][install]] the
+excellent [[https://github.com/daviderestivo/homebrew-emacs-head][homebrew-emacs-head]] package created by [[https://github.com/daviderestivo][Davide Restivo]]:
+
+#+begin_src bash
+brew install emacs-head@30 \
+     --with-cocoa \
+     --with-crash-debug \
+     --with-imagemagick \
+     --with-modern-icon-pen \
+     --with-native-comp \
+     --with-no-frame-refocus \
+     --with-pdumper \
+     --with-tree-sitter \
+     --with-xwidgets
+#+end_src
+
+* License
+
+#+begin_src text :tangle LICENSE
+MIT License
+
+Copyright (c) 2024 Murilo Pereira
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+#+end_src
