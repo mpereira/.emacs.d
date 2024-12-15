@@ -145,6 +145,10 @@ clean-custom.el:
 clean-elc:
 	find . -name "*.elc" -type f | xargs rm -f
 
+.PHONY: clean-tree-sitter-modules
+clean-tree-sitter-modules:
+	rm -rf ~/.emacs.d/tree-sitter//*
+
 .PHONY: clean-test
 clean-test:
 	rm -rf $(TEST_RUNS_DIRECTORY)/*
@@ -158,7 +162,7 @@ clean-emojis:
 	rm -rf emojis
 
 .PHONY: clean
-clean: clean-test clean-custom.el custom.el clean-elc clean-elpy clean-emojis
+clean: clean-test clean-custom.el custom.el clean-elc clean-elpy clean-emojis clean-tree-sitter-modules
 
 .PHONY: clean-elpa
 clean-elpa:
