@@ -1522,6 +1522,28 @@ If another key is pressed, execute its command."
    ";" nil ; originally `image-next-frame'.
    ))
 
+(defun mpereira/copy-image-to-clipboard ()
+  "Copy the image at point to the clipboard."
+  (interactive)
+  (let* ((image-data (image--get-image))
+         (image-file (if (plist-get (cdr image-data) :file)
+                         (expand-file-name (plist-get (cdr image-data) :file))
+                       (let ((temp-file (make-temp-file "image-copy" nil ".png")))
+                         (with-temp-file temp-file
+                           (insert (plist-get image-data :data)))
+                         temp-file))))
+    (cond
+     ((eq system-type 'windows-nt)
+      (message "Not supported yet."))
+     ((eq system-type 'darwin)
+      (do-applescript
+       (format "set the clipboard to POSIX file \"%s\"" (expand-file-name image-file))))
+     ((eq system-type 'gnu/linux)
+      (call-process-shell-command
+       (format "xclip -selection clipboard -t image/%s -i %s"
+               (file-name-extension image-file)
+               image-file))))))
+
 ;; NOTE: got from Fuco1's config on 2024-12-13.
 ;; https://github.com/Fuco1/.emacs.d/blob/76e80dd07320b079fa26db3af6096d8d8a4f3bb9/site-lisp/my-redef.el
 (eval-after-load "lisp-mode"
