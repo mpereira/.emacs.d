@@ -1544,6 +1544,25 @@ If another key is pressed, execute its command."
                (file-name-extension image-file)
                image-file))))))
 
+(use-package pip-requirements
+  :defer t
+  :config
+  (pip-requirements-fetch-packages))
+
+(defun mpereira/pypi-package-latest-version ()
+  "Get the latest version of a PyPI package.
+Requires the `pip-requirements' package."
+  (interactive)
+  (let* ((package-name (completing-read "Package name: " pip-packages))
+         (url (format "https://pypi.org/pypi/%s/json" package-name))
+         (url-body (with-temp-buffer
+                     (url-insert-file-contents url)
+                     (let ((json-false :false))
+                       (json-read))))
+         (version (alist-get 'version (alist-get 'info url-body))))
+    (message "%s" version)
+    (kill-new version)))
+
 ;; NOTE: got from Fuco1's config on 2024-12-13.
 ;; https://github.com/Fuco1/.emacs.d/blob/76e80dd07320b079fa26db3af6096d8d8a4f3bb9/site-lisp/my-redef.el
 (eval-after-load "lisp-mode"
