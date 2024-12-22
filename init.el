@@ -1509,6 +1509,19 @@ If another key is pressed, execute its command."
 
 (add-hook 'emacs-lisp-mode-hook #'mpereira/enable-autoreload-for-dir-locals)
 
+(require 'json)
+(require 'url)
+
+(use-package image
+  :ensure nil
+  :after (evil-collection)
+  :general
+  (:keymaps '(image-mode-map)
+   :states '(normal)
+   "," nil ; originally `image-previous-file'.
+   ";" nil ; originally `image-next-frame'.
+   ))
+
 ;; NOTE: got from Fuco1's config on 2024-12-13.
 ;; https://github.com/Fuco1/.emacs.d/blob/76e80dd07320b079fa26db3af6096d8d8a4f3bb9/site-lisp/my-redef.el
 (eval-after-load "lisp-mode"
