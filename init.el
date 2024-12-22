@@ -1440,6 +1440,47 @@ Also check out `org-insert-heading-respect-content'."
    "t" #'mpereira/narrow-or-widen-dwim
    "w" #'delete-trailing-whitespace))
 
+(defun mpereira/blamer-show-posframe-commit-info-interactive ()
+  "Display commit information for the current line in a posframe.
+If the 'd' key is pressed, shows the commit in magit.
+If the 'y' key is pressed, yanks the commit hash.
+If another key is pressed, execute its command."
+  (interactive)
+  (blamer-show-posframe-commit-info)
+  (let* ((this-line-number (line-number-at-pos))
+         (file-name (buffer-file-name))
+         (command (append blamer--git-blame-cmd
+                          (list (format "%s,%s" this-line-number this-line-number))))
+         (commit-info (apply #'vc-git--run-command-string file-name command)))
+    (unless commit-info
+      (error "blamer: Could not retrieve commit information for this line"))
+    (when (string-match "^\\([[:xdigit:]]+\\) " commit-info)
+      (let ((commit-hash (match-string 1 commit-info))
+            (key-sequence (read-key-sequence-vector nil)))
+        (posframe-hide blamer--buffer-name)
+        (cond
+         ;; NOTE: "[100]" is the key sequence for pressing "d".
+         ((equal key-sequence [100])
+          (if (string= commit-hash "00000000")
+              (message "No commit information for this line.")
+            (magit-revision-setup-buffer commit-hash nil (list (buffer-file-name)))))
+         ;; NOTE: "[121]" is the key sequence for pressing "y".
+         ((equal key-sequence [121])
+          (kill-new commit-hash))
+         (t
+          (let ((command (key-binding key-sequence)))
+            (when (commandp command)
+              (command-execute command)))))))))
+
+(use-package blamer
+  :custom
+  (blamer-show-avatar-p nil)
+  (blamer-max-commit-message-length 80)
+  :general
+  (:keymaps '(global-map)
+   :states '(normal)
+   "C-0" 'mpereira/blamer-show-posframe-commit-info-interactive))
+
 ;; Reload directory local variables when saving .dir-locals.el files.
 ;; Taken from https://emacs.stackexchange.com/a/13096.
 
