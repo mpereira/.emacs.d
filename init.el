@@ -785,6 +785,10 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   (gptel-api-key mpereira/secret-openai-secret-api-key)
   (gptel-model 'gpt-4o))
 
+(use-package gptel-quick
+  :vc (:url "https://github.com/karthink/gptel-quick"
+       :rev :newest))
+
 (use-package orderless
   :custom
   (orderless-matching-styles '(orderless-literal orderless-regexp))
@@ -1414,6 +1418,7 @@ Also check out `org-insert-heading-respect-content'."
    :states '(normal visual)
    :prefix mpereira/leader
    :infix "l"
+   "d" 'gptel-quick
    "l" 'chatgpt-shell-quick-insert)
 
   ;; p -> project ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
