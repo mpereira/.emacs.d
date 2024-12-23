@@ -1257,6 +1257,19 @@ Also check out `org-insert-heading-respect-content'."
    "k" 'evil-previous-visual-line
    "j" 'evil-next-visual-line))
 
+(use-package verb
+  :general
+  (:keymaps '(org-mode-map)
+   :states '(normal)
+   :prefix mpereira/leader
+   :infix "e"
+   "e" verb-command-map)
+  (:keymaps '(verb-command-map)
+   :states '(normal)
+   :prefix mpereira/leader
+   :infix "e"
+   "e" verb-command-map))
+
 (use-package org-make-toc)
 
 (use-package org-web-tools
