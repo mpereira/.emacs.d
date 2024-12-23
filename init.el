@@ -61,6 +61,7 @@
        :rev :newest)
   :custom
   (which-key-max-display-columns 2)
+  (which-key-max-description-length 40)
   (which-key-posframe-border-width mpereira/posframe-default-internal-border-width)
   (which-key-posframe-parameters mpereira/posframe-default-internal-border-color)
   (which-key-posframe-poshandler 'posframe-poshandler-point-bottom-left-corner)
