@@ -561,6 +561,27 @@ Otherwise, it will be shown."
 
   (evil-mode 1))
 
+(use-package evil-org
+  :after evil org
+  :config
+  ;; evil-org unconditionally remaps `evil-quit' to `org-edit-src-abort' which I
+  ;; don't like because it results in `evil-quit' keybinding invocations to not
+  ;; quit the window.
+  ;; (when (command-remapping 'evil-quit nil org-src-mode-map)
+  ;;   (define-key org-src-mode-map [remap evil-quit] nil))
+  :hook
+  (org-mode-hook . evil-org-mode)
+  (evil-org-mode-hook . (lambda ()
+                          (evil-org-set-key-theme '(operators
+                                                    navigation
+                                                    textobjects))))
+  :config
+  ;; NOTE: overriding default which includes newline:
+  ;; `evil-org-end-of-line', even though `evil-v$-excludes-newline' is
+  ;; set to `t'.
+  (evil-define-key 'motion 'evil-org-mode
+    (kbd "$") 'evil-end-of-line))
+
 (use-package evil-multiedit
   :after evil
   :custom
