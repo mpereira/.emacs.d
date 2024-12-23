@@ -1071,12 +1071,13 @@ roles or playbooks directories."
    "(" 'magit-section-up
    "<" #'magit-go-backward
    ">" #'magit-go-forward
+   "?" #'evil-ex-search-backward
    "C-j" 'magit-section-forward-sibling
    "C-k" 'magit-section-backward-sibling
    "H" 'evil-window-top
    "L" 'evil-window-bottom
+   "TAB" 'magit-section-cycle ; originally `magit-section-toggle'.
    "Z" #'magit-stash
-   "?" #'evil-ex-search-backward
    "zb" #'evil-scroll-line-to-bottom
    "zt" #'evil-scroll-line-to-top
    "zz" #'evil-scroll-line-to-center)
