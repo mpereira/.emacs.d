@@ -778,7 +778,17 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   ;; FIXME: this keybinding isn't being set in `comint-mode-map'. Why?
   (:keymaps '(chatgpt-shell-mode-map)
    :states '(insert)
-   "C-l" 'comint-clear-buffer))
+   "C-l" 'comint-clear-buffer)
+  (:keymaps '(chatgpt-shell-mode-map)
+   :states '(normal)
+   "C-k" (lambda (n)
+           (interactive "p")
+           (comint-previous-prompt n)
+           (evil-scroll-line-to-top (line-number-at-pos)))
+   "C-j" (lambda (n)
+           (interactive "p")
+           (comint-next-prompt n)
+           (evil-scroll-line-to-top (line-number-at-pos)))))
 
 (use-package gptel
   :custom
