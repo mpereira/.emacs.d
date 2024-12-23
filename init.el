@@ -1100,6 +1100,9 @@ roles or playbooks directories."
 ;; | Issues        | Read and write |
 ;; | Metadata      | Read-only      |
 ;; | Pull requests | Read and write |
+
+(use-package forge)
+
 (use-package persp-project
   :vc (:url "https://github.com/PauloPhagula/persp-project"
        :rev :newest))
