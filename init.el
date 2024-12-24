@@ -978,7 +978,8 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
 (defun mpereira/maybe-enable-ansible-mode ()
   "Enable `ansible' mode if the current buffer is a YAML file within
 roles or playbooks directories."
-  (when (string-match-p "\\(roles\\|playbooks\\)\\/.*\\.ya?ml\\'" (buffer-file-name))
+  (when (and (buffer-file-name)
+             (string-match-p "\\(roles\\|playbooks\\)\\/.*\\.ya?ml\\'" (buffer-file-name)))
     (ansible-mode)))
 
 (use-package ansible
