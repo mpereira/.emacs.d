@@ -788,7 +788,11 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
    "C-j" (lambda (n)
            (interactive "p")
            (comint-next-prompt n)
-           (evil-scroll-line-to-top (line-number-at-pos)))))
+           (evil-scroll-line-to-top (line-number-at-pos))))
+  (:keymaps '(chatgpt-shell-prompt-compose-mode-map)
+   :states '(normal)
+   ">" 'chatgpt-shell-prompt-compose-next-interaction
+   "<" 'chatgpt-shell-prompt-compose-previous-interaction))
 
 (use-package gptel
   :custom
