@@ -1126,10 +1126,21 @@ roles or playbooks directories."
 (use-package forge)
 
 (use-package persp-project
-  :vc (:url "https://github.com/PauloPhagula/persp-project"
-       :rev :newest))
+  ;; :vc (:url "https://github.com/PauloPhagula/persp-project"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "PauloPhagula/persp-project"))
 
 (use-package dwim-shell-command)
+
+(defun mpereira/dired-yank-file-path-at-point ()
+  "Yank the absolute path of the file at point in dired."
+  (interactive)
+  (let ((filename (dired-get-filename nil t)))
+    (when filename
+      (let ((path (expand-file-name filename (dired-current-directory))))
+        (message path)
+        (kill-new path)))))
 
 (use-package dired
   :ensure nil
@@ -1147,7 +1158,12 @@ roles or playbooks directories."
    "C-k" 'dired-subtree-previous-sibling
    "M-c" 'dired-ranger-copy
    "M-v" 'dired-ranger-paste
-   "o" 'hydra-dired-quick-sort/body)) ; originally `dired-sort-toggle-or-edit'.
+   "o" 'hydra-dired-quick-sort/body)
+  (:keymaps '(dired-mode-map)
+   :states '(normal)
+   :prefix mpereira/leader
+   :infix "y"
+   "y" 'mpereira/dired-yank-file-path-at-point))
 
 (use-package dired-ranger)
 
