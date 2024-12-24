@@ -987,7 +987,24 @@ roles or playbooks directories."
   (yaml-mode-hook . lsp-deferred)
   (yaml-mode-hook . mpereira/maybe-enable-ansible-mode))
 
-(use-package terraform-mode)
+(defun mpereira/terraform-disable-lsp-conflicting-keybindings ()
+  "Disable lsp-mode keybindings that conflict with terraform-mode."
+  (general-define-key
+   :keymaps '(lsp-mode-map)
+   :states '(normal)
+   "gd" nil))
+
+(use-package terraform-mode
+  :config
+  (add-hook 'terraform-mode-hook
+            'mpereira/terraform-disable-lsp-conflicting-keybindings
+            nil
+            t)
+  :general
+  (:keymaps '(terraform-mode-map)
+   :states '(normal)
+   "gd" #'terraform-open-doc))
+
 (use-package docker)
 (use-package bazel)
 (use-package jinja2-mode)
