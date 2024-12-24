@@ -472,6 +472,13 @@ Otherwise, it will be shown."
                         (require 'lsp-pyright)
                         (lsp))))
 
+(defun mpereira/jupyter-clear-highlights-and-overlays ()
+  "Clear all highlights and overlays in the current buffer."
+  (interactive)
+  (evil-ex-nohighlight)
+  (when (fboundp 'jupyter-eval-remove-overlays)
+    (jupyter-eval-remove-overlays)))
+
 (use-package jupyter
   :custom (jupyter-eval-use-overlays t)
   :hook
@@ -481,13 +488,16 @@ Otherwise, it will be shown."
                                                   'jupyter-completion-at-point
                                                   t)))
   :general
-  (:keymaps '(python-base-mode-map)
+  (:keymaps '(jupyter-repl-interaction-mode-map)
    :states '(normal visual)
    :prefix mpereira/leader
    :infix "e"
    "e" 'jupyter-eval-line-or-region
    "E" 'jupyter-eval-buffer
-   "(" 'jupyter-eval-defun))
+   "(" 'jupyter-eval-defun)
+  (:keymaps '(jupyter-repl-interaction-mode-map)
+   :states '(normal visual)
+   "C-l" 'mpereira/jupyter-clear-highlights-and-overlays))
 
 (use-package avy
   :custom
