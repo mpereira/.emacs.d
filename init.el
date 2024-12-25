@@ -1315,7 +1315,12 @@ Also check out `org-insert-heading-respect-content'."
    "(" 'org-up-element
    ")" 'org-down-element
    "k" 'evil-previous-visual-line
-   "j" 'evil-next-visual-line))
+   "j" 'evil-next-visual-line)
+  (:keymaps '(org-mode-map)
+   :states '(normal)
+   :prefix mpereira/leader
+   :infix "o"
+   "b" 'org-tree-to-indirect-buffer))
 
 (use-package verb
   :general
