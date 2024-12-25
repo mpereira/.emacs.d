@@ -405,6 +405,7 @@ Otherwise, it will be shown."
   (lsp-ui-doc-border (face-background 'vertico-posframe-border))
   (lsp-ui-doc-include-signature nil)
   (lsp-ui-doc-position 'at-point)
+  (lsp-completion-provider :none)
   (lsp-headerline-breadcrumb-enable nil)
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
   (gc-cons-threshold (* 100 1024 1024)) ; 100MB.
