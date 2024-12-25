@@ -795,6 +795,7 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   :custom
   (chatgpt-shell-openai-key mpereira/secret-openai-secret-api-key)
   (chatgpt-shell-google-key mpereira/secret-google-gemini-api-key)
+  (chatgpt-shell-anthropic-key mpereira/secret-emacs-anthropic-api-key)
   :general
   ("M-;" #'chatgpt-shell)
   ;; FIXME: this keybinding isn't being set in `comint-mode-map'. Why?
