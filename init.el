@@ -1217,6 +1217,19 @@ roles or playbooks directories."
             "C-j" 'rg-next-file
             "C-k" 'rg-prev-file))
 
+(defun mpereira/eshell-write-history-append ()
+  "Write the Eshell command history to its history file preserving existing entries.
+Instead of overwriting the entire history file, this function appends the new
+history entries to the existing ones."
+  (eshell-write-history nil t))
+
+(defun mpereira/eshell-make-eshell-write-history-append ()
+  "Configure Eshell to append rather than overwrite command history on exit.
+Removes the default history writing hook and adds a new one that preserves
+existing history entries. This modification is buffer-local."
+  (remove-hook 'eshell-exit-hook 'eshell-write-history t)
+  (add-hook 'eshell-exit-hook #'mpereira/eshell-write-history-append nil t))
+
 (use-package eshell
   :custom
   (eshell-banner-message "")
@@ -1240,7 +1253,11 @@ roles or playbooks directories."
    "C-/" #'consult-history)
   :config
   (require 'em-alias)
-  (eshell/alias "e" "find-file $1"))
+  (require 'em-hist)
+  (eshell/alias "e" "find-file $1")
+  :hook
+  ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2023-11/msg00798.html
+  (eshell-mode-hook . mpereira/eshell-make-eshell-write-history-append))
 
 (use-package hide-mode-line)
 
