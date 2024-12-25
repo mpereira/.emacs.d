@@ -33,12 +33,6 @@
   :custom
   (use-package-hook-name-suffix . nil))
 
-(use-package diminish
-  :hook
-  (after-init-hook . (lambda () (dolist (mode '(auto-revert-mode
-                                                eldoc-mode))
-                                  (diminish mode)))))
-
 (use-package which-key
   :diminish
   :custom
@@ -95,6 +89,22 @@
   ;; Prevent tabs from being inserted when formatting buffers.
   ;; https://www.gnu.org/software/emacs/manual/html_node/eintr/Indent-Tabs-Mode.html
   (setq-default indent-tabs-mode nil))
+
+(use-package prot
+  :defer t
+  :vc (prot :url "https://github.com/protesilaos/dotfiles"
+            :lisp-dir "emacs/.emacs.d/prot-lisp/"))
+
+(require 'prot-common)
+(require 'prot-modeline)
+
+(add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
+
+(require 'mode-line-right-align)
+(require 'mpereira-mode-line)
+(require 'mpereira-html-escape-unescape)
+(require 'mpereira-lisp-indent-function)
+(mpereira-mode-line-mode 1)
 
 (use-package modus-themes)
 
@@ -402,13 +412,14 @@ Otherwise, it will be shown."
 (use-package lsp-mode
   :diminish lsp-lens-mode
   :custom
-  (lsp-ui-doc-border (face-background 'vertico-posframe-border))
-  (lsp-ui-doc-include-signature nil)
-  (lsp-ui-doc-position 'at-point)
+  (lsp-modeline-diagnostics-enable nil)
+  (lsp-modeline-code-actions-enable nil)
   (lsp-completion-provider :none)
   (lsp-headerline-breadcrumb-enable nil)
+  (lsp-modeline-diagnostics-scope :file)
+  (lsp-progress-prefix "⧖ ")
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
-  (gc-cons-threshold (* 100 1024 1024)) ; 100MB.
+  (gc-cons-threshold (* 100 1024 1024))      ; 100MB.
   (read-process-output-max (* 10 1024 1024)) ; 10MB.
   :general
   (:keymaps '(lsp-mode-map)
@@ -1735,153 +1746,3 @@ Requires the `pip-requirements' package."
          (version (alist-get 'version (alist-get 'info url-body))))
     (message "%s" version)
     (kill-new version)))
-
-(defvar mpereira/html-entity-to-unicode-alist
-  '(("Aacute" . "Á") ("aacute" . "á") ("Acirc" . "Â") ("acirc" . "â") ("acute" . "´") ("AElig" . "Æ") ("aelig" . "æ") ("Agrave" . "À") ("agrave" . "à") ("alefsym" . "ℵ") ("Alpha" . "Α") ("alpha" . "α") ("amp" . "&") ("and" . "∧") ("ang" . "∠") ("apos" . "'") ("aring" . "å") ("Aring" . "Å") ("asymp" . "≈") ("atilde" . "ã") ("Atilde" . "Ã") ("auml" . "ä") ("Auml" . "Ä") ("bdquo" . "„") ("Beta" . "Β") ("beta" . "β") ("brvbar" . "¦") ("bull" . "•") ("cap" . "∩") ("ccedil" . "ç") ("Ccedil" . "Ç") ("cedil" . "¸") ("cent" . "¢") ("Chi" . "Χ") ("chi" . "χ") ("circ" . "ˆ") ("clubs" . "♣") ("cong" . "≅") ("copy" . "©") ("crarr" . "↵") ("cup" . "∪") ("curren" . "¤") ("Dagger" . "‡") ("dagger" . "†") ("darr" . "↓") ("dArr" . "⇓") ("deg" . "°") ("Delta" . "Δ") ("delta" . "δ") ("diams" . "♦") ("divide" . "÷") ("eacute" . "é") ("Eacute" . "É") ("ecirc" . "ê") ("Ecirc" . "Ê") ("egrave" . "è") ("Egrave" . "È") ("empty" . "∅") ("emsp" . " ") ("ensp" . " ") ("Epsilon" . "Ε") ("epsilon" . "ε") ("equiv" . "≡") ("Eta" . "Η") ("eta" . "η") ("eth" . "ð") ("ETH" . "Ð") ("euml" . "ë") ("Euml" . "Ë") ("euro" . "€") ("exist" . "∃") ("fnof" . "ƒ") ("forall" . "∀") ("frac12" . "½") ("frac14" . "¼") ("frac34" . "¾") ("frasl" . "⁄") ("Gamma" . "Γ") ("gamma" . "γ") ("ge" . "≥") ("gt" . ">") ("harr" . "↔") ("hArr" . "⇔") ("hearts" . "♥") ("hellip" . "…") ("iacute" . "í") ("Iacute" . "Í") ("icirc" . "î") ("Icirc" . "Î") ("iexcl" . "¡") ("igrave" . "ì") ("Igrave" . "Ì") ("image" . "ℑ") ("infin" . "∞") ("int" . "∫") ("Iota" . "Ι") ("iota" . "ι") ("iquest" . "¿") ("isin" . "∈") ("iuml" . "ï") ("Iuml" . "Ï") ("Kappa" . "Κ") ("kappa" . "κ") ("Lambda" . "Λ") ("lambda" . "λ") ("lang" . "〈") ("laquo" . "«") ("larr" . "←") ("lArr" . "⇐") ("lceil" . "⌈") ("ldquo" . "“") ("le" . "≤") ("lfloor" . "⌊") ("lowast" . "∗") ("loz" . "◊") ("lrm" . "") ("lsaquo" . "‹") ("lsquo" . "‘") ("lt" . "<") ("macr" . "¯") ("mdash" . "—") ("micro" . "µ") ("middot" . "·") ("minus" . "−") ("Mu" . "Μ") ("mu" . "μ") ("nabla" . "∇") ("nbsp" . "") ("ndash" . "–") ("ne" . "≠") ("ni" . "∋") ("not" . "¬") ("notin" . "∉") ("nsub" . "⊄") ("ntilde" . "ñ") ("Ntilde" . "Ñ") ("Nu" . "Ν") ("nu" . "ν") ("oacute" . "ó") ("Oacute" . "Ó") ("ocirc" . "ô") ("Ocirc" . "Ô") ("OElig" . "Œ") ("oelig" . "œ") ("ograve" . "ò") ("Ograve" . "Ò") ("oline" . "‾") ("omega" . "ω") ("Omega" . "Ω") ("Omicron" . "Ο") ("omicron" . "ο") ("oplus" . "⊕") ("or" . "∨") ("ordf" . "ª") ("ordm" . "º") ("oslash" . "ø") ("Oslash" . "Ø") ("otilde" . "õ") ("Otilde" . "Õ") ("otimes" . "⊗") ("ouml" . "ö") ("Ouml" . "Ö") ("para" . "¶") ("part" . "∂") ("permil" . "‰") ("perp" . "⊥") ("Phi" . "Φ") ("phi" . "φ") ("Pi" . "Π") ("pi" . "π") ("piv" . "ϖ") ("plusmn" . "±") ("pound" . "£") ("Prime" . "″") ("prime" . "′") ("prod" . "∏") ("prop" . "∝") ("Psi" . "Ψ") ("psi" . "ψ") ("quot" . "\"") ("radic" . "√") ("rang" . "〉") ("raquo" . "»") ("rarr" . "→") ("rArr" . "⇒") ("rceil" . "⌉") ("rdquo" . "”") ("real" . "ℜ") ("reg" . "®") ("rfloor" . "⌋") ("Rho" . "Ρ") ("rho" . "ρ") ("rlm" . "") ("rsaquo" . "›") ("rsquo" . "’") ("sbquo" . "‚") ("scaron" . "š") ("Scaron" . "Š") ("sdot" . "⋅") ("sect" . "§") ("shy" . "") ("Sigma" . "Σ") ("sigma" . "σ") ("sigmaf" . "ς") ("sim" . "∼") ("spades" . "♠") ("sub" . "⊂") ("sube" . "⊆") ("sum" . "∑") ("sup" . "⊃") ("sup1" . "¹") ("sup2" . "²") ("sup3" . "³") ("supe" . "⊇") ("szlig" . "ß") ("Tau" . "Τ") ("tau" . "τ") ("there4" . "∴") ("Theta" . "Θ") ("theta" . "θ") ("thetasym" . "ϑ") ("thinsp" . " ") ("thorn" . "þ") ("THORN" . "Þ") ("tilde" . "˜") ("times" . "×") ("trade" . "™") ("uacute" . "ú") ("Uacute" . "Ú") ("uarr" . "↑") ("uArr" . "⇑") ("ucirc" . "û") ("Ucirc" . "Û") ("ugrave" . "ù") ("Ugrave" . "Ù") ("uml" . "¨") ("upsih" . "ϒ") ("Upsilon" . "Υ") ("upsilon" . "υ") ("uuml" . "ü") ("Uuml" . "Ü") ("weierp" . "℘") ("Xi" . "Ξ") ("xi" . "ξ") ("yacute" . "ý") ("Yacute" . "Ý") ("yen" . "¥") ("yuml" . "ÿ") ("Yuml" . "Ÿ") ("Zeta" . "Ζ") ("zeta" . "ζ") ("zwj" . "") ("zwnj" . ""))
-  "Alist that maps HTML entity names to equivalent unicode characters")
-
-(defvar mpereira/html-entity-to-unicode-hash nil
-  "Hash table mapping HTML entities to unicode characters")
-
-(defvar mpereira/html-unicode-to-entity-hash nil
-  "Hash table mapping unicode characters to HTML entities")
-
-(let ((entity-list-length (length mpereira/html-entity-to-unicode-alist)))
-  (setq mpereira/html-entity-to-unicode-hash
-        (make-hash-table :test 'equal :size entity-list-length))
-  (loop for (key . val) in mpereira/html-entity-to-unicode-alist
-        do (puthash key val mpereira/html-entity-to-unicode-hash))
-
-  (setq mpereira/html-unicode-to-entity-hash
-        (make-hash-table :test 'equal :size entity-list-length))
-  (loop for (val . key) in mpereira/html-entity-to-unicode-alist
-        do (puthash key val mpereira/html-unicode-to-entity-hash)))
-
-(defun mpereira/html-entity-to-unicode (entity)
-  (gethash entity mpereira/html-entity-to-unicode-hash))
-
-(defun mpereira/html-unicode-to-entity (unicode)
-  (gethash unicode mpereira/html-unicode-to-entity-hash))
-
-(defun mpereira/html-string-entities-to-unicode (string)
-  (replace-regexp-in-string "&[[:word:]]+;"
-                            (lambda (s)
-                              (or (mpereira/html-entity-to-unicode (substring s 1 -1)) s))
-                            string))
-
-(defun mpereira/html-string-unicode-to-entities (string)
-  (replace-regexp-in-string "[^[:word:]]"
-                            (lambda (s)
-                              (or (mpereira/html-unicode-to-entity s) s))
-                            string))
-
-(defun mpereira/html-escape (&optional start end)
-  "Escape characters to HTML entities in the current buffer between
-start and end, which default to the whole buffer"
-  (interactive "r")
-  (unless start (setq start (point-min)))
-  (unless end (setq end (point-max)))
-  (save-excursion
-    (save-restriction
-      (narrow-to-region start end)
-      (goto-char (point-min))
-      (while (re-search-forward "\\([^[:word:]]\\)" nil t)
-        (let* ((match (match-string 1))
-               (entity (mpereira/html-unicode-to-entity (match-string 1))))
-          (when entity
-            (setq entity (concat "&" entity ";")))
-          (replace-match (or entity match) nil nil))))))
-
-(defun mpereira/html-unescape (&optional start end)
-  "Unescape HTML entities to characters in the current buffer
-between start and end, which default to the whole buffer"
-  (interactive "r")
-  (unless start (setq start (point-min)))
-  (unless end (setq end (point-max)))
-  (save-excursion
-    (save-restriction
-      (narrow-to-region start end)
-      (goto-char (point-min))
-      (while (re-search-forward "\\(&\\([[:word:]]+\\);\\)" nil t)
-        (replace-match (or (mpereira/html-entity-to-unicode (match-string 2))
-                           (match-string 1))
-                       nil nil)))))
-
-;; NOTE: got from Fuco1's config on 2024-12-13.
-;; https://github.com/Fuco1/.emacs.d/blob/76e80dd07320b079fa26db3af6096d8d8a4f3bb9/site-lisp/my-redef.el
-(eval-after-load "lisp-mode"
-  '(defun lisp-indent-function (indent-point state)
-     "This function is the normal value of the variable `lisp-indent-function'.
-The function `calculate-lisp-indent' calls this to determine
-if the arguments of a Lisp function call should be indented specially.
-
-INDENT-POINT is the position at which the line being indented begins.
-Point is located at the point to indent under (for default indentation);
-STATE is the `parse-partial-sexp' state for that position.
-
-If the current line is in a call to a Lisp function that has a non-nil
-property `lisp-indent-function' (or the deprecated `lisp-indent-hook'),
-it specifies how to indent.  The property value can be:
-
-* `defun', meaning indent `defun'-style
-  \(this is also the case if there is no property and the function
-  has a name that begins with \"def\", and three or more arguments);
-
-* an integer N, meaning indent the first N arguments specially
-  (like ordinary function arguments), and then indent any further
-  arguments like a body;
-
-* a function to call that returns the indentation (or nil).
-  `lisp-indent-function' calls this function with the same two arguments
-  that it itself received.
-
-This function returns either the indentation to use, or nil if the
-Lisp function does not specify a special indentation."
-     (let ((normal-indent (current-column))
-           (orig-point (point)))
-       (goto-char (1+ (elt state 1)))
-       (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
-       (cond
-        ;; car of form doesn't seem to be a symbol, or is a keyword
-        ((and (elt state 2)
-              (or (not (looking-at "\\sw\\|\\s_"))
-                  (looking-at ":")))
-         (if (not (> (save-excursion (forward-line 1) (point))
-                     calculate-lisp-indent-last-sexp))
-             (progn (goto-char calculate-lisp-indent-last-sexp)
-                    (beginning-of-line)
-                    (parse-partial-sexp (point)
-                                        calculate-lisp-indent-last-sexp 0 t)))
-         ;; Indent under the list or under the first sexp on the same
-         ;; line as calculate-lisp-indent-last-sexp.  Note that first
-         ;; thing on that line has to be complete sexp since we are
-         ;; inside the innermost containing sexp.
-         (backward-prefix-chars)
-         (current-column))
-        ((and (save-excursion
-                (goto-char indent-point)
-                (skip-syntax-forward " ")
-                (not (looking-at ":")))
-              (save-excursion
-                (goto-char orig-point)
-                (looking-at ":")))
-         (save-excursion
-           (goto-char (+ 2 (elt state 1)))
-           (current-column)))
-        (t
-         (let ((function (buffer-substring (point)
-                                           (progn (forward-sexp 1) (point))))
-               method)
-           (setq method (or (function-get (intern-soft function)
-                                          'lisp-indent-function)
-                            (get (intern-soft function) 'lisp-indent-hook)))
-           (cond ((or (eq method 'defun)
-                      (and (null method)
-                           (> (length function) 3)
-                           (string-match "\\`def" function)))
-                  (lisp-indent-defform state indent-point))
-                 ((integerp method)
-                  (lisp-indent-specform method state
-                                        indent-point normal-indent))
-                 (method
-                  (funcall method indent-point state)))))))))
