@@ -438,18 +438,25 @@ Otherwise, it will be shown."
    "n" 'lsp-organize-imports)
   :hook
   (prog-mode-hook . mpereira/maybe-enable-lsp)
+  (lsp-mode-hook . mpereira/disable-eldoc)
   :config
-  (setq lsp-ui-doc-frame-parameters
-        (map-merge 'alist lsp-ui-doc-frame-parameters mpereira/default-posframe-override-parameters))
-  (custom-set-faces
-   '(lsp-ui-doc-background ((t (:inherit vertico-posframe))))
-   '(lsp-ui-doc-header ((t (:inherit vertico-posframe-border)))))
   (add-to-list 'lsp-language-id-configuration '(makefile-bsdmake-mode . "make")))
 
 (use-package lsp-ui
+  :defer t
   :custom
+  (lsp-ui-doc-border (face-background 'vertico-posframe-border))
+  (lsp-ui-doc-include-signature nil)
+  (lsp-ui-doc-position 'at-point)
   (lsp-ui-doc-max-width 100)
-  (lsp-ui-doc-max-height 30))
+  (lsp-ui-doc-max-height 30)
+:config
+  (setq lsp-ui-doc-frame-parameters
+        (map-merge 'alist lsp-ui-doc-frame-parameters mpereira/default-posframe-override-parameters))
+  (add-to-list 'lsp-ui-doc-frame-parameters '(clojure-mode . "clojure"))
+  (custom-set-faces
+   '(lsp-ui-doc-background ((t (:inherit vertico-posframe))))
+   '(lsp-ui-doc-header ((t (:inherit vertico-posframe-border))))))
 
 (use-package lsp-pyright
   :custom
