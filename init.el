@@ -711,11 +711,10 @@ Otherwise, it will be shown."
   ;; NOTE: using `vertico-multiform-mode' as a workaround to conditionally
   ;; disable posframe for `consult-line'.
   (vertico-multiform-mode 1)
-  (setq vertico-multiform-commands
-        '((consult-line (:not posframe))
-          (consult-ripgrep (:not posframe))
-          (mpereira/consult-ripgrep-at-point (:not posframe))
-          (t posframe))))
+  :custom
+  (vertico-multiform-commands '((consult-line (:not posframe))
+                                (consult-ripgrep (:not posframe))
+                                (t posframe))))
 
 (setq mpereira/posframe-default-internal-border-color
       (face-attribute 'vertico-posframe-border :background nil t))
