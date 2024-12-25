@@ -1339,6 +1339,24 @@ Also check out `org-insert-heading-respect-content'."
    "M-w" 'org-web-tools-insert-link-for-url
    "M-W" 'org-web-tools-insert-web-page-as-entry))
 
+(use-package ibuffer
+  :custom
+  (ibuffer-formats '((mark modified read-only locked " "
+                           (name 50 50 :left :elide)
+                           " "
+                           (size 9 -1 :right)
+                           " "
+                           (mode 16 16 :left :elide)
+                           " " filename-and-process)
+                     (mark " "
+                           (name 16 -1)
+                           " " filename)))
+  :general
+  (:keymaps '(ibuffer-mode-map)
+   :states '(normal)
+   "," nil ; originally `ibuffer-toggle-sorting-mode' from evil-collection.
+   ))
+
 (use-package emacs
   ;; NOTE: using keymap `override' so that these keybindings override
   ;; any existing keybindings on the current mode.
