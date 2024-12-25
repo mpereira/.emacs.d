@@ -1168,6 +1168,7 @@ roles or playbooks directories."
   :ensure nil
   :custom
   (dired-listing-switches "-AGFhlv --group-directories-first --time-style=long-iso")
+  (dired-vc-rename-file t)
   :hook
   (dired-mode-hook . dired-hide-details-mode)
   :general
