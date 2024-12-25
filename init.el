@@ -46,28 +46,6 @@
   :config
   (which-key-mode 1))
 
-(with-eval-after-load 'vertico
-  (setq mpereira/posframe-default-internal-border-color
-        (face-attribute 'vertico-posframe-border :background nil t))
-  (setq mpereira/posframe-default-internal-border-width vertico-posframe-border-width)
-  (setq mpereira/default-posframe-override-parameters
-        `((left-fringe . 8)
-          (right-fringe . 8)
-          (background-color . ,(face-attribute 'vertico-posframe :background nil t))
-          (foreground-color . ,(face-attribute 'vertico-posframe :foreground nil t)))))
-
-(use-package which-key-posframe
-  :vc (:url "https://github.com/emacsorphanage/which-key-posframe"
-       :rev :newest)
-  :custom
-  (which-key-max-display-columns 2)
-  (which-key-max-description-length 40)
-  (which-key-posframe-border-width mpereira/posframe-default-internal-border-width)
-  (which-key-posframe-parameters mpereira/posframe-default-internal-border-color)
-  (which-key-posframe-poshandler 'posframe-poshandler-point-bottom-left-corner)
-  :config
-  (which-key-posframe-mode 1))
-
 (load-library (expand-file-name "secrets.el.gpg" user-emacs-directory))
 
 (use-package emacs
@@ -424,6 +402,9 @@ Otherwise, it will be shown."
 (use-package lsp-mode
   :diminish lsp-lens-mode
   :custom
+  (lsp-ui-doc-border (face-background 'vertico-posframe-border))
+  (lsp-ui-doc-include-signature nil)
+  (lsp-ui-doc-position 'at-point)
   (lsp-headerline-breadcrumb-enable nil)
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
   (gc-cons-threshold (* 100 1024 1024)) ; 100MB.
@@ -457,6 +438,11 @@ Otherwise, it will be shown."
   :hook
   (prog-mode-hook . mpereira/maybe-enable-lsp)
   :config
+  (setq lsp-ui-doc-frame-parameters
+        (map-merge 'alist lsp-ui-doc-frame-parameters mpereira/default-posframe-override-parameters))
+  (custom-set-faces
+   '(lsp-ui-doc-background ((t (:inherit vertico-posframe))))
+   '(lsp-ui-doc-header ((t (:inherit vertico-posframe-border)))))
   (add-to-list 'lsp-language-id-configuration '(makefile-bsdmake-mode . "make")))
 
 (use-package lsp-ui
@@ -730,6 +716,32 @@ Otherwise, it will be shown."
           (consult-ripgrep (:not posframe))
           (mpereira/consult-ripgrep-at-point (:not posframe))
           (t posframe))))
+
+(setq mpereira/posframe-default-internal-border-color
+      (face-attribute 'vertico-posframe-border :background nil t))
+(setq mpereira/posframe-default-internal-border-width vertico-posframe-border-width)
+(setq mpereira/default-posframe-override-parameters
+      `((left-fringe . 8)
+        (right-fringe . 8)
+        (internal-border-color . ,mpereira/posframe-default-internal-border-color)
+        (internal-border-width . ,mpereira/posframe-default-internal-border-width)
+        (background-color . ,(face-attribute 'vertico-posframe :background nil t))
+        (foreground-color . ,(face-attribute 'vertico-posframe :foreground nil t))))
+
+(use-package which-key-posframe
+  :after vertico
+  ;; :vc (:url "https://github.com/emacsorphanage/which-key-posframe"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "emacsorphanage/which-key-posframe")
+  :custom
+  (which-key-max-display-columns 2)
+  (which-key-max-description-length 40)
+  (which-key-posframe-border-width mpereira/posframe-default-internal-border-width)
+  (which-key-posframe-parameters mpereira/posframe-default-internal-border-color)
+  (which-key-posframe-poshandler 'posframe-poshandler-point-bottom-left-corner)
+  :config
+  (which-key-posframe-mode 1))
 
 ;; macOS modifiers.
 (setq mac-command-modifier 'meta)
@@ -1581,7 +1593,17 @@ If another key is pressed, execute its command."
   :general
   (:keymaps '(global-map)
    :states '(normal)
-   "C-0" 'mpereira/blamer-show-posframe-commit-info-interactive))
+   "C-0" 'mpereira/blamer-show-posframe-commit-info-interactive)
+  :config
+  (custom-set-faces
+   '(blamer-pretty-border-face ((t :inherit font-lock-variable-name-face
+                                   :height unspecified)))
+   '(blamer-pretty-commit-message-face ((t :inherit font-lock-string-face
+                                           :height unspecified)))
+   '(blamer-pretty-meta-keywords-face ((t :inherit font-lock-function-name-face
+                                          :height unspecified)))
+   '(blamer-pretty-meta-data-face ((t :inherit font-lock-variable-name-face
+                                      :height unspecified)))))
 
 ;; Reload directory local variables when saving .dir-locals.el files.
 ;; Taken from https://emacs.stackexchange.com/a/13096.
