@@ -64,6 +64,8 @@
   ;; Force packages relying on this general indentation variable
   ;; (e.g., lsp-mode) to indent with 2 spaces.
   (standard-indent 2)
+  ;; Show trailing whitespace.
+  (show-trailing-whitespace t)
   ;; Make cursor the width of the character it is under e.g. full
   ;; width of a TAB.
   (x-stretch-cursor t)
