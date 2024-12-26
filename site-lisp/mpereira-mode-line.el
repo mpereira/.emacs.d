@@ -193,6 +193,12 @@ Optional MAX-LENGTH specifies maximum length of the output."
                   prot-modeline-misc-info
                   " "
                   prot-modeline-major-mode
+                  ;; HACK: when olivetti-mode is enabled it does
+                  ;; something to the mode line that shifts the right
+                  ;; side one character to the right. So an extra
+                  ;; space is necessary.
+                  (:eval (when (bound-and-true-p olivetti-mode)
+                           " "))
                   " ")))
 
 (defun mpereira-mode-line-disable ()
