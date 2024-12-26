@@ -1726,14 +1726,56 @@ If another key is pressed, execute its command."
         (when (equal default-directory dir))
         (mpereira/reload-dir-locals-for-current-buffer)))))
 
-(defun mpereira/enable-autoreload-for-dir-locals ()
-  (when (and (buffer-file-name)
-             (equal dir-locals-file
-                    (file-name-nondirectory (buffer-file-name))))
-    (add-hook (make-variable-buffer-local 'after-save-hook)
-              'mpereira/reload-dir-locals-for-all-buffer-in-this-directory)))
+(defun mpereira/hack-dir-local-variables ()
+  "Read per-directory local variables for the current buffer.
+Store the directory-local variables in `dir-local-variables-alist'
+and `file-local-variables-alist', without applying them."
+  (let* ((items (hack-dir-local--get-variables nil))
+         (dir-name (car items))
+         (variables (cdr items)))
+    (when variables
+      ;; Clear both alists to prevent duplicates
+      (setq dir-local-variables-alist nil
+            file-local-variables-alist nil)
+      (dolist (elt variables)
+        (if (eq (car elt) 'coding)
+            (unless hack-dir-local-variables--warned-coding
+              (setq hack-dir-local-variables--warned-coding t)
+              (display-warning 'files
+                               "Coding cannot be specified by dir-locals"))
+          (push elt dir-local-variables-alist)))
+      (hack-local-variables-filter variables dir-name))))
 
-(add-hook 'emacs-lisp-mode-hook #'mpereira/enable-autoreload-for-dir-locals)
+;; The original `hack-dir-local-variables' function has an issue where
+;; it accumulates duplicate entries in `dir-local-variables-alist'
+;; when processing `eval' forms from .dir-locals.el. This happens
+;; because:
+;;
+;; 1. The original function only removes existing entries
+;; conditionally with: (unless (memq (car elt) '(eval mode)) ...)
+;; 2. This means `eval' entries are never removed before new ones are
+;; added
+;; 3. Each time the function runs, it adds new entries without
+;; cleaning up old ones
+;;
+;; This fixed version:
+
+;; - Clears both `dir-local-variables-alist' and
+;; `file-local-variables-alist' before processing new variables
+;; - Ensures clean state for each evaluation of directory local
+;; variables
+;; - Prevents duplicate entries from accumulating
+;; - Maintains the original functionality while fixing the duplication
+;; issue
+;;
+;; Without this fix, multiple evaluations of directory local variables
+;; (which can happen during normal Emacs operation) would cause
+;; duplicate `eval' forms to pile up in the alists, potentially
+;; leading to repeated evaluations of the same code.
+;;
+;; TODO: check if the emacs community if this is an actual bug, and
+;; submit a patch if yes.
+(advice-add 'hack-dir-local-variables :override #'mpereira/hack-dir-local-variables)
 
 (require 'json)
 (require 'url)
