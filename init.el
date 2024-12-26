@@ -973,6 +973,31 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
    :infix "e"
    "e" 'eval-region))
 
+(defun mpereira/lisp-data-check-parens ()
+  (let ((position (point)))
+    (save-excursion
+      (goto-char (point-min))
+      (condition-case err
+          (scan-sexps (point-min) (point-max))
+        (scan-error
+         (goto-char (nth 2 err))
+         (posframe-show "*unbalanced-parens-error*"
+                        :string (format "Unbalanced parentheses near line %d"
+                                        (line-number-at-pos))
+                        :position position
+                        :timeout 2
+                        :background-color "#aa2200"
+                        :foreground-color "white"
+                        :internal-border-width 2)
+         (error "Unbalanced parentheses near line %d" (line-number-at-pos)))))))
+
+(defun mpereira/lisp-data-check-parens-before-save-setup ()
+  "Check for balanced parentheses after saving Lisp-data buffers."
+  (add-hook 'after-save-hook #'mpereira/lisp-data-check-parens nil t))
+
+(add-hook 'lisp-data-mode-hook
+          'mpereira/lisp-data-check-parens-before-save-setup)
+
 ;; Clojure.
 (use-package clojure-ts-mode
   :hook
