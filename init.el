@@ -1150,6 +1150,22 @@ roles or playbooks directories."
    "{" #'combobulate-envelop-tsx-ts-mode-expression
    "c" #'combobulate-clone-node-dwim))
 
+(defun mpereira/magit-center-buffer-contents ()
+  "Center the buffer contents by setting `olivetti-body-width` to
+120 and enabling `olivetti-mode`."
+  (interactive)
+  (setq-local olivetti-body-width 120)
+  (olivetti-mode))
+
+(defun mpereira/magit-center-buffer-contents-and-toggle-margin-if-in-magit-log-mode ()
+  "Center the buffer contents and toggle the margin if the current
+mode is `magit-log-mode`."
+  (interactive)
+  (when (derived-mode-p 'magit-log-mode)
+    (mpereira/magit-center-buffer-contents)
+    (if (magit-buffer-margin-p)
+        (magit-toggle-margin))))
+
 (use-package magit
   :custom
   (magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
@@ -1173,13 +1189,11 @@ roles or playbooks directories."
   :config
   (transient-bind-q-to-quit)
 
-  (defun mpereira/magit-center-buffer-contents ()
-    (interactive)
-    (setq-local olivetti-body-width 120)
-    (olivetti-mode))
+  (add-hook 'magit-setup-buffer-hook
+            'mpereira/magit-center-buffer-contents-and-toggle-margin-if-in-magit-log-mode
+            100)
   :hook
   (magit-status-mode-hook . mpereira/magit-center-buffer-contents)
-  (magit-log-mode-hook . mpereira/magit-center-buffer-contents)
   (git-commit-setup-hook . evil-insert-state))
 
 ;; NOTE: a fine-grained personal access token with the following
