@@ -412,10 +412,11 @@ Otherwise, it will be shown."
 (use-package lsp-mode
   :diminish lsp-lens-mode
   :custom
-  (lsp-modeline-diagnostics-enable nil)
-  (lsp-modeline-code-actions-enable nil)
   (lsp-completion-provider :none)
+  (lsp-copilot-enabled nil)
   (lsp-headerline-breadcrumb-enable nil)
+  (lsp-modeline-code-actions-enable nil)
+  (lsp-modeline-diagnostics-enable nil)
   (lsp-modeline-diagnostics-scope :file)
   (lsp-progress-prefix "⧖ ")
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
