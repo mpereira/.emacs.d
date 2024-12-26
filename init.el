@@ -1172,6 +1172,12 @@ mode is `magit-log-mode`."
   :custom
   (magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
   (magit-bury-buffer-function 'magit-restore-window-configuration)
+  ;; Show recent branches/tags on top on commands like `magit-push'
+  ;; "elsewhere".
+  ;; https://github.com/magit/magit/issues/2872#issuecomment-291011191
+  (magit-list-refs-sortby "-creatordate")
+  ;; Ediff starts by default in a new frame. Don't do that.
+  (ediff-window-setup-function 'ediff-setup-windows-plain)
   :general
   (:keymaps '(magit-mode-map)
    :states '(normal)
