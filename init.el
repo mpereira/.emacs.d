@@ -910,6 +910,47 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   :vc (:url "https://github.com/karthink/gptel-quick"
        :rev :newest))
 
+(require 'mpereira-whisper)
+
+;; IMPORTANT.
+;;
+;; For microphone access to work from macOS:
+;;
+;; 1. The following should be added to the Emacs.app plist:
+;;
+;;     <key>NSMicrophoneUsageDescription</key>
+;;     <string>Emacs requires access to the microphone for module functionality.</string>
+;;
+;; 2. Emacs.app should be codesigned. For example:
+;;
+;;    (compile
+;;     "codesign \
+;;        --force \
+;;        --deep \
+;;        --sign - \
+;;        /opt/homebrew/Cellar/emacs-head@29/29.2_1/Emacs.app")
+
+(use-package whisper
+  :vc (:url "https://github.com/natrys/whisper.el"
+       :rev :newest)
+  :general
+  (:keymaps '(minibuffer-local-map)
+   "M-r" 'whisper-run)
+  (:keymaps '(global-map)
+   :states '(insert)
+   "M-r" 'whisper-run)
+  :hook
+  (whisper-after-transcription-hook . mpereira-whisper-kill-transcription)
+  (whisper-before-transcription-hook . mpereira-system-audio-mute)
+  (whisper-after-transcription-hook . mpereira-system-audio-unmute)
+  :custom
+  (whisper-model "base")
+  (whisper-language "en")
+  (whisper-translate nil)
+  (whisper--ffmpeg-input-device (mpereira-whisper-select-default-audio-device
+                                 "MacBook Pro Microphone"))
+  (whisper-use-threads (/ (num-processors) 2)))
+
 (use-package orderless
   :custom
   (orderless-matching-styles '(orderless-literal orderless-regexp))
