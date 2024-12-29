@@ -45,6 +45,10 @@
 (use-package emacs
   :custom
   (confirm-kill-emacs 'y-or-n-p)
+  ;; REVIEW: I'm not sure if I need this, but it's a possible
+  ;; workaround for an lsp-mode issue:
+  ;; https://github.com/emacs-lsp/lsp-mode/issues/4112
+  (backup-by-copying t)
   (use-short-answers t)
   (frame-resize-pixelwise t)
   (custom-file (expand-file-name "custom.el" user-emacs-directory))
