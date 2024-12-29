@@ -42,6 +42,8 @@
 
 (load-library (expand-file-name "secrets.el.gpg" user-emacs-directory))
 
+(use-package no-littering)
+
 (use-package emacs
   :custom
   (confirm-kill-emacs 'y-or-n-p)
@@ -879,9 +881,6 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
 
 (use-package evil-string-inflection
   :after evil)
-
-(setq backup-directory-alist `(("." . ,(concat user-emacs-directory "file-backups"))))
-(setq tramp-backup-directory-alist `(("." . ,(concat user-emacs-directory "remote-file-backups"))))
 
 (use-package undo-tree
   :diminish
