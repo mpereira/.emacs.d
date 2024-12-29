@@ -1393,6 +1393,8 @@ Also check out `org-insert-heading-respect-content'."
   ;; Open src buffer in current window. Why isn't this controlled by
   ;; `display-buffer-alist'?
   (org-src-window-setup 'current-window)
+  ;; Org babel asks for confirmation by default.
+  (org-confirm-babel-evaluate nil)
   ;; Open indirect buffer in the same window.
   (org-indirect-buffer-display 'current-window)
   (org-todo-keywords '((sequence "TODO(t!)"
@@ -1421,7 +1423,14 @@ Also check out `org-insert-heading-respect-content'."
    :states '(normal)
    :prefix mpereira/leader
    :infix "o"
-   "b" 'org-tree-to-indirect-buffer))
+   "b" 'org-tree-to-indirect-buffer)
+  :config
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               '((shell . t)
+                                 (emacs-lisp . t)
+                                 (python . t)
+                                 (verb . t)
+                                 (jupyter . t))))
 
 (use-package verb
   :general
