@@ -1461,6 +1461,7 @@ Also check out `org-insert-heading-respect-content'."
   (:keymaps '(ibuffer-mode-map)
    :states '(normal)
    "," nil ; originally `ibuffer-toggle-sorting-mode' from evil-collection.
+   "N" nil ; originally `ibuffer-do-shell-command-pipe-replace'.
    ))
 
 (use-package emacs
