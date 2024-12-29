@@ -1392,6 +1392,10 @@ existing history entries. This modification is buffer-local."
   ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2023-11/msg00798.html
   (eshell-mode-hook . mpereira/eshell-make-eshell-write-history-append))
 
+(use-package eat
+  :hook
+  (eshell-mode-hook . eat-eshell-mode))
+
 (use-package hide-mode-line)
 
 (use-package winner
