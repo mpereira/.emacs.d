@@ -1253,11 +1253,14 @@ mode is `magit-log-mode`."
    "C-k" 'magit-section-backward-sibling
    "H" 'evil-window-top
    "L" 'evil-window-bottom
-   "TAB" 'magit-section-cycle ; originally `magit-section-toggle'.
+   "TAB" 'magit-section-cycle     ; originally `magit-section-toggle'.
    "Z" #'magit-stash
    "zb" #'evil-scroll-line-to-bottom
    "zt" #'evil-scroll-line-to-top
    "zz" #'evil-scroll-line-to-center)
+  (:keymaps '(magit-status-mode-map)
+   "e" #'ignore ; originally `magit-ediff-dwim'. I keep pressing this accidentally.
+   )
   :config
   (transient-bind-q-to-quit)
 
