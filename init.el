@@ -835,8 +835,19 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
            (evil-scroll-line-to-top (line-number-at-pos))))
   (:keymaps '(chatgpt-shell-prompt-compose-mode-map)
    :states '(normal)
+   "<" 'chatgpt-shell-prompt-compose-previous-interaction
    ">" 'chatgpt-shell-prompt-compose-next-interaction
-   "<" 'chatgpt-shell-prompt-compose-previous-interaction))
+   "C-c '" 'chatgpt-shell-view-block-at-point
+   "C-j" 'chatgpt-shell-prompt-compose-next-item
+   "C-k" 'chatgpt-shell-prompt-compose-previous-item
+   "M-RET" 'chatgpt-shell-prompt-compose-reply)
+  (:keymaps '(chatgpt-shell-prompt-compose-view-mode-map)
+   :states '(normal)
+   "C-j" 'chatgpt-shell-prompt-compose-next-item
+   "C-k" 'chatgpt-shell-prompt-compose-previous-item)
+  (:keymaps '(chatgpt-shell-prompt-compose-mode-map)
+   :states '(insert)
+   "M-RET" 'chatgpt-shell-prompt-compose-send-buffer))
 
 (use-package gptel
   :custom
@@ -1614,7 +1625,8 @@ Also check out `org-insert-heading-respect-content'."
    :prefix mpereira/leader
    :infix "l"
    "d" 'gptel-quick
-   "l" 'chatgpt-shell-quick-insert)
+   "l" 'chatgpt-shell-quick-insert
+   "c" 'chatgpt-shell-prompt-compose)
 
   ;; p -> project ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
