@@ -481,13 +481,48 @@ Otherwise, it will be shown."
   (lsp-ui-doc-position 'at-point)
   (lsp-ui-doc-max-width 100)
   (lsp-ui-doc-max-height 30)
-:config
+  (lsp-ui-peek-peek-height 40)
+  :general
+  ;; NOTE: binding this on visual/normal state causes the peek view to
+  ;; be aborted on keypress.
+  (general-define-key
+   :keymaps '(lsp-ui-peek-mode-map)
+    "C-j" 'lsp-ui-peek--select-next
+    "C-k" 'lsp-ui-peek--select-prev)
+  :config
   (setq lsp-ui-doc-frame-parameters
         (map-merge 'alist lsp-ui-doc-frame-parameters mpereira/default-posframe-override-parameters))
   (add-to-list 'lsp-ui-doc-frame-parameters '(clojure-mode . "clojure"))
   (custom-set-faces
    '(lsp-ui-doc-background ((t (:inherit vertico-posframe))))
-   '(lsp-ui-doc-header ((t (:inherit vertico-posframe-border))))))
+   '(lsp-ui-doc-header ((t (:inherit vertico-posframe-border)))))
+
+  ;; lsp-ui-peek in posframe:
+  ;; - https://github.com/emacs-lsp/lsp-ui/issues/441
+  ;; - https://github.com/kassick/dotfiles/commit/f930e5e9cc268267073fc1878ee265a4a7cb89b4
+  ;; - https://github.com/seagle0128/.emacs.d/commit/a73a46ef3630e2492f5a0d70c32a59fead6c2ed6
+  (defun lsp-ui-peek--peek-display (src1 src2)
+    (-let* ((win-width (frame-width))
+            (lsp-ui-peek-list-width (/ (frame-width) 2))
+            (string (-some--> (-zip-fill "" src1 src2)
+                      (--map (lsp-ui-peek--adjust win-width it) it)
+                      (-map-indexed 'lsp-ui-peek--make-line it)
+                      (-concat it (lsp-ui-peek--make-footer)))))
+      (setq lsp-ui-peek--buffer (get-buffer-create " *lsp-peek--buffer*"))
+      (posframe-show lsp-ui-peek--buffer
+                     :string (mapconcat 'identity string "")
+                     :min-width (frame-width)
+                     :poshandler #'posframe-poshandler-frame-center)))
+
+  (defun lsp-ui-peek--peek-destroy ()
+    (when (bufferp lsp-ui-peek--buffer)
+      (posframe-delete lsp-ui-peek--buffer))
+    (setq lsp-ui-peek--buffer nil
+          lsp-ui-peek--last-xref nil)
+    (set-window-start (get-buffer-window) lsp-ui-peek--win-start))
+
+  (advice-add #'lsp-ui-peek--peek-new :override #'lsp-ui-peek--peek-display)
+  (advice-add #'lsp-ui-peek--peek-hide :override #'lsp-ui-peek--peek-destroy))
 
 (use-package lsp-pyright
   :custom
