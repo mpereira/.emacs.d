@@ -100,6 +100,15 @@
   ;; https://www.gnu.org/software/emacs/manual/html_node/eintr/Indent-Tabs-Mode.html
   (setq-default indent-tabs-mode nil))
 
+(defun mpereira/show-trailing-whitespace-maybe-disable ()
+  "Disable `show-trailing-whitespace' in selected modes."
+  (when (derived-mode-p 'shell-mode
+                        'eshell-mode)
+    (setq-local show-trailing-whitespace nil)))
+
+(add-hook 'after-change-major-mode-hook
+          'mpereira/show-trailing-whitespace-maybe-disable)
+
 (use-package prot
   :defer t
   :vc (prot :url "https://github.com/protesilaos/dotfiles"
