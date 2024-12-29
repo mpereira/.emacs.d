@@ -94,6 +94,8 @@
   (global-hl-line-mode t)
   ;; Remember file cursor positions.
   (save-place-mode 1)
+  ;; Remember minibuffer history.
+  (savehist-mode 1)
   ;; Prevent tabs from being inserted when formatting buffers.
   ;; https://www.gnu.org/software/emacs/manual/html_node/eintr/Indent-Tabs-Mode.html
   (setq-default indent-tabs-mode nil))
