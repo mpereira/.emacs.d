@@ -1066,6 +1066,10 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   :hook
   (clojure-ts-mode-hook . evil-cleverparens-mode))
 
+(use-package cider
+  :hook
+  (clojure-ts-mode-hook . cider-mode))
+
 ;; TypeScript.
 (use-package emacs
   :mode
