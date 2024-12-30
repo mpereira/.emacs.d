@@ -1111,10 +1111,166 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   :hook
   (clojure-ts-mode-hook . cider-mode))
 
+(defun mpereira/treesit-tsx-goto-matching ()
+  "Jump to matching TSX delimiters or keywords using tree-sitter.
+
+This function uses tree-sitter to navigate between matching
+elements in code.
+
+When called with point on various syntax elements, it jumps to
+their matching counterpart.
+
+Supported patterns include:
+
+JavaScript/TypeScript:
+- JSX tags: <tag> </tag>
+- JSX expressions: {expr}
+- Parentheses: ( )
+- Curly braces: { }
+- Square brackets: [ ]
+- Function definitions: beginning/end
+- Control flow:
+  * if -> else
+  * try -> catch
+  * while/for loop boundaries
+
+HTML/XML:
+- Opening/closing tags: <tag> </tag>
+
+The function does nothing when point is not on a supported syntax element."
+  (interactive)
+  (when-let* ((node (treesit-node-at (point)))
+              (parent (treesit-node-parent node)))
+    (let ((node-type (treesit-node-type node))
+          (parent-type (treesit-node-type parent)))
+      (cond
+       ;; JSX elements.
+       ((or (string= "jsx_opening_element" parent-type)
+            (string= "jsx_closing_element" parent-type))
+        (let* ((jsx-element (treesit-node-parent parent))
+               (element-start (treesit-node-start jsx-element))
+               (element-end (treesit-node-end jsx-element)))
+          (if (< (point) (/ (+ element-start element-end) 2))
+              (goto-char (1- element-end))
+            (goto-char element-start))))
+
+       ;; JSX expression containers.
+       ((and (or (string= "{" node-type)
+                 (string= "}" node-type))
+             (string= "jsx_expression" parent-type))
+        (if (string= "{" node-type)
+            (goto-char (1- (treesit-node-end parent)))
+          (goto-char (treesit-node-start parent))))
+
+       ;; HTML/XML elements.
+       ((or (string= "start_tag" parent-type)
+            (string= "end_tag" parent-type))
+        (let* ((element (treesit-node-parent parent))
+               (element-start (treesit-node-start element))
+               (element-end (treesit-node-end element)))
+          (if (< (point) (/ (+ element-start element-end) 2))
+              (goto-char (1- element-end))
+            (goto-char element-start))))
+
+       ;; Parentheses.
+       ((and (or (string= "(" node-type)
+                 (string= ")" node-type))
+             (member parent-type
+                     '("parenthesized_expression"
+                       "arguments"
+                       "formal_parameters")))
+        (if (string= "(" node-type)
+            (goto-char (1- (treesit-node-end parent)))
+          (goto-char (treesit-node-start parent))))
+
+       ;; Curly braces.
+       ((and (or (string= "{" node-type)
+                 (string= "}" node-type))
+             (member parent-type
+                     '("statement_block" "object" "class_body" "function_body")))
+        (if (string= "{" node-type)
+            (goto-char (1- (treesit-node-end parent)))
+          (goto-char (treesit-node-start parent))))
+
+       ;; Square brackets.
+       ((and (or (string= "[" node-type)
+                 (string= "]" node-type))
+             (member parent-type '("array" "subscript_expression")))
+        (if (string= "[" node-type)
+            (goto-char (1- (treesit-node-end parent)))
+          (goto-char (treesit-node-start parent))))
+
+       ;; Function definitions.
+       ((member parent-type
+                '("function_declaration" "method_definition" "arrow_function"))
+        (let ((function-start (treesit-node-start parent))
+              (function-end (treesit-node-end parent)))
+          (if (< (point) (/ (+ function-start function-end) 2))
+              (goto-char (1- function-end))
+            (goto-char function-start))))
+
+       ;; Try-catch statements.
+       ((or (string= node-type "try")
+            (string= node-type "catch")
+            (string= parent-type "try_statement"))
+        (let* ((try-statement (if (string= parent-type "try_statement")
+                                  parent
+                                (treesit-node-parent parent)))
+               (try-clause (treesit-node-child-by-field-name try-statement "body"))
+               (catch-clause (treesit-node-child-by-field-name try-statement "handler"))
+               (try-start (treesit-node-start try-statement))
+               (catch-start (treesit-node-start catch-clause)))
+          (if (>= (point) catch-start)
+              (goto-char try-start)
+            (goto-char catch-start))))
+
+       ;; If-else statements.
+       ((or (string= "if" node-type)
+            (and (string= "else" node-type)
+                 (string= "if_statement" (treesit-node-type
+                                          (treesit-node-parent parent)))))
+        (let* ((if-statement (if (string= "if" node-type)
+                                 parent
+                               (treesit-node-parent parent)))
+               (alternative (treesit-node-child-by-field-name if-statement "alternative")))
+          (if (string= "if" node-type)
+              (when alternative
+                ;; Go to the start of alternative and find the "else" keyword
+                (goto-char (treesit-node-start alternative))
+                (search-forward "else" (+ (point) 5) t))
+            (goto-char (treesit-node-start if-statement)))))
+
+       ;; Control flow structures.
+       ((member parent-type
+                '("while_statement" "for_statement"))
+        (let ((statement-start (treesit-node-start parent))
+              (statement-end (treesit-node-end parent)))
+          (if (< (point) (/ (+ statement-start statement-end) 2))
+              (goto-char (1- statement-end))
+            (goto-char statement-start))))
+
+       ;; String literals (including template literals).
+       ((member parent-type '("string" "template_string"))
+        (let ((string-start (treesit-node-start parent))
+              (string-end (treesit-node-end parent)))
+          (if (< (point) (/ (+ string-start string-end) 2))
+              (goto-char (1- string-end))
+            (goto-char string-start))))))))
+
+(define-minor-mode mpereira/treesit-tsx-goto-matching-mode
+  "Minor mode for jumping between matching TSX delimiters using tree-sitter."
+  :lighter " TSX-Match"
+  (if mpereira/treesit-tsx-goto-matching-mode
+      (evil-local-set-key 'normal "%" 'mpereira/treesit-tsx-goto-matching)
+    (evil-local-set-key 'normal "%" 'evil-jump-item)))
+
 ;; TypeScript.
 (use-package emacs
   :mode
-  ("\\.[t|j]sx?$" . typescript-ts-mode))
+  ("\\.[t|j]sx?$" . typescript-ts-mode)
+  :hook
+  (typescript-ts-base-mode-hook . turn-off-evil-matchit-mode)
+  (typescript-ts-base-mode-hook . mpereira/treesit-tsx-goto-matching-mode))
 
 ;; (lsp-install-server nil 'eslint)
 
