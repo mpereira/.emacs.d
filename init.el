@@ -1391,18 +1391,21 @@ mode is `magit-log-mode`."
             "C-j" 'rg-next-file
             "C-k" 'rg-prev-file))
 
-(defun mpereira/eshell-write-history-append ()
-  "Write the Eshell command history to its history file preserving existing entries.
-Instead of overwriting the entire history file, this function appends the new
-history entries to the existing ones."
-  (eshell-write-history nil t))
 
-(defun mpereira/eshell-make-eshell-write-history-append ()
-  "Configure Eshell to append rather than overwrite command history on exit.
-Removes the default history writing hook and adds a new one that preserves
-existing history entries. This modification is buffer-local."
-  (remove-hook 'eshell-exit-hook 'eshell-write-history t)
-  (add-hook 'eshell-exit-hook #'mpereira/eshell-write-history-append nil t))
+(defun mpereira/eshell-append-last-command-to-history ()
+  "Append the last Eshell command to the Eshell history file.
+
+This function ensures that the most recently executed command in
+the Eshell session is written to the history file immediately
+after execution. It creates a temporary history ring containing
+only the latest command and writes it to the specified history
+file."
+  (when eshell-history-ring
+    (let ((last-command-eshell-history-ring (make-ring 1)))
+      (ring-insert last-command-eshell-history-ring
+                   (car (ring-elements eshell-history-ring)))
+      (let ((eshell-history-ring last-command-eshell-history-ring))
+        (eshell-write-history eshell-history-file-name t)))))
 
 (use-package eshell
   :custom
@@ -1429,9 +1432,27 @@ existing history entries. This modification is buffer-local."
   (require 'em-alias)
   (require 'em-hist)
   (eshell/alias "e" "find-file $1")
-  :hook
-  ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2023-11/msg00798.html
-  (eshell-mode-hook . mpereira/eshell-make-eshell-write-history-append))
+
+  ;; Make eshell append to history after each command.
+  ;; https://emacs.stackexchange.com/questions/18564/merge-history-from-multiple-eshells
+  ;;
+  ;; I tried making eshell append to history via
+  ;; `(eshell-write-history nil t)' when:
+  ;;
+  ;; 1. eshell buffers were killed (via `eshell-exit-hook') and
+  ;; 2. Emacs exited (via `emacs-kill-hook')
+  ;;
+  ;; This strategy doesn't work when there are multiple eshell
+  ;; buffers. When the first eshell buffer calls
+  ;; `(eshell-write-history nil t)` things look good (i.e., the
+  ;; buffer's commands are appended to the history file), but when the
+  ;; second eshell buffer does the same, the history file's contents
+  ;; gets duplicated.
+  ;;
+  ;; Just appending to the history file after every command seems to
+  ;; be the best strategy.
+  (setq eshell-save-history-on-exit nil)
+  (add-hook 'eshell-pre-command-hook #'mpereira/eshell-append-last-command-to-history))
 
 (use-package eat
   :hook
