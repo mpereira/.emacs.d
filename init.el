@@ -1257,12 +1257,26 @@ The function does nothing when point is not on a supported syntax element."
               (goto-char (1- string-end))
             (goto-char string-start))))))))
 
+(evil-define-motion mpereira/treesit-tsx-goto-matching-motion ()
+  "Motion for `mpereira/treesit-tsx-goto-matching'."
+  :type inclusive
+  :jump t
+  :keep-visual t
+  (mpereira/treesit-tsx-goto-matching))
+
 (define-minor-mode mpereira/treesit-tsx-goto-matching-mode
   "Minor mode for jumping between matching TSX delimiters using tree-sitter."
   :lighter " TSX-Match"
   (if mpereira/treesit-tsx-goto-matching-mode
-      (evil-local-set-key 'normal "%" 'mpereira/treesit-tsx-goto-matching)
-    (evil-local-set-key 'normal "%" 'evil-jump-item)))
+      (progn
+        (evil-local-set-key 'normal "%" 'mpereira/treesit-tsx-goto-matching)
+        (evil-local-set-key 'visual "%" 'mpereira/treesit-tsx-goto-matching-motion))
+
+    (let ((jump-item-fn (if (bound-and-true-p evil-matchit-mode-map)
+                            'evilmi-jump-items
+                          'evil-jump-item)))
+      (evil-local-set-key 'normal "%" jump-item-fn)
+      (evil-local-set-key 'normal "%" jump-item-fn))))
 
 ;; TypeScript.
 (use-package emacs
