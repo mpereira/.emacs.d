@@ -1492,6 +1492,8 @@ mode is `magit-log-mode`."
 
 (use-package forge)
 
+(use-package igist)
+
 (use-package persp-project
   ;; :vc (:url "https://github.com/PauloPhagula/persp-project"
   ;;      :rev :newest)
