@@ -42,7 +42,9 @@
 
 (load-library (expand-file-name "secrets.el.gpg" user-emacs-directory))
 
-(use-package no-littering)
+(use-package no-littering
+  :config
+  (no-littering-theme-backups))
 
 (use-package emacs
   :custom
