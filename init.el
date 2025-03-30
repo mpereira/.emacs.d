@@ -6,6 +6,38 @@
 
 (require 'package)
 
+(require 'cl-lib)
+
+(defun copy-last-error-message ()
+  "Copy the last error message from the *Messages* buffer to the kill ring.
+
+An error message is defined as any line that matches one of several common
+Emacs Lisp error patterns, such as errors about undefined functions, wrong
+number/type of arguments, void variables, debugger entries, and similar errors."
+  (interactive)
+  (let ((error-patterns '("^error\\b"
+                          "function definition is void:"
+                          "variable definition is void:"
+                          "Wrong number of arguments:"
+                          "Wrong type argument:"
+                          "Debugger entered--Lisp error:"
+                          "Invalid function:"))
+        err-msg)
+    (with-current-buffer "*Messages*"
+      (save-excursion
+        (goto-char (point-max))
+        (while (and (not err-msg) (not (bobp)))
+          (let ((line (buffer-substring-no-properties (line-beginning-position)
+                                                       (line-end-position))))
+            (when (cl-some (lambda (pat) (string-match-p pat line)) error-patterns)
+              (setq err-msg line))
+            (forward-line -1)))))
+    (if err-msg
+        (progn
+          (kill-new err-msg)
+          (message "%s" err-msg))
+      (message "No error message found."))))
+
 (setq package-enable-at-startup nil)
 
 (package-initialize)
@@ -1820,6 +1852,7 @@ Also check out `org-insert-heading-respect-content'."
 
   (:states '(normal visual)
    :prefix mpereira/leader
+   "11" #'copy-last-error-message
    "," #'evil-switch-to-windows-last-buffer
    "." #'vertico-repeat
    "/" #'consult-line
