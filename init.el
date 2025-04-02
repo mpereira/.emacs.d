@@ -137,6 +137,7 @@ number/type of arguments, void variables, debugger entries, and similar errors."
 (defun mpereira/show-trailing-whitespace-maybe-disable ()
   "Disable `show-trailing-whitespace' in selected modes."
   (when (derived-mode-p 'shell-mode
+                        'vterm-mode
                         'eshell-mode)
     (setq-local show-trailing-whitespace nil)))
 
@@ -1663,6 +1664,22 @@ file."
 (use-package eat
   :hook
   (eshell-mode-hook . eat-eshell-mode))
+
+(defun mpereira/hl-line-mode-disable ()
+  "Disable the highlighting of the current line in the current buffer."
+  (interactive)
+  (setq-local global-hl-line-mode nil))
+
+(use-package vterm
+  :if (executable-find "cmake")
+  ;; Disabling hl-line-mode in vterm buffers because typing causes the highlight
+  ;; to flicker.
+  :hook (vterm-mode-hook . mpereira/hl-line-mode-disable)
+  :init
+  (setq vterm-always-compile-module t)
+  :config
+  (setq vterm-max-scrollback 100000)
+  (setq vterm-clear-scrollback-when-clearing t))
 
 (use-package hide-mode-line)
 
