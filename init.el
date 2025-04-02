@@ -606,13 +606,9 @@ Otherwise, it will be shown."
     (jupyter-eval-remove-overlays)))
 
 (use-package jupyter
-  :custom (jupyter-eval-use-overlays t)
-  :hook
-  ;; NOTE: https://github.com/emacs-jupyter/jupyter/issues/344
-  (jupyter-interaction-mode-hook . (lambda ()
-                                     (remove-hook 'completion-at-point-functions
-                                                  'jupyter-completion-at-point
-                                                  t)))
+  :custom
+  (jupyter-eval-use-overlays t)
+  (jupyter-repl-completion-at-point-hook-depth 100)
   :general
   (:keymaps '(jupyter-repl-interaction-mode-map)
    :states '(normal visual)
