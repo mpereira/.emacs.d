@@ -2162,7 +2162,7 @@ Also check out `org-insert-heading-respect-content'."
    "g" 'rg-menu
    "p" 'dired-sidebar-toggle-sidebar
    "r" 'project-query-replace-regexp
-   "s" 'project-persp-switch-project
+   "s" 'persp-project-switch-project
    "t" 'persp-switch-last)
 
   ;; s -> shell ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
