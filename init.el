@@ -1618,6 +1618,8 @@ file."
       (let ((eshell-history-ring last-command-eshell-history-ring))
         (eshell-write-history eshell-history-file-name t)))))
 
+(use-package eat)
+
 (use-package eshell
   :custom
   (eshell-banner-message "")
