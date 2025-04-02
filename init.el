@@ -1537,6 +1537,10 @@ mode is `magit-log-mode`."
 
 (use-package dwim-shell-command)
 
+(use-package open-junk-file
+  :custom
+  (open-junk-file-find-file-function #'find-file))
+
 (defun mpereira/dired-yank-file-path-at-point ()
   "Yank the absolute path of the file at point in dired."
   (interactive)
