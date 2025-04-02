@@ -1431,6 +1431,8 @@ roles or playbooks directories."
 
 (use-package buffer-move)
 (use-package olivetti)
+(use-package prettier)
+(use-package blacken)
 
 (use-package tree-sitter
   :hook
