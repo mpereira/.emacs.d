@@ -2043,7 +2043,12 @@ Also check out `org-insert-heading-respect-content'."
    "vh" #'mpereira/toggle-window-split
    "vs" #'mpereira/split-window-right-and-switch
    "w" #'save-buffer
-   "yy" #'mpereira/yank-buffer-name
+   "yy" (lambda ()
+          (interactive)
+          (mpereira/call-interactively-with-prefix-arg
+           '(4)
+           #'mpereira/yank-buffer-file-name))
+   "yY" #'mpereira/yank-buffer-name
    "Y" #'mpereira/project-combine-file-contents-into-markdown)
 
   ;; d -> describe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
