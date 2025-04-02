@@ -298,12 +298,16 @@ echo area, and returned."
           (kill-buffer))))))
 
 (defun mpereira/rename-file-and-buffer ()
-  "Rename the current buffer and file it is visiting."
+  "Rename the current buffer and file it is visiting.
+If a directory is selected, retain the original file name."
   (interactive)
   (let ((filename (buffer-file-name)))
     (if (not (and filename (file-exists-p filename)))
         (message "Buffer is not visiting a file!")
-      (let ((new-name (read-file-name "New name: " filename)))
+      (let* ((new-name (read-file-name "New name: " filename))
+             (new-name (if (file-directory-p new-name)
+                           (expand-file-name (file-name-nondirectory filename) new-name)
+                         new-name)))
         (cond
          ((vc-backend filename) (vc-rename-file filename new-name))
          (t
