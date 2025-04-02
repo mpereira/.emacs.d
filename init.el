@@ -408,17 +408,21 @@ narrowed."
 (with-eval-after-load "consult"
   (defun mpereira/corfu-move-to-minibuffer ()
     (interactive)
-    (let ((completion-extra-properties corfu--extra)
-          completion-cycle-threshold completion-cycling)
-      (apply #'consult-completion-in-region completion-in-region--data))))
+    (pcase completion-in-region--data
+      (`(,beg ,end ,table ,pred ,extras)
+       (let ((completion-extra-properties extras)
+             completion-cycle-threshold completion-cycling)
+         (consult-completion-in-region beg end table pred))))))
 
 (use-package corfu
   :custom
-  (corfu-auto t)
+  ;; Don't automatically show completions when typing.
+  (corfu-auto nil)
   (corfu-min-width 30)
   (corfu-max-width 100)
   (corfu-count 15)
   (corfu-popupinfo-delay '(0.5 . 0.5))
+  (corfu-quit-at-boundary 'separator)
   :general
   (:keymaps '(corfu-map)
    :states '(insert)
