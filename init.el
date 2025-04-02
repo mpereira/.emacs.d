@@ -1916,6 +1916,33 @@ Also check out `org-insert-heading-respect-content'."
    "N" nil ; originally `ibuffer-do-shell-command-pipe-replace'.
    ))
 
+(defun mpereira/project-combine-file-contents-into-markdown ()
+  "Interactively select project files and copy their contents as markdown to kill ring."
+  (interactive)
+  (let ((files-content "")
+        (continue t)
+        (file-count 0)
+        (project-root (project-root (project-current t))))
+    (while continue
+      (let* ((file (call-interactively #'project-find-file))
+             (rel-path (file-relative-name (buffer-file-name) project-root))
+             (lang (file-name-extension (buffer-file-name)))
+             (content (buffer-substring-no-properties (point-min) (point-max))))
+        (setq files-content
+              (concat files-content
+                      "\n## " rel-path "\n\n"
+                      "```" lang "\n"
+                      content
+                      (if (string-suffix-p "\n" content) "" "\n")
+                      "```\n\n"))
+        (setq file-count (1+ file-count)))
+      (setq continue (y-or-n-p "Select another file? "))
+      (when continue
+        (quit-window)))
+    (when (> (length files-content) 0)
+      (kill-new files-content)
+      (message "%d file contents copied to kill ring as markdown" file-count))))
+
 (defun mpereira/global-text-scale-adjust-decrease ()
   (interactive)
   (call-interactively 'global-text-scale-adjust))
@@ -1998,7 +2025,7 @@ Also check out `org-insert-heading-respect-content'."
    "vs" #'mpereira/split-window-right-and-switch
    "w" #'save-buffer
    "yy" #'mpereira/yank-buffer-name
-   "Y" #'mpereira/yank-buffer-file-name)
+   "Y" #'mpereira/project-combine-file-contents-into-markdown)
 
   ;; d -> describe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
