@@ -1439,7 +1439,9 @@ roles or playbooks directories."
   (dolist (mode-pair '((python-ts-mode . python)
                        (typescript-ts-mode . tsx)
                        (tsx-ts-mode . tsx)
-                       (clojure-ts-mode . clojure)))
+                       (clojure-ts-mode . clojure)
+                       (objc-mode . objc)
+                       (swift-ts-mode . swift)))
     (add-to-list 'tree-sitter-major-mode-language-alist mode-pair)))
 
 (use-package tree-sitter-langs)
@@ -1448,6 +1450,13 @@ roles or playbooks directories."
   :custom
   (treesit-auto-install 'prompt)
   :config
+  (add-to-list 'treesit-auto-recipe-list (make-treesit-auto-recipe
+                                          :lang 'objc
+                                          :ts-mode 'objc-ts-mode
+                                          :remap 'objc-mode
+                                          :url "https://github.com/tree-sitter-grammars/tree-sitter-objc"
+                                          :ext "\\.mm?\\'"))
+  (add-to-list 'treesit-auto-langs 'objc)
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode 1))
 
