@@ -1462,13 +1462,49 @@ roles or playbooks directories."
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode 1))
 
+(defun mpereira/treesit-fold-toggle-recursively ()
+  "Toggle the syntax node at point recursively.
+If the node is closed, open it recursively.
+If the node is open, close it recursively."
+  (interactive)
+  (treesit-fold--ensure-ts
+    (if-let* ((node (treesit-fold--foldable-node-at-pos))
+              (ov (treesit-fold-overlay-at node)))
+        ;; If node is folded, open it recursively
+        (treesit-fold-open-recursively)
+      ;; If node is not folded, find all foldable nodes within it and fold them
+      (when-let* ((node (treesit-fold--foldable-node-at-pos))
+                  (range (treesit-fold--get-fold-range node)))
+        (let* ((beg (car range))
+               (end (cdr range)))
+          ;; First create the fold for the current node
+          (treesit-fold-close node)
+
+          ;; Now manually iterate through the tree under this node
+          ;; and fold each valid node
+          (save-excursion
+            (goto-char beg)
+            (while (< (point) end)
+              (when-let* ((current-node (treesit-fold--foldable-node-at-pos))
+                          (not-same-node (not (and (= (treesit-node-start current-node)
+                                                      (treesit-node-start node))
+                                                   (= (treesit-node-end current-node)
+                                                      (treesit-node-end node))))))
+                (when (and (>= (treesit-node-start current-node) beg)
+                           (<= (treesit-node-end current-node) end))
+                  (treesit-fold-close current-node)))
+              (forward-line 1))))
+
+        (run-hooks 'treesit-fold-on-fold-hook)
+        t))))
+
 (use-package treesit-fold
   :vc (:url "https://github.com/emacs-tree-sitter/treesit-fold"
        :rev :newest)
   :general
   (:keymaps '(treesit-fold-mode-map)
    :states '(normal visual)
-   "TAB" #'treesit-fold-open-recursively
+   "TAB" #'mpereira/treesit-fold-toggle-recursively
    "S-<tab>" #'mpereira/treesit-fold-toggle-all))
 
 (defun mpereira/treesit-fold-toggle-all ()
