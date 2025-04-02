@@ -460,6 +460,13 @@ narrowed."
     (lsp)))
 
 (use-package flycheck
+  :custom
+  (flycheck-mode-line-prefix "FlyC")
+  (flycheck-mode-success-indicator ":0")
+  (flycheck-idle-change-delay 3)
+  (flycheck-display-errors-delay 3)
+  (flycheck-idle-buffer-switch-delay 3)
+  (flycheck-check-syntax-automatically '(save mode-enabled idle-change))
   :general
   (:keymaps '(flycheck-mode-map)
    :states '(normal visual)
