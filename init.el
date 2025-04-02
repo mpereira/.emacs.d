@@ -1577,9 +1577,26 @@ mode is `magit-log-mode`."
     (if (magit-buffer-margin-p)
         (magit-toggle-margin))))
 
+(defun mpereira/magit-display-buffer-status-fullscreen-diff-in-split (buffer)
+  "Display BUFFER according to its major mode.
+If BUFFER is in `magit-status-mode', display it in full frame.
+If BUFFER is in `magit-diff-mode', display it in a side window on the right with a width of half the frame.
+For any other mode, use the traditional Magit buffer display method."
+  (cond ((eq (with-current-buffer buffer major-mode)
+             'magit-status-mode)
+         (display-buffer buffer '(magit--display-buffer-fullframe)))
+        ((eq (with-current-buffer buffer major-mode)
+             'magit-diff-mode)
+         (display-buffer-in-side-window buffer
+                                        '((window-width . 0.5)
+                                          (side . right)
+                                          (slot . 0))))
+        (t
+         (magit-display-buffer-traditional buffer))))
+
 (use-package magit
   :custom
-  (magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+  (magit-display-buffer-function 'mpereira/magit-display-buffer-status-fullscreen-diff-in-split)
   (magit-bury-buffer-function 'magit-restore-window-configuration)
   ;; Show recent branches/tags on top on commands like `magit-push'
   ;; "elsewhere".
@@ -2093,7 +2110,8 @@ Also check out `org-insert-heading-respect-content'."
    "c" #'magit-commit-popup
    "d" #'(lambda ()
            (interactive)
-           (let ((display-buffer-alist (append display-buffer-alist
+           (let ((magit-display-buffer-function 'magit-display-buffer-traditional)
+                 (display-buffer-alist (append display-buffer-alist
                                                '(("magit-diff.*"
                                                   (display-buffer-same-window))))))
              (magit-diff-buffer-file)))
