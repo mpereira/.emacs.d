@@ -1547,7 +1547,17 @@ If the node is open, close it recursively."
    "(" #'combobulate-envelop-tsx-ts-mode-wrap-parentheses
    "<" #'combobulate-envelop-tsx-ts-mode-tag
    "{" #'combobulate-envelop-tsx-ts-mode-expression
-   "c" #'combobulate-clone-node-dwim))
+   "c" #'combobulate-clone-node-dwim)
+
+  (:keymaps '(combobulate-key-map)
+   :states '(normal visual)
+   "M-r" #'combobulate-splice-up
+   "M-R" #'combobulate-vanish-node
+   "M-d" #'combobulate-kill-node-dwim
+   "M-(" #'combobulate-envelop-tsx-ts-mode-wrap-parentheses
+   "M-<" #'combobulate-envelop-tsx-ts-mode-tag
+   "M-{" #'combobulate-envelop-tsx-ts-mode-expression
+   "M-C" #'combobulate-clone-node-dwim))
 
 (defun mpereira/magit-center-buffer-contents ()
   "Center the buffer contents by setting `olivetti-body-width` to
