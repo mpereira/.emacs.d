@@ -922,6 +922,8 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
             "C-j" #'copilot-next-completion
             "C-k" #'copilot-previous-completion)
   :custom
+  (copilot-indent-offset-warning-disable t)
+  :config
   (add-to-list 'copilot-indentation-alist '(lisp-data-mode . 2)))
 
 (use-package comint
