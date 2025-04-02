@@ -1916,6 +1916,10 @@ Also check out `org-insert-heading-respect-content'."
    "N" nil ; originally `ibuffer-do-shell-command-pipe-replace'.
    ))
 
+(defun mpereira/global-text-scale-adjust-decrease ()
+  (interactive)
+  (call-interactively 'global-text-scale-adjust))
+
 (use-package emacs
   ;; NOTE: using keymap `override' so that these keybindings override
   ;; any existing keybindings on the current mode.
@@ -1923,6 +1927,7 @@ Also check out `org-insert-heading-respect-content'."
   :general
   (:keymaps '(override)
    :states '(normal visual insert)
+   "M--" #'mpereira/global-text-scale-adjust-decrease
    "M-=" #'global-text-scale-adjust
    "M-H" #'buf-move-left
    "M-J" #'buf-move-down
