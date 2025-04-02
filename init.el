@@ -192,6 +192,18 @@ number/type of arguments, void variables, debugger entries, and similar errors."
 
 (fset #'remove-from-list #'cl-delete)
 
+(defun mpereira/process-using-port ()
+  "Show list of processes listening on ports via TCP.
+  Copies the selected process's PID to the clipboard."
+  (interactive)
+  (let ((candidates (split-string (shell-command-to-string
+                                   "lsof -nP -iTCP | grep LISTEN")
+                                  "\n"
+                                  t)))
+    (let ((chosen-process (completing-read "Port: " candidates nil t)))
+      (when chosen-process
+        (kill-new (cadr (split-string chosen-process " " t)))))))
+
 (defun mpereira/symbol-at-point-as-string ()
   "Return current symbol at point as a string."
   (let ((s (thing-at-point 'symbol)))
