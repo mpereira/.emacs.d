@@ -74,6 +74,8 @@ number/type of arguments, void variables, debugger entries, and similar errors."
 
 (load-library (expand-file-name "secrets.el.gpg" user-emacs-directory))
 
+(use-package s)
+
 (use-package no-littering
   :config
   (no-littering-theme-backups))
