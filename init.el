@@ -234,19 +234,28 @@ in the echo area. If no valid symbol is found at point, do nothing."
   (with-current-buffer buffer
     (eq major-mode 'eshell-mode)))
 
-(defun mpereira/yank-buffer-file-name ()
-  "Copy the absolute path of the current buffer's file or directory to the kill ring.
+(defun mpereira/yank-buffer-file-name (&optional project-relative)
+  "Copy the path of the current buffer's file or directory to the kill ring.
 
-If the buffer is visiting a file, its absolute file path is yanked.
+If the buffer is visiting a file, its file path is yanked.
 If the buffer is in Eshell, the Eshell working directory is yanked.
+When PROJECT-RELATIVE is non-nil, return the path relative to the project root.
 The copied path is displayed in the echo area."
-  (interactive)
-  (let ((buffer-file-name* (if (eshell-p (current-buffer))
-                               (eshell/pwd)
-                             (buffer-file-name))))
-    (kill-new buffer-file-name*)
-    (message buffer-file-name*)
-    buffer-file-name*))
+  (interactive "P")
+  (let* ((buffer-file-name* (if (eshell-p (current-buffer))
+                                (eshell/pwd)
+                              (buffer-file-name)))
+         (file-path (if (and project-relative buffer-file-name*)
+                        (let ((project (project-current)))
+                          (if project
+                              (file-relative-name buffer-file-name*
+                                                 (project-root project))
+                            buffer-file-name*))
+                      buffer-file-name*)))
+    (when file-path
+      (kill-new file-path)
+      (message "%s" file-path)
+      file-path)))
 
 (defun mpereira/yank-buffer-name ()
   "Copy the name of the current buffer to the kill ring.
