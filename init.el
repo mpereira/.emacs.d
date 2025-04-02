@@ -968,7 +968,13 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
    "C-k" 'chatgpt-shell-prompt-compose-previous-item)
   (:keymaps '(chatgpt-shell-prompt-compose-mode-map)
    :states '(insert)
-   "M-RET" 'chatgpt-shell-prompt-compose-send-buffer))
+   "M-RET" 'chatgpt-shell-prompt-compose-send-buffer)
+  (:keymaps '(chatgpt-shell-prompt-compose-view-mode-map)
+   :states '(normal)
+   "0" nil ; originally `text-scale-adjust'.
+   "+" nil ; originally `text-scale-increase'.
+   "-" nil ; originally `text-scale-decrease'.
+   ))
 
 (use-package gptel
   :custom
