@@ -640,6 +640,13 @@ Otherwise, it will be shown."
   :custom
   (consult-git-log-grep-open-function #'magit-show-commit))
 
+(use-package consult-tramp
+  :ensure nil
+  ;; :vc (:url "https://github.com/Ladicle/consult-tramp.git"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "Ladicle/consult-tramp"))
+
 (use-package elec-pair
   :config
   (electric-pair-mode 1)
