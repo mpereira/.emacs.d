@@ -836,6 +836,22 @@ Otherwise, it will be shown."
 ;; NOTE: required for `minibuffer-keyboard-quit'.
 (require 'delsel)
 
+(use-package emacs
+  :general
+  (:keymaps '(minibuffer-local-map
+              minibuffer-local-ns-map
+              minibuffer-local-completion-map
+              minibuffer-local-must-match-map
+              minibuffer-local-isearch-map)
+   "C-j" 'next-history-element
+   "C-k" 'previous-history-element
+   "<escape>" #'minibuffer-keyboard-quit
+   "<C-escape>" #'(lambda ()
+                    (interactive)
+                    (let ((evil-want-minibuffer t))
+                      (evil-initialize))))
+  (:keymaps '(minibuffer-local-map)))
+
 (use-package vertico
   :bind (:map vertico-map
          ("C-f" . mpereira/vertico-next-page)
