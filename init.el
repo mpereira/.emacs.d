@@ -1945,6 +1945,21 @@ Also check out `org-insert-heading-respect-content'."
   :custom
   (org-pandoc-options '((standalone . t))))
 
+(use-package org-popup-posframe
+  ;; :vc (:url "https://github.com/A7R7/org-popup-posframe"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "A7R7/org-popup-posframe")
+  :custom
+  (org-popup-posframe-org-attach-poshandler 'posframe-poshandler-point-bottom-left-corner)
+  (org-popup-posframe-org-capture-poshandler 'posframe-poshandler-point-bottom-left-corner-upward)
+  (org-popup-posframe-org-export-dispatch-poshandler 'posframe-poshandler-frame-center)
+  (org-popup-posframe-org-insert-link-poshandler 'posframe-poshandler-point-bottom-left-corner)
+  (org-popup-posframe-org-insert-structure-template-poshandler 'posframe-poshandler-point-bottom-left-corner)
+  (org-popup-posframe-org-todo-poshandler 'posframe-poshandler-point-bottom-left-corner)
+  :config
+  (org-popup-posframe-mode 1))
+
 (use-package verb
   :general
   (:keymaps '(org-mode-map)
