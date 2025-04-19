@@ -4,6 +4,8 @@
           (lambda ()
             (setq debug-on-error nil)))
 
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+
 (require 'package)
 
 (require 'cl-lib)
@@ -89,7 +91,6 @@ number/type of arguments, void variables, debugger entries, and similar errors."
   (backup-by-copying t)
   (use-short-answers t)
   (frame-resize-pixelwise t)
-  (custom-file (expand-file-name "custom.el" user-emacs-directory))
   (inhibit-startup-screen t)
   ;; Don't play beep when quitting, etc.
   (ring-bell-function 'ignore)
