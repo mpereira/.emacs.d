@@ -1921,6 +1921,14 @@ Also check out `org-insert-heading-respect-content'."
    :infix "o"
    "b" 'org-tree-to-indirect-buffer)
   :hook
+  ;; Don't match opening angle bracket so that I can use org-tempo
+  ;; snippets.
+  (org-mode-hook
+   .
+   (lambda ()
+     (setq-local electric-pair-inhibit-predicate
+                 `(lambda (c)
+                    (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
   (org-insert-heading-hook . org-id-get-create)
   :config
   (org-babel-do-load-languages 'org-babel-load-languages
