@@ -1931,6 +1931,7 @@ Also check out `org-insert-heading-respect-content'."
                     (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
   (org-insert-heading-hook . org-id-get-create)
   :config
+  (setf (alist-get 'file org-link-frame-setup) 'find-file)
   (org-babel-do-load-languages 'org-babel-load-languages
                                '((shell . t)
                                  (emacs-lisp . t)
