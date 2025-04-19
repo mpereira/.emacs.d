@@ -1011,6 +1011,17 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   :vc (:url "https://github.com/karthink/gptel-quick"
        :rev :newest))
 
+(use-package ultra-scroll
+  ;; :vc (:url "https://github.com/jdtsmith/ultra-scroll"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "jdtsmith/ultra-scroll")
+  :init
+  (setq scroll-conservatively 101)
+  (setq scroll-margin 0)
+  :config
+  (ultra-scroll-mode 1))
+
 (require 'mpereira-whisper)
 
 ;; IMPORTANT.
