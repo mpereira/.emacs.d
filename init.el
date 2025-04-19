@@ -1939,6 +1939,12 @@ Also check out `org-insert-heading-respect-content'."
                                  (verb . t)
                                  (jupyter . t))))
 
+(use-package ox-gfm)
+
+(use-package ox-pandoc
+  :custom
+  (org-pandoc-options '((standalone . t))))
+
 (use-package verb
   :general
   (:keymaps '(org-mode-map)
