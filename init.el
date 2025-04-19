@@ -1876,6 +1876,10 @@ Also check out `org-insert-heading-respect-content'."
 (use-package org
   :hook
   (org-insert-heading-hook . org-id-get-create)
+  :init
+  (add-to-list 'org-modules 'org-expiry)
+  ;; Expansion snippets like <s.
+  (add-to-list 'org-modules 'org-tempo)
   :custom
   (org-startup-folded 'fold)
   (org-directory (expand-file-name "org" mpereira/cloud-synced-directory))
@@ -1902,10 +1906,6 @@ Also check out `org-insert-heading-respect-content'."
                                  "SOMEDAY(s@/!)"
                                  "DONE(D!)"
                                  "CANCELLED(c@/!)")))
-  :init
-  (add-to-list 'org-modules 'org-expiry)
-  ;; Expansion snippets like <s.
-  (add-to-list 'org-modules 'org-tempo)
   :general
   (:keymaps '(org-mode-map)
    :states '(normal)
