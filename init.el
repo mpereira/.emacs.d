@@ -1874,8 +1874,6 @@ Also check out `org-insert-heading-respect-content'."
   (org-insert-heading))
 
 (use-package org
-  :hook
-  (org-insert-heading-hook . org-id-get-create)
   :init
   (add-to-list 'org-modules 'org-expiry)
   ;; Expansion snippets like <s.
@@ -1921,6 +1919,8 @@ Also check out `org-insert-heading-respect-content'."
    :prefix mpereira/leader
    :infix "o"
    "b" 'org-tree-to-indirect-buffer)
+  :hook
+  (org-insert-heading-hook . org-id-get-create)
   :config
   (org-babel-do-load-languages 'org-babel-load-languages
                                '((shell . t)
