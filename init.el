@@ -1451,6 +1451,7 @@ roles or playbooks directories."
    "gd" nil))
 
 (use-package terraform-mode
+  :mode ("\\.hcl\\'" . terraform-mode)
   :config
   (add-hook 'terraform-mode-hook
             'mpereira/terraform-disable-lsp-conflicting-keybindings
