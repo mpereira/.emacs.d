@@ -59,6 +59,8 @@ number/type of arguments, void variables, debugger entries, and similar errors."
 (setq use-package-always-ensure t)
 (setq use-package-always-demand t)
 
+(add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
+
 (setenv "LSP_USE_PLISTS" "true")
 
 (setq mpereira/leader ",")
@@ -154,8 +156,6 @@ number/type of arguments, void variables, debugger entries, and similar errors."
 
 (require 'prot-common)
 (require 'prot-modeline)
-
-(add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
 
 (require 'mode-line-right-align)
 (require 'mpereira-mode-line)
