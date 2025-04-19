@@ -1975,6 +1975,38 @@ Also check out `org-insert-heading-respect-content'."
 
 (use-package org-make-toc)
 
+(defun mpereira/filesystem-friendly-file-path (s)
+  "Sanitizes string to be filesystem friendly."
+  (replace-regexp-in-string "[^[:alpha:]_-]" "_" s))
+
+(use-package org-download
+  :ensure nil
+  ;; :vc (:url "https://github.com/abo-abo/org-download.git"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "abo-abo/org-download")
+  :custom
+  (org-download-screenshot-method "screencapture -i %s")
+  (org-download-image-dir (concat org-directory "/download"))
+  :config
+  ;; MONKEYPATCH(org-download).
+  (defun org-download-get-heading (lvl)
+    "Return the heading of the current entry's LVL level parent."
+    (save-excursion
+      (let ((cur-lvl (org-current-level)))
+        (if cur-lvl
+            (progn
+              (unless (= cur-lvl 1)
+                (org-up-heading-all (- (1- (org-current-level)) lvl)))
+              (let ((heading (nth 4 (org-heading-components))))
+                (if heading
+                    (mpereira/filesystem-friendly-file-path
+                     (replace-regexp-in-string
+                      " " "_"
+                      heading))
+                  "")))
+          "")))) )
+
 (use-package org-web-tools
   :general
   (:keymaps '(org-mode-map)
