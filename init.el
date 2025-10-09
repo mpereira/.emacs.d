@@ -2409,6 +2409,213 @@ and `file-local-variables-alist', without applying them."
 ;; submit a patch if yes.
 (advice-add 'hack-dir-local-variables :override #'mpereira/hack-dir-local-variables)
 
+(defun mpereira/current-window-height-half ()
+  "Calculate a window height that's half the height of the current window."
+  (round (* (window-height) 0.5)))
+
+(defun mpereira/rg-goto-file-right-window (orig-fun &rest args)
+  "Open files from rg in the bottom right window.
+
+This works in conjuntion with `display-buffer-alist' rules for *rg* buffers:
+
+(display-buffer-reuse-window display-buffer-in-side-window)
+(side . bottom)
+(slot . -1)  ; negative slot = left side
+(window-height . 0.5)
+(window-width . 0.5)
+(mode-line-format . (\" \" \"%b\"))"
+  (let ((display-buffer-overriding-action
+         '((display-buffer-reuse-window display-buffer-in-side-window)
+           (side . bottom)
+           (slot . 1)  ; positive slot = right side
+           (window-height . 0.5)
+           (window-width . 0.5))))
+    (apply orig-fun args)))
+
+(advice-add 'compile-goto-error :around #'mpereira/rg-goto-file-right-window)
+
+;; Inspiration, resources:
+;; - http://juanjose.garciaripoll.com/blog/arranging-emacs-windows
+;; - https://github.com/hlissner/doom-emacs/blob/master/modules/ui/popup/config.el
+;; - https://protesilaos.com/emacs/dotemacs#h:50f8b1e4-b14e-453f-a37e-1c0e495ab80f
+;; - https://web.archive.org/web/20160409014815/https://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
+(setq-default display-buffer-alist
+              '(("\\*Org Agenda\\*"
+                 (display-buffer-same-window))
+
+                ;; This fixes
+                ;; `org-todo' ->
+                ;; `org-switch-to-buffer-other-window' ->
+                ;; `org-no-popups'
+                ;; creating a new frame.
+                ;;
+                ;; FIXME: this is still deleting other windows when
+                ;; the org note window is switched to.
+                ("\\*Org Note\\*"
+                 (display-buffer-reuse-window display-buffer-in-direction)
+                 (direction . below)
+                 (window-height . mpereira/current-window-height-half))
+
+                (".*Org Src.*"
+                 (display-buffer-same-window))
+
+                ("\\*kubed-logs .+\\*"
+                 (display-buffer-same-window))
+
+                ("\\*kubed-.+-stderr\\*"
+                 (display-buffer-below-selected))
+
+                ("\\*Kubed pods@.+\\*"
+                 (display-buffer-same-window))
+
+                (".* llm .* compose\\*"
+                 (display-buffer-same-window))
+
+                ((derived-mode . org-src-mode)
+                 (display-buffer-same-window))
+
+                ("\\*xref\\*"
+                 (display-buffer-reuse-mode-window display-buffer-at-bottom)
+                 (window-height . 0.4)
+                 (dedicated . t)
+                 (preserve-size . (t . t)))
+
+                ("\\*jupyter-repl[.+]\\*"
+                 (display-buffer-no-window))
+
+                ("\\*prodigy\\*"
+                 (display-buffer-same-window))
+
+                ("\\*prodigy-.+\\*"
+                 (display-buffer-same-window))
+
+                ("\\*docker-\\(containers\\|images\\|networks\\|volumes\\)\\*"
+                 (display-buffer-below-selected))
+
+                ("\\*kubel (.+\\*"
+                 (display-buffer-same-window))
+
+                ("\\*kubel -.+\\*"
+                 (display-buffer-below-selected))
+
+                ("\\* docker container \\(logs\\|inspect\\) .+ \\*"
+                 (display-buffer-same-window))
+
+                ("\\* Merriam-Webster Thesaurus \\*"
+                 (display-buffer-below-selected))
+
+                ("\\*cider-\\(doc\\|error\\|inspect\\)\\*"
+                 (display-buffer-below-selected))
+
+                ("\\*cider-\\(doc\\|error\\|inspect\\|test-report\\)\\*"
+                 (display-buffer-reuse-window
+                  display-buffer-below-selected))
+
+                ;; File-specific magit-log buffer.
+                ;; magit-log(branch-name -- path/to/file.ext): project-name
+                ("magit-log(.+): .+"
+                 (display-buffer-below-selected))
+
+                ;; Clicking on a revision in a file-specific magit-log buffer.
+                ;; magit-revision: project-name
+                ("magit-revision: .+"
+                 (display-buffer-same-window))
+
+                ("\\*compilation\\*"
+                 (display-buffer-below-selected))
+
+                ("\\*mpereira/pp-macroexpand-all\\*"
+                 (display-buffer-in-side-window)
+                 (window-height . 0.5)
+                 (window-width . 0.5)
+                 (slot . 0)
+                 (mode-line-format . (" " "%b")))
+
+                ("\\*hackernews top stories\\*"
+                 (display-buffer-in-side-window)
+                 (window-width . 120)
+                 (side . left)
+                 (slot . 0)
+                 (mode-line-format . (" " "%b")))
+
+                ;; TODO: do something like this in separate modes.
+                ;; (setf (alist-get '(major-mode . elpaca-log-mode)
+                ;;                  display-buffer-alist
+                ;;                  nil nil #'equal)
+                ;;       '((display-buffer-at-bottom
+                ;;          display-buffer-in-side-window)
+                ;;         (side . bottom)
+                ;;         (slot . 49)
+                ;;         (window-height . 0.4)
+                ;;         (body-function . select-window)))
+
+                ("\\*helpful.*\\*"
+                 (display-buffer-in-direction)
+                 (direction . below)
+                 (window-height . mpereira/current-window-height-half))
+
+                ("\\*jupyter-output\\*"
+                 (display-buffer-in-direction)
+                 (direction . below)
+                 (window-height . mpereira/current-window-height-half))
+
+                ("\\*lsp-help\\*"
+                 (display-buffer-in-direction)
+                 (direction . below)
+                 (window-height . mpereira/current-window-height-half))
+
+                ("\\(\\Wo\\)?*Man.*"
+                 (display-buffer-in-direction)
+                 (direction . below)
+                 (window-height . mpereira/current-window-height-half))
+
+                ("\\*\\(compilation\\|run .*\\|cargo test.*\\|cargo check.*\\|Async Shell Command\\)\\*"
+                 (display-buffer-in-side-window)
+                 (window-width . 100)
+                 (side . right)
+                 (slot . 0)
+                 (mode-line-format . (" " "%b")))
+
+                ("\\*Embark Export: .*"
+                 (display-buffer-in-side-window)
+                 (window-height . 0.5)
+                 (window-width . 0.5)
+                 (slot . 0)
+                 (mode-line-format . (" " "%b")))
+
+                ("\\*\\(rg\\*\\|Embark Export: .*\\)"
+                 (display-buffer-reuse-window display-buffer-in-side-window)
+                 (side . bottom)
+                 (slot . -1)  ; negative slot = left side
+                 (window-height . 0.5)
+                 (window-width . 0.5)
+                 (mode-line-format . (" " "%b")))
+
+                ("\\*Flycheck.*\\*"
+                 (display-buffer-below-selected))
+
+                ("\\*last-eshell-output\\*"
+                 (display-buffer-same-window))
+
+                ("\\*Diff\\*"
+                 (display-buffer-same-window))
+
+                ("\\(\\*undo-tree\\*\\)"
+                 (display-buffer-in-side-window)
+                 (window-width . 80)
+                 (window-height . 0.5)
+                 (side . left)
+                 (slot . 0)
+                 (mode-line-format . (" " "%b")))
+
+                ("\\(\\*undo-tree Diff\\*\\)"
+                 (display-buffer-in-side-window)
+                 (window-width . 80)
+                 (window-height . 0.5)
+                 (side . left)
+                 (slot . 1)
+                 (mode-line-format . (" " "%b")))))
+
 (require 'json)
 (require 'url)
 
