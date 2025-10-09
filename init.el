@@ -1623,7 +1623,7 @@ mode is `magit-log-mode`."
   (interactive)
   (when (derived-mode-p 'magit-log-mode)
     (mpereira/magit-center-buffer-contents)
-    (if (magit-buffer-margin-p)
+    (if (magit--right-margin-option)
         (magit-toggle-margin))))
 
 (defun mpereira/magit-display-buffer-status-fullscreen-diff-in-split (buffer)
