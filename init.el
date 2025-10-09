@@ -205,6 +205,19 @@ number/type of arguments, void variables, debugger entries, and similar errors."
       (when chosen-process
         (kill-new (cadr (split-string chosen-process " " t)))))))
 
+(defun mpereira/kill-process-using-port ()
+  "Show a list of processes listening on TCP ports, and kill the selected one with `kill -9`."
+  (interactive)
+  (let* ((candidates (split-string
+                      (shell-command-to-string "lsof -nP -iTCP | grep LISTEN")
+                      "\n" t))
+         (chosen-process (completing-read "Kill process: " candidates nil t)))
+    (when (and chosen-process (not (string-empty-p chosen-process)))
+      (let ((pid (cadr (split-string chosen-process " " t))))
+        (when (and pid (yes-or-no-p (format "Kill process %s (PID %s)? " chosen-process pid)))
+          (shell-command (format "kill -9 %s" pid))
+          (message "Killed process with PID %s" pid))))))
+
 (defun mpereira/symbol-at-point-as-string ()
   "Return current symbol at point as a string."
   (let ((s (thing-at-point 'symbol)))
