@@ -1643,6 +1643,13 @@ For any other mode, use the traditional Magit buffer display method."
         (t
          (magit-display-buffer-traditional buffer))))
 
+
+(defun mpereira/magit-toggle-margin-for-file-log ()
+  "Toggle margin in magit-log-mode when viewing file history."
+  (when (and (derived-mode-p 'magit-log-mode)
+             (magit-file-relative-name))
+    (magit-toggle-margin)))
+
 (use-package magit
   :custom
   (magit-display-buffer-function 'mpereira/magit-display-buffer-status-fullscreen-diff-in-split)
@@ -1679,6 +1686,9 @@ For any other mode, use the traditional Magit buffer display method."
             'mpereira/magit-center-buffer-contents-and-toggle-margin-if-in-magit-log-mode
             100)
   :hook
+  ;; By default `magit-log-buffer-file' doesn't show the right margin.
+  ;; This makes it so that it does.
+  (magit-log-mode-hook . mpereira/magit-toggle-margin-for-file-log)
   (magit-status-mode-hook . mpereira/magit-center-buffer-contents)
   (git-commit-setup-hook . evil-insert-state))
 
