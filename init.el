@@ -253,7 +253,8 @@ in the echo area. If no valid symbol is found at point, do nothing."
 
 If the buffer is visiting a file, its file path is yanked.
 If the buffer is in Eshell, the Eshell working directory is yanked.
-When PROJECT-RELATIVE is non-nil, return the path relative to the project root.
+When PROJECT-RELATIVE is '(4), return the path relative to the project root.
+When PROJECT-RELATIVE is '(16), return the path relative to the project root with the project directory name prepended.
 The copied path is displayed in the echo area."
   (interactive "P")
   (let* ((buffer-file-name* (if (eshell-p (current-buffer))
@@ -262,8 +263,15 @@ The copied path is displayed in the echo area."
          (file-path (if (and project-relative buffer-file-name*)
                         (let ((project (project-current)))
                           (if project
-                              (file-relative-name buffer-file-name*
-                                                 (project-root project))
+                              (let* ((project-root (project-root project))
+                                     (relative-path (file-relative-name buffer-file-name* project-root)))
+                                (if (equal project-relative '(16))
+                                    ;; Include project directory name
+                                    (concat (file-name-nondirectory (directory-file-name project-root))
+                                            "/"
+                                            relative-path)
+                                  ;; Just relative path
+                                  relative-path))
                             buffer-file-name*))
                       buffer-file-name*)))
     (when file-path
@@ -2164,10 +2172,10 @@ Also check out `org-insert-heading-respect-content'."
    "vh" #'mpereira/toggle-window-split
    "vs" #'mpereira/split-window-right-and-switch
    "w" #'save-buffer
-   "yy" (lambda ()
-          (interactive)
+   "yy" (lambda (arg)
+          (interactive "P")
           (mpereira/call-interactively-with-prefix-arg
-           '(4)
+           (if arg '(16) '(4))
            #'mpereira/yank-buffer-file-name))
    "yY" #'mpereira/yank-buffer-name
    "Y" #'mpereira/project-combine-file-contents-into-markdown)
