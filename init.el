@@ -1500,6 +1500,10 @@ roles or playbooks directories."
 (use-package bazel)
 (use-package jinja2-mode)
 (use-package nginx-mode)
+(use-package kubed
+  :config
+  ;; Make emacs mode keybindings available in normal mode.
+  (evil-make-intercept-map kubed-list-mode-map 'normal))
 
 (use-package buffer-move)
 (use-package olivetti)
