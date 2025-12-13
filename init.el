@@ -1465,6 +1465,10 @@ The function does nothing when point is not on a supported syntax element."
 (use-package yaml-mode
   :mode ("\\.ya?ml(?:\\.j2)?\\'" . yaml-mode))
 
+(use-package markdown-mode
+  :mode
+  ("\\.md$" . gfm-mode))
+
 (defun mpereira/maybe-enable-ansible-mode ()
   "Enable `ansible' mode if the current buffer is a YAML file within
 roles or playbooks directories."
