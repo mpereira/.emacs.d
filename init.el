@@ -1953,6 +1953,11 @@ Also check out `org-insert-heading-respect-content'."
   (org-confirm-babel-evaluate nil)
   ;; Open indirect buffer in the same window.
   (org-indirect-buffer-display 'current-window)
+  ;; Show the TODO states in the minibuffer.
+  ;;
+  ;; NOTE: not using `org-popup-posframe-mode' for now because it is
+  ;; broken: https://github.com/A7R7/org-popup-posframe/issues/8
+  (org-use-fast-todo-selection 'expert)
   (org-todo-keywords '((sequence "TODO(t!)"
                                  "DOING(d!)"
                                  "NEXT(n!)"
@@ -2002,6 +2007,9 @@ Also check out `org-insert-heading-respect-content'."
   (org-pandoc-options '((standalone . t))))
 
 (use-package org-popup-posframe
+  ;; NOTE: not using `org-popup-posframe-mode' for now because it is
+  ;; broken: https://github.com/A7R7/org-popup-posframe/issues/8
+  :disabled
   ;; :vc (:url "https://github.com/A7R7/org-popup-posframe"
   ;;      :rev :newest)
   :vc (:fetcher github
