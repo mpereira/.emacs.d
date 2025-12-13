@@ -668,6 +668,13 @@ Otherwise, it will be shown."
   :vc (:fetcher github
        :repo "Ladicle/consult-tramp"))
 
+(use-package consult-jq
+  :ensure nil
+  ;; :vc (:url "https://github.com/bigbuger/consult-jq.git"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "bigbuger/consult-jq"))
+
 (use-package elec-pair
   :config
   (electric-pair-mode 1)
