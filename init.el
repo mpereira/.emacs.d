@@ -2031,6 +2031,13 @@ Also check out `org-insert-heading-respect-content'."
   :config
   (org-popup-posframe-mode 1))
 
+(defun mpereira/org-todo-with-date (&optional arg)
+  (interactive "P")
+  (cl-letf* ((org-read-date-prefer-future nil)
+             (my-current-time (org-read-date t t nil "When:" nil nil nil))
+             ((symbol-function #'org-current-effective-time)
+              #'(lambda () my-current-time)))
+    (org-todo arg)))
 (use-package verb
   :general
   (:keymaps '(org-mode-map)
