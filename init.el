@@ -732,7 +732,7 @@ Otherwise, it will be shown."
   (evil-ex-define-cmd "bD" #'mpereira/delete-file-and-buffer)
   ;; NOTE: this is originally `evil-window-delete', but I want the
   ;; window to remain.
-  (evil-ex-define-cmd "bd" #'kill-this-buffer)
+  (evil-ex-define-cmd "bd" #'kill-current-buffer)
 
   (evil-mode 1))
 
