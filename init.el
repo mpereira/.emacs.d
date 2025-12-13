@@ -1731,6 +1731,12 @@ For any other mode, use the traditional Magit buffer display method."
 
 (use-package igist)
 
+(use-package git-timemachine
+  ;; :vc (:url "https://github.com/emacsmirror/git-timemachine"
+  ;;      :rev :newest)
+  :vc (:fetcher github
+       :repo "emacsmirror/git-timemachine"))
+
 (use-package persp-project
   ;; :vc (:url "https://github.com/PauloPhagula/persp-project"
   ;;      :rev :newest)
