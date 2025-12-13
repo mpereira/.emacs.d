@@ -1098,6 +1098,12 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 
+(use-package prescient)
+
+(use-package vertico-prescient
+  :config
+  (vertico-prescient-mode 1))
+
 (use-package evil-nerd-commenter
   :after evil)
 
