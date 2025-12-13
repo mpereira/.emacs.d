@@ -1998,7 +1998,10 @@ Also check out `org-insert-heading-respect-content'."
                                  (emacs-lisp . t)
                                  (python . t)
                                  (verb . t)
-                                 (jupyter . t))))
+                                 ;; NOTE: commenting this out to prevent:
+                                 ;; ;; (file-missing "Searching for program" "No such file or directory" "jupyter")
+                                 ;; (jupyter . t)
+                                 )))
 
 (use-package ox-gfm)
 
