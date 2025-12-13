@@ -2328,7 +2328,7 @@ Also check out `org-insert-heading-respect-content'."
    :infix "p"
    "B" 'project-ibuffer
    "b" 'project-switch-to-buffer
-   "d" 'project-dired
+   "d" 'project-find-dir
    "D" 'project-find-directory
    "f" 'project-find-file
    "G" 'consult-ripgrep
