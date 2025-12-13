@@ -1647,8 +1647,9 @@ If the node is open, close it recursively."
 mode is `magit-log-mode`."
   (interactive)
   (when (derived-mode-p 'magit-log-mode)
-    (mpereira/magit-center-buffer-contents)
-    (if (magit--right-margin-option)
+    (if (not (magit-file-relative-name))
+        (mpereira/magit-center-buffer-contents))
+    (if (not (magit--right-margin-active))
         (magit-toggle-margin))))
 
 (defun mpereira/magit-display-buffer-status-fullscreen-diff-in-split (buffer)
@@ -1672,7 +1673,8 @@ For any other mode, use the traditional Magit buffer display method."
 (defun mpereira/magit-toggle-margin-for-file-log ()
   "Toggle margin in magit-log-mode when viewing file history."
   (when (and (derived-mode-p 'magit-log-mode)
-             (magit-file-relative-name))
+             (magit-file-relative-name)
+             (not (magit--right-margin-active)))
     (magit-toggle-margin)))
 
 (use-package magit
