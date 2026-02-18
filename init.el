@@ -2747,3 +2747,178 @@ Requires the `pip-requirements' package."
          (version (alist-get 'version (alist-get 'info url-body))))
     (message "%s" version)
     (kill-new version)))
+
+(defun mpereira/screenshot-frame ()
+  "Export a styled screenshot of the current buffer to a PNG file.
+
+The image is written to:
+`~/Library/Mobile Documents/com~apple~CloudDocs/Screenshots/'
+using a filename like:
+`Emacs YYYY-MM-DD HH-MM-SS.png'
+
+Rendering behavior:
+- If a region is active, only that region is shown (via narrowing).
+- The screenshot uses a temporary indirect buffer, so original window/buffer
+  state is not modified.
+- Mode-line, fringes, visible cursor, and region highlighting are hidden.
+- Content is centered horizontally and vertically inside a fixed-size frame.
+
+Capture behavior:
+- Uses `x-export-frames' when available.
+- On macOS builds without `x-export-frames', falls back to `screencapture'
+  and validates PNG output.
+
+After a successful capture, the file is opened, its path is copied to the
+kill ring, and (on macOS) image bytes are copied to the system clipboard."
+  (interactive)
+  (let* ((origin-buf (current-buffer))
+         ;; Capture region bounds in the origin buffer before switching frames.
+         (region-bounds
+          (when (use-region-p)
+            (cons (region-beginning) (region-end))))
+         ;; Use an indirect buffer so display tweaks don't mutate the original buffer.
+         (buf (clone-indirect-buffer
+               (generate-new-buffer-name
+                (format "%s<screenshot>" (buffer-name origin-buf)))
+               nil))
+         (border 20)
+         (w 600) (h 340)
+         (frame-resize-pixelwise t)
+         (frame-inhibit-implied-resize t)
+         (frame (make-frame
+                 `((internal-border-width . ,border)
+                   (undecorated . t)
+                   (left-fringe . 0)
+                   (right-fringe . 0)
+                   (vertical-scroll-bars . nil)
+                   (horizontal-scroll-bars . nil)
+                   (tool-bar-lines . 0)
+                   (menu-bar-lines . 0))))
+         (dir (expand-file-name
+               "~/Library/Mobile Documents/com~apple~CloudDocs/Screenshots/"))
+         (file (expand-file-name
+                (format "Emacs %s.png" (format-time-string "%Y-%m-%d %H-%M-%S"))
+                dir))
+         pad-overlay
+         region-face-cookie
+         display-table-cookie)
+    (unwind-protect
+        (progn
+          (make-directory dir t)
+          (select-frame-set-input-focus frame)
+          (switch-to-buffer buf)
+          (delete-other-windows)
+          (when region-bounds
+            (narrow-to-region (car region-bounds) (cdr region-bounds))
+            (goto-char (point-min)))
+          ;; Hide active-region highlighting in the screenshot output.
+          (setq-local transient-mark-mode nil)
+          (setq mark-active nil)
+          (deactivate-mark)
+          ;; Hide point cursor in the screenshot buffer/window/frame.
+          (setq-local cursor-type nil)
+          ;; Evil can render a block cursor independently; disable it in temp buffer.
+          (when (fboundp 'evil-local-mode)
+            (evil-local-mode -1))
+          (set-frame-parameter frame 'cursor-type nil)
+          (internal-show-cursor (selected-window) nil)
+          ;; Force `region' to render like normal text in this temporary buffer.
+          (setq region-face-cookie
+                (face-remap-add-relative 'region 'default))
+          ;; Hide line-continuation glyphs (e.g. trailing "\") in screenshots.
+          (setq display-table-cookie (or buffer-display-table (make-display-table)))
+          (set-display-table-slot display-table-cookie 'wrap ?\s)
+          (setq-local buffer-display-table display-table-cookie)
+          (setq-local mode-line-format nil)
+          (set-window-fringes (selected-window) 0 0)
+          (set-frame-size frame w h t)
+          (let* ((win (selected-window))
+                 (content-cols
+                  (save-excursion
+                    (goto-char (point-min))
+                    (let ((max-cols 1))
+                      (while (< (point) (point-max))
+                        (end-of-line)
+                        (setq max-cols (max max-cols (current-column)))
+                        (forward-line 1))
+                      max-cols)))
+                 ;; Screen-line count is better than logical lines when text wraps.
+                 (content-lines (max 1 (count-screen-lines (point-min) (point-max) t win)))
+                 (win-cols (window-body-width win))
+                 (win-lines (window-body-height win))
+                 ;; Keep one spare column so right-edge chars do not wrap.
+                 (required-cols (1+ content-cols))
+                 (hpad (max 0 (/ (- win-cols required-cols) 2)))
+                 (top-pad (max 0 (/ (- win-lines content-lines) 2))))
+            ;; Center horizontally with symmetric margins.
+            (set-window-margins win hpad hpad)
+            ;; Center vertically by injecting top padding in this window only.
+            (when (> top-pad 0)
+              (setq pad-overlay (make-overlay (point-min) (point-min) buf))
+              (overlay-put pad-overlay 'before-string (make-string top-pad ?\n))
+              (overlay-put pad-overlay 'window win)))
+          (if (fboundp 'x-export-frames)
+              (x-export-frames (list frame) 'png file)
+            (if (eq system-type 'darwin)
+                (let* ((capture-output (get-buffer-create " *my/screencapture*"))
+                       (png-header "\x89PNG\r\n\x1a\n"))
+                  ;; Interactive capture is much more reliable than window-id capture.
+                  (sit-for 0.2)
+                  (raise-frame frame)
+                  (redisplay t)
+                  (with-current-buffer capture-output
+                    (erase-buffer))
+                  ;; Prefer window capture; it avoids capturing unrelated UI.
+                  (let* ((status-w (call-process "screencapture" nil capture-output nil
+                                                 "-x" "-W" file))
+                         (ok-w (and (integerp status-w)
+                                    (zerop status-w)
+                                    (file-exists-p file)
+                                    (> (file-attribute-size (file-attributes file)) 0)
+                                    ;; Verify signature so we reject broken captures.
+                                    (with-temp-buffer
+                                      (set-buffer-multibyte nil)
+                                      (insert-file-contents-literally file nil 0 8)
+                                      (equal (buffer-string) png-header)))))
+                    (unless ok-w
+                      ;; Fallback to interactive region selection when needed.
+                      (let* ((status-i (call-process "screencapture" nil capture-output nil
+                                                     "-x" "-i" file))
+                             (ok-i (and (integerp status-i)
+                                        (zerop status-i)
+                                        (file-exists-p file)
+                                        (> (file-attribute-size (file-attributes file)) 0)
+                                        (with-temp-buffer
+                                          (set-buffer-multibyte nil)
+                                          (insert-file-contents-literally file nil 0 8)
+                                          (equal (buffer-string) png-header)))))
+                        (unless ok-i
+                          (error "screencapture failed (window=%s, interactive=%s): %s"
+                                 status-w status-i
+                                 (with-current-buffer capture-output
+                                   (buffer-string))))))))
+              (error "x-export-frames is unavailable on this Emacs build")))
+          (when (eq system-type 'darwin)
+            (let ((status (call-process
+                           "osascript" nil nil nil
+                           "-e"
+                           (format "set the clipboard to (read (POSIX file %s) as PNG picture)"
+                                   (prin1-to-string file)))))
+              (unless (and (integerp status) (zerop status))
+                (message "Failed to copy PNG bytes to clipboard"))))
+          (kill-new file)
+          (cond
+           ((eq system-type 'darwin)
+            (start-process "my/screenshot-open" nil "open" file))
+           ((eq system-type 'gnu/linux)
+            (start-process "my/screenshot-open" nil "xdg-open" file)))
+          (message "Wrote %s (copied image + path to clipboard/kill-ring)" file))
+      ;; Always clean up temporary visual state and objects.
+      (when (overlayp pad-overlay)
+        (delete-overlay pad-overlay))
+      (when region-face-cookie
+        (face-remap-remove-relative region-face-cookie))
+      (when (frame-live-p frame)
+        (delete-frame frame))
+      (when (buffer-live-p buf)
+        (kill-buffer buf)))))
