@@ -527,7 +527,6 @@ Otherwise, it will be shown."
   :diminish lsp-lens-mode
   :custom
   (lsp-completion-provider :none)
-  (lsp-copilot-enabled nil)
   (lsp-headerline-breadcrumb-enable nil)
   (lsp-modeline-code-actions-enable nil)
   (lsp-modeline-diagnostics-enable nil)
@@ -961,22 +960,6 @@ If CENTERED-P is non-nil, enables `olivetti-mode' to center the buffer content."
         (progn
           (setq-local olivetti-body-width 100)
           (call-interactively 'olivetti-mode))))))
-
-(use-package copilot
-  :vc (:url "https://github.com/copilot-emacs/copilot.el"
-       :rev :newest
-       :branch "main")
-  :hook (prog-mode-hook . copilot-mode)
-  :general (:keymaps '(copilot-mode-map)
-            :states '(insert)
-            "C-;" #'copilot-accept-completion
-            "C-:" #'copilot-accept-completion-by-line
-            "C-j" #'copilot-next-completion
-            "C-k" #'copilot-previous-completion)
-  :custom
-  (copilot-indent-offset-warning-disable t)
-  :config
-  (add-to-list 'copilot-indentation-alist '(lisp-data-mode . 2)))
 
 (use-package comint
   :ensure nil
