@@ -1815,12 +1815,21 @@ file."
 
 (use-package eat)
 
+(defun mpereira/eshell-configure-scrolling ()
+  "Keep Eshell's input line fully visible above the mode line."
+  ;; `ultra-scroll-mode' disables this globally for smooth scrolling.
+  (setq-local make-cursor-line-fully-visible t))
+
 (use-package eshell
+  :hook
+  (eshell-mode . mpereira/eshell-configure-scrolling)
   :custom
   (eshell-banner-message "")
   (eshell-hist-ignoredups t)
   (eshell-history-size 1000000)
   (eshell-buffer-maximum-lines 50000)
+  ;; Preserve the window position instead of forcing the prompt to the bottom.
+  (eshell-scroll-show-maximum-output nil)
   :general
   (:keymaps 'eshell-mode-map
    "C-S-k" #'mpereira/eshell-switch-to-last-output-buffer
