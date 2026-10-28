@@ -1450,7 +1450,9 @@ The function does nothing when point is not on a supported syntax element."
 
 (use-package markdown-mode
   :mode
-  ("\\.md$" . gfm-mode))
+  ("\\.md$" . gfm-mode)
+  :custom
+  (markdown-command "pandoc --from=gfm --to=html5"))
 
 (defun mpereira/maybe-enable-ansible-mode ()
   "Enable `ansible' mode if the current buffer is a YAML file within
